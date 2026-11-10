@@ -1,0 +1,6 @@
+{
+  "projectFileVersion": 3,
+  "sourceFiles": ["Source/**/*.yarn"],
+  "excludeFiles": ["**/*~/*"],
+  "baseLanguage": "en"
+}
