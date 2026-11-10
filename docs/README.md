@@ -14,11 +14,25 @@
 | 10_AUDIO_AND_SOUND_DESIGN | Audio language and acoustic gameplay |
 | 11_UI_UX_DESIGN | HUD, interfaces, accessibility |
 | 12_AI_AND_SIMULATION | Threats, NPCs, fish, world simulation |
-| 13_PRODUCTION_MANAGEMENT | Roadmap, tasks, risks, release |
+| 13_PRODUCTION_MANAGEMENT | Roadmap, tasks, risks, release, AI workflow |
 | 14_TESTING_AND_QUALITY | Test plans and quality gates |
 | 15_COMMERCIAL_AND_MARKETING | Audience, positioning, release materials |
 | 16_REFERENCES_AND_RESEARCH | Research sources |
 | 17_ARCHIVE | Deprecated designs and experiments |
+
+## Production management and AI-agent workflow
+
+- [Development Roadmap](13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md) — 24-month commercial production baseline, phase windows, weekly capacity, scope controls.
+- [Production Plan](13_PRODUCTION_MANAGEMENT/PRODUCTION-PLAN.md) — two-week work cycles, capacity model, workflow, quality gates.
+- [Project Milestones](13_PRODUCTION_MANAGEMENT/PROJECT-MILESTONES.md) — evidence-based exit criteria.
+- [Feature Priorities](13_PRODUCTION_MANAGEMENT/FEATURE-PRIORITIES.md) — P0–P3 sequencing and immediate blockers.
+- [Development Sprints](13_PRODUCTION_MANAGEMENT/DEVELOPMENT-SPRINTS.md) — sprint planning and reporting process.
+- [AI-Assisted Development Workflow](13_PRODUCTION_MANAGEMENT/AI-ASSISTED-DEVELOPMENT.md) — agent responsibilities, work loop, verification, and handoff.
+- [Release Plan](13_PRODUCTION_MANAGEMENT/RELEASE-PLAN.md) — commercial release gates and decisions still open.
+- [Repository coding-agent instructions](../AGENTS.md).
+- [GitHub Copilot instructions](../.github/copilot-instructions.md).
+
+AI agents must read the repository's \`AGENTS.md\` before changing code. A roadmap, design specification, generated code snippet, or passing static check does not prove a feature is implemented or verified.
 
 ## World geography and regional ecology
 

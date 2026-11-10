@@ -16,7 +16,7 @@ A single-player, 2.5D open-world fishing survival-horror prototype for Windows P
 | Mode | Single-player |
 | Presentation | 2.5D with a 3D world and elevated camera |
 | Horror | Systemic, atmosphere- and audio-led |
-| Production | Solo-first |
+| Production | Solo-first, AI-assisted |
 | Status | Connected gameplay prototype; not a complete game |
 
 ## Getting the project running
@@ -29,9 +29,9 @@ A single-player, 2.5D open-world fishing survival-horror prototype for Windows P
 
 The setup command creates the starter URP assets and generates three scenes when missing:
 
-- `Greyhaven_Blockout.unity` — harbour, village, starter boat, Harbourmaster, fishing/salvage prototype, and shallow survey profile.
-- `OuterShoals_SurveySandbox.unity` — deep bathymetry profile, a diel scattering layer, authored phenomenon sites, Sounding Rig, and site inspection.
-- `HollowTrench_SurveySandbox.unity` — trench profile, authored brine-pool/seep/hydrate/whale-fall evidence sites, Sounding Rig, and site inspection.
+- \`Greyhaven_Blockout.unity\` — harbour, village, starter boat, Harbourmaster, fishing/salvage prototype, and shallow survey profile.
+- \`OuterShoals_SurveySandbox.unity\` — deep bathymetry profile, a diel scattering layer, authored phenomenon sites, Sounding Rig, and site inspection.
+- \`HollowTrench_SurveySandbox.unity\` — trench profile, authored brine-pool/seep/hydrate/whale-fall evidence sites, Sounding Rig, and site inspection.
 
 The two deep-water scenes are isolated test ranges included in Build Settings. There is **no in-game region-travel system yet**. They are functional survey prototypes, not finished levels or complete deep-ocean hazard simulations.
 
@@ -57,7 +57,7 @@ The harvesting timing action now uses one shared Input System action for keyboar
 - Rigidbody boat steering and a fixed-angle follow camera.
 - Movement/action-driven sea time: the day advances while the boat is genuinely moving or the player is performing a supported harvesting or survey action.
 - Timed fishing and dredging minigames using spatial cargo placement.
-- Cargo hold geometry, blocked/damaged cells, salvage-site depletion, and vessel hull/engine condition.
+- Cargo hold geometry, blocked/damaged cells, item placement, salvage-site depletion, and vessel hull/engine condition.
 - Day/night lighting and fog response, panic pressure, dead-calm and wrong-way-swell incidents, distant hull knocks, false navigation lights, and other restrained maritime omens.
 - A Sounding Rig with regional bathymetry approximations, a day/night biological scattering-layer return, signal confidence, independent-ping verification, authored site discovery, and save persistence.
 - Four Greyhaven residents with action-clock daily schedules, short waypoint movement, separate Yarn conversations, stable NPC IDs, and persistent relationship scores.
@@ -68,11 +68,11 @@ The harvesting timing action now uses one shared Input System action for keyboar
 
 ## Save and load foundation
 
-Runtime saves are stored outside the project in `Application.persistentDataPath/Saves/`:
+Runtime saves are stored outside the project in \`Application.persistentDataPath/Saves/\`:
 
-- `slot_01.json` through `slot_05.json`
-- `autosave.json`
-- corresponding `.bak` recovery files
+- \`slot_01.json\` through \`slot_05.json\`
+- \`autosave.json\`
+- corresponding \`.bak\` recovery files
 
 The versioned schema now preserves boat transform/velocity, cargo, vessel condition, daily salvage depletion, sea time, weather intensity and remaining duration, weather cooldown, hallucination cooldown, pending seabird events, the latest omen, maritime incident countdown/caption/hush/false-light state, Sounding Rig discoveries and opportunities, acoustic hearing history, and inspected site IDs. Save participants are discovered by the scene coordinator.
 
@@ -84,11 +84,25 @@ The repository contains a connected prototype, not a complete 20-hour game. Crea
 
 The static check is:
 
-```bash
+\`\`\`bash
 python tools/validate_project.py
-```
+\`\`\`
 
-GitHub Actions runs this repository-integrity validator on pushes and pull requests to `main`. It checks file/configuration contracts and key integration wiring. It is **not a Unity compilation or player build**. The Edit Mode tests are in `Assets/_Project/Tests/EditMode/`; they still need to be run in Unity 6000.3.28f1, followed by Play Mode checks and a Windows build.
+GitHub Actions runs this repository-integrity validator on pushes and pull requests to \`main\`. It checks file/configuration contracts and key integration wiring. It is **not a Unity compilation or player build**. The Edit Mode tests are in \`Assets/_Project/Tests/EditMode/\`; they still need to be run in Unity 6000.3.28f1, followed by Play Mode checks and a Windows build.
+
+## Production target and agent instructions
+
+The current production baseline targets a commercial Windows release around **November 2028**, using a 24-month planning horizon and an assumed 25–40 development hours per week. This is an estimate, not a guaranteed ship date. The aggressive scenario is 18–20 months; the conservative contingency is 30–36 months. The game targets 20+ hours of play, subject to validation through a complete vertical slice and playtesting.
+
+- [Repository-wide coding agent instructions](AGENTS.md)
+- [GitHub Copilot instructions](.github/copilot-instructions.md)
+- [Development Roadmap](docs/13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md)
+- [Production Plan](docs/13_PRODUCTION_MANAGEMENT/PRODUCTION-PLAN.md)
+- [Project Milestones](docs/13_PRODUCTION_MANAGEMENT/PROJECT-MILESTONES.md)
+- [Feature Priorities](docs/13_PRODUCTION_MANAGEMENT/FEATURE-PRIORITIES.md)
+- [AI-Assisted Development Workflow](docs/13_PRODUCTION_MANAGEMENT/AI-ASSISTED-DEVELOPMENT.md)
+
+AI agents must read \`AGENTS.md\` before modifying the project. Planned content and documented mechanics are not implementation evidence; report only tests and builds actually executed.
 
 ## Design and technical references
 
