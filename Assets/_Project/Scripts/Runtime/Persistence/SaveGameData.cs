@@ -328,6 +328,37 @@ namespace WhereTheSoundingsEnd.Persistence
                 }
             }
 
+            for (int index = 0; index < data.inventory.placements.Count; index++)
+            {
+                CargoPlacementSaveData placement = data.inventory.placements[index];
+                if (placement == null ||
+                    string.IsNullOrWhiteSpace(placement.itemId) ||
+                    placement.quantity < 1 ||
+                    placement.anchorX < 0 ||
+                    placement.anchorY < 0 ||
+                    placement.rotationQuarterTurns < 0 ||
+                    placement.rotationQuarterTurns > 3 ||
+                    float.IsNaN(placement.quality) ||
+                    float.IsInfinity(placement.quality) ||
+                    float.IsNaN(placement.freshness) ||
+                    float.IsInfinity(placement.freshness))
+                {
+                    error = "The save contains an invalid spatial cargo placement at index " + index + ".";
+                    return false;
+                }
+            }
+
+            for (int index = 0; index < data.dialogue.floatVariables.Count; index++)
+            {
+                YarnFloatVariableSaveData variable = data.dialogue.floatVariables[index];
+                if (variable == null || string.IsNullOrWhiteSpace(variable.variableName) ||
+                    float.IsNaN(variable.value) || float.IsInfinity(variable.value))
+                {
+                    error = "The save contains an invalid Yarn float variable at index " + index + ".";
+                    return false;
+                }
+            }
+
             return true;
         }
 
