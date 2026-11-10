@@ -3,7 +3,7 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Runtime foundation implemented; gameplay coverage in progress  
 > Owner: Project lead  
-> Version: 0.2  
+> Version: 0.3  
 > Last reviewed: 2026-11-10
 
 ## Player-facing behaviour
@@ -29,7 +29,11 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - SaveFileService validates slots, serializes JSON, writes a temporary file, replaces the primary file, rotates the previous primary into a backup, lists slots, loads saves, recovers from a valid backup, and deletes a slot.
 - SaveGameCoordinator is the scene-level entry point. It discovers active and inactive MonoBehaviours implementing ISaveParticipant, asks them to capture state, and restores those participants on load.
 - AutosaveController runs a five-minute unscaled-time interval after a 45-second startup delay, retries failed writes after 30 seconds, and also saves on application pause, focus loss, active-scene unload, application quit, and requested checkpoints. Lifecycle triggers are debounced by 15 seconds to avoid duplicate focus/pause/scene notifications. Explicit checkpoints and application quit bypass this debounce so important progress and the final session state are written.
-- BoatPrototypeController currently implements ISaveParticipant and records the Greyhaven starter boat transform and Rigidbody velocity.
+- BoatPrototypeController records the Greyhaven starter boat transform and Rigidbody velocity.
+- SeaStateDirector persists elapsed game time, time of day, panic and sea disturbance.
+- VesselConditionController persists hull and engine condition.
+- SpatialCargoHold persists cargo placements and damaged-cell coordinates.
+- SalvageSite persists daily remaining pulls by stable site ID.
 
 Typical runtime use:
 
@@ -67,15 +71,17 @@ Implemented now:
 - Slot listing and deletion.
 - Scene-level capture/restore participant contract.
 - Starter boat position, rotation, linear velocity, and angular velocity.
-- Spatial cargo placements through SpatialCargoHold (requires authored CargoItemDefinition assets in its catalogue).
+- Spatial cargo placements, damaged hold cells and equipment placements through SpatialCargoHold.
+- Action-driven day/time, panic and sea disturbance.
+- Hull/engine condition and wreck-site daily depletion.
 - Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
 
 - Player character state and player inventory.
-- Fishing catches, sell/buy transactions, freshness decay and equipment runtime models.
+- Sale transactions, regional market state and freshness decay (not yet implemented).
 - Dialogue presentation cursor and mid-line resume state.
-- WorldClock instance, day/night and weather runtime state.
+- Dynamic tide/current/weather simulation and authored audio mixer state.
 - Quests, journal evidence, discoveries and NPC relationships.
 - Regional fish stocks, creature states, threat state, encounter cooldowns and random stream ownership.
 - A player-facing save/load menu, save confirmation prompt, and UI feedback for autosave status. Autosaving itself is implemented.
