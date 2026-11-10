@@ -216,3 +216,56 @@ Do not persist a transient audio source handle or a Unity instance reference. Re
 ## Related AI behaviour specification
 
 For advanced predator behaviour, evidence-based escalation, utility action selection, predictive pursuit, stalking, limited group coordination, destructive tendencies, fairness, and validation, see [AI Coordination and Hunting Logic](../12_AI_AND_SIMULATION/AI-COORDINATION-AND-HUNTING-LOGIC.md). This is a design specification; it does not mean runtime AI code has been implemented in the Unity project.
+
+
+## 12. Creature life-cycle and ecology runtime
+
+The threat components above only describe player-directed hostile encounters. Ordinary creature life behaviours use separate services defined in [Creature Life Cycles and Ecological Behaviour](../12_AI_AND_SIMULATION/CREATURE-LIFE-CYCLES-AND-ECOLOGY.md).
+
+### Additional component boundaries
+
+| Component | Responsibility | Must not own |
+|---|---|---|
+| CreatureLifeController | Daily / seasonal schedule and life-state transitions | Player boat damage |
+| CreatureNeeds | Hunger, energy, health, injury, stress, reproductive readiness | Movement or target selection |
+| CreatureBehaviourSelector | Rank legal life and tactical actions | Global event scheduling |
+| CreaturePerception | Prey, predator, sound, light, and habitat observations | Quest completion |
+| CreatureMemory | Feeding sites, habitat routes, threats, and learned disturbance | Global population stock |
+| CreatureMotor | Wander, patrol, shelter, migration, and bounded movement | Feeding / stock mutation |
+| CreatureFeedingController | Hunt resolution, feeding, appetite, and prey-stock event | Player-directed attack damage |
+| CreatureRecoveryController | Rest, healing, and injury recovery | Instant full-health reset |
+| ReproductionScheduler | Breeding windows, cohort recruitment, maturation opportunities | Individual creature locomotion |
+| RegionalEcologyService | Population, migration, food availability, and off-screen aggregation | High-frequency local AI |
+| AnomalyController | Authored impossible rules, evidence, and anomaly phase | Arbitrary untelegraphed damage |
+
+### Additional authoring assets
+
+- CreatureDefinition: stable species ID, classification, habitat, senses, locomotion limits, feature flags.
+- CreatureBehaviourProfile: active periods, allowed behaviours, personality weights, resting / feeding tendencies.
+- DietDefinition: prey categories, feeding grounds, food value, capture constraints.
+- HabitatDefinition: region, depth, current, cover, refuge, capacity, and environmental suitability.
+- LifeCycleDefinition: activity windows, seasonal gates, maturity abstraction, breeding and migration schedules.
+- AnomalyDefinition: baseline behaviour, explicit violated rule, trigger, domain, repetition, evidence, constraints, resolution.
+
+### Runtime ownership rules
+
+1. ScriptableObjects contain immutable authoring values; runtime needs and mutable condition belong to a per-instance state object.
+2. Life state, tactical action, hostile encounter state, and anomaly state are separate fields. A creature can be hungry and resting while its player encounter state remains unaware.
+3. Ordinary predator feeding mutates regional prey stock only through a validated, idempotent ecology event. It never calls the player boat damage service.
+4. Only the hostile attack controller can apply creature attack damage to the boat.
+5. AnomalyController may override only explicitly authored life rules. It cannot bypass save integrity, safe-zone rules, or quest-critical safeguards by default.
+6. Inactive regions store aggregate records and scheduled outcomes; they do not run local movement and perception loops.
+
+### Recommended extension build order
+
+1. One non-hostile species with active / rest windows.
+2. Wandering, patrol, shelter, and return-to-habitat.
+3. One prey school and one simple predator feeding event.
+4. Hunger, energy, and stock updates.
+5. Rest and gradual injury recovery.
+6. One seasonal recruitment / breeding event.
+7. The Sleeper's hostile encounter, still using the separate ThreatBrain pipeline.
+8. One authored anomalous behaviour with a discoverable clue.
+9. Inactive-region aggregation and save / load regression tests.
+
+This is an architecture extension, not a claim that the Unity runtime scripts already exist. Implement and profile these systems incrementally; do not build a full ecosystem simulator before the first region prototype.
