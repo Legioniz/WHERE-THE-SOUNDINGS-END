@@ -62,6 +62,11 @@ namespace WhereTheSoundingsEnd.World
             if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             regions = FindObjectsByType<DeepOceanSurveyRegion>(FindObjectsSortMode.None);
             sites = FindObjectsByType<DeepOceanPhenomenonSite>(FindObjectsSortMode.None);
+            for (int i = 0; i < sites.Length; i++)
+            {
+                if (sites[i] != null && !sites[i].IsValidForRegion)
+                    Debug.LogWarning("Deep-ocean site marker has an invalid region/depth combination: " + sites[i].SiteId, sites[i]);
+            }
 
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.playOnAwake = false;
@@ -202,6 +207,10 @@ namespace WhereTheSoundingsEnd.World
                 reading += firstDiscovery
                     ? "\nNEW SITE: " + site.DisplayName + " [" + site.EvidenceLabel + "]"
                     : "\nKNOWN SITE: " + site.DisplayName;
+                float siteConfidence = DeepOceanSurveyMath.CalculateReturnConfidence(
+                    site.SignalStrength, signalQuality, region.AcousticAttenuation);
+                reading += "\nSITE DEPTH: " + Mathf.RoundToInt(site.DepthMeters) +
+                    " m  ·  SIGNAL CONFIDENCE " + Mathf.RoundToInt(siteConfidence * 100f) + "%";
                 reading += "\n" + site.FirstSurveyNote;
             }
 
@@ -239,7 +248,7 @@ namespace WhereTheSoundingsEnd.World
             for (int i = 0; i < sites.Length; i++)
             {
                 DeepOceanPhenomenonSite site = sites[i];
-                if (site == null || !site.IsDetectableFrom(position, regionId)) continue;
+                if (site == null || !site.IsValidForRegion || !site.IsDetectableFrom(position, regionId)) continue;
                 float distance = (site.transform.position - position).sqrMagnitude;
                 float range = site.DetectionRadius * siteDetectionRangeMultiplier;
                 if (distance <= range * range && distance < bestDistance)
