@@ -34,6 +34,7 @@ namespace WhereTheSoundingsEnd.World
         private string status = "F: fish   G: dredge";
         private Texture2D ringTexture;
         private Texture2D targetTexture;
+        private SalvageSite activeSalvageSite;
 
         public bool IsActionActive => action != HarvestActionType.None;
         public HarvestActionType ActiveAction => action;
@@ -91,6 +92,29 @@ namespace WhereTheSoundingsEnd.World
             if (Time.timeScale <= 0.0001f || (seaState != null && seaState.PanicLevel > 0.98f))
                 return;
 
+            Rigidbody vessel = GetComponent<Rigidbody>();
+            if (vessel != null && vessel.linearVelocity.magnitude > 1.5f)
+            {
+                status = "Slow the vessel before attempting a careful harvest.";
+                return;
+            }
+
+            if (type == HarvestActionType.Dredging)
+            {
+                float distance;
+                activeSalvageSite = SalvageSite.FindNearest(transform.position, out distance);
+                if (activeSalvageSite == null)
+                {
+                    status = "No wreck or debris field close enough to dredge.";
+                    return;
+                }
+                if (seaState != null && !activeSalvageSite.TryConsumePull(seaState.DayNumber))
+                {
+                    status = "This debris field has been picked clean for today.";
+                    return;
+                }
+            }
+
             action = type;
             beatIndex = 0;
             successfulBeats = 0;
@@ -141,6 +165,7 @@ namespace WhereTheSoundingsEnd.World
 
             status = result;
             action = HarvestActionType.None;
+            activeSalvageSite = null;
             if (seaState != null)
             {
                 seaState.SetHarvesting(false);
