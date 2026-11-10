@@ -8,9 +8,11 @@ A single-player, 2.5D open-world fishing survival-horror game for Windows PC. Th
 
 | Area | Decision |
 |---|---|
-| Engine | Unity |
+| Engine | Unity 6.3 LTS — 6000.3.28f1 |
+| Rendering | Universal Render Pipeline 17.3.0 |
 | Gameplay language | C# |
-| First platform | Windows PC |
+| Input | Unity Input System 1.20.1 |
+| First platform | Windows 64-bit |
 | Mode | Single-player |
 | Presentation | 2.5D with a 3D world and controlled elevated camera |
 | World | Open, organized into authored regions |
@@ -20,17 +22,47 @@ A single-player, 2.5D open-world fishing survival-horror game for Windows PC. Th
 | Initial cash target | ₱0, assuming existing PC and internet |
 | Production | Solo-first |
 
-## Start here
+## Getting the project running
+
+1. Install Unity Hub and Unity Editor **6000.3.28f1** with Windows Build Support.
+2. Clone this repository and open the repository root in Unity Hub.
+3. Let Unity resolve packages and finish importing assets.
+4. Run **Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation** in the Editor.
+5. Open the generated Greyhaven blockout and press Play.
+
+The setup command creates the starter URP assets, primitive Greyhaven scene, boat prototype, 2.5D camera, player settings, and initial build-scene list. The scene is a technical greybox, not a finished level.
+
+### Controls in the current prototype
+
+| Action | Keyboard | Gamepad |
+|---|---|---|
+| Move / steer boat | W A S D | Left stick |
+| Interact (reserved) | E | South face button |
+| Fish (reserved) | F | West face button |
+| Sounding pulse (reserved) | Q | Right shoulder |
+| Pause (reserved) | Esc | Start |
+
+Only movement/steering currently affects gameplay. The other actions are mapped for later implementation.
+
+## Project status
+
+The repository now contains a real Unity project scaffold and an initial boat/camera prototype. It is **not yet a complete playable vertical slice**. Fishing, economy, persistence, population simulation, creature AI, quests, and production content remain unimplemented.
+
+Run the static check with **python tools/validate_project.py**. The Edit Mode tests and a Windows build still need to be run in Unity 6000.3.28f1. See [Unity Project Foundation](docs/08_TECHNICAL_DESIGN/UNITY-PROJECT-FOUNDATION.md) for setup and validation steps.
+
+## Design and production references
+
 - [Game Design Document](docs/01_GAME_DESIGN/GAME-DESIGN-DOCUMENT.md)
 - [World Bible](docs/02_LORE_AND_WORLD/WORLD-BIBLE.md)
 - [Core Game Loop](docs/01_GAME_DESIGN/CORE-GAME-LOOP.md)
 - [System Mathematics](docs/07_GAME_RULES_AND_BALANCING/SYSTEM-MATHEMATICS.md)
 - [Technical Design](docs/08_TECHNICAL_DESIGN/TECHNICAL-DESIGN-DOCUMENT.md)
-- [Roadmap](docs/13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md)
+- [Unity Project Foundation](docs/08_TECHNICAL_DESIGN/UNITY-PROJECT-FOUNDATION.md)
+- [Development Roadmap](docs/13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md)
 - [Documentation Index](docs/README.md)
 
-## Engineering decision
+## Engineering decisions
 
-The existing [Performance and Programming Language Guidance](docs/technical/PERFORMANCE_AND_LANGUAGE_GUIDANCE.md) selects Unity + C#. It is preserved and remains authoritative. Earlier Godot + GDScript exploration is superseded. Python is reserved for offline simulation, balancing, and validation tools, not real-time gameplay.
+Unity + C# is the production baseline. ScriptableObjects will hold authored definitions; runtime models own mutable simulation state. Python is reserved for offline simulation, content validation, and balancing. See [Performance and Programming Language Guidance](docs/technical/PERFORMANCE_AND_LANGUAGE_GUIDANCE.md). Earlier Godot + GDScript exploration is superseded.
 
-Documents distinguish established theory, engineering approximations, and designer tuning. Placeholder files do not imply implemented features.
+Documents distinguish established theory, engineering approximations, and designer tuning. A design specification does not mean its system has been implemented.
