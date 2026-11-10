@@ -1,7 +1,7 @@
 # Deep-Ocean Phenomena and Mariner Experiences
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Proposed research-to-gameplay specification — not canon until reviewed  
+> Status: Research-to-gameplay reference; initial Sounding Rig runtime slice implemented; remaining phenomena proposed  
 > Owner: Project lead  
 > Version: 0.1  
 > Last reviewed: 2026-11-10
@@ -311,3 +311,45 @@ All systems should use stable event IDs, deterministic opportunity evaluation, s
 - Van Puyvelde et al., “The submariners’ sleep study: a field investigation of sleep and circadian hormones during a 67-day submarine mission with a strict 6-h-on/6-h-off watch routine,” *Journal of Applied Physiology* (2022), [DOI](https://doi.org/10.1152/japplphysiol.00130.2021)
 
 The cited studies support fatigue, sleep, mood, and circadian discussion in their studied submarine contexts. They do not prove anecdotal hallucination stories or establish identical effects in a lone fishing-vessel operator.
+
+
+## 12. Runtime implementation status — 2026-11-10
+
+The first connected runtime slice now exists in Unity. It is deliberately narrower than the full research catalogue.
+
+### Implemented in C#
+
+- DeepOceanSurveyMath provides deterministic night weighting, diel layer-depth interpolation, mid-water-versus-seabed separation, confidence calculation, and stable opportunity hashing.
+- DeepOceanSurveyRegion provides region-bounded bathymetry and acoustic profile data. It has baseline configurations for all six regions.
+- SoundingRigController consumes the existing SoundingPulse Input Action (Q / gamepad right shoulder), checks vessel speed, emits a procedural test ping, reads the active regional profile, displays a seabed return, and reports a separate biological mid-water return where configured.
+- A first scattering-layer return is labelled *possible*. A second ping from a sufficiently different heading within ten in-game minutes raises the interpretation to *repeatable biological scattering layer*. It never becomes a terrain collider.
+- AcousticEventBus publishes typed gameplay signal metadata so future creature perception and acoustic navigation can consume the same pulse without polling AudioSources.
+- DeepOceanPhenomenonSite provides stable, authored site markers for brine pools, vent fields, cold seeps, hydrates, whale falls, bioluminescence, water-mass fronts, derelict vessels and damaged gear. A survey can discover a nearby marker and record its site ID.
+- Survey pulse count, discovered site IDs and evaluated opportunity IDs persist through save schema v4. Existing schema 0–3 saves migrate with empty survey state.
+- Greyhaven's generated scene receives a shallow-water profile and the Sounding Rig. Greyhaven intentionally has no deep scattering layer.
+
+### Regional profile baseline
+
+| Region | Nominal depth | Deep scattering layer | Runtime profile |
+|---|---:|---|---|
+| Greyhaven | 18 m | No | Attached by the Greyhaven environment builder |
+| The Shallows | 52 m | No | Available profile; region scene not yet authored |
+| Blackrock Reach | 210 m | No | Available profile; region scene not yet authored |
+| The Drowned Parish | 34 m | No | Available profile; region scene not yet authored |
+| The Outer Shoals | 1,450 m | Yes | Available profile; region scene not yet authored |
+| The Hollow Trench | 3,850 m | Yes | Available profile; region scene not yet authored |
+
+These are game survey-profile baselines, not real-world nautical chart values. The scattering-layer depth targets are authored gameplay approximations and should be calibrated against the region's eventual ecology and water-column design.
+
+### Not implemented yet
+
+- No final sonar waveform, frequency-dependent ray propagation, multipath model, or calibrated transducer physics.
+- No actual fish/squid school population is yet attached to the scattering-layer return.
+- No authored brine pool, vent, seep, hydrate or whale-fall site marker has been placed in a playable Outer Shoals / Hollow Trench scene.
+- No ROV, diver, probe or bottom-contact tool interaction exists for site hazards.
+- The acoustic bus currently publishes the Sounding Rig pulse; creature AI has not yet subscribed to it.
+- No operational-strain, fatigue, sleep, rest, or work-watch simulation has been implemented.
+- No final recorded audio assets or AudioMixer snapshots are connected.
+- Only Greyhaven has been wired into a generated scene. The other regional profiles are ready for their scene builders but do not create those regions automatically.
+
+The first implementation is a survey-and-discovery foundation, not a complete deep-ocean simulation. Keep the research evidence labels and physical safety rules in force as each site controller is added.
