@@ -95,7 +95,12 @@ namespace WhereTheSoundingsEnd.World
             bool pressured = seaState.IsNight || seaState.PanicLevel >= daytimePressureThreshold;
             if (!pressured) return;
 
-            incidentCountdown -= realDelta * 72f;
+            // Follow the authoritative simulation clock so custom time scales and pauses
+            // affect atmospheric incidents exactly as they affect weather and world events.
+            float gameDelta = Mathf.Max(0f, seaState.LastGameDeltaSeconds);
+            if (gameDelta <= 0f) return;
+
+            incidentCountdown -= gameDelta;
             if (incidentCountdown > 0f) return;
 
             incidentCountdown = Random.Range(minimumIncidentInterval, maximumIncidentInterval);
