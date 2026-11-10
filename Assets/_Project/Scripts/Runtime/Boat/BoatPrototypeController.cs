@@ -85,7 +85,8 @@ namespace WhereTheSoundingsEnd.Boat
             float speed = horizontalVelocity.magnitude;
             VesselConditionController condition = GetComponent<VesselConditionController>();
             float engineFactor = condition == null ? 1f : Mathf.Lerp(0.15f, 1f, condition.EngineCondition / 100f);
-            float effectiveMaximumSpeed = maximumSpeed * engineFactor;
+            float hullFactor = condition == null ? 1f : Mathf.Lerp(0.35f, 1f, condition.HullIntegrity / 100f);
+            float effectiveMaximumSpeed = maximumSpeed * engineFactor * hullFactor;
             if (speed > effectiveMaximumSpeed)
             {
                 horizontalVelocity = horizontalVelocity.normalized * effectiveMaximumSpeed;
