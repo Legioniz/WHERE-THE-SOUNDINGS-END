@@ -18,7 +18,7 @@ The interface has three principal areas:
 2. **Hold grid:** a 7-column × 9-row cell layout. Occupied cells show a compact item mark; blocked cells are visibly distinct; the selected item is highlighted.
 3. **Cargo details and intake:** used-cell count, selected item's quantity/quality/freshness/rotation, rotate/remove actions, and an explicit prototype catch-intake list.
 
-The inventory is built with Unity UI Toolkit through `UIDocument` and a generated `PanelSettings` asset. The generated scene also receives an Input System UI module and EventSystem for pointer interactions.
+The inventory is built with Unity UI Toolkit through `UIDocument` and a generated `PanelSettings` asset. The project targets Unity 6, where UI Toolkit handles runtime pointer input without adding a separate uGUI EventSystem.
 
 ## Controls
 
