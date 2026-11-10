@@ -20,6 +20,16 @@
 | 16_REFERENCES_AND_RESEARCH | Research sources |
 | 17_ARCHIVE | Deprecated designs and experiments |
 
+## AI, event, and encounter implementation
+
+- [Creature AI and threat behaviour](12_AI_AND_SIMULATION/CREATURE-AI.md)
+- [Threat Director and encounter scheduling](12_AI_AND_SIMULATION/THREAT-DIRECTOR.md)
+- [World event scheduler](12_AI_AND_SIMULATION/WORLD-SIMULATION.md)
+- [Entity perception and encounter mathematics](07_GAME_RULES_AND_BALANCING/ENTITY-PERCEPTION-AND-ENCOUNTER-MATH.md)
+- [Quest runtime trigger matrix](03_STORY_AND_NARRATIVE/SIDE_QUESTS/MARITIME_MYSTERIES/EVENT-BEHAVIOUR-AND-TRIGGER-MATRIX.md)
+- [Threat audio logic](10_AUDIO_AND_SOUND_DESIGN/THREAT-AUDIO-LOGIC.md)
+- [Unity implementation blueprint](08_TECHNICAL_DESIGN/AI-IMPLEMENTATION-BLUEPRINT.md)
+
 ## New maritime lore collection
 
 - [Maritime myths and motifs catalogue](02_LORE_AND_WORLD/MARITIME-MYTHS-CATALOG.md)
