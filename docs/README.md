@@ -34,6 +34,12 @@
 
 AI agents must read the repository's `AGENTS.md` before changing code. A roadmap, design specification, generated code snippet, or passing static check does not prove a feature is implemented or verified.
 
+## Repository safety and verification
+
+- [Repository Safeguards](14_TESTING_AND_QUALITY/REPOSITORY-SAFEGUARDS.md) — CI policy, secret-pattern checks, code-owner review, pull-request process, and required GitHub branch rules.
+- [Testing Strategy](14_TESTING_AND_QUALITY/TESTING-STRATEGY.md) — Edit Mode, Play Mode, integration, performance, and accessibility coverage.
+- [Documentation Standard](DOCUMENTATION-STANDARD.md) — authoritative sources, evidence/status labels, and documentation change requirements.
+
 ## World geography and regional ecology
 
 - [World Bible](02_LORE_AND_WORLD/WORLD-BIBLE.md)

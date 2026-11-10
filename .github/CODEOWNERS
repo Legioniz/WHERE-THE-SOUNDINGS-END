@@ -1,0 +1,11 @@
+# Human project-lead review for repository-wide changes.
+* @Legioniz
+
+# Explicitly protect high-impact project configuration and persistence contracts.
+/.github/ @Legioniz
+/AGENTS.md @Legioniz
+/ProjectSettings/ @Legioniz
+/Packages/ @Legioniz
+/Assets/_Project/Scripts/Runtime/Persistence/ @Legioniz
+/Assets/_Project/Tests/ @Legioniz
+/docs/13_PRODUCTION_MANAGEMENT/ @Legioniz

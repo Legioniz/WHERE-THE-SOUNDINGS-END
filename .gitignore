@@ -50,3 +50,17 @@ desktop.ini
 
 # Keep Unity metadata files tracked. They contain asset GUID identity.
 !*.meta
+
+
+# Local credentials and signing material — never commit real secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+credentials.json
+secrets.json
+service-account-*.json
+id_rsa
+id_ed25519

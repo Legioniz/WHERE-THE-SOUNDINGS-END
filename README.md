@@ -91,6 +91,12 @@ python tools/validate_project.py
 
 GitHub Actions runs this repository-integrity validator on pushes and pull requests to `main`. It checks file/configuration contracts and key integration wiring. It is **not a Unity compilation or player build**. The Edit Mode tests are in `Assets/_Project/Tests/EditMode/`; they still need to be run in Unity 6000.3.28f1, followed by Play Mode checks and a Windows build.
 
+## Repository safeguards
+
+The repository includes code-owner review routing, a pull-request checklist, least-privilege/pinned GitHub Actions, weekly Dependabot checks for GitHub Actions, a security reporting policy, and a repository safeguard validator.
+
+Run **python tools/validate_safeguards.py --self-test** locally. Read [Repository Safeguards](docs/14_TESTING_AND_QUALITY/REPOSITORY-SAFEGUARDS.md) for the automated coverage, limitations, and required GitHub main-branch ruleset. Branch protection and GitHub secret-scanning settings must still be enabled in repository Settings by an administrator; committing files does not activate those account-level controls.
+
 ## Production target and agent instructions
 
 The current production baseline targets a commercial Windows release around **November 2028**, using a 24-month planning horizon and an assumed 25–40 development hours per week. This is an estimate, not a guaranteed ship date. The aggressive scenario is 18–20 months; the conservative contingency is 30–36 months. The game targets 20+ hours of play, subject to validation through a complete vertical slice and playtesting.
