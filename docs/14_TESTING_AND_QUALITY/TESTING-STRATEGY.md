@@ -19,6 +19,7 @@
 
 ### Play Mode
 - Boat handling, speed gating and Sounding Rig input.
+- Rigidbody buoyancy, wave following, heave/pitch/roll stability, forward/reverse thrust, opposing-throttle braking, speed taper, rudder flow, and lateral water resistance.
 - Survey action advances the sea clock for its configured duration.
 - Pausing or opening dialogue / inventory still freezes sea time.
 - Greyhaven profile returns shallow bathymetry and never reports a deep scattering layer.
@@ -43,7 +44,7 @@
 - Confirm Outer Shoals and Hollow Trench sandbox scenes contain valid regional profiles and authored site markers.
 
 ### Performance
-- Profile water mesh, fog, local wildlife, acoustic listeners and physics at representative and worst-case loads.
+- Profile water mesh, buoyancy sampling, Rigidbody forces, fog, local wildlife, acoustic listeners and physics at representative and worst-case loads.
 - Verify acoustic listeners are event-driven / throttled and do not poll all AudioSources.
 - Verify survey site lookup remains acceptable as site counts grow; replace linear scans with spatial indexing when needed.
 
@@ -68,6 +69,7 @@ The Edit Mode test source includes:
 - Site signal confidence from authored signal strength and acoustic attenuation.
 - NPC day/overnight schedule boundaries and missing-window behaviour.
 - NPC stable-ID relationship persistence.
+- Four-point buoyancy force and damping response, forward/reverse acceleration, braking behaviour, engine/hull condition effects, and flow-dependent rudder authority.
 
 The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v5, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 

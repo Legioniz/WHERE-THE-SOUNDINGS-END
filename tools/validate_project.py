@@ -45,6 +45,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/World/SalvageSite.cs",
     "Assets/_Project/Scripts/Runtime/World/PanicBirdSwarmVisual.cs",
     "Assets/_Project/Tests/EditMode/SeaStateAndCargoDamageTests.cs",
+    "Assets/_Project/Tests/EditMode/BoatPhysicsTests.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/YarnDialogueSaveParticipant.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs",
@@ -56,6 +57,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Tests/EditMode/CargoGridGeometryTests.cs",
     "docs/06_GAMEPLAY_SYSTEMS/ACTION-DRIVEN-SEA-STATE.md",
     "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs",
+    "Assets/_Project/Scripts/Runtime/Boat/BoatHydrodynamics.cs",
     "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs",
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
@@ -199,6 +201,39 @@ def main() -> int:
         boat_source = (ROOT / "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs").read_text(encoding="utf-8")
         if "if (isActiveAndEnabled) BindInputActions();" not in boat_source:
             failures.append("BoatPrototypeController must bind input assigned by the environment builder after AddComponent.")
+
+        boat_hydro = (ROOT / "Assets/_Project/Scripts/Runtime/Boat/BoatHydrodynamics.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "TrySampleSurface", "AddForceAtPosition", "Physics.gravity",
+            "CalculateBuoyancyForce", "buoyancyOffsets",
+        ):
+            if required_text not in boat_hydro:
+                failures.append(f"BoatHydrodynamics is missing expected water-force behaviour: {required_text}")
+
+        boat_source = (ROOT / "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "BoatMovementMath.CalculatePropulsionAcceleration", "body.AddForce(",
+            "body.AddTorque(", "CalculateRudderAuthority", "lateralResistance",
+            "quadraticForwardDrag",
+        ):
+            if required_text not in boat_source:
+                failures.append(f"BoatPrototypeController is missing physics-driven movement: {required_text}")
+        fixed_update = boat_source.split("private void FixedUpdate()", 1)[1].split("public void CaptureSaveData", 1)[0]
+        if "body.linearVelocity =" in fixed_update or "body.angularVelocity =" in fixed_update:
+            failures.append("Boat movement must apply forces/torques instead of setting velocity directly.")
+
+        water_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/MaritimeSurfaceBehaviour.cs").read_text(encoding="utf-8")
+        for required_text in ("TrySampleSurface", "EvaluateWaveHeight", "SampleSurface", "worldSurfaceVelocity"):
+            if required_text not in water_source:
+                failures.append(f"MaritimeSurfaceBehaviour is missing shared wave sampling: {required_text}")
+
+        greyhaven_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
+        if "hydrodynamics.Configure(seaSurface)" not in greyhaven_builder or "body.useGravity = true;" not in greyhaven_builder:
+            failures.append("Greyhaven must connect the boat buoyancy component and enable Rigidbody gravity.")
+
+        deep_builder = (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8")
+        if "hydrodynamics.Configure(waterSurface)" not in deep_builder or "body.useGravity = true;" not in deep_builder:
+            failures.append("Deep-ocean survey boats must use the same Rigidbody buoyancy model.")
 
         atmosphere_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishermanAtmosphereDirector.cs").read_text(encoding="utf-8")
         if "seaState.LastGameDeltaSeconds" not in atmosphere_source or "realDelta * 72f" in atmosphere_source:

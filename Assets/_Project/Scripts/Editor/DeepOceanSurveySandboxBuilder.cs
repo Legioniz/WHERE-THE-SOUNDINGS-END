@@ -91,20 +91,22 @@ namespace WhereTheSoundingsEnd.Editor
             Collider waterCollider = water.GetComponent<Collider>();
             if (waterCollider != null) UnityEngine.Object.DestroyImmediate(waterCollider);
             water.transform.SetParent(world.transform, true);
-            water.AddComponent<MaritimeSurfaceBehaviour>();
+            MaritimeSurfaceBehaviour waterSurface = water.AddComponent<MaritimeSurfaceBehaviour>();
             DeepOceanSurveyRegion profile = water.AddComponent<DeepOceanSurveyRegion>();
             profile.ConfigureForRegion(regionId);
 
             GameObject boat = new GameObject("Player_Boat_Survey_Prototype");
             boat.transform.SetParent(world.transform, false);
-            boat.transform.position = new Vector3(0f, 0.8f, -45f);
+            boat.transform.position = new Vector3(0f, -0.1f, -45f);
             Rigidbody body = boat.AddComponent<Rigidbody>();
             body.mass = 1200f;
-            body.useGravity = false;
-            body.constraints = RigidbodyConstraints.FreezePositionY |
-                               RigidbodyConstraints.FreezeRotationX |
-                               RigidbodyConstraints.FreezeRotationZ;
+            body.useGravity = true;
+            body.constraints = RigidbodyConstraints.None;
             body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            body.linearDamping = 0.04f;
+            body.angularDamping = 0.18f;
+            body.centerOfMass = new Vector3(0f, -0.10f, -0.12f);
             BoxCollider hull = boat.AddComponent<BoxCollider>();
             hull.size = new Vector3(2.2f, 0.8f, 6f);
 
@@ -118,6 +120,8 @@ namespace WhereTheSoundingsEnd.Editor
 
             BoatPrototypeController boatController = boat.AddComponent<BoatPrototypeController>();
             boatController.InputActions = controls;
+            BoatHydrodynamics hydrodynamics = boat.GetComponent<BoatHydrodynamics>();
+            hydrodynamics.Configure(waterSurface);
             SpatialCargoHold cargoHold = boat.AddComponent<SpatialCargoHold>();
             boat.AddComponent<VesselConditionController>();
 

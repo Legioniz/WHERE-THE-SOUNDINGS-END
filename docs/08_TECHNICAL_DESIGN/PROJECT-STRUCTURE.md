@@ -68,7 +68,9 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Narrative/HarbourmasterInteraction.cs: boat-proximity trigger and E-key dialogue start.
 - Dialogue/Greyhaven.yarnproject: Yarn Spinner 3.x project definition.
 - Dialogue/Source/Greyhaven_Harbourmaster.yarn: branching first conversation with the Harbourmaster.
-- Boat/BoatPrototypeController.cs: temporary Rigidbody handling prototype.
+- Boat/BoatPrototypeController.cs: force-driven forward/reverse propulsion, opposing-throttle braking, speed-dependent rudder and vessel-condition response.
+- Boat/BoatHydrodynamics.cs: four-point spring buoyancy, wave-following heave/pitch/roll, and stability damping.
+- World/MaritimeSurfaceBehaviour.cs: shared analytic wave height/normal/velocity samples used by both the rendered sea mesh and buoyancy forces.
 - Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera with configurable framing.
 - Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, Greyhaven, and any missing deep-ocean survey scenes.
 - Editor/GreyhavenEnvironmentBuilder.cs: builds the Greyhaven harbour scene, starter boat, cargo catalogue, Yarn dialogue, save/autosave coordinator, shallow survey profile, and Harbourmaster interaction. Editor/DeepOceanSurveySandboxBuilder.cs generates Outer Shoals and Hollow Trench survey scenes with regional profiles and authored evidence sites.

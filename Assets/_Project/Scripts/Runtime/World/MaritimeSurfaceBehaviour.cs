@@ -89,6 +89,43 @@ namespace WhereTheSoundingsEnd.World
                 new Vector3(localPosition.x, centerHeight, localPosition.z));
         }
 
+        /// <summary>
+        /// Physics query for the same rendered wave field, including the vertical motion
+        /// of the surface. The buoyancy solver uses this rather than a separate flat waterline.
+        /// </summary>
+        public bool TrySampleSurface(
+            Vector3 worldPosition,
+            out Vector3 worldSurfacePosition,
+            out Vector3 worldSurfaceNormal,
+            out Vector3 worldSurfaceVelocity)
+        {
+            Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
+            if (Mathf.Abs(localPosition.x) > 5f || Mathf.Abs(localPosition.z) > 5f)
+            {
+                worldSurfacePosition = Vector3.zero;
+                worldSurfaceNormal = Vector3.up;
+                worldSurfaceVelocity = Vector3.zero;
+                return false;
+            }
+
+            SampleSurface(worldPosition, out worldSurfacePosition, out worldSurfaceNormal);
+
+            Vector2 direction;
+            float phase;
+            GetWaveState(out direction, out phase);
+            float phaseRate = waveSpeed * (wrongWayRemaining > 0f ? -1.35f : 1f);
+            const float sampleInterval = 0.025f;
+            float previousHeight = EvaluateWaveHeight(
+                localPosition.x, localPosition.z,
+                direction, phase - phaseRate * sampleInterval, amplitudeBlend);
+            float nextHeight = EvaluateWaveHeight(
+                localPosition.x, localPosition.z,
+                direction, phase + phaseRate * sampleInterval, amplitudeBlend);
+            float verticalVelocity = (nextHeight - previousHeight) / (2f * sampleInterval);
+            worldSurfaceVelocity = transform.TransformVector(Vector3.up * verticalVelocity);
+            return true;
+        }
+
         private void Update()
         {
             float dt = Time.deltaTime;

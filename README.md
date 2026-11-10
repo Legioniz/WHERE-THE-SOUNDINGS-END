@@ -50,11 +50,12 @@ Use **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment** after ch
 | Pause | Esc | Start |
 | Inventory | I | North face button |
 
-The harvesting timing action now uses one shared Input System action for keyboard and gamepad input. Some controls are prototype-level and will be refined as the player-facing UI replaces the current OnGUI overlays.
+The harvesting timing action now uses one shared Input System action for keyboard and gamepad input. Boat movement now uses inertia and water forces instead of direct velocity changes; its buoyancy is a lightweight four-point approximation, not a full fluid simulation.
 
 ## Implemented runtime foundations
 
-- Rigidbody boat steering and an elevated orthographic follow camera with velocity look-ahead, turn damping, and shared ocean-surface response.
+- Force-driven Rigidbody workboat movement with forward/reverse thrust, braking, speed-dependent rudder, prop wash, lateral resistance, and quadratic drag.
+- Four-point spring buoyancy sampled from the same moving ocean surface used by rendering and the velocity-aware orthographic follow camera.
 - Movement/action-driven sea time: the day advances while the boat is genuinely moving or the player is performing a supported harvesting or survey action.
 - Timed fishing and dredging minigames using spatial cargo placement.
 - Cargo hold geometry, blocked/damaged cells, item placement, salvage-site depletion, and vessel hull/engine condition.
@@ -110,6 +111,7 @@ AI agents must read `AGENTS.md` before modifying the project. Planned content an
 - [World Bible](docs/02_LORE_AND_WORLD/WORLD-BIBLE.md)
 - [Maritime Horror Director](docs/06_GAMEPLAY_SYSTEMS/MARITIME-HORROR-DIRECTOR.md)
 - [Save and Load](docs/06_GAMEPLAY_SYSTEMS/SAVE-AND-LOAD.md)
+- [Boat Movement and Hydrodynamics](docs/06_GAMEPLAY_SYSTEMS/BOAT-MOVEMENT.md)
 - [Sounding Rig algorithms](docs/07_GAME_RULES_AND_BALANCING/SOUNDING-RIG-ALGORITHMS.md)
 - [Technical Design](docs/08_TECHNICAL_DESIGN/TECHNICAL-DESIGN-DOCUMENT.md)
 - [Deep-Ocean Survey Implementation](docs/08_TECHNICAL_DESIGN/DEEP-OCEAN-SURVEY-IMPLEMENTATION.md)

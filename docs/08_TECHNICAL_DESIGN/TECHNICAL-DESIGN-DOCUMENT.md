@@ -29,11 +29,11 @@ The repository now includes:
 - Runtime, Editor, and Edit Mode test assemblies.
 - Input Action map for keyboard and gamepad.
 - Engine-independent WorldClock and PCG32 random stream.
-- First-pass Rigidbody boat handling and a velocity-aware orthographic follow camera that samples the shared maritime surface.
+- Force-driven Rigidbody workboat propulsion, reverse/braking, water resistance, rudder torque and four-point wave-sampled buoyancy; an orthographic follow camera anticipates velocity and responds to the same maritime surface.
 - An Editor setup command that generates URP assets and a Greyhaven blockout scene.
 - Static repository validation through tools/validate_project.py and GitHub Actions.
 
-The generated Greyhaven scene is a primitive technical blockout. Boat handling is prototype tuning, not a final physical model. Unity Editor import, C# compilation, Edit Mode tests, and Windows build have not yet been verified in this environment.
+The generated Greyhaven scene is a primitive technical blockout. Boat movement is a lightweight hydrodynamics approximation rather than a full fluid simulation; its current tuning still requires Play Mode observation and measurement. Unity Editor import, C# compilation, Edit Mode tests, and Windows build have not yet been verified in this environment.
 
 ## Scenes
 

@@ -44,6 +44,10 @@ AI agents must read the repository's `AGENTS.md` before changing code. A roadmap
 - [Location catalog](05_WORLD_AND_LEVEL_DESIGN/LOCATION-CATALOG.md)
 - [Exploration design](05_WORLD_AND_LEVEL_DESIGN/EXPLORATION-DESIGN.md)
 
+## Vehicle handling and world physics
+
+- [Boat Movement and Hydrodynamics](06_GAMEPLAY_SYSTEMS/BOAT-MOVEMENT.md)
+
 ## Creature roster, fishing, and trade
 
 - [Catchable seafood and market species catalog](04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)

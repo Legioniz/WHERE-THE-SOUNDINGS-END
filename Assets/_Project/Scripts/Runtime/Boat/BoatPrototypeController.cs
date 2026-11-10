@@ -6,24 +6,39 @@ using WhereTheSoundingsEnd.World;
 namespace WhereTheSoundingsEnd.Boat
 {
     /// <summary>
-    /// Greyhaven blockout controller only. Values are prototype tuning, not final boat physics.
+    /// Player propulsion and rudder control for the Greyhaven workboat.
+    /// It applies forces and torque to a Rigidbody; velocity is never assigned directly.
+    /// Buoyancy and hull-water contact are handled by BoatHydrodynamics.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(BoatHydrodynamics))]
     public sealed class BoatPrototypeController : MonoBehaviour, ISaveParticipant
     {
         [Header("Input")]
         [SerializeField] private InputActionAsset inputActions;
 
-        [Header("Prototype handling")]
-        [SerializeField, Min(0.1f)] private float acceleration = 5.0f;
-        [SerializeField, Min(0.1f)] private float maximumSpeed = 10.0f;
-        [SerializeField, Min(0.1f)] private float turnAcceleration = 2.0f;
-        [SerializeField, Min(0.1f)] private float steeringReferenceSpeed = 2.0f;
+        [Header("Propulsion")]
+        [SerializeField, Min(0.1f)] private float forwardAcceleration = 2.8f;
+        [SerializeField, Min(0.1f)] private float reverseAcceleration = 0.95f;
+        [SerializeField, Min(0.1f)] private float brakingAcceleration = 2.6f;
+        [SerializeField, Min(0.5f)] private float maximumForwardSpeed = 8.5f;
+        [SerializeField, Min(0.5f)] private float maximumReverseSpeed = 3.2f;
 
-        private Rigidbody _body;
-        private InputActionMap _boatMap;
-        private InputAction _moveAction;
-        private Vector2 _moveInput;
+        [Header("Rudder")]
+        [SerializeField, Min(0.1f)] private float rudderAcceleration = 1.35f;
+        [SerializeField, Min(0.1f)] private float rudderFullFlowSpeed = 4.5f;
+        [SerializeField, Min(0f)] private float propWashFlow = 1.1f;
+        [SerializeField, Min(0f)] private float yawDamping = 1.25f;
+
+        [Header("Water resistance")]
+        [SerializeField, Min(0f)] private float lateralResistance = 2.4f;
+        [SerializeField, Min(0f)] private float quadraticForwardDrag = 0.018f;
+
+        private Rigidbody body;
+        private InputActionMap boatMap;
+        private InputAction moveAction;
+        private VesselConditionController vesselCondition;
+        private Vector2 moveInput;
 
         public InputActionAsset InputActions
         {
@@ -37,14 +52,15 @@ namespace WhereTheSoundingsEnd.Boat
 
         private void Awake()
         {
-            _body = GetComponent<Rigidbody>();
-            _body.useGravity = false;
-            _body.constraints |= RigidbodyConstraints.FreezePositionY |
-                                 RigidbodyConstraints.FreezeRotationX |
-                                 RigidbodyConstraints.FreezeRotationZ;
-            _body.interpolation = RigidbodyInterpolation.Interpolate;
-            _body.linearDamping = 1.6f;
-            _body.angularDamping = 2.0f;
+            body = GetComponent<Rigidbody>();
+            vesselCondition = GetComponent<VesselConditionController>();
+            body.useGravity = true;
+            body.constraints = RigidbodyConstraints.None;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            body.linearDamping = 0.04f;
+            body.angularDamping = 0.18f;
+            body.centerOfMass = new Vector3(0f, -0.10f, -0.12f);
         }
 
         private void OnEnable()
@@ -56,119 +72,106 @@ namespace WhereTheSoundingsEnd.Boat
         {
             if (inputActions == null)
             {
-                // The environment builder assigns this property immediately after AddComponent.
-                // Keep the controller enabled so that assignment can bind the map correctly.
+                // The generated-scene builder assigns the shared asset immediately after AddComponent.
                 Debug.LogWarning("BoatPrototypeController is waiting for PlayerControls.inputactions.", this);
                 return;
             }
 
-            if (_boatMap != null) _boatMap.Disable();
-            _boatMap = inputActions.FindActionMap("Boat", true);
-            _moveAction = _boatMap.FindAction("Move", true);
-            _boatMap.Enable();
+            if (boatMap != null) boatMap.Disable();
+            boatMap = inputActions.FindActionMap("Boat", true);
+            moveAction = boatMap.FindAction("Move", true);
+            boatMap.Enable();
         }
 
         private void OnDisable()
         {
-            _boatMap?.Disable();
-            _boatMap = null;
-            _moveAction = null;
-            _moveInput = Vector2.zero;
+            boatMap?.Disable();
+            boatMap = null;
+            moveAction = null;
+            moveInput = Vector2.zero;
         }
 
         private void Update()
         {
-            if (_moveAction != null)
-            {
-                _moveInput = Vector2.ClampMagnitude(_moveAction.ReadValue<Vector2>(), 1.0f);
-            }
+            if (moveAction != null)
+                moveInput = Vector2.ClampMagnitude(moveAction.ReadValue<Vector2>(), 1f);
         }
 
         private void FixedUpdate()
         {
-            float throttle = Mathf.Clamp(_moveInput.y, -1.0f, 1.0f);
-            float steering = Mathf.Clamp(_moveInput.x, -1.0f, 1.0f);
-            _body.AddForce(transform.forward * (throttle * acceleration), ForceMode.Acceleration);
+            if (body == null) return;
 
-            Vector3 horizontalVelocity = new Vector3(
-                _body.linearVelocity.x,
-                0.0f,
-                _body.linearVelocity.z);
+            float throttle = Mathf.Clamp(moveInput.y, -1f, 1f);
+            float steering = Mathf.Clamp(moveInput.x, -1f, 1f);
+            Vector3 forward = transform.forward;
+            Vector3 right = transform.right;
 
-            float speed = horizontalVelocity.magnitude;
-            VesselConditionController condition = GetComponent<VesselConditionController>();
-            float engineFactor = condition == null ? 1f : Mathf.Lerp(0.15f, 1f, condition.EngineCondition / 100f);
-            float hullFactor = condition == null ? 1f : Mathf.Lerp(0.35f, 1f, condition.HullIntegrity / 100f);
-            float effectiveMaximumSpeed = maximumSpeed * engineFactor * hullFactor;
-            if (speed > effectiveMaximumSpeed)
-            {
-                horizontalVelocity = horizontalVelocity.normalized * effectiveMaximumSpeed;
-                _body.linearVelocity = new Vector3(
-                    horizontalVelocity.x,
-                    _body.linearVelocity.y,
-                    horizontalVelocity.z);
-            }
+            float forwardSpeed = Vector3.Dot(body.linearVelocity, forward);
+            float engineCondition = vesselCondition != null ? vesselCondition.EngineCondition : 100f;
+            float hullIntegrity = vesselCondition != null ? vesselCondition.HullIntegrity : 100f;
 
-            float forwardSpeed = Vector3.Dot(horizontalVelocity, transform.forward);
-            float travelDirection = Mathf.Abs(forwardSpeed) > 0.15f
+            float propulsion = BoatMovementMath.CalculatePropulsionAcceleration(
+                throttle, forwardSpeed, engineCondition, hullIntegrity,
+                maximumForwardSpeed, maximumReverseSpeed,
+                forwardAcceleration, reverseAcceleration, brakingAcceleration);
+            if (Mathf.Abs(propulsion) > 0.0001f)
+                body.AddForce(forward * propulsion, ForceMode.Acceleration);
+
+            // A displacement hull resists sideways motion much more strongly than forward travel.
+            Vector3 horizontalVelocity = Vector3.ProjectOnPlane(body.linearVelocity, Vector3.up);
+            float lateralSpeed = Vector3.Dot(horizontalVelocity, right);
+            body.AddForce(-right * lateralSpeed * lateralResistance, ForceMode.Acceleration);
+
+            // Quadratic drag rises with speed and naturally limits coasting distance.
+            body.AddForce(
+                -forward * (forwardSpeed * Mathf.Abs(forwardSpeed) * quadraticForwardDrag),
+                ForceMode.Acceleration);
+
+            // The rudder needs water flowing past it. Prop wash gives a small response at low speed,
+            // while reverse travel reverses the vessel's steering response.
+            float rudderAuthority = BoatMovementMath.CalculateRudderAuthority(
+                forwardSpeed, throttle, propWashFlow, rudderFullFlowSpeed);
+            float travelDirection = Mathf.Abs(forwardSpeed) > 0.2f
                 ? Mathf.Sign(forwardSpeed)
-                : 1.0f;
-            float steeringAuthority = Mathf.Clamp01(speed / steeringReferenceSpeed);
-
-            _body.AddTorque(
-                Vector3.up * (steering * turnAcceleration * steeringAuthority * travelDirection),
+                : Mathf.Abs(throttle) > 0.05f ? Mathf.Sign(throttle) : 1f;
+            float yawAcceleration = steering * rudderAcceleration * rudderAuthority * travelDirection;
+            float yawVelocity = Vector3.Dot(body.angularVelocity, Vector3.up);
+            body.AddTorque(
+                Vector3.up * (yawAcceleration - yawVelocity * yawDamping),
                 ForceMode.Acceleration);
         }
 
         public void CaptureSaveData(SaveGameData data)
         {
             if (data == null || data.vessel == null)
-            {
                 throw new System.ArgumentNullException(nameof(data), "Save data must contain a vessel record.");
-            }
 
-            if (_body == null)
-            {
-                _body = GetComponent<Rigidbody>();
-            }
-
+            if (body == null) body = GetComponent<Rigidbody>();
             data.vessel.isPresent = true;
             data.vessel.vesselId = "greyhaven.starter_vessel";
             CopyVector(transform.position, data.vessel.position);
             CopyVector(transform.eulerAngles, data.vessel.rotationEuler);
-            CopyVector(_body.linearVelocity, data.vessel.linearVelocity);
-            CopyVector(_body.angularVelocity, data.vessel.angularVelocity);
+            CopyVector(body.linearVelocity, data.vessel.linearVelocity);
+            CopyVector(body.angularVelocity, data.vessel.angularVelocity);
         }
 
         public void RestoreSaveData(SaveGameData data)
         {
-            if (data == null || data.vessel == null || !data.vessel.isPresent)
-            {
-                return;
-            }
-
-            if (_body == null)
-            {
-                _body = GetComponent<Rigidbody>();
-            }
+            if (data == null || data.vessel == null || !data.vessel.isPresent) return;
+            if (body == null) body = GetComponent<Rigidbody>();
 
             Vector3 position = ToVector(data.vessel.position);
             Quaternion rotation = Quaternion.Euler(ToVector(data.vessel.rotationEuler));
-
-            _body.position = position;
-            _body.rotation = rotation;
-            _body.linearVelocity = ToVector(data.vessel.linearVelocity);
-            _body.angularVelocity = ToVector(data.vessel.angularVelocity);
+            body.position = position;
+            body.rotation = rotation;
+            body.linearVelocity = ToVector(data.vessel.linearVelocity);
+            body.angularVelocity = ToVector(data.vessel.angularVelocity);
             transform.SetPositionAndRotation(position, rotation);
         }
 
         private static void CopyVector(Vector3 source, Vector3SaveData destination)
         {
-            if (destination == null)
-            {
-                throw new System.ArgumentNullException(nameof(destination));
-            }
-
+            if (destination == null) throw new System.ArgumentNullException(nameof(destination));
             destination.x = source.x;
             destination.y = source.y;
             destination.z = source.z;
@@ -176,9 +179,49 @@ namespace WhereTheSoundingsEnd.Boat
 
         private static Vector3 ToVector(Vector3SaveData value)
         {
-            return value == null
-                ? Vector3.zero
-                : new Vector3(value.x, value.y, value.z);
+            return value == null ? Vector3.zero : new Vector3(value.x, value.y, value.z);
+        }
+    }
+
+    /// <summary>Pure helpers keep boat tuning and limits testable without a physics scene.</summary>
+    public static class BoatMovementMath
+    {
+        public static float CalculatePropulsionAcceleration(
+            float throttle, float forwardSpeed, float engineCondition, float hullIntegrity,
+            float maximumForwardSpeed, float maximumReverseSpeed,
+            float forwardAcceleration, float reverseAcceleration, float brakingAcceleration)
+        {
+            throttle = Mathf.Clamp(throttle, -1f, 1f);
+            if (Mathf.Abs(throttle) <= 0.0001f) return 0f;
+
+            float engineFactor = Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(engineCondition / 100f));
+            float hullFactor = Mathf.Lerp(0.35f, 1f, Mathf.Clamp01(hullIntegrity / 100f));
+            float conditionFactor = engineFactor * hullFactor;
+            float forwardLimit = maximumForwardSpeed * Mathf.Lerp(0.65f, 1f, engineFactor) *
+                                 Mathf.Lerp(0.55f, 1f, hullFactor);
+            float reverseLimit = maximumReverseSpeed * Mathf.Lerp(0.65f, 1f, engineFactor) *
+                                 Mathf.Lerp(0.55f, 1f, hullFactor);
+
+            // Opposing throttle brakes first. It only begins reversing once forward speed is near zero.
+            if (Mathf.Abs(forwardSpeed) > 0.25f && Mathf.Sign(throttle) != Mathf.Sign(forwardSpeed))
+                return throttle * brakingAcceleration * conditionFactor;
+
+            if (throttle > 0f)
+            {
+                float speedFactor = 1f - Mathf.Clamp01(Mathf.Max(0f, forwardSpeed) / Mathf.Max(0.1f, forwardLimit));
+                return throttle * forwardAcceleration * speedFactor * conditionFactor;
+            }
+
+            float reverseSpeedFactor = 1f -
+                Mathf.Clamp01(Mathf.Max(0f, -forwardSpeed) / Mathf.Max(0.1f, reverseLimit));
+            return throttle * reverseAcceleration * reverseSpeedFactor * conditionFactor;
+        }
+
+        public static float CalculateRudderAuthority(
+            float forwardSpeed, float throttle, float propWashFlow, float fullFlowSpeed)
+        {
+            float effectiveFlow = Mathf.Max(Mathf.Abs(forwardSpeed), Mathf.Abs(throttle) * propWashFlow);
+            return Mathf.Clamp01(effectiveFlow / Mathf.Max(0.1f, fullFlowSpeed));
         }
     }
 }

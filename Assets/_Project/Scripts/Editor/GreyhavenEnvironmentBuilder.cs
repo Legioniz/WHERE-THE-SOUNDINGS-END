@@ -73,7 +73,7 @@ namespace WhereTheSoundingsEnd.Editor
             BuildEstuary(estuary, soil, wood, foliage, rock);
             BuildLighthouse(landmarks, concrete, roof, red, beacon);
             BuildBuoys(landmarks, red, green, metal);
-            BuildBoat(player, controls, hull, wood, metal, cargoCatalog);
+            BuildBoat(player, controls, hull, wood, metal, cargoCatalog, seaSurface);
             BuildCameraAndLight(lighting, player, seaSurface);
 
             YarnDialogueSaveParticipant dialogueSave = BuildSaveCoordinator(world.transform);
@@ -771,19 +771,21 @@ namespace WhereTheSoundingsEnd.Editor
             radius.radius = salvage.InteractionRadius;
         }
 
-        private static void BuildBoat(Transform parent, InputActionAsset controls, Material hull, Material deck, Material metal, List<CargoItemDefinition> cargoCatalog)
+        private static void BuildBoat(Transform parent, InputActionAsset controls, Material hull, Material deck, Material metal, List<CargoItemDefinition> cargoCatalog, MaritimeSurfaceBehaviour seaSurface)
         {
             GameObject boat = new GameObject("Player_Boat_Blockout");
             boat.transform.SetParent(parent, false);
-            boat.transform.position = new Vector3(10f, 0.8f, 14f);
+            boat.transform.position = new Vector3(10f, -0.1f, 14f);
 
             Rigidbody body = boat.AddComponent<Rigidbody>();
             body.mass = 1200f;
-            body.useGravity = false;
-            body.constraints = RigidbodyConstraints.FreezePositionY |
-                               RigidbodyConstraints.FreezeRotationX |
-                               RigidbodyConstraints.FreezeRotationZ;
+            body.useGravity = true;
+            body.constraints = RigidbodyConstraints.None;
             body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            body.linearDamping = 0.04f;
+            body.angularDamping = 0.18f;
+            body.centerOfMass = new Vector3(0f, -0.10f, -0.12f);
 
             GameObject hullMesh = GameObject.CreatePrimitive(PrimitiveType.Cube);
             hullMesh.name = "Hull";
@@ -816,6 +818,8 @@ namespace WhereTheSoundingsEnd.Editor
 
             BoatPrototypeController controller = boat.AddComponent<BoatPrototypeController>();
             controller.InputActions = controls;
+            BoatHydrodynamics hydrodynamics = boat.GetComponent<BoatHydrodynamics>();
+            hydrodynamics.Configure(seaSurface);
             SpatialCargoHold cargoHold = boat.AddComponent<SpatialCargoHold>();
             cargoHold.SetItemDefinitions(cargoCatalog);
             cargoHold.TryPlace("GEAR-ENGINE-01", 0, 0, 0, 1, 1f, 1f, out _);
