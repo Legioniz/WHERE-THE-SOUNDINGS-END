@@ -2,6 +2,7 @@ using UnityEngine;
 using Yarn.Unity;
 using System.Collections.Generic;
 using WhereTheSoundingsEnd.Inventory;
+using WhereTheSoundingsEnd.Core;
 using WhereTheSoundingsEnd.Persistence;
 
 namespace WhereTheSoundingsEnd.World
@@ -100,7 +101,7 @@ namespace WhereTheSoundingsEnd.World
                               (dialogueRunner != null && dialogueRunner.IsDialogueRunning);
             float speed = vesselBody == null ? 0f : HorizontalSpeed(vesselBody.linearVelocity);
             bool moving = speed >= movementThreshold;
-            IsAdvancing = !pausedByUi && (moving || harvestingActive);
+            IsAdvancing = ActionDrivenClockPolicy.ShouldAdvance(speed, movementThreshold, harvestingActive, pausedByUi);
 
             if (!IsAdvancing)
             {
