@@ -65,3 +65,10 @@ Status labels: Approved baseline, Working baseline, Proposed, Placeholder, Depre
 Population rules are authored per species and fishing ground. The simulation tracks cohort growth, breeding stock, daily recruitment, fishing mortality, migration, and recovery. These are specifications; Unity runtime implementation remains separate.
 
 - [Ocean legends and sea monsters — expanded research](02_LORE_AND_WORLD/OCEAN-LEGENDS-AND-SEA-MONSTERS.md)
+
+## Rare legendary encounters
+
+- [Ocean legends and sea monsters — research catalogue](02_LORE_AND_WORLD/OCEAN-LEGENDS-AND-SEA-MONSTERS.md)
+- [Legendary maritime encounter scheduler](12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-SCHEDULER.md)
+
+Legend-inspired encounters are rare, location-bound events evaluated by the Threat Director. They may be harmless sightings, environmental omens, dangerous contacts, or lethal hazards with authored warnings and possible escape routes.
