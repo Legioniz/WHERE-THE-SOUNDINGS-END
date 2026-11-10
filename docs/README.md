@@ -37,6 +37,8 @@
 - [Anomalous species and site-specific entities](04_CHARACTERS_AND_ENTITIES/ANOMALOUS-SPECIES.md)
 - [Creature life cycles and ecological behaviour](12_AI_AND_SIMULATION/CREATURE-LIFE-CYCLES-AND-ECOLOGY.md)
 - [Fish population model](07_GAME_RULES_AND_BALANCING/FISH-POPULATION-MODEL.md)
+- [Seafood selling price schedule](07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md)
+- [Economy mathematics](07_GAME_RULES_AND_BALANCING/ECONOMY-MATHEMATICS.md)
 - [AI coordination and hunting logic](12_AI_AND_SIMULATION/AI-COORDINATION-AND-HUNTING-LOGIC.md)
 - [Threat Director and encounter scheduling](12_AI_AND_SIMULATION/THREAT-DIRECTOR.md)
 - [World event scheduler](12_AI_AND_SIMULATION/WORLD-SIMULATION.md)
