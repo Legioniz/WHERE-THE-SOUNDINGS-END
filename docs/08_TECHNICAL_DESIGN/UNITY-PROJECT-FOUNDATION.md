@@ -66,9 +66,9 @@ It also configures the default render pipeline, Linear color space, Input System
 
 ## Integrity checks and current limitations
 
-Run python tools/validate_project.py from the repository root. The GitHub Actions workflow runs this static project-integrity check on pushes and pull requests to main.
+Run python tools/validate_project.py and python tools/validate_csharp.py from the repository root. GitHub Actions runs both checks on pushes and pull requests to main. The C# check uses Tree-sitter to parse every project source file and catch malformed syntax.
 
-This check validates repository structure and JSON configuration only. It does not compile C#, import assets, execute Edit Mode tests, or produce a Windows build. Those checks must be run in the pinned Unity Editor after first import.
+These checks validate repository structure, JSON configuration, assembly-definition references and C# syntax. They do not perform semantic C# compilation against Unity/package assemblies, import assets, execute Edit Mode tests, or produce a Windows build. Those checks must be run in the pinned Unity Editor after first import.
 
 Not yet implemented: fishing, catch inventory, selling, world persistence, save migration, ecosystem simulation, creature AI, threat director, quests, full navigation/acoustics, finished UI/audio, production art, and release packaging.
 
