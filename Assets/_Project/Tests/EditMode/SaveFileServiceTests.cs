@@ -219,6 +219,44 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(result.Message, Does.Contain("cargo"));
         }
 
+
+        [Test]
+        public void Load_MigratesSchemaOneAndInitializesSpatialCargoAndDialogueCollections()
+        {
+            Directory.CreateDirectory(_temporaryDirectory);
+            File.WriteAllText(
+                _service.GetSaveFilePath(1),
+                "{\"schemaVersion\":1,\"saveId\":\"schema-one\",\"inventory\":{},\"progress\":{}}");
+
+            SaveGameData loaded;
+            SaveOperationResult result = _service.TryLoad(1, out loaded);
+
+            Assert.That(result.Success, Is.True, result.Message);
+            Assert.That(loaded.schemaVersion, Is.EqualTo(SaveGameData.CurrentSchemaVersion));
+            Assert.That(loaded.inventory.placements, Is.Not.Null);
+            Assert.That(loaded.inventory.holdWidth, Is.EqualTo(7));
+            Assert.That(loaded.inventory.holdHeight, Is.EqualTo(9));
+            Assert.That(loaded.dialogue.floatVariables, Is.Not.Null);
+            Assert.That(loaded.dialogue.stringVariables, Is.Not.Null);
+            Assert.That(loaded.dialogue.boolVariables, Is.Not.Null);
+        }
+
+        [Test]
+        public void Save_RejectsInvalidSpatialCargoPlacementRecords()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            data.inventory.placements.Add(new CargoPlacementSaveData
+            {
+                itemId = string.Empty,
+                quantity = 1
+            });
+
+            SaveOperationResult result = _service.Save(1, data);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("placement"));
+        }
+
         [Test]
         public void Delete_RemovesPrimaryAndBackupFiles()
         {
