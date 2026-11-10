@@ -72,3 +72,10 @@ Population rules are authored per species and fishing ground. The simulation tra
 - [Legendary maritime encounter scheduler](12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-SCHEDULER.md)
 
 Legend-inspired encounters are rare, location-bound events evaluated by the Threat Director. They may be harmless sightings, environmental omens, dangerous contacts, or lethal hazards with authored warnings and possible escape routes.
+
+## Legendary encounter art and discoveries
+
+- [Legendary encounter scheduler](12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-SCHEDULER.md)
+- [Legendary encounter visual, behaviour, and discoverable lore dossiers](12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-VISUAL-AND-LORE-DOSSIERS.md)
+
+The dossiers define silhouettes, anatomy, scale, movement, audio, surface / underwater effects, danger cues, discoverable records, clue locations, journal confidence, and cultural-use boundaries.
