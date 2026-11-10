@@ -143,7 +143,7 @@ Run each against:
 
 Acceptance checks:
 - Verify the schedule's 100 fish, 47 invertebrate, and 8 algae price IDs are complete and unique.
-- A 2 kg standard milkfish sale returns $4.60 at neutral market factor 1.00 before other modifiers; at Greyhaven's INSHORE factor of 1.08 it returns $4.97.
+- A 2 kg standard milkfish sale returns $4.60 at neutral market factor 1.00 before other modifiers; at Greyhaven's INSHORE factor of 1.08 it returns $4.97 after line-level rounding.
 - Five approved mature sea urchins return $3.55 before modifiers.
 - Ineligible catch returns zero ordinary-sale revenue.
 - A first-time research contract cannot be claimed twice.
