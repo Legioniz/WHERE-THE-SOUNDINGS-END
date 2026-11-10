@@ -22,8 +22,8 @@ The project remains Unity 6 LTS / C# / URP. The Greyhaven environment generator 
 4. The controller resolves the nearest regional profile containing the boat.
 5. A stable opportunity ID is built from region, day and saved pulse sequence.
 6. PCG32 seeded from the stable ID generates bounded seabed variation.
-7. The controller computes the optional scattering-layer depth from the region's photoperiod profile.
-8. It reports the seabed and mid-water returns separately. The first layer detection is explicitly uncertain; a second independent heading supports confirmation.
+7. The controller computes a seabed confidence separately from biological-layer confidence, then computes optional scattering-layer depth from the region's photoperiod profile.
+8. It reports the seabed and mid-water returns separately. The first layer detection is explicitly uncertain; a second independent heading in the same region and within ten in-game minutes supports confirmation. Leaving a DSL habitat or receiving no distinct layer return resets that confirmation chain.
 9. Nearby authored phenomenon-site markers may be discovered and add a short evidence note.
 10. The controller publishes an AcousticSignal, adds a small sea-disturbance amount, and contributes its state to SaveGameData schema v4.
 
