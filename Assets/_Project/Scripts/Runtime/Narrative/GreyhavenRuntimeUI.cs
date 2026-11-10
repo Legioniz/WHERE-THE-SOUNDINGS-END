@@ -211,7 +211,6 @@ namespace WhereTheSoundingsEnd.Narrative
 
             _optionsContainer = new VisualElement();
             _optionsContainer.style.flexDirection = FlexDirection.Column;
-            _optionsContainer.style.gap = 6;
             _dialoguePanel.Add(_optionsContainer);
 
             _continueButton = MakeButton("CONTINUE  [SPACE / ENTER]", () =>
@@ -281,11 +280,11 @@ namespace WhereTheSoundingsEnd.Narrative
             body.style.flexDirection = FlexDirection.Row;
             body.style.flexGrow = 1;
             body.style.minHeight = 0;
-            body.style.gap = 18;
             window.Add(body);
 
             VisualElement holdSide = new VisualElement();
             holdSide.style.flexGrow = 1;
+            holdSide.style.marginRight = 18;
             holdSide.style.minWidth = 0;
             body.Add(holdSide);
 
@@ -302,7 +301,6 @@ namespace WhereTheSoundingsEnd.Narrative
             _gridContainer = new VisualElement();
             _gridContainer.style.flexDirection = FlexDirection.Column;
             _gridContainer.style.alignItems = Align.FlexStart;
-            _gridContainer.style.gap = 3;
             gridFrame.Add(_gridContainer);
 
             _selectedItemLabel = new Label("Select cargo to move or inspect.");
@@ -314,7 +312,6 @@ namespace WhereTheSoundingsEnd.Narrative
             VisualElement actions = new VisualElement();
             actions.style.flexDirection = FlexDirection.Row;
             actions.style.flexWrap = Wrap.Wrap;
-            actions.style.gap = 6;
             actions.style.marginTop = 9;
             holdSide.Add(actions);
             actions.Add(MakeButton("ROTATE  [R]", RotateSelected));
@@ -346,7 +343,6 @@ namespace WhereTheSoundingsEnd.Narrative
 
             _catalogueContainer = new VisualElement();
             _catalogueContainer.style.flexDirection = FlexDirection.Column;
-            _catalogueContainer.style.gap = 6;
             catalogue.Add(_catalogueContainer);
 
             _statusLabel = new Label("The hold is clear.");
@@ -373,7 +369,7 @@ namespace WhereTheSoundingsEnd.Narrative
             {
                 VisualElement row = new VisualElement();
                 row.style.flexDirection = FlexDirection.Row;
-                row.style.gap = 3;
+                row.style.marginBottom = 3;
                 _gridContainer.Add(row);
 
                 for (int x = 0; x < cargoHold.Width; x++)
@@ -410,6 +406,7 @@ namespace WhereTheSoundingsEnd.Narrative
                     cellButton.style.paddingRight = 1;
                     cellButton.style.paddingTop = 1;
                     cellButton.style.paddingBottom = 1;
+                    cellButton.style.marginRight = 3;
                     cellButton.style.backgroundColor = background;
                     cellButton.style.color = new Color(0.92f, 0.91f, 0.83f);
                     cellButton.style.fontSize = 11;
@@ -458,6 +455,7 @@ namespace WhereTheSoundingsEnd.Narrative
                 string itemName = definition.DisplayName;
                 Button intake = MakeButton("+  " + itemName, () => IntakePrototypeCatch(itemId));
                 intake.style.width = new Length(100, LengthUnit.Percent);
+                intake.style.marginBottom = 6;
                 intake.style.unityTextAlign = TextAnchor.MiddleLeft;
                 _catalogueContainer.Add(intake);
             }
@@ -730,6 +728,7 @@ namespace WhereTheSoundingsEnd.Narrative
                 Button button = MakeButton((choiceIndex + 1) + ".  " + option.Line.TextWithoutCharacterName.Text,
                     () => chosen.TrySetResult(option));
                 button.style.width = new Length(100, LengthUnit.Percent);
+                button.style.marginBottom = 6;
                 button.style.unityTextAlign = TextAnchor.MiddleLeft;
                 _optionsContainer.Add(button);
                 _optionButtons.Add(button);
@@ -773,6 +772,8 @@ namespace WhereTheSoundingsEnd.Narrative
         {
             Button button = new Button(callback) { text = text };
             button.style.minHeight = 34;
+            button.style.marginRight = 6;
+            button.style.marginBottom = 6;
             button.style.paddingLeft = 10;
             button.style.paddingRight = 10;
             button.style.paddingTop = 5;
