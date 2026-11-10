@@ -109,7 +109,7 @@ Owns:
 - Ping sound is synthesized placeholder audio.
 - The survey does not model beam angle, transducer frequency, acoustic ray paths, multipath, target aspect, bottom composition or thermoclines.
 - The repeated-heading rule is a gameplay verification mechanic, not a claim about real sonar calibration.
-- The current site scan selects the nearest discoverable marker; it does not yet render multiple contacts or a chart overlay.
+- The current site scan selects the nearest discoverable marker; it does not yet render multiple contacts or a chart overlay. Greyhaven's generated outer-channel wreck field now carries the first marker (greyhaven.outer_channel_wreck), so the current playable scene has one real survey-discovery target without inventing deep-water geology in the harbor.
 
 ### 3.5 AcousticEventBus.cs
 
