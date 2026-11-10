@@ -29,6 +29,7 @@
 - [Quest runtime trigger matrix](03_STORY_AND_NARRATIVE/SIDE_QUESTS/MARITIME_MYSTERIES/EVENT-BEHAVIOUR-AND-TRIGGER-MATRIX.md)
 - [Threat audio logic](10_AUDIO_AND_SOUND_DESIGN/THREAT-AUDIO-LOGIC.md)
 - [Unity implementation blueprint](08_TECHNICAL_DESIGN/AI-IMPLEMENTATION-BLUEPRINT.md)
+- [Camera FOV and player awareness](08_TECHNICAL_DESIGN/CAMERA-AND-PLAYER-AWARENESS.md)
 
 ## New maritime lore collection
 
