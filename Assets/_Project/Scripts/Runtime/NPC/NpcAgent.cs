@@ -97,6 +97,12 @@ namespace WhereTheSoundingsEnd.NPC
             relationshipScore = Mathf.Clamp(relationshipScore + delta, 0, 100);
         }
 
+        private void Start()
+        {
+            if (seaState != null)
+                ApplySchedule(NpcScheduleResolver.ResolveIndex(schedule, seaState.CurrentHour));
+        }
+
         private void Update()
         {
             if (seaState == null || !seaState.IsAdvancing || schedule == null)
