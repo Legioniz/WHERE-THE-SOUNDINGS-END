@@ -87,3 +87,12 @@ Roll once per named opportunity. Do not use frame-by-frame rolls. Required quest
 ## 7. Test scenarios
 
 Test at clear noon, night with lantern, rain, dense fog, behind an island, engine off, engine high, one Rig ping, repeated Rig pings, and after collision. Measure false-positive detections, missed detections, time to warning, and time to disengage. Each test should use a fixed event seed.
+
+
+## 8. Unity implementation notes
+
+- Use Physics.Raycast for direct visual occlusion tests with an explicit max distance, layer mask, and QueryTriggerInteraction. Unity 6.0.6 API reference: https://docs.unity.com/en-us/engine/6000.6/script-reference/unityengine/physics/raycast
+- For shore-based NPCs that move on a NavMesh, NavMeshAgent provides movement, path, steering, and raycast-related capabilities. It is not the default solution for open-water creatures. Reference: https://docs.unity.com/en-us/engine/6000.5/script-reference/unityengine/ai/navmeshagent
+- Re-check Unity's resource hub and release information when selecting the exact Unity 6 LTS editor version: https://unity.com/campaign/unity-6-resources
+
+These references establish API capabilities, not the project's tuning values or a requirement to use a specific Unity release.
