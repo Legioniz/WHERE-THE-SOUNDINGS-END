@@ -372,3 +372,15 @@ The following are real ecological references; all named anomalous entities in th
 - [Threat Director](../12_AI_AND_SIMULATION/THREAT-DIRECTOR.md)
 - [Threat audio logic](../10_AUDIO_AND_SOUND_DESIGN/THREAT-AUDIO-LOGIC.md)
 
+
+## 9. Catchable minor anomalies and specimen variants
+
+Not every anomaly is a major hostile entity. The game also contains rare catchable specimens that reward observation and careful fishing without becoming boss fights.
+
+The companion catalogue defines:
+- Eight biologically interpretable aberrant variants of ordinary species (pigment, injury, skeletal, ocular, parasite, or fin abnormalities). They are not automatically new species or supernatural.
+- Eight unnatural catchables with specific impossible rules and learnable capture conditions.
+- Research-only specimen handling, finite rewards, release options, and anti-farming rules.
+
+See [Mutated and Unnatural Catchable Specimens](MUTATED-AND-UNNATURAL-CATCHES.md). These minor specimen encounters do not change the planning target of 6–8 major threats. The Sleeper and established hostile encounter specifications remain authoritative for the principal deep-water threat.
+
