@@ -71,3 +71,30 @@ Never promote an ambient incident directly into an attack without the threat sys
 - Ambient incidents do not change panic, save data, cargo, vessel condition or creature AI.
 - Genuine threats retain their existing warning timings and escape rules.
 - Final sound assets require licensing/attribution and mono/accessibility review.
+
+
+## Sudden sea-state anomalies — Greyhaven prototype
+
+The Greyhaven water plane now receives a runtime tessellated mesh through `MaritimeSurfaceBehaviour`. It carries a restrained two-layer swell in ordinary conditions and supports two rare anomalies:
+
+| Event | Surface behaviour | Sound behaviour | Interpretation |
+|---|---|---|---|
+| Dead calm | Swell amplitude falls almost to zero over a short transition and remains nearly flat | Existing scene AudioSources are rapidly attenuated, then slowly restored | The wind seems to stop; the water against the hull becomes unnaturally absent |
+| Wrong-way swell | Wave travel direction reverses and the surface amplitude increases briefly | Existing scene AudioSources dip for a shorter interval | The swell appears to travel against the expected wind direction |
+
+- Events are rare rolls in the existing night / elevated-pressure incident schedule.
+- Dead calm lasts approximately 12–20 seconds; wrong-way swell lasts approximately 14–22 seconds.
+- Audio attenuation only affects AudioSources present when the atmosphere director initializes. There are not yet authored wind, wave, rigging or hull-ambience loops in the Greyhaven scene, so final silence-and-return mixing still depends on adding those recordings.
+- The surface is a visual prototype, not a hydrodynamic simulation. It does not currently alter vessel buoyancy, handling, fishing success, navigation or threat AI.
+- The event does not itself increase panic or cause damage.
+
+### Future escalation ideas
+
+1. A buoy continues swinging after the surrounding water has gone flat.
+2. Rain strikes the sea, but individual impact ripples do not form.
+3. A wave approaches the boat and breaks with no wind or swell behind it.
+4. The sea resumes moving, but every visible wave travels toward the boat for several seconds.
+5. A distant vessel's wake reaches the player before the vessel can be seen.
+6. The player hears water running beneath the hull while the surface remains completely still.
+
+These are authored anomaly candidates, not all implemented. Keep them rare, spatially grounded and separated by ordinary working time.
