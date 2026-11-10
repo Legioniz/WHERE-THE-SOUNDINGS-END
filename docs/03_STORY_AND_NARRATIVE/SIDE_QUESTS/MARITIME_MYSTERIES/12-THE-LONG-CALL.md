@@ -50,3 +50,30 @@ Use scientific and conservation sources for final audio, migration, and behavior
 ## Scope note
 
 The first version can use a short authored audio sequence, three listening locations, and a map task. Do not create a full whale simulation or a boss encounter.
+
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- Quest begins after the lighthouse keeper receives two separate reports.
+- Evaluate on the night listening slot at the trench edge. Initial call chance: **15% per eligible night**; first quest clue is guaranteed by the second eligible night.
+- The unexplained phrase is a seeded audio variation after the natural call is recorded; it never signals a hostile spawn.
+
+### Behaviour, perception, and FOV
+States: `Wildlife Window → Call Heard → Bearing Recorded → Second Call → Route Inferred → Complete`. A distant whale / large marine animal follows an authored migration spline at low simulation frequency. It does not target the player. No hostile FOV. A small surface plume may appear at 80–120 m in clear weather, but visual spotting is not required.
+
+### Sound behaviour
+Play a long animal-like call over low surf ambience. A second phrase repeats after an unusually long gap from a different bearing. Captions: `[long marine call, distant]`, then `[the phrase repeats from another direction]`. Maintain safe dynamic range.
+
+### Attacks and chase
+**None.** No bite, ram, tail strike, pursuit, or damage. If the player approaches too closely, the animal changes course and the event ends. This is avoidance, not aggression.
+
+### Lore reveal
+Lighthouse notes show the call was heard by different crews decades apart. Some entries align with natural vocalization; one repeated phrase remains unexplained. The game does not claim whales produce supernatural messages.
+
+### Acceptance tests
+- Wildlife route is repeatable for the same season / seed.
+- Player can finish without seeing the animal.
+- Animal never targets or damages the boat.
+- Clue is guaranteed by the second eligible night.
