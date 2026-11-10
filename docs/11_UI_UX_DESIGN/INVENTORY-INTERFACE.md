@@ -1,7 +1,7 @@
 # Inventory Interface
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: First runtime UI Toolkit interface implemented; controller and accessibility pass pending  
+> Status: Runtime UI Toolkit hold interface connected to harvesting and vessel damage; controller/accessibility pass pending  
 > Owner: Project lead  
 > Version: 0.2  
 > Last reviewed: 2026-11-10
@@ -16,7 +16,7 @@ The interface has three principal areas:
 
 1. **Hud strip:** game/field-log identity and the CARGO HOLD toggle.
 2. **Hold grid:** a 7-column × 9-row cell layout. Occupied cells show a compact item mark; blocked cells are visibly distinct; the selected item is highlighted.
-3. **Cargo details and intake:** used-cell count, selected item's quantity/quality/freshness/rotation, rotate/remove actions, and an explicit prototype catch-intake list.
+3. **Cargo details and intake:** used-cell count, selected item's quantity/quality/freshness/rotation, rotate/remove actions, and a prototype intake list. Fishing and dredging use separate in-world timed prompts.
 
 The inventory is built with Unity UI Toolkit through `UIDocument` and a generated `PanelSettings` asset. The project targets Unity 6, where UI Toolkit handles runtime pointer input without adding a separate uGUI EventSystem.
 
@@ -30,25 +30,25 @@ The inventory is built with Unity UI Toolkit through `UIDocument` and a generate
 | Click empty cell | Move selected item to that anchor |
 | R | Preview next 90-degree rotation |
 | ROTATE | Same as R |
-| REMOVE | Remove selected non-quest cargo |
+| REMOVE | Remove selected ordinary cargo; installed gear and quest cargo are protected |
 | CARGO HOLD button | Toggle hold |
 
-Rotation is applied only when the player clicks a valid destination. The grid model validates every occupied cell. A rejected move does not mutate the existing placement. Quest-critical cargo cannot be removed through this interface.
+Rotation is applied only when the player clicks a valid destination. The grid model validates every occupied cell. A rejected move does not mutate the existing placement. Quest-critical cargo and installed equipment cannot be removed through this interface. Impact-damaged cells show a cross; cargo destroyed by an impact is removed from the hold and the cell remains blocked.
 
 ## Prototype catch intake
 
-The catalogue panel is explicitly labelled as prototype test intake. Each item button calls `SpatialCargoHold.TryPlaceFirstFit` with one unit and test quality/freshness values. This proves item definitions, shape placement and hold feedback before a fishing-result system exists. The controls are not part of the intended final player-facing interface.
+The catalogue panel remains explicitly labelled as prototype test intake. The real harvesting loop is separate: F starts a three-beat fishing timing challenge, while G starts a four-beat salvage challenge only when stopped near the Greyhaven wreck field. Results are placed through `SpatialCargoHold.TryPlaceFirstFit`.
 
 ## Pause and input
 
-Opening the hold pauses scaled gameplay time so the player can arrange cargo without the boat simulation continuing. UI input remains active through the Input System UI module. The inventory cannot be opened during an active conversation.
+Opening the hold pauses scaled gameplay time so the boat and action-driven clock stop while cargo is arranged. Dialogue also freezes sea time. Outside these pause states, the world clock advances only while the boat is moving or a harvest action is active.
 
 ## Current limitations
 
 - Click-select/click-destination is implemented; drag-and-drop previews are not.
 - No controller navigation/focus scheme has been tuned.
 - No responsive small-screen, text scaling, colour-blind or full remapping/accessibility review has been completed.
-- Fishing, sale transactions, freshness decay, equipment slots and hold upgrades are not connected.
+- Sale transactions, freshness decay and equipment activation/upgrade transactions are not connected. Equipment placements already occupy the same cargo grid.
 - Must be tested in Unity Editor and a Windows build; repository static validation alone does not prove runtime UI interaction.
 
 ## Related systems
