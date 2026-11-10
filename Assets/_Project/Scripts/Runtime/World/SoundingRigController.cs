@@ -207,7 +207,7 @@ namespace WhereTheSoundingsEnd.World
                 reading += firstDiscovery
                     ? "\nNEW SITE: " + site.DisplayName + " [" + site.EvidenceLabel + "]"
                     : "\nKNOWN SITE: " + site.DisplayName;
-                float siteConfidence = DeepOceanSurveyMath.CalculateReturnConfidence(
+                float siteConfidence = DeepOceanSurveyMath.CalculateSiteSignalConfidence(
                     site.SignalStrength, signalQuality, region.AcousticAttenuation);
                 reading += "\nSITE DEPTH: " + Mathf.RoundToInt(site.DepthMeters) +
                     " m  ·  SIGNAL CONFIDENCE " + Mathf.RoundToInt(siteConfidence * 100f) + "%";
