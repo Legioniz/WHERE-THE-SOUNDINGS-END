@@ -43,6 +43,8 @@ namespace WhereTheSoundingsEnd.World
         private double timeOfDaySeconds;
         private float seaDisturbance;
         private float weatherFogPressure;
+        private float fogRemainingGameSeconds;
+        private float weatherShiftCooldown;
         private Material birdMaterial;
         private bool harvestingActive;
         private float hallucinationCooldown;
@@ -77,6 +79,7 @@ namespace WhereTheSoundingsEnd.World
             }
             if (timeOfDaySeconds <= 0.0)
                 timeOfDaySeconds = startingHour * 3600.0;
+            weatherShiftCooldown = Random.Range(900f, 1500f);
         }
 
         public void Configure(Rigidbody boat, DialogueRunner runner, HarvestingMinigameController harvest, SpatialCargoHold hold)
@@ -129,10 +132,39 @@ namespace WhereTheSoundingsEnd.World
             float gameDelta = Time.deltaTime * gameSecondsPerRealSecond;
             elapsedGameSeconds += gameDelta;
             timeOfDaySeconds = (timeOfDaySeconds + gameDelta) % 86400.0;
+            UpdateWeather(gameDelta);
             UpdatePanic(gameDelta);
             seaDisturbance = Mathf.MoveTowards(seaDisturbance, 0f, gameDelta / 60f * 0.0008f);
             UpdateAtmosphere(gameDelta);
             UpdateHallucination(gameDelta);
+        }
+
+        private void UpdateWeather(float gameDelta)
+        {
+            if (fogRemainingGameSeconds > 0f)
+            {
+                fogRemainingGameSeconds -= gameDelta;
+                if (fogRemainingGameSeconds <= 0f)
+                {
+                    fogRemainingGameSeconds = 0f;
+                    weatherFogPressure = 0f;
+                }
+                return;
+            }
+
+            weatherShiftCooldown -= gameDelta;
+            if (weatherShiftCooldown > 0f) return;
+
+            weatherShiftCooldown = Random.Range(1800f, 3600f);
+            if (Random.value < 0.34f)
+            {
+                weatherFogPressure = Random.Range(0.55f, 0.95f);
+                fogRemainingGameSeconds = Random.Range(720f, 1200f);
+            }
+            else
+            {
+                weatherFogPressure = 0f;
+            }
         }
 
         private void UpdatePanic(float gameDelta)
@@ -146,7 +178,7 @@ namespace WhereTheSoundingsEnd.World
                 panicLevel -= daylightRecoveryPerGameMinute * minutes;
 
             if (foggy)
-                panicLevel += fogPanicPerGameMinute * minutes;
+                panicLevel += fogPanicPerGameMinute * weatherFogPressure * minutes;
 
             if (!IsNight && IsNearHarbour())
                 panicLevel -= safeHarbourRecoveryPerGameMinute * minutes;
@@ -166,8 +198,8 @@ namespace WhereTheSoundingsEnd.World
             float nightBlend = IsNight ? 1f : 0f;
             float panicFog = panicLevel * 0.0014f;
             RenderSettings.fog = true;
-            RenderSettings.fogDensity = baseFogDensity + nightBlend * 0.0011f + panicFog;
-            RenderSettings.fogColor = Color.Lerp(dayFog, nightFog, Mathf.Clamp01(nightBlend + panicLevel * 0.35f));
+            RenderSettings.fogDensity = baseFogDensity + nightBlend * 0.0011f + panicFog + weatherFogPressure * 0.0024f;
+            RenderSettings.fogColor = Color.Lerp(dayFog, nightFog, Mathf.Clamp01(nightBlend + panicLevel * 0.35f + weatherFogPressure * 0.25f));
 
             for (int i = 0; i < sceneLights.Length; i++)
             {
@@ -352,6 +384,7 @@ namespace WhereTheSoundingsEnd.World
             data.world.dayNumber = Mathf.FloorToInt((float)(elapsedGameSeconds / 86400.0)) + 1;
             data.world.panicLevel = panicLevel;
             data.world.seaDisturbance = seaDisturbance;
+            data.world.weatherId = weatherFogPressure >= 0.65f ? "dense_fog" : weatherFogPressure > 0.1f ? "mist" : "clear";
         }
 
         public void RestoreSaveData(SaveGameData data)
@@ -361,6 +394,8 @@ namespace WhereTheSoundingsEnd.World
             timeOfDaySeconds = System.Math.Max(0.0, System.Math.Min(86399.0, data.world.timeOfDaySeconds));
             panicLevel = Mathf.Clamp01(data.world.panicLevel);
             seaDisturbance = Mathf.Clamp01(data.world.seaDisturbance);
+            weatherFogPressure = data.world.weatherId == "dense_fog" ? 0.85f : data.world.weatherId == "mist" ? 0.4f : 0f;
+            fogRemainingGameSeconds = weatherFogPressure > 0f ? 600f : 0f;
         }
 
         private static float HorizontalSpeed(Vector3 velocity)
