@@ -58,6 +58,9 @@ REQUIRED_FILES = [
     "Assets/_Project/Tests/EditMode/CoreFoundationTests.cs",
     "Assets/_Project/Tests/EditMode/SaveFileServiceTests.cs",
     "docs/05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md",
+    "docs/06_GAMEPLAY_SYSTEMS/DEEP-OCEAN-PHENOMENA-AND-MARINER-EXPERIENCES.md",
+    "docs/07_GAME_RULES_AND_BALANCING/SOUNDING-RIG-ALGORITHMS.md",
+    "docs/08_TECHNICAL_DESIGN/DEEP-OCEAN-SURVEY-IMPLEMENTATION.md",
 ]
 
 
