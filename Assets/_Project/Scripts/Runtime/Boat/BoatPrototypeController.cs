@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Boat
 {
@@ -82,9 +83,12 @@ namespace WhereTheSoundingsEnd.Boat
                 _body.linearVelocity.z);
 
             float speed = horizontalVelocity.magnitude;
-            if (speed > maximumSpeed)
+            VesselConditionController condition = GetComponent<VesselConditionController>();
+            float engineFactor = condition == null ? 1f : Mathf.Lerp(0.15f, 1f, condition.EngineCondition / 100f);
+            float effectiveMaximumSpeed = maximumSpeed * engineFactor;
+            if (speed > effectiveMaximumSpeed)
             {
-                horizontalVelocity = horizontalVelocity.normalized * maximumSpeed;
+                horizontalVelocity = horizontalVelocity.normalized * effectiveMaximumSpeed;
                 _body.linearVelocity = new Vector3(
                     horizontalVelocity.x,
                     _body.linearVelocity.y,
