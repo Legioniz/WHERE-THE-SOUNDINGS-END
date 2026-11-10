@@ -47,3 +47,30 @@ The first research report proposed equinox and solstice bell events, but did not
 ## Scope note
 
 The event can be a deterministic one-day-per-game-year trigger. The player should receive warnings and a second opportunity so missing the window does not permanently block content.
+
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- Event occurs deterministically at the authored tide-turn phase on the designated in-game calendar day.
+- Only harmonic ornament varies by the saved event seed. The bell itself is not random.
+- Keep the window open for one full in-game tide interval; if missed, it returns next cycle. Never gate the quest behind a one-minute real-time window.
+
+### Behaviour, perception, and FOV
+States: `Dormant Calendar → Window Forecast → Tide Turning → Bell Sequence → Recording Available → Resolved`. The bell is a static submerged mechanism; it rings as the tide changes, then stops. No creature FOV or player vision cone. Once the first bearing is recorded, reveal the structure at 15–25 m subject to fog.
+
+### Sound behaviour
+Three-part sequence: one long tone, two shorter returns. The waveform variation is saved by event ID. Captions provide rhythm and approximate direction.
+
+### Attacks and chase
+**None.** No entity or pursuit. One approach route may be unsafe during the tide turn, but a second accessible route remains. Bell audio never causes damage.
+
+### Lore reveal
+A lighthouse log contains the same three-part notation from before current village records, suggesting an old maritime marker of unknown origin.
+
+### Acceptance tests
+- Follows game calendar and tide simulation.
+- Player has a full tide interval to interact.
+- Missed event returns next cycle.
+- Audio has caption and waveform equivalents.
