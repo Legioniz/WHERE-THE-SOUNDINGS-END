@@ -8,6 +8,11 @@
 
 This collection separates each research-inspired side quest into its own file. Every draft is an original fictional proposal based on a broad motif, not a retelling of a real community's sacred story.
 
+## Runtime specification
+
+- [Event behaviour and trigger matrix](EVENT-BEHAVIOUR-AND-TRIGGER-MATRIX.md)
+- Shared rules: [Creature AI](../../../../12_AI_AND_SIMULATION/CREATURE-AI.md), [Threat Director](../../../../12_AI_AND_SIMULATION/THREAT-DIRECTOR.md), [Perception and encounter math](../../../../07_GAME_RULES_AND_BALANCING/ENTITY-PERCEPTION-AND-ENCOUNTER-MATH.md), and [Threat audio logic](../../../../10_AUDIO_AND_SOUND_DESIGN/THREAT-AUDIO-LOGIC.md).
+
 ## Quest files
 
 | File | Working title | Main system / experience | Inspiration status |
