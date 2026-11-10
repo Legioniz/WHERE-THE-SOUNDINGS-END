@@ -34,6 +34,7 @@ namespace WhereTheSoundingsEnd.Editor
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
                 GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
 
+            DeepOceanSurveySandboxBuilder.EnsureScenes(controls);
             RegisterBuildScene();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -53,7 +54,9 @@ namespace WhereTheSoundingsEnd.Editor
                 return;
 
             EnsureProjectFolders();
-            GreyhavenEnvironmentBuilder.Build(LoadControls(), ScenePath);
+            InputActionAsset controls = LoadControls();
+            GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
+            DeepOceanSurveySandboxBuilder.EnsureScenes(controls);
             RegisterBuildScene();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

@@ -1,4 +1,5 @@
 using UnityEngine;
+using WhereTheSoundingsEnd.Persistence;
 
 namespace WhereTheSoundingsEnd.World
 {
@@ -9,7 +10,7 @@ namespace WhereTheSoundingsEnd.World
     /// They never create damage, collisions or guaranteed supernatural explanations.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class FishermanAtmosphereDirector : MonoBehaviour
+    public sealed class FishermanAtmosphereDirector : MonoBehaviour, ISaveParticipant
     {
         [Header("References")]
         [SerializeField] private SeaStateDirector seaState;
@@ -170,13 +171,15 @@ namespace WhereTheSoundingsEnd.World
             captionRemaining = 4.5f;
         }
 
-        private void SpawnFalseNavigationLight()
+        private void SpawnFalseNavigationLight(Vector3? restoredPosition = null, float restoredRemainingSeconds = -1f)
         {
             if (falseNavigationLight != null) return;
 
-            Vector3 position = vesselBody.position
-                + vesselBody.transform.forward * Random.Range(42f, 68f)
-                + vesselBody.transform.right * Random.Range(-22f, 22f);
+            Vector3 position = restoredPosition.HasValue
+                ? restoredPosition.Value
+                : vesselBody.position
+                    + vesselBody.transform.forward * Random.Range(42f, 68f)
+                    + vesselBody.transform.right * Random.Range(-22f, 22f);
             position.y = 0.8f;
 
             falseNavigationLight = new GameObject("Atmosphere_False_Navigation_Light");
@@ -205,7 +208,7 @@ namespace WhereTheSoundingsEnd.World
             falseNavigationLightSource.range = 13f;
             falseNavigationLightSource.shadows = LightShadows.None;
 
-            falseLightRemaining = Random.Range(7f, 12f);
+            falseLightRemaining = restoredRemainingSeconds >= 0f ? restoredRemainingSeconds : Random.Range(7f, 12f);
         }
 
         private void UpdateFalseLight(float deltaTime)
@@ -242,6 +245,55 @@ namespace WhereTheSoundingsEnd.World
             };
             style.normal.textColor = new Color(0.82f, 0.84f, 0.81f);
             GUI.Label(new Rect(Screen.width * 0.5f - 300f, Screen.height - 92f, 600f, 34f), currentCaption, style);
+        }
+
+        public void CaptureSaveData(SaveGameData data)
+        {
+            if (data == null || data.world == null)
+                throw new System.ArgumentNullException(nameof(data), "Save data must contain world state.");
+
+            data.world.atmosphereIncidentCountdownGameSeconds = System.Math.Max(0.0, incidentCountdown);
+            data.world.atmosphereCaption = currentCaption ?? string.Empty;
+            data.world.atmosphereCaptionRemainingRealSeconds = System.Math.Max(0.0, captionRemaining);
+            data.world.atmosphereHushRemainingRealSeconds = System.Math.Max(0.0, hushRemaining);
+            data.world.atmosphereHushBlend = Mathf.Clamp01(hushBlend);
+            data.world.atmosphereFalseLightActive = falseNavigationLight != null;
+            data.world.atmosphereFalseLightRemainingRealSeconds =
+                falseNavigationLight != null ? System.Math.Max(0.0, falseLightRemaining) : 0.0;
+            CopyVector(falseNavigationLight != null ? falseNavigationLight.transform.position : Vector3.zero,
+                data.world.atmosphereFalseLightPosition);
+        }
+
+        public void RestoreSaveData(SaveGameData data)
+        {
+            if (data == null || data.world == null) return;
+
+            incidentCountdown = (float)System.Math.Max(0.0, data.world.atmosphereIncidentCountdownGameSeconds);
+            currentCaption = data.world.atmosphereCaption ?? string.Empty;
+            captionRemaining = (float)System.Math.Max(0.0, data.world.atmosphereCaptionRemainingRealSeconds);
+            hushRemaining = (float)System.Math.Max(0.0, data.world.atmosphereHushRemainingRealSeconds);
+            hushBlend = Mathf.Clamp01(data.world.atmosphereHushBlend);
+
+            if (data.world.atmosphereFalseLightActive &&
+                data.world.atmosphereFalseLightRemainingRealSeconds > 0.0)
+            {
+                SpawnFalseNavigationLight(
+                    ToVector(data.world.atmosphereFalseLightPosition),
+                    (float)data.world.atmosphereFalseLightRemainingRealSeconds);
+            }
+        }
+
+        private static void CopyVector(Vector3 source, Vector3SaveData destination)
+        {
+            if (destination == null) throw new System.ArgumentNullException(nameof(destination));
+            destination.x = source.x;
+            destination.y = source.y;
+            destination.z = source.z;
+        }
+
+        private static Vector3 ToVector(Vector3SaveData source)
+        {
+            return source == null ? Vector3.zero : new Vector3(source.x, source.y, source.z);
         }
 
         private void OnDestroy()

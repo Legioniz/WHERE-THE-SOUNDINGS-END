@@ -220,7 +220,7 @@ namespace WhereTheSoundingsEnd.World
                 opportunityId, AcousticEventKind.SoundingPulse, region.RegionId,
                 vesselBody.position, 0.72f, 900f, seaState != null ? seaState.ElapsedGameSeconds : 0.0));
 
-            if (seaState != null) seaState.AddDisturbance(0.012f);
+            // AcousticWorldListener receives the signal and applies the world response once.
         }
 
         private DeepOceanSurveyRegion FindCurrentRegion(Vector3 position)
