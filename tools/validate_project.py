@@ -231,10 +231,43 @@ def main() -> int:
             if action_ids.get("Inventory") != "b0a70000000000000000000000000007":
                 failures.append("Inventory input action ID does not match the committed control map.")
 
+        assembly_definitions = {}
         for path in ROOT.glob("Assets/_Project/**/*.asmdef"):
             definition = json.loads(path.read_text(encoding="utf-8"))
-            if not definition.get("name"):
+            assembly_name = definition.get("name")
+            if not assembly_name:
                 failures.append(f"Assembly definition has no name: {path.relative_to(ROOT)}")
+                continue
+            if assembly_name in assembly_definitions:
+                failures.append(f"Duplicate assembly definition name: {assembly_name}")
+            assembly_definitions[assembly_name] = (path, definition)
+
+        external_assemblies = {
+            "Unity.InputSystem",
+            "Unity.RenderPipelines.Universal.Runtime",
+            "YarnSpinner.Unity",
+        }
+        for assembly_name, (path, definition) in assembly_definitions.items():
+            for reference in definition.get("references", []):
+                if reference not in assembly_definitions and reference not in external_assemblies:
+                    failures.append(
+                        f"{path.relative_to(ROOT)} references unresolved assembly: {reference}"
+                    )
+
+        runtime_assembly = assembly_definitions.get("WhereTheSoundingsEnd.Runtime")
+        if runtime_assembly is not None and runtime_assembly[1].get("includePlatforms"):
+            failures.append("Runtime assembly must not be restricted to editor-only platforms.")
+
+        editor_assembly = assembly_definitions.get("WhereTheSoundingsEnd.Editor")
+        if editor_assembly is not None and "Editor" not in editor_assembly[1].get("includePlatforms", []):
+            failures.append("Editor assembly must be restricted to the Editor platform.")
+
+        test_assembly = assembly_definitions.get("WhereTheSoundingsEnd.Tests.EditMode")
+        if test_assembly is not None:
+            if "Editor" not in test_assembly[1].get("includePlatforms", []):
+                failures.append("Edit Mode test assembly must be restricted to the Editor platform.")
+            if "TestAssemblies" not in test_assembly[1].get("optionalUnityReferences", []):
+                failures.append("Edit Mode test assembly must reference Unity Test Framework assemblies.")
     except (ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         failures.append(str(error))
 
