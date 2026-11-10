@@ -42,6 +42,7 @@ namespace WhereTheSoundingsEnd.World
         private float previousLayerDepth = -1f;
         private float previousHeading;
         private double previousPingGameTime = -100000.0;
+        private string previousLayerRegionId = string.Empty;
         private int consecutiveLayerEvidence;
 
         public int PulseSequence => pulseSequence;
@@ -152,6 +153,7 @@ namespace WhereTheSoundingsEnd.World
                 {
                     float heading = vesselBody.rotation.eulerAngles.y;
                     bool independentPing = previousLayerDepth > 0f &&
+                        string.Equals(previousLayerRegionId, region.RegionId, StringComparison.OrdinalIgnoreCase) &&
                         Math.Abs(Mathf.DeltaAngle(previousHeading, heading)) >= 25f &&
                         (seaState == null || seaState.ElapsedGameSeconds - previousPingGameTime <= 600.0);
 
@@ -159,6 +161,7 @@ namespace WhereTheSoundingsEnd.World
                         ? consecutiveLayerEvidence + 1
                         : 1;
                     previousLayerDepth = layerDepth;
+                    previousLayerRegionId = region.RegionId;
                     previousHeading = heading;
                     previousPingGameTime = seaState != null ? seaState.ElapsedGameSeconds : 0.0;
 
@@ -273,6 +276,12 @@ namespace WhereTheSoundingsEnd.World
             };
             GUI.Label(new Rect(20f, Screen.height - 148f, 510f, 102f),
                 "SOUNDING RIG  [Q]\n" + latestReading, style);
+        }
+
+        private void OnDisable()
+        {
+            surveyingRemaining = 0f;
+            if (seaState != null) seaState.SetSurveying(false);
         }
 
         private void OnDestroy()
