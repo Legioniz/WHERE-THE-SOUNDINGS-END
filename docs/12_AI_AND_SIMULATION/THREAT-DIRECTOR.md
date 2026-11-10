@@ -134,3 +134,20 @@ Persist active event ID, event state, opportunity ID, cooldown timestamps, tensi
 - Same seed + same opportunity history reproduces the selection.
 - Quest-critical clue is reachable after the configured retry limit.
 - Damaged boat and recent attacks reduce, rather than increase, hostile pressure.
+
+## Legendary maritime encounter candidates
+
+The Threat Director is also the single selection authority for rare legend-inspired encounters. It must not create a second independent spawner.
+
+The candidate catalogue, location gates, phases, escape rules, and starting odds are maintained in [Legendary Maritime Encounters](LEGENDARY-ENCOUNTER-SCHEDULER.md). Examples include the White Whale, Hafgufa, Deep Arms, the Flying Dutchman, Umibōzu-like Black Horizon, Bake-kujira, and mythic current events.
+
+Additional rules:
+- Legendary candidates share the one-major-threat lock with The Sleeper. They cannot start a lethal contact while The Sleeper or another major hostile encounter is active.
+- A harmless distant manifestation may be selected during a normal quiet period only if its escalation gate is disabled for that opportunity.
+- A candidate must have a valid region, depth, spawn anchor, warning cue set, and escape anchor before it can be selected.
+- Candidate base chances are per eligible opportunity, never per frame. Persist the opportunity result and candidate cooldown.
+- An encounter that has already been witnessed may use a different presentation variant on a later eligible visit, but it must respect its individual cooldown and not become routine.
+- Below 25% hull, ordinary lethal legendary candidates receive reduced weight and warning-only manifestations are preferred.
+- Story-critical first sightings use a deterministic clue / fallback and cannot be lost to RNG.
+
+Legend candidates return a risk class and phase plan to the encounter controller. The Threat Director still does not move the entity, execute its attack, or resolve final damage. Those remain local encounter-controller responsibilities.
