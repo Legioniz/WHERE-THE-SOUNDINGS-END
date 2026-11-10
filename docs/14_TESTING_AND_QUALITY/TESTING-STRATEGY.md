@@ -64,10 +64,10 @@ The Edit Mode test source includes:
 - Separate confidence calculation for seabed and sparse biological-layer returns.
 - Site signal confidence from authored signal strength and acoustic attenuation.
 
-The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v5, Sounding Rig persistence markers and regional profile IDs.
+The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v5, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 
 ## Verification boundary
 
-The static validator checks repository structure and configuration only. It does not compile C#, import the Unity project, run Edit Mode or Play Mode tests, or create a player build.
+The static validator checks repository structure and configuration; Tree-sitter checks C# syntax. Neither resolves C# symbols or compiles against Unity/package assemblies. These checks do not import the Unity project, run Edit Mode or Play Mode tests, or create a player build.
 
 A feature is not considered fully verified until Unity 6000.3.28f1 imports the project without compile errors, the relevant tests pass, and the generated Greyhaven scene has been exercised in Play Mode.
