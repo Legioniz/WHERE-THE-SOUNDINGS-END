@@ -54,6 +54,17 @@ namespace WhereTheSoundingsEnd.Inventory
             RebuildDefinitionLookup();
         }
 
+        public void SetItemDefinitions(IEnumerable<CargoItemDefinition> definitions)
+        {
+            itemDefinitions.Clear();
+            if (definitions != null)
+            {
+                foreach (CargoItemDefinition definition in definitions)
+                    if (definition != null) itemDefinitions.Add(definition);
+            }
+            RebuildDefinitionLookup();
+        }
+
         public bool TryPlace(
             string itemId,
             int x,
