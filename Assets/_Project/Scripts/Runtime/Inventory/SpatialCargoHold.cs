@@ -56,6 +56,8 @@ namespace WhereTheSoundingsEnd.Inventory
 
         public void SetItemDefinitions(IEnumerable<CargoItemDefinition> definitions)
         {
+            if (itemDefinitions == null)
+                itemDefinitions = new List<CargoItemDefinition>();
             itemDefinitions.Clear();
             if (definitions != null)
             {
