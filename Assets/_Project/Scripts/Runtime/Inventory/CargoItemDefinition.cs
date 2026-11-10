@@ -30,6 +30,8 @@ namespace WhereTheSoundingsEnd.Inventory
         [SerializeField, Min(0f)] private float freshnessLossPerGameMinute;
         [SerializeField] private bool canBeDamaged = true;
         [SerializeField] private bool isQuestCritical;
+        [SerializeField] private bool isAberrant;
+        [SerializeField, Min(1f)] private float sellValueMultiplier = 1f;
 
         public string ItemId { get { return itemId; } }
         public string DisplayName { get { return displayName; } }
@@ -38,6 +40,8 @@ namespace WhereTheSoundingsEnd.Inventory
         public float FreshnessLossPerGameMinute { get { return freshnessLossPerGameMinute; } }
         public bool CanBeDamaged { get { return canBeDamaged; } }
         public bool IsQuestCritical { get { return isQuestCritical; } }
+        public bool IsAberrant { get { return isAberrant; } }
+        public float SellValueMultiplier { get { return Mathf.Max(1f, sellValueMultiplier); } }
 
         private void OnValidate()
         {
