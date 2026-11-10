@@ -44,6 +44,7 @@ namespace WhereTheSoundingsEnd.World
         public float SignalStrength => signalStrength;
         public string FirstSurveyNote => firstSurveyNote;
         public string EvidenceLabel => evidenceLabel;
+        public bool IsValidForRegion => DeepOceanPhenomenonRules.IsAllowed(phenomenonType, regionId, depthMeters);
 
         public void Configure(
             string id, string region, DeepOceanPhenomenonType type, string title,
@@ -62,7 +63,7 @@ namespace WhereTheSoundingsEnd.World
 
         public bool IsDetectableFrom(Vector3 position, string activeRegionId)
         {
-            if (!string.Equals(regionId, activeRegionId, System.StringComparison.OrdinalIgnoreCase))
+            if (!IsValidForRegion || !string.Equals(regionId, activeRegionId, System.StringComparison.OrdinalIgnoreCase))
                 return false;
             Vector2 a = new Vector2(position.x, position.z);
             Vector2 b = new Vector2(transform.position.x, transform.position.z);
