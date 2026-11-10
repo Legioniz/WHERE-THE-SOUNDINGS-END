@@ -36,7 +36,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Dialogue/Greyhaven.yarnproject",
     "Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn",
     "Assets/_Project/Tests/EditMode/CargoGridGeometryTests.cs",
-    "Assets/_Project/Scripts/Boat/BoatPrototypeController.cs",
+    "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs",
     "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs",
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
