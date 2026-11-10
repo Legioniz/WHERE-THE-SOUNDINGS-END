@@ -32,7 +32,7 @@
 - [Repository coding-agent instructions](../AGENTS.md).
 - [GitHub Copilot instructions](../.github/copilot-instructions.md).
 
-AI agents must read the repository's \`AGENTS.md\` before changing code. A roadmap, design specification, generated code snippet, or passing static check does not prove a feature is implemented or verified.
+AI agents must read the repository's `AGENTS.md` before changing code. A roadmap, design specification, generated code snippet, or passing static check does not prove a feature is implemented or verified.
 
 ## World geography and regional ecology
 

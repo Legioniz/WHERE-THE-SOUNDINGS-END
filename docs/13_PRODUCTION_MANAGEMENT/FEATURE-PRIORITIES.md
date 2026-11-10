@@ -15,7 +15,7 @@ P0 work blocks reliable progress or the first complete playable slice.
 1. Audit the current repository and classify real implementation status.
 2. Preserve the Unity 6.3 LTS project baseline, assembly boundaries, generated-scene workflow, and existing code conventions.
 3. Close critical boat, camera, action-driven time, scene bootstrap, and interaction integration defects.
-4. Complete and verify the first NPC foundation increment using the existing \`NpcAgent\`, \`NpcScheduleResolver\`, Yarn dialogue, interaction, and save contracts. Immediate focus: schedule/interaction correctness, stable IDs, dialogue integration, relationship persistence, tests, and clearly scoped next steps for pathfinding and quest state.
+4. Complete and verify the first NPC foundation increment using the existing `NpcAgent`, `NpcScheduleResolver`, Yarn dialogue, interaction, and save contracts. Immediate focus: schedule/interaction correctness, stable IDs, dialogue integration, relationship persistence, tests, and clearly scoped next steps for pathfinding and quest state.
 5. Verify save/load/autosave and backup recovery; preserve migration compatibility before adding new persisted systems.
 6. Establish the first complete expedition loop and the acceptance criteria for the vertical slice.
 7. Maintain repository static checks, C# syntax checks, Edit Mode tests, and Unity verification instructions.

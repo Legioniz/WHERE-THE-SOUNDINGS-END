@@ -29,9 +29,9 @@ A single-player, 2.5D open-world fishing survival-horror prototype for Windows P
 
 The setup command creates the starter URP assets and generates three scenes when missing:
 
-- \`Greyhaven_Blockout.unity\` — harbour, village, starter boat, Harbourmaster, fishing/salvage prototype, and shallow survey profile.
-- \`OuterShoals_SurveySandbox.unity\` — deep bathymetry profile, a diel scattering layer, authored phenomenon sites, Sounding Rig, and site inspection.
-- \`HollowTrench_SurveySandbox.unity\` — trench profile, authored brine-pool/seep/hydrate/whale-fall evidence sites, Sounding Rig, and site inspection.
+- `Greyhaven_Blockout.unity` — harbour, village, starter boat, Harbourmaster, fishing/salvage prototype, and shallow survey profile.
+- `OuterShoals_SurveySandbox.unity` — deep bathymetry profile, a diel scattering layer, authored phenomenon sites, Sounding Rig, and site inspection.
+- `HollowTrench_SurveySandbox.unity` — trench profile, authored brine-pool/seep/hydrate/whale-fall evidence sites, Sounding Rig, and site inspection.
 
 The two deep-water scenes are isolated test ranges included in Build Settings. There is **no in-game region-travel system yet**. They are functional survey prototypes, not finished levels or complete deep-ocean hazard simulations.
 
@@ -68,11 +68,11 @@ The harvesting timing action now uses one shared Input System action for keyboar
 
 ## Save and load foundation
 
-Runtime saves are stored outside the project in \`Application.persistentDataPath/Saves/\`:
+Runtime saves are stored outside the project in `Application.persistentDataPath/Saves/`:
 
-- \`slot_01.json\` through \`slot_05.json\`
-- \`autosave.json\`
-- corresponding \`.bak\` recovery files
+- `slot_01.json` through `slot_05.json`
+- `autosave.json`
+- corresponding `.bak` recovery files
 
 The versioned schema now preserves boat transform/velocity, cargo, vessel condition, daily salvage depletion, sea time, weather intensity and remaining duration, weather cooldown, hallucination cooldown, pending seabird events, the latest omen, maritime incident countdown/caption/hush/false-light state, Sounding Rig discoveries and opportunities, acoustic hearing history, and inspected site IDs. Save participants are discovered by the scene coordinator.
 
@@ -84,11 +84,11 @@ The repository contains a connected prototype, not a complete 20-hour game. Crea
 
 The static check is:
 
-\`\`\`bash
+```bash
 python tools/validate_project.py
-\`\`\`
+```
 
-GitHub Actions runs this repository-integrity validator on pushes and pull requests to \`main\`. It checks file/configuration contracts and key integration wiring. It is **not a Unity compilation or player build**. The Edit Mode tests are in \`Assets/_Project/Tests/EditMode/\`; they still need to be run in Unity 6000.3.28f1, followed by Play Mode checks and a Windows build.
+GitHub Actions runs this repository-integrity validator on pushes and pull requests to `main`. It checks file/configuration contracts and key integration wiring. It is **not a Unity compilation or player build**. The Edit Mode tests are in `Assets/_Project/Tests/EditMode/`; they still need to be run in Unity 6000.3.28f1, followed by Play Mode checks and a Windows build.
 
 ## Production target and agent instructions
 
@@ -102,7 +102,7 @@ The current production baseline targets a commercial Windows release around **No
 - [Feature Priorities](docs/13_PRODUCTION_MANAGEMENT/FEATURE-PRIORITIES.md)
 - [AI-Assisted Development Workflow](docs/13_PRODUCTION_MANAGEMENT/AI-ASSISTED-DEVELOPMENT.md)
 
-AI agents must read \`AGENTS.md\` before modifying the project. Planned content and documented mechanics are not implementation evidence; report only tests and builds actually executed.
+AI agents must read `AGENTS.md` before modifying the project. Planned content and documented mechanics are not implementation evidence; report only tests and builds actually executed.
 
 ## Design and technical references
 

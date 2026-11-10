@@ -50,7 +50,7 @@ Every sprint record should contain:
 
 ## Sprint report template
 
-\`\`\`markdown
+```markdown
 # Sprint YYYY-NN
 
 - Dates:
@@ -81,6 +81,6 @@ Every sprint record should contain:
 - Item:
 - Reason:
 - Next action:
-\`\`\`
+```
 
 A sprint is not complete because its dates elapsed. Report actual evidence and carry unfinished work forward explicitly.

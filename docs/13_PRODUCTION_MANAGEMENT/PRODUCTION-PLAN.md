@@ -16,7 +16,7 @@ This document defines how the project will be produced as a commercial, solo-fir
 - One human project lead owns product direction, final approval, playtesting, and release decisions.
 - AI assistants/agents may support code, architecture analysis, documentation, research synthesis, test design, data authoring, bug triage, and review.
 - AI output must be inspected, integrated, tested, and licensed appropriately. Generated code is not automatically correct or production-ready.
-- Unity 6.3 LTS (\`6000.3.28f1\`), URP 17.3.0, C#, Input System 1.20.1, Windows 64-bit first.
+- Unity 6.3 LTS (`6000.3.28f1`), URP 17.3.0, C#, Input System 1.20.1, Windows 64-bit first.
 - Initial release is single-player. Multiplayer, console ports, mod support, and additional platforms are outside the committed baseline unless separately approved.
 - The 24-month/November 2028 target is a planning estimate. The 18–20 month scenario is high risk; a 30–36 month scenario is the schedule contingency.
 

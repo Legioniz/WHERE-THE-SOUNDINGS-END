@@ -23,7 +23,7 @@ AI does not independently prove that a feature works, replace Unity compilation,
 
 ## 2. Project-specific context every agent must preserve
 
-- Unity 6.3 LTS (\`6000.3.28f1\`), URP 17.3.0, C#, Input System 1.20.1.
+- Unity 6.3 LTS (`6000.3.28f1`), URP 17.3.0, C#, Input System 1.20.1.
 - Single-player 2.5D fishing survival horror; Windows 64-bit first.
 - Action-driven sea-time progression is an intentional gameplay rule.
 - The ocean combines physical conditions, ecology, acoustics, authored anomalies, and player-caused disturbance.
@@ -35,7 +35,7 @@ AI does not independently prove that a feature works, replace Unity compilation,
 ## 3. Required AI work loop
 
 ### A. Orient
-- Read \`/AGENTS.md\`, the root README, documentation index, production roadmap, priorities, milestones, AI workflow, and documentation standard.
+- Read `/AGENTS.md`, the root README, documentation index, production roadmap, priorities, milestones, AI workflow, and documentation standard.
 - Inspect the current branch and repository tree.
 - Read relevant source files, scene builders, ScriptableObjects/data assets, assembly definitions, save contracts, tests, and owning documents.
 - Confirm whether the requested feature already exists partially or is described only in documentation.
@@ -58,7 +58,7 @@ AI does not independently prove that a feature works, replace Unity compilation,
 ### D. Verify
 - Add Edit Mode tests for deterministic logic and edge cases.
 - Define Play Mode/integration tests for scene wiring, input, timing, interactions, cross-system state, and persistence.
-- Run \`python tools/validate_project.py\` and \`python tools/validate_csharp.py\` when a suitable local environment is available.
+- Run `python tools/validate_project.py` and `python tools/validate_csharp.py` when a suitable local environment is available.
 - Run Unity import/compilation, Edit Mode tests, Play Mode checks, and a Windows build when the environment and task allow.
 - Report unavailable verification explicitly. Never convert an unrun test into a passing test.
 

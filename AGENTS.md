@@ -6,21 +6,21 @@ These instructions apply to every AI coding agent, automated contributor, and hu
 
 Before starting a task, inspect the current repository state and read:
 
-1. \`README.md\` — project identity, engine baseline, current implementation status, setup, and verification limits.
-2. \`docs/README.md\` — documentation map and authoritative source locations.
-3. \`docs/13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md\` — current production target and phases.
-4. \`docs/13_PRODUCTION_MANAGEMENT/PRODUCTION-PLAN.md\` — production assumptions, workflow, and quality gates.
-5. \`docs/13_PRODUCTION_MANAGEMENT/FEATURE-PRIORITIES.md\` — work sequencing and scope protection.
-6. \`docs/13_PRODUCTION_MANAGEMENT/PROJECT-MILESTONES.md\` — milestone exit criteria and current status.
-7. \`docs/13_PRODUCTION_MANAGEMENT/AI-ASSISTED-DEVELOPMENT.md\` — AI/human responsibilities and implementation workflow.
-8. \`docs/DOCUMENTATION-STANDARD.md\` — documentation and evidence requirements.
+1. `README.md` — project identity, engine baseline, current implementation status, setup, and verification limits.
+2. `docs/README.md` — documentation map and authoritative source locations.
+3. `docs/13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md` — current production target and phases.
+4. `docs/13_PRODUCTION_MANAGEMENT/PRODUCTION-PLAN.md` — production assumptions, workflow, and quality gates.
+5. `docs/13_PRODUCTION_MANAGEMENT/FEATURE-PRIORITIES.md` — work sequencing and scope protection.
+6. `docs/13_PRODUCTION_MANAGEMENT/PROJECT-MILESTONES.md` — milestone exit criteria and current status.
+7. `docs/13_PRODUCTION_MANAGEMENT/AI-ASSISTED-DEVELOPMENT.md` — AI/human responsibilities and implementation workflow.
+8. `docs/DOCUMENTATION-STANDARD.md` — documentation and evidence requirements.
 
-Then read the relevant feature specification, technical design, data contract, and tests. For NPC tasks, also read \`docs/12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md\`. Do not rely on a previous chat summary in place of the current repository.
+Then read the relevant feature specification, technical design, data contract, and tests. For NPC tasks, also read `docs/12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md`. Do not rely on a previous chat summary in place of the current repository.
 
 ## Project baseline
 
 - Project: WHERE THE SOUNDINGS END.
-- Engine: Unity 6.3 LTS, editor version \`6000.3.28f1\`.
+- Engine: Unity 6.3 LTS, editor version `6000.3.28f1`.
 - Rendering: Universal Render Pipeline 17.3.0.
 - Language: C#.
 - Input: Unity Input System 1.20.1.
@@ -71,12 +71,12 @@ A design document, catalog entry, planned milestone, generated scene name, or st
 
 Run the repository checks when a local checkout/environment is available:
 
-\`\`\`bash
+```bash
 python tools/validate_project.py
 python tools/validate_csharp.py
-\`\`\`
+```
 
-These checks validate repository contracts and C# syntax; they do not constitute a Unity compilation or player build. A fully verified Unity feature additionally requires import/compilation in Unity \`6000.3.28f1\`, relevant Edit Mode tests, relevant Play Mode/integration checks, and a Windows build where applicable.
+These checks validate repository contracts and C# syntax; they do not constitute a Unity compilation or player build. A fully verified Unity feature additionally requires import/compilation in Unity `6000.3.28f1`, relevant Edit Mode tests, relevant Play Mode/integration checks, and a Windows build where applicable.
 
 Never claim Unity tests, Play Mode, a build, performance profiling, or manual gameplay verification passed unless those actions were actually executed and their result inspected. If Unity is unavailable, say so and report only the static checks that actually ran.
 
