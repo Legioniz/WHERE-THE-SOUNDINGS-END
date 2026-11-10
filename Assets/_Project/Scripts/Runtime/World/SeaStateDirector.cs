@@ -44,6 +44,10 @@ namespace WhereTheSoundingsEnd.World
         private float seaDisturbance;
         private bool harvestingActive;
         private float hallucinationCooldown;
+        private bool birdEventPending;
+        private float birdEventCountdown;
+        private float[] sourceBasePitch = System.Array.Empty<float>();
+        private float[] sourceBaseVolume = System.Array.Empty<float>();
         private string latestOmen = string.Empty;
         private Light[] sceneLights = System.Array.Empty<Light>();
         private AudioSource[] soundscapeSources = System.Array.Empty<AudioSource>();
@@ -62,6 +66,13 @@ namespace WhereTheSoundingsEnd.World
         {
             sceneLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
             soundscapeSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+            sourceBasePitch = new float[soundscapeSources.Length];
+            sourceBaseVolume = new float[soundscapeSources.Length];
+            for (int i = 0; i < soundscapeSources.Length; i++)
+            {
+                sourceBasePitch[i] = soundscapeSources[i] != null ? soundscapeSources[i].pitch : 1f;
+                sourceBaseVolume[i] = soundscapeSources[i] != null ? soundscapeSources[i].volume : 1f;
+            }
             if (timeOfDaySeconds <= 0.0)
                 timeOfDaySeconds = startingHour * 3600.0;
         }
@@ -164,8 +175,8 @@ namespace WhereTheSoundingsEnd.World
             for (int i = 0; i < soundscapeSources.Length; i++)
             {
                 if (soundscapeSources[i] == null) continue;
-                soundscapeSources[i].pitch = Mathf.Lerp(1f, 0.88f, soundWarp);
-                soundscapeSources[i].volume = Mathf.Lerp(1f, 0.72f, panicLevel * 0.5f);
+                soundscapeSources[i].pitch = sourceBasePitch[i] * Mathf.Lerp(1f, 0.88f, soundWarp);
+                soundscapeSources[i].volume = sourceBaseVolume[i] * Mathf.Lerp(1f, 0.72f, panicLevel * 0.5f);
             }
         }
 
@@ -176,10 +187,31 @@ namespace WhereTheSoundingsEnd.World
                 return;
 
             hallucinationCooldown = Random.Range(55f, 105f);
-            if (panicLevel > 0.9f && Random.value < 0.34f && TryStealFish())
+            if (birdEventPending)
             {
-                latestOmen = "Black wings break the fog. Something is tearing at the catch.";
-                SpawnBirdSwarm();
+                birdEventCountdown -= gameDelta;
+                if (birdEventCountdown <= 0f)
+                {
+                    birdEventPending = false;
+                    if (TryStealFish())
+                    {
+                        latestOmen = "The flock tears away one of the catches.";
+                        SpawnBirdSwarm();
+                    }
+                    else
+                    {
+                        latestOmen = "The birds circle, but find nothing to take.";
+                    }
+                }
+                return;
+            }
+
+            if (panicLevel > 0.9f && Random.value < 0.34f)
+            {
+                birdEventPending = true;
+                birdEventCountdown = 105f;
+                hallucinationCooldown = Random.Range(150f, 240f);
+                latestOmen = "Black wings gather above the fog. Keep the catch covered.";
                 return;
             }
 
@@ -276,7 +308,10 @@ namespace WhereTheSoundingsEnd.World
             GUI.Label(new Rect(30, 47, 170, 20), IsAdvancing ? "SEA TIME: RUNNING" : "SEA TIME: HELD", text);
 
             GUI.Box(new Rect(Screen.width * 0.5f - 125, 18, 250, 44), GUIContent.none);
-            GUI.Label(new Rect(Screen.width * 0.5f - 112, 21, 226, 18),
+            GUIUtility.RotateAroundPivot(panicLevel * 720f, new Vector2(Screen.width * 0.5f - 94f, 34f));
+            GUI.Label(new Rect(Screen.width * 0.5f - 110, 21, 28, 26), "◉", text);
+            GUIUtility.RotateAroundPivot(-panicLevel * 720f, new Vector2(Screen.width * 0.5f - 94f, 34f));
+            GUI.Label(new Rect(Screen.width * 0.5f - 78, 21, 192, 18),
                 "PANIC  " + Mathf.RoundToInt(panicLevel * 100f) + "%", text);
             GUI.HorizontalSlider(new Rect(Screen.width * 0.5f - 110, 44, 220, 12), panicLevel, 0f, 1f);
 
