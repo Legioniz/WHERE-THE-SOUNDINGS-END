@@ -1,7 +1,7 @@
 # Project Structure
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Unity Greyhaven prototype with cargo, dialogue and initial Sounding Rig survey loop  
+> Status: Connected Unity prototype with cargo, dialogue, atmospheric horror, and deep-ocean survey sandboxes  
 > Owner: Project lead  
 > Version: 0.4  
 > Last reviewed: 2026-11-10
@@ -70,8 +70,8 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Dialogue/Source/Greyhaven_Harbourmaster.yarn: branching first conversation with the Harbourmaster.
 - Boat/BoatPrototypeController.cs: temporary Rigidbody handling prototype.
 - Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera with configurable framing.
-- Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, and initial build-scene list.
-- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, shallow survey profile, outer-channel wreck survey marker, starter boat with Sounding Rig, camera, spatial cargo catalogue, save/autosave coordinator, Yarn DialogueRunner and presenter, UI Toolkit PanelSettings asset, and Harbourmaster interaction trigger.
+- Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, Greyhaven, and any missing deep-ocean survey scenes.
+- Editor/GreyhavenEnvironmentBuilder.cs: builds the Greyhaven harbour scene, starter boat, cargo catalogue, Yarn dialogue, save/autosave coordinator, shallow survey profile, and Harbourmaster interaction. Editor/DeepOceanSurveySandboxBuilder.cs generates Outer Shoals and Hollow Trench survey scenes with regional profiles and authored evidence sites.
 
 ## Greyhaven environment generation
 
@@ -95,10 +95,10 @@ Greyhaven is a working technical greybox. Its coordinates and dimensions are pro
 
 ## Deep-ocean survey integration
 
-The generated Greyhaven scene attaches DeepOceanSurveyRegion to Sheltered_Bay_Surface and configures it as shallow coastal water. The starter boat receives SoundingRigController, which consumes the existing SoundingPulse Input Action. Greyhaven's profile deliberately reports no deep scattering layer.
+The generated Greyhaven scene attaches a shallow DeepOceanSurveyRegion to Sheltered_Bay_Surface and gives the starter boat SoundingRigController plus close-range site inspection. Greyhaven deliberately reports no deep scattering layer. Project setup also generates OuterShoals_SurveySandbox and HollowTrench_SurveySandbox. These are functional survey test ranges, not finished levels and not connected by in-game travel.
 
-The region component contains baseline profiles for all six named regions. Future region scene builders must attach one profile to the correct world / water root and place authored DeepOceanPhenomenonSite markers. Merely having a profile in code does not mean a region scene or site is playable.
+The region component contains baseline profiles for all six named regions. The Outer Shoals and Hollow Trench profiles are attached to generated survey scenes, each with four valid site markers. The current site interaction records field-note inspection; physical vent heat, seep chemistry, brine exposure, hydrate stability, wreck entanglement, and whale-fall succession remain separate unfinished controllers.
 
-The survey subsystem uses AcousticEventBus as the gameplay signal source. Future creature perception should subscribe to this event contract rather than scanning scene AudioSources. Current implementation publishes Sounding Rig pulses only; creature listeners are not yet connected.
+The survey subsystem publishes through AcousticEventBus. AcousticWorldListener is connected in generated scenes: it scores signals by range, loudness, sensitivity and background noise, deduplicates event IDs, applies small sea disturbance, and exposes a SignalHeard event for future species-specific perception. No predator, fish or creature state machine subscribes yet; those listeners must be added to existing AI state machines rather than creating a parallel threat spawner.
 
-Save schema v4 adds survey pulse count, discovered site IDs and evaluated opportunity IDs. See [Deep-Ocean Survey Implementation](DEEP-OCEAN-SURVEY-IMPLEMENTATION.md) for the file-by-file dependency map, runtime flow, tuning assumptions and remaining integration work.
+Save schema v5 includes survey state, weather/horror timers, inspected site IDs, acoustic history and temporary atmosphere state. See [Deep-Ocean Survey Implementation](DEEP-OCEAN-SURVEY-IMPLEMENTATION.md) for the file-by-file dependency map, runtime flow, tuning assumptions and remaining integration work.

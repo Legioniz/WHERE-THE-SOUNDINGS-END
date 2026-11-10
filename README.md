@@ -2,7 +2,7 @@
 
 > **Some waters should never be disturbed.**
 
-A single-player, 2.5D open-world fishing survival-horror game for Windows PC. The player takes up work connected to a missing fisherman in an isolated island village, where the sea's ecology, acoustic signals, and unexplained entities are interconnected.
+A single-player, 2.5D open-world fishing survival-horror prototype for Windows PC. The player works around an isolated island village tied to a missing fisherman, where ordinary seamanship, marine ecology, acoustic signals, and unexplained events become increasingly difficult to distinguish.
 
 ## Current project baseline
 
@@ -14,13 +14,10 @@ A single-player, 2.5D open-world fishing survival-horror game for Windows PC. Th
 | Input | Unity Input System 1.20.1 |
 | First platform | Windows 64-bit |
 | Mode | Single-player |
-| Presentation | 2.5D with a 3D world and controlled elevated camera |
-| World | Open, organized into authored regions |
-| Horror | Intense, systemic, atmosphere- and audio-led |
-| Playtime goal | 20+ hours; not yet validated |
-| Death | Consequences and recovery, not default campaign permadeath |
-| Initial cash target | ₱0, assuming existing PC and internet |
+| Presentation | 2.5D with a 3D world and elevated camera |
+| Horror | Systemic, atmosphere- and audio-led |
 | Production | Solo-first |
+| Status | Connected gameplay prototype; not a complete game |
 
 ## Getting the project running
 
@@ -30,48 +27,78 @@ A single-player, 2.5D open-world fishing survival-horror game for Windows PC. Th
 4. Run **Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation** in the Editor.
 5. Open the generated Greyhaven blockout and press Play.
 
-The setup command creates the starter URP assets, procedural Greyhaven coastal greybox, boat prototype, 2.5D camera, player settings, and initial build-scene list. To regenerate the environment after changing the builder, use **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment**. The rebuild command warns before replacing the scene.
+The setup command creates the starter URP assets and generates three scenes when missing:
 
-The scene contains an irregular island shore, sheltered bay, breakwater, piers, village service buildings, lighthouse, estuary/mangrove placeholders, channel buoys, and the starter boat. It is a technical greybox—not finished level art.
+- `Greyhaven_Blockout.unity` — harbour, village, starter boat, Harbourmaster, fishing/salvage prototype, and shallow survey profile.
+- `OuterShoals_SurveySandbox.unity` — deep bathymetry profile, a diel scattering layer, authored phenomenon sites, Sounding Rig, and site inspection.
+- `HollowTrench_SurveySandbox.unity` — trench profile, authored brine-pool/seep/hydrate/whale-fall evidence sites, Sounding Rig, and site inspection.
 
-### Controls in the current prototype
+The two deep-water scenes are isolated test ranges included in Build Settings. There is **no in-game region-travel system yet**. They are functional survey prototypes, not finished levels or complete deep-ocean hazard simulations.
+
+Use **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment** after changing the Greyhaven builder. Use **Tools > WHERE THE SOUNDINGS END > Rebuild Deep Ocean Survey Sandboxes** to regenerate the two deep-water test scenes. Rebuild operations replace generated scenes and warn before discarding manual scene edits.
+
+## Current prototype controls
 
 | Action | Keyboard | Gamepad |
 |---|---|---|
 | Move / steer boat | W A S D | Left stick |
-| Interact (reserved) | E | South face button |
-| Fish (reserved) | F | West face button |
-| Sounding pulse (reserved) | Q | Right shoulder |
-| Pause (reserved) | Esc | Start |
+| Interact / inspect nearby site | E | South face button |
+| Start fishing | F | West face button |
+| Start dredging | G | Right trigger |
+| Sounding pulse | Q | Right shoulder |
+| Harvest timing beat | Space / Enter | South face button / right shoulder |
+| Pause | Esc | Start |
+| Inventory | I | North face button |
 
-Only movement/steering currently affects gameplay. The other actions are mapped for later implementation.
+The harvesting timing action now uses one shared Input System action for keyboard and gamepad input. Some controls are prototype-level and will be refined as the player-facing UI replaces the current OnGUI overlays.
 
-### Save and load foundation
+## Implemented runtime foundations
 
-The generated Greyhaven scene includes a Save Game Coordinator. Runtime saves are stored outside the project in Application.persistentDataPath/Saves/ as five independent files: slot_01.json through slot_05.json. Each slot keeps a previous-save .bak file for recovery. A separate autosave.json is written every five minutes after a 45-second startup delay and on focus loss, application pause/quit, active-scene unload, and requested checkpoints. Autosaves have their own backup and never overwrite manual slots. The coordinator exposes SaveSlot(slot), LoadSlot(slot), SaveAutosave(reason), LoadAutosave(), GetSlots(), and DeleteSlot(slot); the starter boat currently captures its transform and Rigidbody velocity. A player-facing save/load menu and the remaining gameplay-state participants are not yet implemented. See docs/06_GAMEPLAY_SYSTEMS/SAVE-AND-LOAD.md.
+- Rigidbody boat steering and a fixed-angle follow camera.
+- Movement/action-driven sea time: the day advances while the boat is genuinely moving or the player is performing a supported harvesting or survey action.
+- Timed fishing and dredging minigames using spatial cargo placement.
+- Cargo hold geometry, blocked/damaged cells, salvage-site depletion, and vessel hull/engine condition.
+- Day/night lighting and fog response, panic pressure, dead-calm and wrong-way-swell incidents, distant hull knocks, false navigation lights, and other restrained maritime omens.
+- A Sounding Rig with regional bathymetry approximations, a day/night biological scattering-layer return, signal confidence, independent-ping verification, authored site discovery, and save persistence.
+- An event-driven acoustic listener that scores signals by range, loudness, sensitivity, and background noise, deduplicates heard events, adds environmental disturbance, and exposes a scored event for future creature perception.
+- Close-range inspection of authored phenomenon sites with persistent field-note records.
+- Greyhaven, Outer Shoals, and Hollow Trench survey scenes generated by Editor tooling.
+- Five manual JSON save slots, backup recovery, a separate autosave file, schema migrations, and autosave lifecycle/checkpoint triggers.
 
-## Project status
+## Save and load foundation
 
-The repository contains a Unity project scaffold, deterministic core utilities, a first-pass boat and camera prototype, a procedural Greyhaven scene generator, and a foundational save/load system. The environment scene is generated by running the setup command in Unity; source control alone does not prove that Editor import, scene rendering, Play Mode physics, or a Windows build have passed.
+Runtime saves are stored outside the project in `Application.persistentDataPath/Saves/`:
 
-The project is **not yet a complete playable vertical slice**. Fishing, economy, full player/world persistence, population simulation, creature AI, quests, and production content remain unimplemented. Five-slot JSON persistence is implemented as a runtime foundation; the Greyhaven starter boat is currently the only gameplay object connected to capture and restore.
+- `slot_01.json` through `slot_05.json`
+- `autosave.json`
+- corresponding `.bak` recovery files
 
-Run the static check with python tools/validate_project.py. The Edit Mode tests and a Windows build still need to be run in Unity 6000.3.28f1. See the Unity Project Foundation document at docs/08_TECHNICAL_DESIGN/UNITY-PROJECT-FOUNDATION.md and the Greyhaven Environment document at docs/05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md.
+The versioned schema now preserves boat transform/velocity, cargo, vessel condition, daily salvage depletion, sea time, weather intensity and remaining duration, weather cooldown, hallucination cooldown, pending seabird events, the latest omen, maritime incident countdown/caption/hush/false-light state, Sounding Rig discoveries and opportunities, acoustic hearing history, and inspected site IDs. Save participants are discovered by the scene coordinator.
 
-## Design and production references
+This remains a runtime foundation. A full player-facing save/load menu, cross-scene restore flow, and persistence adapters for future creature/population/quest/economy systems are not complete.
+
+## Project status and verification boundary
+
+The repository contains a connected prototype, not a complete 20-hour game. Creature AI, population simulation, a full regional travel network, the finished market/economy loop, quest campaign, and site-specific physical hazard simulations remain incomplete. Deep-ocean site markers are survey evidence; they do not yet implement the heat/chemistry/pressure/entanglement effects of vents, seeps, hydrates, brine pools, or wreck hazards.
+
+The static check is:
+
+```bash
+python tools/validate_project.py
+```
+
+GitHub Actions runs this repository-integrity validator on pushes and pull requests to `main`. It checks file/configuration contracts and key integration wiring. It is **not a Unity compilation or player build**. The Edit Mode tests are in `Assets/_Project/Tests/EditMode/`; they still need to be run in Unity 6000.3.28f1, followed by Play Mode checks and a Windows build.
+
+## Design and technical references
 
 - [Game Design Document](docs/01_GAME_DESIGN/GAME-DESIGN-DOCUMENT.md)
 - [World Bible](docs/02_LORE_AND_WORLD/WORLD-BIBLE.md)
-- [Core Game Loop](docs/01_GAME_DESIGN/CORE-GAME-LOOP.md)
-- [System Mathematics](docs/07_GAME_RULES_AND_BALANCING/SYSTEM-MATHEMATICS.md)
+- [Maritime Horror Director](docs/06_GAMEPLAY_SYSTEMS/MARITIME-HORROR-DIRECTOR.md)
+- [Save and Load](docs/06_GAMEPLAY_SYSTEMS/SAVE-AND-LOAD.md)
+- [Sounding Rig algorithms](docs/07_GAME_RULES_AND_BALANCING/SOUNDING-RIG-ALGORITHMS.md)
 - [Technical Design](docs/08_TECHNICAL_DESIGN/TECHNICAL-DESIGN-DOCUMENT.md)
-- [Unity Project Foundation](docs/08_TECHNICAL_DESIGN/UNITY-PROJECT-FOUNDATION.md)
-- [Greyhaven Environment](docs/05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md)
-- [Development Roadmap](docs/13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md)
+- [Deep-Ocean Survey Implementation](docs/08_TECHNICAL_DESIGN/DEEP-OCEAN-SURVEY-IMPLEMENTATION.md)
+- [Testing Strategy](docs/14_TESTING_AND_QUALITY/TESTING-STRATEGY.md)
 - [Documentation Index](docs/README.md)
 
-## Engineering decisions
-
-Unity + C# is the production baseline. ScriptableObjects will hold authored definitions; runtime models own mutable simulation state. Python is reserved for offline simulation, content validation, and balancing. See docs/technical/PERFORMANCE_AND_LANGUAGE_GUIDANCE.md. Earlier Godot + GDScript exploration is superseded.
-
-Documents distinguish established theory, engineering approximations, and designer tuning. A design specification does not mean its system has been implemented.
+Documents distinguish established science, engineering approximations, designer tuning, placeholders, and fictional anomalies. A design specification does not mean its system has been implemented.

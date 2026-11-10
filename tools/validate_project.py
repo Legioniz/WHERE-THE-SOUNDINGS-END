@@ -37,6 +37,8 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonSite.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonRules.cs",
     "Assets/_Project/Scripts/Runtime/World/AcousticEventBus.cs",
+    "Assets/_Project/Scripts/Runtime/World/AcousticWorldListener.cs",
+    "Assets/_Project/Scripts/Runtime/World/DeepOceanSiteInteractionController.cs",
     "Assets/_Project/Scripts/Runtime/World/SoundingRigController.cs",
     "Assets/_Project/Scripts/Runtime/World/VesselConditionController.cs",
     "Assets/_Project/Scripts/Runtime/World/HarvestingMinigameController.cs",
@@ -55,6 +57,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
     "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs",
+    "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs",
     "Assets/_Project/Tests/EditMode/WhereTheSoundingsEnd.Tests.EditMode.asmdef",
     "Assets/_Project/Tests/EditMode/CoreFoundationTests.cs",
     "Assets/_Project/Tests/EditMode/SaveFileServiceTests.cs",
@@ -100,9 +103,21 @@ def main() -> int:
             failures.append("PlayerControls.inputactions has no Boat action map.")
         else:
             action_names = {action["name"] for action in boat_map.get("actions", [])}
-            expected_actions = {"Move", "Interact", "Fish", "Dredge", "SoundingPulse", "Pause", "Inventory"}
+            expected_actions = {"Move", "Interact", "Fish", "Dredge", "SoundingPulse", "Pause", "Inventory", "HarvestBeat"}
             if not expected_actions.issubset(action_names):
                 failures.append("Boat action map is missing one or more required actions.")
+            harvest_bindings = [
+                binding.get("path")
+                for binding in boat_map.get("bindings", [])
+                if binding.get("action") == "HarvestBeat"
+            ]
+            for required_binding in (
+                "<Keyboard>/space", "<Keyboard>/enter",
+                "<Gamepad>/buttonSouth", "<Gamepad>/rightShoulder",
+            ):
+                if required_binding not in harvest_bindings:
+                    failures.append(f"HarvestBeat is missing {required_binding}.")
+
             identifiers = [
                 item.get("id")
                 for item in boat_map.get("actions", []) + boat_map.get("bindings", [])
@@ -111,11 +126,20 @@ def main() -> int:
                 failures.append("Input action/binding identifiers must be unique.")
 
         save_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs").read_text(encoding="utf-8")
-        if "CurrentSchemaVersion = 4" not in save_source:
-            failures.append("SaveGameData schema must be version 4 after deep-ocean survey persistence changes.")
+        if "CurrentSchemaVersion = 5" not in save_source:
+            failures.append("SaveGameData schema must be version 5 after atmospheric/acoustic persistence changes.")
 
-        if "case 3:" not in save_source or "data.schemaVersion = 4;" not in save_source:
-            failures.append("SaveGameData is missing the schema 3 to 4 survey-state migration.")
+        if "case 4:" not in save_source or "data.schemaVersion = 5;" not in save_source:
+            failures.append("SaveGameData is missing the schema 4 to 5 atmosphere-state migration.")
+
+        for required_text in (
+            "weatherRemainingGameSeconds", "weatherShiftCooldownGameSeconds",
+            "hallucinationCooldownGameSeconds", "birdEventPending",
+            "atmosphereIncidentCountdownGameSeconds", "inspectedPhenomenonSiteIds",
+            "heardAcousticEventIds",
+        ):
+            if required_text not in save_source:
+                failures.append(f"WorldSaveData is missing persistent state: {required_text}")
 
         survey_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SoundingRigController.cs").read_text(encoding="utf-8")
         for required_text in ("SoundingPulse", "discoveredPhenomenonSiteIds", "evaluatedSurveyOpportunityIds", "AcousticEventBus.Publish", "IsIndependentLayerObservation", "CalculateSiteSignalConfidence"):
@@ -137,9 +161,45 @@ def main() -> int:
                 failures.append(f"DeepOceanSurveyRegion is missing regional profile: {required_region}")
 
         sea_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs").read_text(encoding="utf-8")
-        for required_text in ("movementThreshold", "SetHarvesting", "panicLevel", "timeOfDaySeconds"):
+        for required_text in (
+            "movementThreshold", "SetHarvesting", "panicLevel", "timeOfDaySeconds",
+            "worldClock.Advance", "LastGameDeltaSeconds", "weatherShiftCooldownGameSeconds",
+            "birdEventCountdownGameSeconds", "latestOmen",
+        ):
             if required_text not in sea_source:
                 failures.append(f"SeaStateDirector is missing expected runtime feature: {required_text}")
+
+        harvest_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/HarvestingMinigameController.cs").read_text(encoding="utf-8")
+        if 'FindAction("HarvestBeat"' not in harvest_source or "harvestBeatAction.WasPressedThisFrame()" not in harvest_source:
+            failures.append("HarvestingMinigameController must use the shared keyboard/gamepad HarvestBeat action.")
+        if "Keyboard.current" in harvest_source:
+            failures.append("HarvestingMinigameController must not hard-code keyboard-only beat input.")
+
+        acoustic_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/AcousticWorldListener.cs").read_text(encoding="utf-8")
+        for required_text in ("AcousticEventBus.SignalEmitted += HandleSignal", "AcousticEventBus.SignalEmitted -= HandleSignal", "AcousticPerceptionMath.CalculateHearingScore", "SignalHeard?.Invoke", "heardEventIds"):
+            if required_text not in acoustic_source:
+                failures.append(f"AcousticWorldListener is missing expected event-driven behaviour: {required_text}")
+
+        site_interaction = (ROOT / "Assets/_Project/Scripts/Runtime/World/DeepOceanSiteInteractionController.cs").read_text(encoding="utf-8")
+        if 'FindAction("Interact"' not in site_interaction or "inspectedPhenomenonSiteIds" not in site_interaction:
+            failures.append("DeepOceanSiteInteractionController must support input and persistent site inspection.")
+
+        sandbox_source = (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8")
+        for required_text in ("OuterShoals_SurveySandbox.unity", "HollowTrench_SurveySandbox.unity", "ConfigureForRegion(regionId)", "CreateSites"):
+            if required_text not in sandbox_source:
+                failures.append(f"Deep-ocean sandbox builder is missing: {required_text}")
+
+        builder_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
+        if "DeepOceanSurveySandboxBuilder.EnsureScenes(LoadControls())" not in builder_source:
+            failures.append("Project setup must generate the missing deep-ocean survey sandbox scenes.")
+
+        boat_source = (ROOT / "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs").read_text(encoding="utf-8")
+        if "if (isActiveAndEnabled) BindInputActions();" not in boat_source:
+            failures.append("BoatPrototypeController must bind input assigned by the environment builder after AddComponent.")
+
+        atmosphere_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishermanAtmosphereDirector.cs").read_text(encoding="utf-8")
+        if "ISaveParticipant" not in atmosphere_source or "atmosphereFalseLightPosition" not in atmosphere_source:
+            failures.append("FishermanAtmosphereDirector must persist its active incident presentation state.")
 
         yarn_project = load_json("Assets/_Project/Dialogue/Greyhaven.yarnproject")
         if yarn_project.get("projectFileVersion") != 3:

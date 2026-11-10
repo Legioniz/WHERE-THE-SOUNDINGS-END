@@ -30,7 +30,10 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - SaveGameCoordinator is the scene-level entry point. It discovers active and inactive MonoBehaviours implementing ISaveParticipant, asks them to capture state, and restores those participants on load.
 - AutosaveController runs a five-minute unscaled-time interval after a 45-second startup delay, retries failed writes after 30 seconds, and also saves on application pause, focus loss, active-scene unload, application quit, and requested checkpoints. Lifecycle triggers are debounced by 15 seconds to avoid duplicate focus/pause/scene notifications. Explicit checkpoints and application quit bypass this debounce so important progress and the final session state are written.
 - BoatPrototypeController records the Greyhaven starter boat transform and Rigidbody velocity.
-- SeaStateDirector persists elapsed game time, time of day, panic and sea disturbance.\n- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.
+- SeaStateDirector persists elapsed game time, time of day, panic, sea disturbance, weather intensity/remaining duration/next shift, hallucination cooldown, pending seabird warning and latest omen.
+- FishermanAtmosphereDirector persists its incident countdown, caption/hush timers and active false-navigation-light position/remaining duration.
+- AcousticWorldListener persists hearing pressure, last heard signal metadata and a bounded event-ID deduplication ledger.
+- DeepOceanSiteInteractionController persists inspected phenomenon-site IDs.\n- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.
 - VesselConditionController persists hull and engine condition.
 - SpatialCargoHold persists cargo placements and damaged-cell coordinates.
 - SalvageSite persists daily remaining pulls by stable site ID.
@@ -74,7 +77,7 @@ Implemented now:
 - Spatial cargo placements, damaged hold cells and equipment placements through SpatialCargoHold.
 - Action-driven day/time, panic and sea disturbance.
 - Hull/engine condition and wreck-site daily depletion.
-- Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).\n- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs in schema v4.
+- Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).\n- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs in schema v5.
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
 
@@ -97,7 +100,7 @@ A field's presence in SaveGameData is a persistence contract, not proof that the
 
 ## Deep-ocean survey persistence
 
-Save schema v4 adds three fields to WorldSaveData:
+Save schema v5 adds three fields to WorldSaveData:
 - soundingPulseCount: monotonic accepted-pulse sequence used in stable opportunity IDs;
 - discoveredPhenomenonSiteIds: stable site IDs already found by the player;
 - evaluatedSurveyOpportunityIds: recent opportunity IDs retained as a duplicate-evaluation guard.
@@ -105,3 +108,16 @@ Save schema v4 adds three fields to WorldSaveData:
 Schema 0–3 saves migrate to v4 with zero pulses and empty discovery/opportunity collections. This preserves older campaigns without granting discoveries.
 
 SoundingRigController is an ISaveParticipant. Its temporary sonar caption, generated AudioClip, current echo display, and temporary confirmation window are intentionally not persisted. A future physical site controller must add its own state only when the site can actually be altered by player actions.
+
+
+Schema v5 also records:
+- weather fog pressure, remaining fog duration and next weather-shift cooldown;
+- hallucination cooldown, pending seabird event and remaining warning countdown;
+- latest omen text;
+- inspected phenomenon-site IDs;
+- acoustic pressure, latest heard event/region/position/timestamp, and a bounded 128-event duplicate guard;
+- maritime incident countdown, caption/hush durations, hush blend, and active false-navigation-light position/remaining duration.
+
+Schema 4 saves migrate with weather defaults derived from their old weather label, a safe weather-shift delay, no pending bird event, and empty acoustic/inspection history. Existing schema 0–3 migrations remain ordered and preserved.
+
+Generated scenes include an AcousticWorldListener. It subscribes to AcousticEventBus, scores audibility by range/loudness/sensitivity/background noise, deduplicates heard IDs, applies a small disturbance response, and exposes a scored SignalHeard event for future creature or navigation listeners. It does not poll AudioSources.

@@ -197,4 +197,4 @@ Listener rules:
 - Keep presentation audio and gameplay perception separate; muting a clip must not change AI hearing, and playing a clip must not create a gameplay signal by itself.
 - Do not poll every AudioSource per creature or per rendered frame.
 
-Current status: AcousticEventBus and Sounding Rig publication are implemented. No creature, navigation or radio listener adapter is currently connected. A future adapter must use the existing threat and creature state machines, not create a parallel acoustic threat spawner.
+Current status: AcousticEventBus and Sounding Rig publication are implemented. AcousticWorldListener subscribes in generated scenes, scores audibility from distance, authored radius, loudness, sensitivity and background noise, rejects duplicate event IDs, stores a bounded hearing ledger, increases acoustic pressure and sea disturbance, and emits a scored SignalHeard callback. This is a real scene-level listener and integration point, not yet a predator or fish AI reaction. Species-specific listeners must subscribe to SignalHeard and route hearing into their existing state machines; they must not create a parallel acoustic threat spawner.

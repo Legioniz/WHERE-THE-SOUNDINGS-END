@@ -34,7 +34,6 @@ namespace WhereTheSoundingsEnd.Editor
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
                 GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
 
-            DeepOceanSurveySandboxBuilder.EnsureScenes(controls);
             RegisterBuildScene();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -56,7 +55,6 @@ namespace WhereTheSoundingsEnd.Editor
             EnsureProjectFolders();
             InputActionAsset controls = LoadControls();
             GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
-            DeepOceanSurveySandboxBuilder.EnsureScenes(controls);
             RegisterBuildScene();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -73,7 +71,8 @@ namespace WhereTheSoundingsEnd.Editor
 
         private static void RegisterBuildScene()
         {
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
+            // The sandbox builder registers Greyhaven first, followed by each generated deep-water scene.
+            DeepOceanSurveySandboxBuilder.EnsureScenes(LoadControls());
         }
 
         private static void EnsureProjectFolders()

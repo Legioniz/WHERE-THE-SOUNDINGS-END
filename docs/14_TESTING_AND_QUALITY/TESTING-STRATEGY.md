@@ -14,7 +14,7 @@
 - Inventory geometry, blocked cells, item placement and damage.
 - Save DTO validation and schema migration.
 - Stable opportunity identity and idempotent event evaluation.
-- Acoustic signal construction and listener scoring when listener adapters exist.
+- Acoustic signal construction, range/loudness/sensitivity/noise scoring, event deduplication and listener persistence.
 
 ### Play Mode
 - Boat handling, speed gating and Sounding Rig input.
@@ -28,12 +28,16 @@
 
 ### Integration
 - Complete trip, fishing, salvage, survey, recovery and save/load.
-- Load schema 0, 1, 2 and 3 saves into schema 4 without inventing survey progress.
+- Load schema 0, 1, 2 and 3 saves through schema 5 without inventing survey progress; migrate schema 4 weather labels into safe timer defaults.
 - Survey multiple regions and verify opportunity IDs do not collide.
 - Confirm repeated pings from the same heading do not promote an uncertain return.
 - Confirm a second ping from a different heading in the same region and within the time window can promote the interpretation.
 - Confirm cross-region pings cannot confirm one another.
 - Confirm disabled / unloaded SoundingRigController releases its action-driven clock flag.
+- Confirm keyboard and gamepad HarvestBeat bindings both register timed minigame beats.
+- Confirm weather/fog durations, shift cooldowns, hallucination cooldowns and pending seabird warning state survive save/load.
+- Confirm maritime incident caption, hush and false-navigation-light state restore without rerolling the event.
+- Confirm Outer Shoals and Hollow Trench sandbox scenes contain valid regional profiles and authored site markers.
 
 ### Performance
 - Profile water mesh, fog, local wildlife, acoustic listeners and physics at representative and worst-case loads.
@@ -60,7 +64,7 @@ The Edit Mode test source includes:
 - Separate confidence calculation for seabed and sparse biological-layer returns.
 - Site signal confidence from authored signal strength and acoustic attenuation.
 
-The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v4, Sounding Rig persistence markers and regional profile IDs.
+The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v5, Sounding Rig persistence markers and regional profile IDs.
 
 ## Verification boundary
 

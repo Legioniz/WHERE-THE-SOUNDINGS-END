@@ -33,6 +33,7 @@ namespace WhereTheSoundingsEnd.Tests
         {
             if (root != null) Object.DestroyImmediate(root);
             if (cargoDefinition != null) Object.DestroyImmediate(cargoDefinition);
+            AcousticEventBus.ClearSubscribersForTests();
         }
 
         [TestCase(0f, false, false, false)]
@@ -214,6 +215,59 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void AcousticPerceptionMath_UsesRangeLoudnessSensitivityAndNoise()
+        {
+            float clearNear = AcousticPerceptionMath.CalculateHearingScore(10f, 100f, 0.8f, 0.9f, 0.1f);
+            float noisyNear = AcousticPerceptionMath.CalculateHearingScore(10f, 100f, 0.8f, 0.9f, 0.8f);
+            float outsideRange = AcousticPerceptionMath.CalculateHearingScore(100f, 100f, 1f, 1f, 0f);
+
+            Assert.That(clearNear, Is.GreaterThan(noisyNear));
+            Assert.That(clearNear, Is.InRange(0f, 1f));
+            Assert.AreEqual(0f, outsideRange);
+        }
+
+        [Test]
+        public void AcousticWorldListener_ConsumesAndDeduplicatesHeardSignals()
+        {
+            AcousticWorldListener listener = root.AddComponent<AcousticWorldListener>();
+            int received = 0;
+            listener.SignalHeard += (signal, score) => received++;
+
+            AcousticSignal signal = new AcousticSignal(
+                "test.sounding.001", AcousticEventKind.SoundingPulse, "greyhaven",
+                new Vector3(1f, 0f, 1f), 0.8f, 100f, 42.0);
+            AcousticEventBus.Publish(signal);
+            AcousticEventBus.Publish(signal);
+
+            Assert.AreEqual(1, received);
+            Assert.AreEqual("test.sounding.001", listener.LastHeardEventId);
+            Assert.That(listener.AcousticPressure, Is.GreaterThan(0f));
+        }
+
+        [Test]
+        public void SaveMigration_VersionFourAddsPersistentAtmosphereDefaults()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            data.schemaVersion = 4;
+            data.world.weatherId = "dense_fog";
+            data.world.weatherFogPressure = 0f;
+            data.world.inspectedPhenomenonSiteIds = null;
+            data.world.heardAcousticEventIds = null;
+
+            string error;
+            Assert.IsTrue(SaveGameDataMigration.TryPrepare(data, out error), error);
+
+            Assert.AreEqual(5, data.schemaVersion);
+            Assert.AreEqual(0.85f, data.world.weatherFogPressure, 0.001f);
+            Assert.AreEqual(600.0, data.world.weatherRemainingGameSeconds);
+            Assert.AreEqual(900.0, data.world.weatherShiftCooldownGameSeconds);
+            Assert.AreEqual(60.0, data.world.hallucinationCooldownGameSeconds);
+            Assert.IsFalse(data.world.birdEventPending);
+            Assert.IsNotNull(data.world.inspectedPhenomenonSiteIds);
+            Assert.IsNotNull(data.world.heardAcousticEventIds);
+        }
+
+        [Test]
         public void SaveMigration_VersionTwoAddsPanicDamageAndSurveyDefaults()
         {
             SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
@@ -226,13 +280,15 @@ namespace WhereTheSoundingsEnd.Tests
 
             string error;
             Assert.IsTrue(SaveGameDataMigration.TryPrepare(data, out error), error);
-            Assert.AreEqual(4, data.schemaVersion);
+            Assert.AreEqual(5, data.schemaVersion);
             Assert.AreEqual(0.42f, data.world.panicLevel, 0.001f);
             Assert.AreEqual(63f, data.vessel.hullIntegrity, 0.001f);
             Assert.AreEqual(1, data.inventory.damagedCells.Count);
             Assert.AreEqual(0, data.world.soundingPulseCount);
             Assert.IsNotNull(data.world.discoveredPhenomenonSiteIds);
             Assert.IsNotNull(data.world.evaluatedSurveyOpportunityIds);
+            Assert.IsNotNull(data.world.inspectedPhenomenonSiteIds);
+            Assert.IsNotNull(data.world.heardAcousticEventIds);
         }
     }
 }
