@@ -625,14 +625,14 @@ namespace WhereTheSoundingsEnd.Editor
             SalvageSite salvage = site.AddComponent<SalvageSite>();
 
             GameObject brokenHull = Block("Wrecked_Hull_Remnant", site.transform,
-                new Vector3(0f, -0.55f, 0f), new Vector3(5.5f, 0.7f, 2.4f), timber);
+                site.transform.position + new Vector3(0f, -0.55f, 0f), new Vector3(5.5f, 0.7f, 2.4f), timber);
             brokenHull.transform.localRotation = Quaternion.Euler(0f, 18f, 7f);
             Block("Wrecked_Deck_Plate", site.transform,
-                new Vector3(1.2f, -0.05f, 0.8f), new Vector3(2.6f, 0.18f, 1.1f), metal);
+                site.transform.position + new Vector3(1.2f, -0.05f, 0.8f), new Vector3(2.6f, 0.18f, 1.1f), metal);
             Block("Wrecked_Beam_A", site.transform,
-                new Vector3(-1.8f, -0.15f, -1.1f), new Vector3(0.35f, 0.3f, 3.2f), timber);
+                site.transform.position + new Vector3(-1.8f, -0.15f, -1.1f), new Vector3(0.35f, 0.3f, 3.2f), timber);
             Block("Wrecked_Beam_B", site.transform,
-                new Vector3(2.0f, -0.2f, -1.3f), new Vector3(0.3f, 0.25f, 2.5f), timber);
+                site.transform.position + new Vector3(2.0f, -0.2f, -1.3f), new Vector3(0.3f, 0.25f, 2.5f), timber);
 
             SphereCollider radius = site.AddComponent<SphereCollider>();
             radius.isTrigger = true;
