@@ -10,7 +10,7 @@
 
 This catalog defines the fish and marine creatures the player may catch, land, process, and sell. It uses the project's provisional warm-water volcanic archipelago and draws on real Western Central Pacific and Philippine fisheries.
 
-**First roster target:** 56 fish, 21 invertebrates, 3 optional seaweed harvests, plus a separate protected / release-only wildlife class. This is a game content proposal, not a claim that every species is abundant, sustainable, or legally harvestable in every real-world location. Exact climate, species distribution, and fictional harvest rules remain provisional.
+**Expanded proposed roster:** 100 fish, 47 invertebrates, 3 broad seaweed harvest categories plus 5 specific seaweed records, and a separate protected / release-only wildlife class. This is a game content proposal, not a claim that every species is abundant, sustainable, or legally harvestable in every real-world location. Exact climate, species distribution, and fictional harvest rules remain provisional.
 
 Philippine marine capture fisheries include pelagic resources such as tuna, sardines, scads, mackerels, and anchovies, and demersal resources such as slipmouth, threadfin bream, squid, shrimp, and blue crab. SEAFDEC's Philippines profile, using BFAR production data for 2023, lists these among the leading marine capture commodities. NFRDI also identifies commercially relevant reef fish families including snappers, groupers, trevallies, emperors, goatfishes, rabbitfishes, and threadfin breams.
 
@@ -32,7 +32,7 @@ References:
 | BR | Blackrock Reach: basalt coast, reef edge, surge channels |
 | DP | The Drowned Parish: flooded river valley and brackish ruins |
 | OS | The Outer Shoals: offshore ridges, pelagic grounds, seamount edges |
-| HT | The Hollow Trench: deep slope, canyon, abyssal and hadal habitats |
+| HT | The Hollow Trench: deep slope and canyon margins; abyssal / hadal floor is generally not a routine catch zone |
 
 A regional assignment means the species may occur there under suitable habitat and environmental conditions, not that it is endemic.
 
@@ -72,7 +72,7 @@ Nets, pots, specialized jigs, and deep drop lines are equipment unlocks. Avoid u
 
 ---
 
-## 3. Fish species — 56 entries
+## 3. Fish species — 100 entries
 
 Scientific names are used for stable production identification. Common and local names may vary between ports and languages.
 
@@ -153,7 +153,7 @@ Parrotfish are a deliberately constrained harvest. Their grazing can influence r
 
 ---
 
-## 4. Catchable invertebrates — 21 entries
+## 4. Catchable invertebrates — 47 entries
 
 | ID | Creature | Scientific name | Region / habitat | Method | Rarity | Trade |
 |---|---|---|---|---|---|---|
@@ -431,3 +431,180 @@ Separate the authored species definition from runtime stock, individual catch in
 - [Fish Population and Food-Web Model](../07_GAME_RULES_AND_BALANCING/FISH-POPULATION-MODEL.md)
 - [Economy Mathematics](../07_GAME_RULES_AND_BALANCING/ECONOMY-MATHEMATICS.md)
 - [Creature Life Cycles and Ecological Behaviour](../12_AI_AND_SIMULATION/CREATURE-LIFE-CYCLES-AND-ECOLOGY.md)
+
+
+### 3.4 Additional reef, coastal, shelf-edge, and freshwater fish (FSH-057–FSH-100)
+
+This expansion adds commercially plausible fish from reef slopes, current corridors, exposed coast, soft-bottom habitat, upper deep slopes, and the freshwater reaches feeding Greyhaven's estuary. The deep-bottom species are catchable only on the upper slope / deep-drop grounds described below, not from the hadal floor.
+
+| ID | Fish | Scientific name | Region / habitat | Method | Rarity | Trade |
+|---|---|---|---|---|---|---|
+| FSH-057 | Redbelly yellowtail fusilier | *Caesio cuning* | SH, BR, OS; reef slopes and current edges | Rod / bait, selective net | Common / seasonal | T2 |
+| FSH-058 | Blue-and-gold fusilier | *Caesio caerulaurea* | SH, BR, OS; reef edge and midwater schools | Rod / bait, selective net | Uncommon | T2 |
+| FSH-059 | Paddletail snapper | *Lutjanus gibbus* | SH, BR, OS; reef slopes and drop-offs | Rod / bait, handline | Uncommon | T3 |
+| FSH-060 | Blackspot snapper | *Lutjanus fulviflamma* | GH, DP, SH; estuary edge, lagoon and coastal reef | Rod / bait | Common / uncommon | T2 |
+| FSH-061 | Red emperor | *Lutjanus sebae* | SH, BR, OS; reef slope and shelf edge | Bottom rod / bait, handline | Scarce | T4 |
+| FSH-062 | Malabar grouper | *Epinephelus malabaricus* | GH, DP, SH; estuary structures, channels and coastal reef | Rod / bait, handline | Uncommon | T4 |
+| FSH-063 | Brown-marbled grouper | *Epinephelus fuscoguttatus* | SH, BR, OS; outer reef and reef slope | Rod / bait, handline | Scarce | T5 |
+| FSH-064 | Wire-netting cod | *Epinephelus chlorostigma* | BR, OS, HT upper slope; rocky and deep shelf structure | Deep handline, bottom rod / bait | Scarce | T4 |
+| FSH-065 | Lunar-tail grouper | *Variola louti* | SH, BR, OS; clear outer reef and rocky drop-off | Rod / bait, rod / lure | Scarce | T4 |
+| FSH-066 | Painted sweetlips | *Diagramma pictum* | SH, BR, DP; reef, rubble and sheltered coastal structures | Rod / bait | Uncommon | T3 |
+| FSH-067 | Blackspotted rubberlip | *Plectorhinchus gibbosus* | SH, BR; sandy reef margins and rubble | Rod / bait | Uncommon | T2 |
+| FSH-068 | Iodine bream | *Gymnocranius euanus* | OS, HT upper slope; deep shelf and hardground | Deep handline | Rare | T4 |
+| FSH-069 | Large-eyed sea bream | *Wattsia mossambica* | OS, HT upper slope; deep shelf and slope | Deep handline | Rare | T4 |
+| FSH-070 | Orange-spotted spinefoot | *Siganus guttatus* | GH, DP, SH; estuary edge, seagrass and reef flat | Rod / bait, selective net | Common | T2 |
+| FSH-071 | Blue-spotted cornetfish | *Fistularia commersonii* | SH, BR, OS; reef edge and sandy channels | Rod / lure, light handline | Uncommon | T2 |
+| FSH-072 | Hound needlefish | *Tylosurus crocodilus* | GH, SH, OS; surface waters, channels and reef margins | Rod / lure, surface bait | Uncommon | T2 |
+| FSH-073 | Black-barred halfbeak | *Hemiramphus far* | GH, SH, OS; surface schools near coast and islands | Light handline, selective net | Common / seasonal | T1 |
+| FSH-074 | Bartail flathead | *Platycephalus indicus* | GH, DP, SH; sandy and muddy bottom | Bottom rod / bait | Uncommon | T2 |
+| FSH-075 | Large-scale tonguesole | *Paraplagusia blochii* | GH, DP; soft-bottom estuary and coastal flats | Bottom rod / bait, selective net | Uncommon | T2 |
+| FSH-076 | Bigeye bream | *Monotaxis grandoculis* | SH, BR, OS; reef slope and sandy reef patches | Rod / bait, handline | Uncommon | T3 |
+| FSH-077 | Black jack | *Caranx lugubris* | BR, OS; exposed reefs, current lines and offshore structures | Rod / lure, trolling | Scarce | T4 |
+| FSH-078 | Almaco jack | *Seriola rivoliana* | OS, HT upper slope; offshore structures and deep current edges | Trolling, deep handline | Scarce | T4 |
+| FSH-079 | Dogtooth tuna | *Gymnosarda unicolor* | BR, OS; steep reef edges and offshore pinnacles | Heavy rod / lure, trolling | Rare | T5 |
+| FSH-080 | Dorab wolf-herring | *Chirocentrus dorab* | GH, DP, OS; coastal pelagic water and estuary mouths | Rod / bait, trolling, selective net | Uncommon | T3 |
+| FSH-081 | Redtail scad | *Decapterus kurroides* | SH, OS; coastal and offshore pelagic schools | Selective net, handline | Uncommon / seasonal | T2 |
+| FSH-082 | Picnic seabream | *Acanthopagrus berda* | GH, DP; estuary, brackish channels and coastal flats | Rod / bait | Uncommon | T3 |
+| FSH-083 | Goldlined seabream | *Rhabdosargus sarba* | GH, SH, DP; estuary mouth, reef flat and sandy coast | Rod / bait | Uncommon | T3 |
+| FSH-084 | Yellowstripe goatfish | *Mulloidichthys flavolineatus* | SH, BR; sand patches beside reef | Bottom rod / bait | Common / uncommon | T2 |
+| FSH-085 | Dash-and-dot goatfish | *Parupeneus barberinus* | SH, BR; reef rubble and sandy channels | Bottom rod / bait | Uncommon | T3 |
+| FSH-086 | Goldsaddle goatfish | *Parupeneus cyclostomus* | SH, BR, OS; reef slope and outer reef | Bottom rod / bait | Scarce | T4 |
+| FSH-087 | Ruby snapper | *Etelis carbunculus* | OS, HT upper slope; deep slope, typically around 200–400 m in regional deep-water fisheries | Deep drop-line / deep handline | Rare | T5 |
+| FSH-088 | Longtail red snapper | *Etelis coruscans* | OS, HT upper slope; deep slope, typically around 200–400 m in regional deep-water fisheries | Deep drop-line / deep handline | Rare | T5 |
+| FSH-089 | Small-tooth jobfish | *Aphareus rutilans* | OS, HT upper slope; deep reef and slope | Deep drop-line / deep handline | Scarce | T4 |
+| FSH-090 | Green jobfish | *Aprion virescens* | BR, OS; reef drop-offs and upper slope | Deep handline, rod / bait | Scarce | T4 |
+| FSH-091 | Rosy jobfish | *Pristipomoides filamentosus* | OS, HT upper slope; deep shelf and slope, commonly 50–300 m in regional fisheries | Deep drop-line / deep handline | Rare | T5 |
+| FSH-092 | Purple-cheek jobfish | *Pristipomoides multidens* | OS, HT upper slope; deep shelf and slope, commonly 50–300 m | Deep drop-line / deep handline | Rare | T5 |
+| FSH-093 | Banded flower snapper | *Pristipomoides zonatus* | OS, HT upper slope; deep shelf and seamount flanks | Deep drop-line / deep handline | Rare | T5 |
+| FSH-094 | Yellow-finned jobfish | *Pristipomoides flavipinnis* | OS, HT upper slope; deep shelf and slope | Deep drop-line / deep handline | Scarce | T4 |
+| FSH-095 | Kalikali / pink snapper | *Pristipomoides sieboldii* | OS, HT upper slope; deep reef and shelf break | Deep drop-line / deep handline | Rare | T5 |
+| FSH-096 | Flower snapper | *Pristipomoides amoenus* | OS, HT upper slope; deep hardground and slope | Deep drop-line / deep handline | Rare | T5 |
+| FSH-097 | Asian swamp eel | *Monopterus albus* | GH upper river, marsh and slow freshwater channels | Baited trap, handline | Uncommon | T3 |
+| FSH-098 | Striped snakehead | *Channa striata* | GH upper river, floodplain pools and vegetated freshwater | Rod / bait, trap | Uncommon | T3 |
+| FSH-099 | Climbing perch | *Anabas testudineus* | GH upper river, marsh and low-oxygen freshwater pools | Rod / bait, trap | Common | T2 |
+| FSH-100 | Philippine broadhead catfish | *Clarias macrocephalus* | GH upper river, marsh and muddy freshwater channels | Rod / bait, trap | Uncommon | T3 |
+
+**Deep-water catch boundary:** The Hollow Trench's hadal floor is not a routine fishery. The deep-drop species above are based on upper-slope regional fisheries at roughly 50–400 m, with individual species-specific ranges. The player needs purpose-built deep-line equipment, correct line capacity, suitable weather, and a mapped slope station. These species are not caught from a shallow boat by ordinary rod equipment. Regional deep-bottom fisheries commonly target ruby snappers and jobfishes, with *Etelis carbunculus* and *E. coruscans* often reported around 200–400 m and several *Pristipomoides* species around 50–300 m. See the SPC deep-bottom fishing guide and the regional deep-snapper study in the references below.
+
+The freshwater fish are restricted to the upper river and connected floodplain habitats of Greyhaven. They do not appear in saltwater reef or offshore tables.
+
+---
+
+### 4.2 Additional crabs, crustaceans, mollusks, and other seafood (INV-022–INV-047)
+
+| ID | Creature / seafood | Scientific name | Region / habitat | Method | Rarity | Trade |
+|---|---|---|---|---|---|---|
+| INV-022 | Orange mud crab | *Scylla olivacea* | GH, DP; mangrove creeks and muddy estuary | Crab pot, baited trap | Uncommon | T4 |
+| INV-023 | Purple mud crab | *Scylla tranquebarica* | GH, DP; larger estuary channels and mangrove mud | Crab pot, baited trap | Scarce | T4 |
+| INV-024 | Crucifix crab | *Charybdis feriata* | GH, SH, DP; coastal shelf and sandy / muddy bottom | Crab pot, baited trap | Uncommon | T3 |
+| INV-025 | Three-spot swimming crab | *Portunus sanguinolentus* | GH, SH, DP; sandy shelf and nearshore bottom | Crab pot, baited trap | Uncommon | T3 |
+| INV-026 | Long-eyed swimming crab | *Podophthalmus vigil* | GH, DP, SH; sandy and muddy coastal bottom | Crab pot, baited trap | Scarce / bycatch | T3 |
+| INV-027 | Crenate swimming crab | *Thalamita crenata* | SH, DP; reef rubble, mangrove edge and shallow bottom | Small crab pot, hand collection where permitted | Uncommon / bycatch | T2 |
+| INV-028 | Common banded mantis shrimp | *Lysiosquillina maculata* | GH, DP, SH; long burrows in sand and mud | Specialized burrow trap | Scarce | T4 |
+| INV-029 | Sculptured mitten lobster | *Parribacus antarcticus* | SH, BR; reef rubble and rocky crevices | Lobster pot, permitted hand capture | Scarce | T4 |
+| INV-030 | Longleg spiny lobster | *Panulirus longipes* | BR, SH, OS; rocky reef and reef slope shelter | Lobster pot, permitted hand capture | Scarce | T4 |
+| INV-031 | Donkey's ear abalone | *Haliotis asinina* | BR, SH; wave-washed rocky reef with algal food | Licensed farm / managed harvest, permitted hand collection | Scarce | T5 |
+| INV-032 | Asian hard clam | *Meretrix meretrix* | GH, DP; sandy and muddy intertidal flats | Hand collection, shallow sediment rake | Uncommon | T3 |
+| INV-033 | Razor clams | *Solen* spp. | GH, DP, SH; fine sand and mud flats | Hand collection, sediment pump in designated beds | Seasonal / uncommon | T3 |
+| INV-034 | Pen shell | *Atrina pectinata* | GH, DP, SH; soft sediment with stable seagrass or muddy bottom | Hand collection / careful small-scale harvest | Scarce | T3 |
+| INV-035 | Dog conch | *Laevistrombus canarium* | GH, SH, DP; seagrass, sand and mud flats | Hand collection at designated beds | Uncommon | T3 |
+| INV-036 | Spider conch | *Lambis lambis* | SH, BR; reef flat and seagrass edge | Hand collection at designated beds | Scarce | T4 |
+| INV-037 | Sandfish sea cucumber | *Holothuria scabra* | GH, SH, DP; clean seagrass and sand-mud flats | Licensed, size-controlled collection; processing contract | Very scarce / controlled | T5 contract |
+| INV-038 | Warty sea cucumber | *Stichopus horrens* | SH, DP; reef, rubble and seagrass edge | Licensed, size-controlled collection; processing contract | Scarce / controlled | T4 contract |
+| INV-039 | Deepwater redfish sea cucumber | *Actinopyga echinites* | SH, BR; reef and seagrass-associated habitat | Licensed, size-controlled collection; processing contract | Scarce / controlled | T4 contract |
+| INV-040 | Lollyfish sea cucumber | *Holothuria atra* | SH, BR; reef flat and seagrass | Licensed, size-controlled collection; processing contract | Uncommon / controlled | T3 contract |
+| INV-041 | Leopardfish sea cucumber | *Bohadschia argus* | SH, BR; coral rubble and reef flat | Licensed, size-controlled collection; processing contract | Scarce / controlled | T4 contract |
+| INV-042 | Edible jellyfish | *Rhopilema hispidum* | GH, SH, OS; seasonal coastal and offshore bloom waters | Dedicated non-damaging net / bloom harvest | Seasonal | T3 processed |
+| INV-043 | Edible squid / lokos | *Photololigo edulis* | SH, DP, OS; coastal shelf and sand-mud bottom | Squid jig, light-assisted jigging | Common / seasonal | T3 |
+| INV-044 | Spineless cuttlefish | *Sepia lycidas* | SH, DP, OS; sandy and muddy shelf | Cuttlefish jig, baited trap | Uncommon | T4 |
+| INV-045 | Western king prawn | *Penaeus latisulcatus* | DP, SH, OS; sandy and muddy shelf | Selective net, baited prawn trap | Uncommon | T3 |
+| INV-046 | Palm shrimp | *Metapenaeus palmensis* | GH, DP, SH; estuary and soft-bottom coastal ground | Selective net, baited trap | Uncommon | T2 |
+| INV-047 | Asian moon scallop | *Amusium pleuronectes* | DP, SH, OS; sandy shelf and offshore soft bottom | Selective scallop dredge / small-scale pot where designed | Scarce | T4 |
+
+**Crab and bycatch note:** The Philippine Journal of Fisheries' Western Visayan Sea blue-swimming-crab assessment records *Charybdis feriata*, *Portunus sanguinolentus*, *Podophthalmus vigil*, and *Thalamita crenata* in crab-pot catches, alongside *Portunus pelagicus*. Use these as plausible mixed crab-ground catches, not as proof that every region has equal abundance. Gear selectivity, undersized releases, and bycatch survival should be modeled.
+
+**Sea cucumber restriction:** Sea cucumbers must be a controlled specialist activity, never an unlimited common harvest. BFAR Administrative Circular 248 (2013) set permit / transport requirements and a minimum dried-size rule for commercial collection and trade. The real-world rule is a research reference, not a complete legal interpretation; check current regulations before final release. In game, use a licensed buyer, size and maturity checks, closed grounds, slow stock recovery, and a drying / processing stage. The player cannot sell freshly collected sea cucumbers through the ordinary fishmonger.
+
+**Jellyfish safety:** *Rhopilema hispidum* has been reported as an edible and commercially important species in Palawan. A jellyfish bloom must still be species-identified; never allow unidentified or dangerous jellyfish to become food. The NFRDI-linked Philippine Journal of Fisheries policy brief distinguishes edible species from harmful jellyfish and documents the risks of stings and blooms.
+
+---
+
+### 5.1 Species-level seaweed and edible algae records
+
+The earlier ALG-001–ALG-003 entries remain broad market categories. These specific records allow the player to distinguish edible sea grapes, carrageenan-farm seaweeds, and agar-producing seaweeds without double-counting the broad categories as separate species.
+
+| ID | Harvest | Scientific name | Habitat / production | Method | Trade role |
+|---|---|---|---|---|---|
+| ALG-004 | Sea grapes / lato | *Caulerpa lentillifera* | GH, SH; sheltered shallow beds or managed plots | Careful hand harvest / farm harvest | Fresh food, premium local market |
+| ALG-005 | Spinosum seaweed | *Eucheuma denticulatum* | SH, OS; managed seaweed farm lines | Harvest cultivation lines | Carrageenan raw material |
+| ALG-006 | Cottonii seaweed | *Kappaphycus alvarezii* | SH, OS; managed shallow farm plots | Harvest cultivation lines | Carrageenan raw material |
+| ALG-007 | Edible red agar seaweed | *Gracilaria edulis* | GH, DP, SH; sheltered estuary and coastal plots | Cut-and-regrow harvest | Agar / food processing |
+| ALG-008 | Sea grape / Caulerpa | *Caulerpa racemosa* | GH, SH; suitable sheltered shallow beds | Careful hand harvest | Fresh food / local market |
+
+Do not assume every species in the genus *Caulerpa* is interchangeable in food handling. Farmed plots and identified edible species are safer and more predictable than unrestricted wild gathering. Philippine sources identify *Caulerpa lentillifera* as a cultivated edible seaweed, and Philippine seaweed farming commonly includes *Eucheuma*, *Kappaphycus*, *Gracilaria*, and *Caulerpa* groups.
+
+---
+
+## 15. Expanded geography, depth, and conservation rules
+
+### 15.1 New geography-to-catch links
+
+- **Greyhaven upper river:** Asian swamp eel, striped snakehead, climbing perch, and Philippine broadhead catfish. These are freshwater catches and must not spawn in saltwater harbour zones.
+- **Estuary and mangrove margin:** Orange and purple mud crabs, blackspot snapper, picnic seabream, Asian hard clam, razor clams, and selected prawns. Brackish tolerance and tide phase determine availability.
+- **Seagrass and shallow reef:** Fusiliers, rabbitfish, goatfish, reef sweetlips, dog conch, spider conch, sea cucumbers, and sea urchins. Grazer harvest should reduce local grazing pressure and can affect algae / habitat quality.
+- **Exposed basalt reef and outer reef slope:** Groupers, lunar-tail grouper, dogtooth tuna, cornetfish, and spiny lobsters. Shelter and surge conditions determine animal activity.
+- **Soft-bottom shelf:** Flathead, tonguesole, breams, squid, cuttlefish, scallops, and prawns. Fishing is by selective bottom gear; no unrestricted seabed trawling.
+- **Offshore current fronts:** Fusiliers, jacks, dogtooth tuna, pelagic schools, and migratory predators. Surface signs and bird activity may reveal feeding aggregations.
+- **Upper deep slope:** Ruby snappers, longtail red snapper, jobfishes, deeper groupers and deep breams. These require a deep-drop line, suitable vessel capability, and a mapped slope station.
+- **Abyssal / hadal floor:** Not part of the ordinary commercial fishery. Deep-sea inhabitants can be encountered, photographed, or sampled by story or research missions; do not turn the trench floor into a normal fishing pond.
+
+### 15.2 Gear progression for the expanded catalog
+
+| Gear unlock | Catch group | Main constraint |
+|---|---|---|
+| Basic rod and bait | Estuary fish, small coastal fish | Correct depth and bait |
+| Light spinning rod | Needlefish, cornetfish, trevallies, reef edge fish | Casting lane and lure behavior |
+| Bottom rig | Threadfin bream, emperors, snappers, flatfish | Seabed type, sinker weight, snag risk |
+| Squid / cuttlefish jig | Squid and cuttlefish | Light, tide, depth, and seasonal activity |
+| Crab / prawn pot | Crab, lobster, shrimp, selected octopus | Bait, soak duration, escape risk, bycatch |
+| Selective net | Anchovies, sardines, scads, fusiliers, mullet | School size, mesh selectivity, legal local quota |
+| Deep-drop handline | Ruby snapper, Etelis snappers, jobfishes, deep breams | 50–400 m upper slope, line capacity, current, long retrieval |
+| Managed shellfish harvest kit | Clams, mussels, oysters, selected gastropods | Bed provenance, water quality, legal size and season |
+| Seaweed cultivation gear | Caulerpa, Eucheuma, Kappaphycus, Gracilaria | Farm plot, crop cycle, disease and water quality |
+
+### 15.3 Species-specific risk and retention
+
+- Large groupers and reef predators should have size distributions and maturity thresholds. A large adult should not be the most common catch.
+- Reef herbivores such as rabbitfish and parrotfish influence the ecosystem. Heavy fishing must reduce grazing activity or shift the local balance.
+- Sea cucumber collection is a controlled endgame / specialist activity with permits, closed windows, size checks, slow recovery, and processing. It must not be an easy high-yield exploit.
+- Abalone, spider conch and other slow-growing reef mollusks are rare, bed-limited, or farmed. Their local stocks recover slowly.
+- Jellyfish harvesting is an event activity during an identified edible-species bloom, not a generic net catch.
+- Freshwater Greyhaven fish are available only upstream of the brackish transition. The saltwater estuary may contain euryhaline species but not every freshwater species.
+- Species with ciguatera or other food-safety concerns should have region-specific warnings or retention restrictions if that system is implemented. Never make a blanket claim that all reef fish of a given family are safe.
+
+### 15.4 Additions to the no-sale / release-only record
+
+Keep the following outside the ordinary catch-and-sell list:
+
+- Sailfish, marlins, and spearfishes: sport / research encounter with tag-and-release rules unless a specifically reviewed fictional fishery is designed.
+- Whale sharks, manta and devil rays, sawfish, turtles, dugongs, dolphins, and whales: observe, rescue, document, or release; never sell.
+- Ornamental or ecologically important reef fish such as butterflyfish, angelfish, Moorish idols, and most damselfish: not ordinary food catches.
+- Pufferfish, porcupinefish, boxfish, and other potentially toxic species: non-sale hazardous bycatch / release; do not create casual edible products.
+- Giant clams and corals: survey and observe only.
+- Smooth top shell (*Trochus niloticus*) and green snail (*Turbo marmoratus*): keep excluded from sale pending current legal review. Philippine conservation rules have specifically listed these taxa among threatened mollusks.
+
+These exclusions are a conservative game-design rule. Actual local legal status should be rechecked against the law and regulations in force at the time of release.
+
+## 16. Expanded research references
+
+- SPC, [Deep-bottom fishing techniques for the Pacific Islands](https://coastfish.spc.int/Fishing/Deep_E/Deep_E.pdf) — deep-bottom target species, including Etelis snappers and Pristipomoides jobfishes, and fishing techniques.
+- PLOS ONE, [Species distribution models of tropical deep-sea snappers](https://doi.org/10.1371/journal.pone.0127395) — Western Central Pacific deep-water snapper and jobfish depth distributions.
+- Philippine Journal of Fisheries, [Blue Swimming Crab Stock Assessment in the Western Visayan Sea](https://www.nfrdi.da.gov.ph/tpjf/vol25/Blue%20Swimming%20Crab%20Stock%20Assessment%20in%20the%20Western%20Visayan%20Sea.pdf) — crab fishery, pot catch, and bycatch taxa.
+- BFAR, [Updated list of registered live food-fish exporters](https://www.bfar.da.gov.ph/wp-content/uploads/2024/11/103124_Updated-List-of-Registered-Live-Food-Fish-Exporters.pdf) — export species including orange mud crab, purple mud crab, crucifix crab, banded mantis shrimp, and other market taxa.
+- SEAFDEC/AQD, [Farming Abalone](https://www.seafdec.org.ph/technologies/abalone/) — Philippine *Haliotis asinina* culture and market context.
+- BFAR Administrative Circular 248 (2013), [Sea cucumber size regulation and trade](https://repository.unesco.gov.ph/items/6e11ea3b-fef0-4bd6-8513-1551dd6d2aa8) — permit, transport and dried-size restrictions in the cited issuance.
+- Philippine Journal of Fisheries, [Harmful Jellyfishes are Manageable](https://www.nfrdi.da.gov.ph/tpjf/vol29_2/Harmful%20Jellyfishes%20are%20Manageable.pdf) — jellyfish safety and *Rhopilema hispidum* context.
+- BFAR-CALABARZON, [Seaweeds](https://bfar4a.da.gov.ph/seaweeds/) — *Caulerpa lentillifera*, *Eucheuma*, and *Gracilaria* cultivation context.
+- NAST Philippines, [Philippine seaweeds and fishery by-products](https://www.nast.dost.gov.ph/index.php/13-news-press-releases/971-philippine-seaweeds-and-fishery-by-products-are-raw-materials-for-locally-made-bioplastics) — Philippine seaweed species and farmed groups.
+- BFAR Administrative Order / Fisheries Administrative Order 208 s. 2001, [Conservation of rare, threatened and endangered fishery species](https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/10/44018) — includes protected mollusk taxa such as *Trochus niloticus* and *Turbo marmoratus*.
+
