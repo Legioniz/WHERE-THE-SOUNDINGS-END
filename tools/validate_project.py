@@ -48,6 +48,9 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Narrative/YarnDialogueSaveParticipant.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs",
+    "Assets/_Project/Scripts/Runtime/NPC/NpcAgent.cs",
+    "Assets/_Project/Tests/EditMode/NpcScheduleTests.cs",
+    "docs/12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md",
     "Assets/_Project/Dialogue/Greyhaven.yarnproject",
     "Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn",
     "Assets/_Project/Tests/EditMode/CargoGridGeometryTests.cs",
@@ -224,6 +227,37 @@ def main() -> int:
             ):
                 if required_text not in yarn_text:
                     failures.append(f"Harbourmaster Yarn source is missing: {required_text}")
+
+        if yarn_source.exists():
+            for npc_node in (
+                "title: Greyhaven_Fishmonger",
+                "title: Greyhaven_Mechanic",
+                "title: Greyhaven_NetMender",
+            ):
+                if npc_node not in yarn_text:
+                    failures.append(f"Greyhaven Yarn source is missing resident dialogue node: {npc_node}")
+
+        npc_source = (ROOT / "Assets/_Project/Scripts/Runtime/NPC/NpcAgent.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "NpcScheduleResolver", "SeaStateDirector", "ISaveParticipant",
+            "NpcStateSaveData", "ModifyRelationship", "walkingSpeed",
+        ):
+            if required_text not in npc_source:
+                failures.append(f"NpcAgent is missing expected runtime feature: {required_text}")
+
+        npc_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
+        for resident_id in (
+            "greyhaven.harbourmaster", "greyhaven.mara_venn",
+            "greyhaven.tomas_vale", "greyhaven.inez_sarmiento",
+        ):
+            if resident_id not in npc_builder:
+                failures.append(f"Greyhaven scene builder is missing resident ID: {resident_id}")
+        if "BuildVillageResident" not in npc_builder or "CreateNpcAnchor" not in npc_builder:
+            failures.append("Greyhaven scene builder must generate scheduled resident NPCs and waypoint anchors.")
+
+        interaction_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs").read_text(encoding="utf-8")
+        if "public string DialogueNode" not in interaction_source or "public string DisplayName" not in interaction_source:
+            failures.append("Resident interaction must support per-NPC dialogue nodes and display names.")
 
         input_map = maps.get("Boat")
         if input_map is not None:
