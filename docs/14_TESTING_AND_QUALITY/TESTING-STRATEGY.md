@@ -55,7 +55,9 @@ The Edit Mode test source includes:
 - deep scattering layer day/night depth ordering;
 - mid-water return separation from seabed;
 - stable survey opportunity hashing;
-- Greyhaven shallow profile versus Outer Shoals deep profile.\n- Same-region, changed-heading and fresh-time-window requirements for independent scattering-layer observations.\n- Separate confidence calculation for seabed and sparse biological-layer returns.
+- Greyhaven shallow profile versus Outer Shoals deep profile.
+- Same-region, changed-heading and fresh-time-window requirements for independent scattering-layer observations.
+- Separate confidence calculation for seabed and sparse biological-layer returns.
 
 The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v4, Sounding Rig persistence markers and regional profile IDs.
 
