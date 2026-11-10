@@ -6,7 +6,7 @@
 | 02_LORE_AND_WORLD | Canonical setting facts, history, myths, maritime research |
 | 03_STORY_AND_NARRATIVE | Acts, endings, quests, dialogue, side-quest drafts |
 | 04_CHARACTERS_AND_ENTITIES | Protagonist, NPCs, fish, creatures |
-| 05_WORLD_AND_LEVEL_DESIGN | Regions, locations, exploration |
+| 05_WORLD_AND_LEVEL_DESIGN | Regions, locations, exploration, ecology |
 | 06_GAMEPLAY_SYSTEMS | Player-facing mechanics |
 | 07_GAME_RULES_AND_BALANCING | Probability, ecology, economy, tuning |
 | 08_TECHNICAL_DESIGN | Unity/C# architecture, data, scenes, saves |
@@ -20,20 +20,29 @@
 | 16_REFERENCES_AND_RESEARCH | Research sources |
 | 17_ARCHIVE | Deprecated designs and experiments |
 
-## AI, event, and encounter implementation
+## World geography and regional ecology
 
-- [Creature AI and threat behaviour](12_AI_AND_SIMULATION/CREATURE-AI.md)
+- [World Bible](02_LORE_AND_WORLD/WORLD-BIBLE.md)
+- [Regional ecology and creature distribution](05_WORLD_AND_LEVEL_DESIGN/REGIONAL-ECOLOGY-AND-CREATURES.md)
+- [Location catalog](05_WORLD_AND_LEVEL_DESIGN/LOCATION-CATALOG.md)
+- [Exploration design](05_WORLD_AND_LEVEL_DESIGN/EXPLORATION-DESIGN.md)
+
+## Creature roster and behaviour
+
+- [Creature Bible](04_CHARACTERS_AND_ENTITIES/CREATURE-BIBLE.md)
+- [Creature behaviour source map](04_CHARACTERS_AND_ENTITIES/CREATURE-BEHAVIORS.md)
+- [Anomalous species and site-specific entities](04_CHARACTERS_AND_ENTITIES/ANOMALOUS-SPECIES.md)
 - [Creature life cycles and ecological behaviour](12_AI_AND_SIMULATION/CREATURE-LIFE-CYCLES-AND-ECOLOGY.md)
+- [Fish population model](07_GAME_RULES_AND_BALANCING/FISH-POPULATION-MODEL.md)
 - [AI coordination and hunting logic](12_AI_AND_SIMULATION/AI-COORDINATION-AND-HUNTING-LOGIC.md)
 - [Threat Director and encounter scheduling](12_AI_AND_SIMULATION/THREAT-DIRECTOR.md)
 - [World event scheduler](12_AI_AND_SIMULATION/WORLD-SIMULATION.md)
 - [Entity perception and encounter mathematics](07_GAME_RULES_AND_BALANCING/ENTITY-PERCEPTION-AND-ENCOUNTER-MATH.md)
-- [Quest runtime trigger matrix](03_STORY_AND_NARRATIVE/SIDE_QUESTS/MARITIME_MYSTERIES/EVENT-BEHAVIOUR-AND-TRIGGER-MATRIX.md)
 - [Threat audio logic](10_AUDIO_AND_SOUND_DESIGN/THREAT-AUDIO-LOGIC.md)
 - [Unity implementation blueprint](08_TECHNICAL_DESIGN/AI-IMPLEMENTATION-BLUEPRINT.md)
 - [Camera FOV and player awareness](08_TECHNICAL_DESIGN/CAMERA-AND-PLAYER-AWARENESS.md)
 
-## New maritime lore collection
+## Narrative and maritime lore
 
 - [Maritime myths and motifs catalogue](02_LORE_AND_WORLD/MARITIME-MYTHS-CATALOG.md)
 - [Maritime research notes and source-quality cautions](02_LORE_AND_WORLD/MARITIME-LORE-RESEARCH-NOTES.md)
