@@ -23,10 +23,10 @@ The clock uses scaled gameplay delta, so a pause state cannot accidentally advan
 
 Panic is a 0–1 psychological-pressure value. It is not hunger, oxygen or a conventional survival bar.
 
-- Night increases panic while time is advancing.
-- Periodic mist and dense-fog weather events add pressure and thicken the view distance. Fog state is stored in the world save.
-- Daylight gradually reduces panic.
-- The sheltered Greyhaven harbor reduces panic faster during daylight.
+- Night increases panic while time is advancing at 0.0012 per in-game minute (about +0.72 over a full ten-hour night).
+- Periodic mist and dense-fog weather events add pressure at up to 0.0025 per in-game minute, and thicken the view distance. Fog state is stored in the world save.
+- Daylight gradually reduces panic at 0.00065 per in-game minute.
+- The sheltered Greyhaven harbor adds a further 0.0015 recovery per in-game minute during daylight.
 - Panic persists through save/load.
 
 Panic changes environmental presentation: fog density/colour and directional-light intensity. A separate weather cycle can roll mist or dense fog while game time is advancing; these events have a finite duration and contribute additional panic. At high panic, non-colliding phantom reef shapes and leviathan-scale shadows can appear. At extreme panic, a phantom seabird event gives a brief omen before stealing one ordinary fish from the cargo hold. It cannot steal quest cargo or equipment. These hallucination visuals are not authoritative collision objects; actual threats remain the responsibility of creature/encounter systems.
