@@ -85,7 +85,17 @@ Supported types:
 
 **Important separation:** A marker represents survey evidence. It is not the hazard itself. A brine pool marker does not poison the boat; a vent marker does not heat the water; a whale-fall marker does not simulate ecological succession. Each requires a dedicated site controller before it can affect physics, wildlife, equipment or player health.
 
-### 3.4 SoundingRigController.cs
+### 3.4 DeepOceanPhenomenonRules.cs
+
+**Role:** Central regional and depth eligibility policy for authored phenomenon markers.
+
+The rules prevent obviously misplaced content from becoming discoverable. Examples: brine pools are restricted to the Hollow Trench; whale falls, hydrates and cold seeps require deep-region profiles; water-mass fronts can appear on the shelf; wrecks and damaged fishing gear can occur in coastal and offshore regions.
+
+**Why separate it:** Scene builders and Edit Mode tests can share one source of truth. The rule is intentionally a setting constraint and can be revised when the island-arc geology is finalized.
+
+**Known limitation:** The allowed depth bands are authored game constraints, not an exhaustive scientific occurrence database. They do not replace a geologist-reviewed placement map.
+
+### 3.5 SoundingRigController.cs
 
 **Role:** Player-facing orchestration.
 
@@ -109,9 +119,9 @@ Owns:
 - Ping sound is synthesized placeholder audio.
 - The survey does not model beam angle, transducer frequency, acoustic ray paths, multipath, target aspect, bottom composition or thermoclines.
 - The repeated-heading rule is a gameplay verification mechanic, not a claim about real sonar calibration.
-- The current site scan selects the nearest discoverable marker; it does not yet render multiple contacts or a chart overlay. Greyhaven's generated outer-channel wreck field now carries the first marker (greyhaven.outer_channel_wreck), so the current playable scene has one real survey-discovery target without inventing deep-water geology in the harbor.
+- The current site scan selects the nearest discoverable marker; it does not yet render multiple contacts or a chart overlay. Site markers are checked against DeepOceanPhenomenonRules, and the return reports marker depth plus signal confidence. Greyhaven's generated outer-channel wreck field carries the first valid marker (greyhaven.outer_channel_wreck). Greyhaven's generated outer-channel wreck field now carries the first marker (greyhaven.outer_channel_wreck), so the current playable scene has one real survey-discovery target without inventing deep-water geology in the harbor.
 
-### 3.5 AcousticEventBus.cs
+### 3.6 AcousticEventBus.cs
 
 **Role:** Typed gameplay signal metadata.
 
@@ -121,7 +131,7 @@ An AcousticSignal carries event ID, kind, region, position, loudness, nominal ra
 
 **Current limitation:** The Sounding Rig is the current publisher. Creature listeners, radio listeners and acoustic navigation adapters have not yet been connected. The radius is an authored gameplay reach, not a physical sound-pressure contour.
 
-### 3.6 SeaStateDirector.cs
+### 3.7 SeaStateDirector.cs
 
 **Role:** Owns action-driven world time and environmental pressure.
 
@@ -129,7 +139,7 @@ The survey action is included with harvesting as a valid reason for the clock to
 
 **Risk to watch:** Every future action that advances time must be explicitly registered and must release its active flag on completion, cancellation, disable and scene unload. A stuck active flag would make the sea clock run indefinitely.
 
-### 3.7 SaveGameData.cs
+### 3.8 SaveGameData.cs
 
 **Role:** Data-only persistence contract.
 
