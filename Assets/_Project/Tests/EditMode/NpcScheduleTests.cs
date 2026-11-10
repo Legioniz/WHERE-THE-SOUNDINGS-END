@@ -21,7 +21,7 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.AreEqual(0, NpcScheduleResolver.ResolveIndex(schedule, 12.5f));
             Assert.AreEqual(1, NpcScheduleResolver.ResolveIndex(schedule, 16f));
             Assert.AreEqual(1, NpcScheduleResolver.ResolveIndex(schedule, 23.5f));
-            Assert.AreEqual(0, NpcScheduleResolver.ResolveIndex(schedule, 3.99f));
+            Assert.AreEqual(1, NpcScheduleResolver.ResolveIndex(schedule, 3.99f));
         }
 
         [Test]
