@@ -49,7 +49,7 @@ The shoreline is irregular rather than a straight wall. It pushes seaward near t
 
 The first pass places blockout buildings for the Greyhaven Fish Market, Harbour Office, Boat Repair Shed, Net Mender Shed, Harbour Inn, and four residential houses.
 
-Buildings are readable by silhouette and position. The first Harbourmaster blockout NPC and boat-proximity dialogue interaction are now generated beside the quay. Interior rooms, NPC schedules, doors, shop transactions, and a full quest objective system remain unimplemented.
+Buildings are readable by silhouette and position. Four blockout residents are generated: the Harbourmaster beside the quay, Mara Venn at the fish market, Tomas Vale near the repair shed, and Inez Sarmiento near the net-mending shed. Each has a boat-proximity dialogue trigger, a stable NPC ID, a daily activity schedule and a simple waypoint destination. Their dialogue nodes and schedule state are saved through the existing Yarn and NPC persistence paths. Interior rooms, doors, shop transactions, and a full quest objective system remain unimplemented.
 
 ### 3.4 East estuary edge
 
@@ -109,7 +109,7 @@ The environment is generated in the Unity Editor by:
 
 Output scene: Assets/_Project/Scenes/Greyhaven_Blockout.unity.
 
-The prototype boat controller is active. W/A/S/D or the left gamepad stick apply throttle and steering. Q or gamepad right shoulder emits a Sounding Rig pulse when the boat is slow enough to survey. When the boat enters the Harbourmaster's interaction radius, the HUD displays an E prompt; press E to start the Yarn Spinner conversation. Press Space/Enter to advance lines and click a response or use keys 1–5 for choices. Press I to open the 7×9 cargo hold; select an item, click an empty cell to move it, press R to rotate, and use Esc to close. The interface's catalogue intake buttons are prototype test tools, not fishing. The fixed-angle orthographic camera follows the boat and is tuned to show the pier, village edge, and channel during initial testing.
+The prototype boat controller is active. W/A/S/D or the left gamepad stick apply throttle and steering. Q or gamepad right shoulder emits a Sounding Rig pulse when the boat is slow enough to survey. When the boat enters a resident's interaction radius, the HUD displays an E prompt naming that resident; press E to start their Yarn Spinner conversation. The initial cast and schedule rules are documented in [Greyhaven NPC System](../12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md). Press Space/Enter to advance lines and click a response or use keys 1–5 for choices. Press I to open the 7×9 cargo hold; select an item, click an empty cell to move it, press R to rotate, and use Esc to close. The interface's catalogue intake buttons are prototype test tools, not fishing. The fixed-angle orthographic camera follows the boat and is tuned to show the pier, village edge, and channel during initial testing.
 
 ## 8. Acceptance checks
 
@@ -122,8 +122,11 @@ Before the greybox is promoted beyond working baseline, verify in Unity:
 - [ ] The boat does not collide with the dock at spawn.
 - [ ] Piers, breakwater rocks, and terrain have appropriate collision.
 - [ ] The harbor opening remains navigable at the prototype boat's turning radius.
-- [ ] The boat trigger can enter/exit the Harbourmaster interaction radius and the E prompt appears/disappears correctly.
-- [ ] The Harbourmaster Yarn node presents lines and branches; accepting the buoy job writes a checkpoint autosave.
+- [ ] The boat trigger can enter/exit all four resident interaction radii and each E prompt names the correct NPC.
+- [ ] The four Yarn dialogue nodes present the correct resident lines and branches.
+- [ ] NPC daily activities update from the action-driven sea clock and residents use only their authored short waypoints.
+- [ ] NPC relationship scores and Yarn dialogue variables survive manual save and autosave.
+- [ ] Accepting the Harbourmaster's buoy job writes a checkpoint autosave.
 - [ ] The cargo hold opens/closes, supports valid move/rotate/reject operations, and restores placements through manual save and autosave.
 - [ ] The lighthouse and channel buoys remain identifiable at gameplay camera scale.
 - [ ] Q emits one survey pulse while stopped, reports shallow depth and can discover the outer-channel wreck marker.
@@ -135,6 +138,6 @@ No Editor rendering, Play Mode, physics, or Windows build result is claimed by r
 
 ## 9. Implementation boundary
 
-Implemented by this pass: procedural terrain mesh and shoreline, visual-only procedural swell surface, blockout district geometry, piers, breakwater, navigation markers, lighthouse silhouette, village service and residential placeholders, mangrove/estuary props, starter boat, configurable 2.5D camera framing, a 7×9 spatial cargo hold with runtime interface, the first Harbourmaster Yarn dialogue interaction, a shallow regional survey profile, a Sounding Rig pulse loop, and a discoverable outer-channel wreck marker.
+Implemented by this pass: procedural terrain mesh and shoreline, visual-only procedural swell surface, blockout district geometry, piers, breakwater, navigation markers, lighthouse silhouette, village service and residential placeholders, mangrove/estuary props, starter boat, configurable 2.5D camera framing, a 7×9 spatial cargo hold with runtime interface, the first four Greyhaven NPC blockouts with schedules and separate Yarn dialogue nodes, a shallow regional survey profile, a Sounding Rig pulse loop, and a discoverable outer-channel wreck marker.
 
-Not implemented: final environment art, optimized production meshes, animated or physically simulated water/tide/current/weather/waves, walkable character controller, interiors, NPC schedules, shops and sale transactions, full quest objective/journal logic, fishing and real catch intake, fish populations, ordinary wildlife, creature AI, hostile threat logic, acoustic navigation, streaming, or region transitions. Cargo UI prototype intake controls are not a substitute for fishing.
+Not implemented: final environment art, optimized production meshes, animated or physically simulated water/tide/current/weather/waves, walkable character controller, interiors, advanced NPC pathfinding, interiors, shops and sale transactions, full quest objective/journal logic, fishing and real catch intake, fish populations, ordinary wildlife, creature AI, hostile threat logic, acoustic navigation, streaming, or region transitions. Cargo UI prototype intake controls are not a substitute for fishing.
