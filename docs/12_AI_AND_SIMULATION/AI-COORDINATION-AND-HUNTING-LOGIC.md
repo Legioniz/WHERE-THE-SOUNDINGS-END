@@ -415,3 +415,20 @@ This document extends, but does not replace:
 - [Unity AI Implementation Blueprint](../08_TECHNICAL_DESIGN/AI-IMPLEMENTATION-BLUEPRINT.md) — component boundaries, event handling, save state, and build order.
 
 When these documents conflict, update the relevant authoritative system specification and record the decision. The numerical values in this document are prototype tuning suggestions unless explicitly marked as existing project values.
+
+
+## 17. Life-cycle behaviour integration
+
+The hunt and encounter logic described above is only one part of a creature's life. Ordinary creatures also need feeding, rest, recovery, migration, habitat use, and reproduction where appropriate. These must not be represented as extra hostile threat states.
+
+Use three connected but independent layers:
+
+- **Life state:** active, resting, sleeping, hungry, feeding, recovering, migrating, sheltering, courting, or spawning.
+- **Tactical action:** wander, patrol, forage, investigate, stalk prey, ambush, feed, flee, or return to habitat.
+- **Player encounter state:** unaware, curious, warning, stalking the boat, pursuing, attacking, disengaging, or anomalous.
+
+A predator can be hungry and resting, then wake to forage, hunt ordinary fish, feed, and return to shelter without ever detecting the player. The Sleeper's player-directed hunt remains a separate hostile encounter controlled by its threat profile.
+
+For full behaviour rules, needs, schedules, food-web interactions, rest and healing, reproduction, migration, and supernatural exceptions, see [Creature Life Cycles and Ecological Behaviour](CREATURE-LIFE-CYCLES-AND-ECOLOGY.md).
+
+The life-cycle specification also defines **unnatural behaviour**: a deliberate, constrained violation of an established baseline (for example, identical calls repeating at impossible tide intervals). Anomaly controllers may override only explicitly authored biological rules; they must not become a general excuse for arbitrary teleportation, invisible damage, or untelegraphed attacks.
