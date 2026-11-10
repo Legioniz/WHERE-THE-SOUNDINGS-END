@@ -63,3 +63,5 @@ Status labels: Approved baseline, Working baseline, Proposed, Placeholder, Depre
 - [Regional population simulation — Unity architecture](08_TECHNICAL_DESIGN/REGIONAL-POPULATION-SIMULATION.md)
 
 Population rules are authored per species and fishing ground. The simulation tracks cohort growth, breeding stock, daily recruitment, fishing mortality, migration, and recovery. These are specifications; Unity runtime implementation remains separate.
+
+- [Ocean legends and sea monsters — expanded research](02_LORE_AND_WORLD/OCEAN-LEGENDS-AND-SEA-MONSTERS.md)
