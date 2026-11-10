@@ -328,3 +328,7 @@ The legends in this research file are now connected to a separate [Legendary Mar
 A legend does not need to be a hostile creature. Some are distant sightings, wildlife-like encounters, current hazards, lunar events, guardian omens, phantom ships, or mythic-scale environmental events. Some culturally specific or geographically mismatched traditions remain contextual until their setting and adaptation have been reviewed.
 
 All entries remain research inspiration, not canon.
+
+## 14. Visual and in-world lore implementation
+
+The researched traditions and transformed encounter motifs now have a separate production dossier: [Legendary Encounter — Visual, Behaviour, and Discoverable Lore Dossiers](../12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-VISUAL-AND-LORE-DOSSIERS.md). It defines original in-game appearances and sample discoverable evidence while retaining the distinction between historical testimony, folklore, scientific comparison, and fictional design.
