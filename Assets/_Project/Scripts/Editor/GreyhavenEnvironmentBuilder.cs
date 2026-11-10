@@ -64,6 +64,7 @@ namespace WhereTheSoundingsEnd.Editor
             Transform lighting = Group("08_Lighting_and_Atmosphere", world.transform);
 
             BuildWater(water, ocean);
+            BuildSalvageSite(water, wood, metal);
             BuildTerrain(terrain, soil, sand, grass, rock);
             BuildBreakwater(harbor, rock, concrete);
             BuildPiers(harbor, wood, metal);
@@ -116,6 +117,10 @@ namespace WhereTheSoundingsEnd.Editor
                     new[] { Vector2Int.zero }, 0.004f),
                 CreateCargoDefinition("SALVAGE-WOOD-01", "Waterlogged Timber", CargoItemCategory.Salvage,
                     new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f),
+                CreateCargoDefinition("SALVAGE-CLOTH-01", "Salt-Stiff Canvas", CargoItemCategory.Salvage,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up }, 0f),
+                CreateCargoDefinition("SALVAGE-SCRAP-01", "Corroded Ship Fittings", CargoItemCategory.Salvage,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right, Vector2Int.right * 2 }, 0f),
                 CreateCargoDefinition("QUEST-SEALED-PARCEL", "Sealed Survey Parcel", CargoItemCategory.Quest,
                     new[] { Vector2Int.zero, Vector2Int.up }, 0f, true),
                 CreateCargoDefinition("ABR-FSH-001", "Milkfish — Glass-Eyed", CargoItemCategory.Fish,
@@ -610,6 +615,28 @@ namespace WhereTheSoundingsEnd.Editor
             Cylinder(name, parent, p + Vector3.up * 0.85f, new Vector3(1.05f, 0.85f, 1.05f), colour);
             Sphere(name + "_Top_Marker", parent, p + Vector3.up * 2f, Vector3.one * 0.7f, colour, false);
             Cylinder(name + "_Antenna", parent, p + Vector3.up * 2.6f, new Vector3(0.09f, 0.85f, 0.09f), metal);
+        }
+
+        private static void BuildSalvageSite(Transform parent, Material timber, Material metal)
+        {
+            GameObject site = new GameObject("Greyhaven_Outer_Channel_Wreck_Field");
+            site.transform.SetParent(parent, false);
+            site.transform.position = new Vector3(30f, -0.25f, 55f);
+            SalvageSite salvage = site.AddComponent<SalvageSite>();
+
+            GameObject brokenHull = Block("Wrecked_Hull_Remnant", site.transform,
+                new Vector3(0f, -0.55f, 0f), new Vector3(5.5f, 0.7f, 2.4f), timber);
+            brokenHull.transform.localRotation = Quaternion.Euler(0f, 18f, 7f);
+            Block("Wrecked_Deck_Plate", site.transform,
+                new Vector3(1.2f, -0.05f, 0.8f), new Vector3(2.6f, 0.18f, 1.1f), metal);
+            Block("Wrecked_Beam_A", site.transform,
+                new Vector3(-1.8f, -0.15f, -1.1f), new Vector3(0.35f, 0.3f, 3.2f), timber);
+            Block("Wrecked_Beam_B", site.transform,
+                new Vector3(2.0f, -0.2f, -1.3f), new Vector3(0.3f, 0.25f, 2.5f), timber);
+
+            SphereCollider radius = site.AddComponent<SphereCollider>();
+            radius.isTrigger = true;
+            radius.radius = salvage.InteractionRadius;
         }
 
         private static void BuildBoat(Transform parent, InputActionAsset controls, Material hull, Material deck, Material metal, List<CargoItemDefinition> cargoCatalog)
