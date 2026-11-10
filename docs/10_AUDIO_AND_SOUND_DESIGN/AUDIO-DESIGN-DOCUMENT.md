@@ -110,3 +110,22 @@ The runtime FishermanAtmosphereDirector adds a restrained first layer of maritim
 These cues are gated by advancing sea time and night / elevated panic. They are not final audio assets and do not alter panic, vessel condition, cargo, navigation, or creature state. The procedural clips are temporary placeholders pending properly licensed or recorded field recordings.
 
 See [Maritime Horror Director](../06_GAMEPLAY_SYSTEMS/MARITIME-HORROR-DIRECTOR.md), [Deep-Ocean Phenomena and Mariner Experiences](../06_GAMEPLAY_SYSTEMS/DEEP-OCEAN-PHENOMENA-AND-MARINER-EXPERIENCES.md), and [Maritime Anomaly Rules](../07_GAME_RULES_AND_BALANCING/MARITIME-ANOMALY-RULES.md). Authored ambience, a music score, mixer snapshots, radio dialogue and the final threat-audio event bus remain future work.
+
+
+## 11. Sounding Rig and acoustic gameplay event integration
+
+The current Sounding Rig emits a short procedural placeholder ping and publishes one AcousticSignal through AcousticEventBus. The signal carries stable event identity, event kind, region ID, world position, normalized loudness, nominal gameplay radius and simulation timestamp.
+
+This creates a clean separation:
+- SoundingRigController decides when the player emits a pulse.
+- AcousticEventBus publishes gameplay metadata.
+- Future creature / navigation listeners evaluate audibility and response.
+- AudioSource playback remains presentation only.
+
+The current ping is not a hydrophone recording or final sonar sound. The nominal event radius is not a calibrated sound-pressure level or real propagation range. No creature AI listener is currently subscribed, and no AudioMixer snapshot or frequency-dependent underwater propagation has been connected.
+
+When adding listeners, score an event using distance, occlusion, region attenuation, listener sensitivity, current threat state and whether the listener's region is active. Avoid frame-by-frame AudioSource scans. A creature must not automatically attack merely because it hears a pulse; its species-specific curiosity, territory, energy, risk and encounter rules still apply.
+
+The DSL return should sound like a broad, layered biological return rather than a single monster voice. A brine-pool boundary should use a quiet instrument / chemistry cue; vent and seep fields must have distinct acoustic signatures; whale-fall activity should feel biologically busy rather than hostile.
+
+Accessibility: the survey result and any critical warning must remain readable in text. Never require the player to identify a low-frequency sound by ear alone.
