@@ -13,7 +13,7 @@ This document is the single source of truth for ordinary seafood dockside prices
 
 Prices are **fictional game-economy values denominated in US dollars ($)**, not a claim about current legal, wholesale, farm-gate, or retail prices for a real species. Philippine market data is used only as a scale reference. The player is a small-boat fisher selling to local buyers, so the base values are designed as dockside payouts, generally below retail benchmarks.
 
-**Fixed conversion anchor:** 1 USD = PHP 63.06, using the BSP reference rate dated November 9, 2026. This is a one-time design conversion anchor, not a live exchange-rate mechanic. All in-game prices remain stable in USD unless the game economy is deliberately rebalanced. Source: [BSP USD/PHP reference rate reported for November 9, 2026](https://philnews.ph/2026/11/10/usd-to-php-exchange-rate-today-tuesday-november-10-2026/).
+**Fixed conversion anchor:** 1 USD = PHP 63.06, using the BSP reference rate dated November 9, 2026. This is a one-time design conversion anchor, not a live exchange-rate mechanic. Convert each legacy PHP base rate to USD and round the displayed unit rate to two decimal places first; use that displayed USD rate for all subsequent calculations. All in-game prices remain stable in USD unless the game economy is deliberately rebalanced. Source: [BSP USD/PHP reference rate reported for November 9, 2026](https://philnews.ph/2026/11/10/usd-to-php-exchange-rate-today-tuesday-november-10-2026/).
 
 ### Market reference snapshot
 
@@ -257,7 +257,7 @@ Unnatural specimens cannot be sold by weight, placed in ordinary restaurant stoc
 | UNC-007 | The Hollowjaw Grenadier | $57.09 | Not accepted |
 | UNC-008 | The Unmoored Fry | $23.79 | Not accepted |
 
-The payout is for evidence and research delivery, not for the specimen's mass. UNC-008 may be released and documented; capturing it is not required for the reward. Each reward is claimed once per save. Repeated exposure, duplicate samples, or reloading an already recorded event cannot generate more money.
+The payout is for evidence and research delivery, not for the specimen's mass. These fixed contract rewards are not multiplied by the island market factor; the reward is paid by the assigned research contract location. UNC-008 may be released and documented; capturing it is not required for the reward. Each reward is claimed once per save. Repeated exposure, duplicate samples, or reloading an already recorded event cannot generate more money.
 
 ## 8. Sale calculation
 
@@ -265,7 +265,7 @@ For a normal eligible sale:
 
 `SaleValueUSD = roundToCent(SaleQuantity × BasePriceUSD × IslandMarketFactor × Quality × Freshness × Demand × LiveCondition)`
 
-For a per-individual item, `SaleQuantity` is the eligible individual count and `BasePriceUSD` is the listed per-individual rate. `IslandMarketFactor` comes from the destination dock and the item's market class. `LiveCondition` is 1.00 by default; use 1.10–1.15 only for an eligible live crab / lobster handed over alive and intact to a buyer that explicitly accepts live stock. Calculate per species / buyer line, then sum the transaction. Apply all factors once only.
+For a per-individual item, `SaleQuantity` is the eligible individual count and `BasePriceUSD` is the listed per-individual rate. Use the two-decimal rate shown in the table as the runtime value, then round the completed sale line to the nearest cent (midpoints round away from zero). `IslandMarketFactor` comes from the destination dock and the item's market class. `LiveCondition` is 1.00 by default; use 1.10–1.15 only for an eligible live crab / lobster handed over alive and intact to a buyer that explicitly accepts live stock. Calculate per species / buyer line, then sum the transaction. Apply all factors once only.
 
 | Factor | Working value | Rule |
 |---|---:|---|
@@ -282,7 +282,21 @@ For a per-individual item, `SaleQuantity` is the eligible individual count and `
 | Live condition | 1.00–1.15 | Only for eligible live, intact crab / lobster; otherwise 1.00 |
 | Legal eligibility | 0 or 1 | Ineligible catch is rejected; do not apply a fractional legal multiplier |
 
-### Island and regional market factors
+Quality, freshness, and demand should be visible to the player. Buyers must explain a discount or refusal. Do not roll hidden price penalties after the catch lands.
+
+### Worked examples
+
+| Catch | Calculation | Base result |
+|---|---|---:|
+| 2.0 kg Milkfish | 2.0 × $2.30 × 1.00 × 1.00 × 1.00 | $4.60 |
+| 3.0 kg Mangrove red snapper | 3.0 × $4.60 × 1.00 × 1.00 × 1.00 | $13.80 |
+| 1.0 kg Giant tiger prawn | 1.0 × $6.66 × 1.00 × 1.00 × 1.00 | $6.66 |
+| 4.0 kg Yellowfin tuna | 4.0 × $5.23 × 1.00 × 0.95 × 1.00 | $19.89 |
+| 5 mature approved sea urchins | 5 × $0.71 | $3.55 |
+
+
+
+## 9. Island market pricing by destination
 
 For pricing purposes, the six established world regions act as six distinct island-market / port economies. These are market hubs mapped to existing geography; they do not lock new canonical island names. Apply the market where the player physically sells the catch, not the region where it was caught.
 
@@ -305,13 +319,13 @@ The market classes are assigned in the species tables:
 
 The multipliers express local supply, buyer specialization, storage infrastructure, and settlement demand. A high multiplier does not mean unlimited buyer capacity. Remote ports may pay more for a scarce class while having low total intake.
 
-#### Example destination rates
+### Example destination rates
 
 These are base dockside rates after the island factor, before catch quality, freshness, live condition, or temporary demand modifiers.
 
 | Catch | Market class | Base USD rate | Greyhaven | Shallows | Blackrock | Drowned Parish | Outer Shoals | Hollow Trench |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| Milkfish | INSHORE | $2.30/kg | $2.48 | $2.18 | $2.07 | $2.76 | $1.72 | $1.27 |
+| Milkfish | INSHORE | $2.30/kg | $2.48 | $2.19 | $2.07 | $2.76 | $1.73 | $1.27 |
 | Mangrove red snapper | REEF | $4.60/kg | $4.23 | $5.52 | $5.06 | $3.91 | $4.14 | $3.45 |
 | Yellowfin tuna | PELAGIC | $5.23/kg | $4.71 | $4.97 | $6.17 | $3.92 | $6.54 | $5.75 |
 | Ruby snapper | DEEPWATER | $7.14/kg | $5.00 | $5.36 | $7.14 | $3.93 | $8.21 | $10.00 |
@@ -319,18 +333,6 @@ These are base dockside rates after the island factor, before catch quality, fre
 | Sea grapes / lato | SEAWEED | $2.22/kg wet | $2.33 | $2.55 | $1.89 | $2.44 | $1.67 | $1.11 |
 
 A player may compare prices on a market board before travelling. Travel time, fuel, ice, storage loss, and boat risk must be considered before chasing a distant premium. Selling is permitted only at an actual buyer or contract terminal in that destination market. The game must never apply the destination multiplier merely because the catch originated there.
-
-Quality, freshness, and demand should be visible to the player. Buyers must explain a discount or refusal. Do not roll hidden price penalties after the catch lands.
-
-### Worked examples
-
-| Catch | Calculation | Base result |
-|---|---|---:|
-| 2.0 kg Milkfish | 2.0 × $2.30 × 1.00 × 1.00 × 1.00 | $4.60 |
-| 3.0 kg Mangrove red snapper | 3.0 × $4.60 × 1.00 × 1.00 × 1.00 | $13.80 |
-| 1.0 kg Giant tiger prawn | 1.0 × $6.66 × 1.00 × 1.00 × 1.00 | $6.66 |
-| 4.0 kg Yellowfin tuna | 4.0 × $5.23 × 1.00 × 0.95 × 1.00 | $19.89 |
-| 5 mature approved sea urchins | 5 × $0.71 | $3.57 |
 
 ## 10. Buyer behavior and market modifiers
 
@@ -358,7 +360,7 @@ Demand should change only through visible conditions such as a posted order, buy
 - A premium buyer order is a temporary, explicit contract. It cannot be refreshed by sleeping, reloading, or changing scenes.
 - If a species is farmed or harvested from a managed plot, stock recovery and plot yield still limit volume.
 - Large fish must use plausible size / weight distributions. Price is per kilogram, not a flat trophy bonus.
-- Keep money rounding to the nearest cent after each buyer line is calculated.
+- Use the two-decimal USD unit rate displayed in the schedule, then round each completed buyer line to the nearest cent (midpoints away from zero).
 
 ## 12. Initial balance targets
 
