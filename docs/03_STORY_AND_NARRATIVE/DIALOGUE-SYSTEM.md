@@ -1,7 +1,7 @@
 # Dialogue System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Yarn Spinner runtime loop and first Harbourmaster conversation implemented; authoring/content expansion pending  
+> Status: Yarn Spinner runtime loop and four Greyhaven resident conversations implemented; authoring/content expansion pending  
 > Owner: Project lead  
 > Version: 0.2  
 > Last reviewed: 2026-11-10
@@ -23,6 +23,17 @@ The Greyhaven scene generator imports the Yarn project, creates a `DialogueRunne
 7. The dialogue panel closes and scaled gameplay time resumes.
 
 The starter NPC is a primitive blockout representation. Interaction is from the boat because the project does not yet have a walkable on-foot character controller.
+
+## Implemented Greyhaven resident dialogue
+
+The generated scene now exposes four boat-proximity interactions:
+
+- Harbourmaster — missing boats, the silent lighthouse bell, channel advice and the sounding-buoy recovery job.
+- Mara Venn — fish condition, unusual catches, the missing crews and honest sale assessment.
+- Tomas Vale — repair advice, engine sounds, hull damage and unexplained knocks.
+- Inez Sarmiento — damaged nets, missing crews, local working rules and preserving evidence.
+
+Each resident has a separate Yarn node and first-meeting/trust variables. Their authored content is in `Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn`.
 
 ## Implemented Harbourmaster branches
 
@@ -52,8 +63,9 @@ The Yarn project declares English as its base language and uses Yarn's line IDs/
 
 ## Content and production boundaries
 
-- No full quest objective tracker, journal/evidence presentation, NPC schedule, relationship simulation, voice-over, facial animation or localization package is connected.
-- Only one NPC interaction node and one blockout NPC are currently authored.
+- The first NPC schedule and relationship runtime foundation is implemented in `Assets/_Project/Scripts/Runtime/NPC/NpcAgent.cs`; only the four Greyhaven residents are configured.
+- Relationship values are saved but are not yet modified by dialogue choices or connected to shop prices, quests or reputation.
+- NPC movement uses short direct waypoints, not NavMesh pathfinding. On-foot interaction, interiors, animation, voice-over, facial animation and localization packages are not connected.
 - Dialogue choices update Yarn variables; broader quest state and world changes must be connected through explicit commands/functions and authoritative gameplay systems.
 - Yarn compilation, line presentation and option selection must be verified in Unity 6000.3.28f1 after package import. Static GitHub checks do not compile Yarn or C#.
 
