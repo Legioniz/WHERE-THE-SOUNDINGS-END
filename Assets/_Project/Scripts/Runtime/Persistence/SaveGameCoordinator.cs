@@ -6,8 +6,8 @@ using UnityEngine.SceneManagement;
 namespace WhereTheSoundingsEnd.Persistence
 {
     /// <summary>
-    /// Scene-level entry point for save/load. Gameplay components implement
-    /// ISaveParticipant to contribute their state to the shared snapshot.
+    /// Scene-level entry point for manual saves and the dedicated autosave.
+    /// Gameplay components implement ISaveParticipant to contribute their state.
     /// </summary>
     public sealed class SaveGameCoordinator : MonoBehaviour
     {
@@ -17,20 +17,57 @@ namespace WhereTheSoundingsEnd.Persistence
         {
             get
             {
-                if (_saveFiles == null)
-                {
-                    _saveFiles = new SaveFileService();
-                }
-
+                if (_saveFiles == null) _saveFiles = new SaveFileService();
                 return _saveFiles;
             }
         }
 
         public SaveOperationResult SaveSlot(int slotNumber)
         {
-            SaveGameData data = SaveGameData.CreateNew(
-                slotNumber,
-                SceneManager.GetActiveScene().name);
+            SaveGameData data;
+            SaveOperationResult failure;
+            if (!TryCaptureSnapshot(slotNumber, "manual", string.Empty, out data, out failure))
+                return failure;
+            return SaveFiles.Save(slotNumber, data);
+        }
+
+        public SaveOperationResult SaveAutosave(string reason)
+        {
+            SaveGameData data;
+            SaveOperationResult failure;
+            if (!TryCaptureSnapshot(0, "autosave", reason, out data, out failure))
+                return failure;
+            return SaveFiles.SaveAutosave(data);
+        }
+
+        public SaveOperationResult LoadSlot(int slotNumber)
+        {
+            SaveGameData data;
+            SaveOperationResult result = SaveFiles.TryLoad(slotNumber, out data);
+            return result.Success ? RestoreSnapshot(data) : result;
+        }
+
+        public SaveOperationResult LoadAutosave()
+        {
+            SaveGameData data;
+            SaveOperationResult result = SaveFiles.TryLoadAutosave(out data);
+            return result.Success ? RestoreSnapshot(data) : result;
+        }
+
+        public List<SaveSlotInfo> GetSlots() { return SaveFiles.GetSlotInfos(); }
+        public SaveOperationResult DeleteSlot(int slotNumber) { return SaveFiles.Delete(slotNumber); }
+        public SaveOperationResult DeleteAutosave() { return SaveFiles.DeleteAutosave(); }
+
+        private bool TryCaptureSnapshot(
+            int slotNumber,
+            string saveKind,
+            string reason,
+            out SaveGameData data,
+            out SaveOperationResult failure)
+        {
+            data = SaveGameData.CreateNew(slotNumber, SceneManager.GetActiveScene().name);
+            data.saveKind = saveKind;
+            data.saveReason = reason ?? string.Empty;
 
             List<ISaveParticipant> participants = FindSaveParticipants();
             for (int index = 0; index < participants.Count; index++)
@@ -42,31 +79,27 @@ namespace WhereTheSoundingsEnd.Persistence
                 catch (Exception exception)
                 {
                     Debug.LogException(exception);
-                    return SaveOperationResult.Failed(
+                    data = null;
+                    failure = SaveOperationResult.Failed(
                         "Saving was cancelled because a gameplay component could not provide its state: " +
                         exception.Message);
+                    return false;
                 }
             }
 
-            return SaveFiles.Save(slotNumber, data);
+            failure = SaveOperationResult.Succeeded("Snapshot captured.");
+            return true;
         }
 
-        public SaveOperationResult LoadSlot(int slotNumber)
+        private SaveOperationResult RestoreSnapshot(SaveGameData data)
         {
-            SaveGameData data;
-            SaveOperationResult loadResult = SaveFiles.TryLoad(slotNumber, out data);
-            if (!loadResult.Success)
-            {
-                return loadResult;
-            }
-
             string activeScene = SceneManager.GetActiveScene().name;
             if (!string.IsNullOrWhiteSpace(data.sceneId) &&
                 !string.Equals(data.sceneId, activeScene, StringComparison.Ordinal))
             {
                 return SaveOperationResult.Failed(
                     "This save belongs to scene '" + data.sceneId +
-                    "'. Load that scene before restoring this slot.");
+                    "'. Load that scene before restoring this save.");
             }
 
             List<ISaveParticipant> participants = FindSaveParticipants();
@@ -85,17 +118,7 @@ namespace WhereTheSoundingsEnd.Persistence
                 }
             }
 
-            return loadResult;
-        }
-
-        public List<SaveSlotInfo> GetSlots()
-        {
-            return SaveFiles.GetSlotInfos();
-        }
-
-        public SaveOperationResult DeleteSlot(int slotNumber)
-        {
-            return SaveFiles.Delete(slotNumber);
+            return SaveOperationResult.Succeeded("Save data restored.");
         }
 
         private static List<ISaveParticipant> FindSaveParticipants()
@@ -108,10 +131,7 @@ namespace WhereTheSoundingsEnd.Persistence
             for (int index = 0; index < behaviours.Length; index++)
             {
                 ISaveParticipant participant = behaviours[index] as ISaveParticipant;
-                if (participant != null)
-                {
-                    participants.Add(participant);
-                }
+                if (participant != null) participants.Add(participant);
             }
 
             return participants;

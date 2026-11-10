@@ -93,6 +93,11 @@ namespace WhereTheSoundingsEnd.Persistence
             return Path.Combine(_saveDirectory, "slot_" + slotNumber.ToString("D2") + ".json");
         }
 
+        public string GetAutosaveFilePath()
+        {
+            return Path.Combine(_saveDirectory, "autosave.json");
+        }
+
         public SaveOperationResult Save(int slotNumber, SaveGameData data)
         {
             if (!IsValidSlot(slotNumber))
@@ -100,6 +105,16 @@ namespace WhereTheSoundingsEnd.Persistence
                 return SaveOperationResult.Failed("Save slot must be between " + MinimumSlot + " and " + MaximumSlot + ".");
             }
 
+            return SaveToPaths(slotNumber, GetSaveFilePath(slotNumber), "slot " + slotNumber, data, "manual");
+        }
+
+        public SaveOperationResult SaveAutosave(SaveGameData data)
+        {
+            return SaveToPaths(0, GetAutosaveFilePath(), "autosave", data, "autosave");
+        }
+
+        private SaveOperationResult SaveToPaths(int slotNumber, string destination, string label, SaveGameData data, string saveKind)
+        {
             string validationError;
             if (!SaveGameDataMigration.TryPrepare(data, out validationError))
             {
@@ -108,13 +123,13 @@ namespace WhereTheSoundingsEnd.Persistence
 
             lock (_syncRoot)
             {
-                string destination = GetSaveFilePath(slotNumber);
                 string temporary = destination + ".tmp";
                 string backup = destination + ".bak";
 
                 try
                 {
                     data.slotNumber = slotNumber;
+                    data.saveKind = saveKind;
                     data.schemaVersion = SaveGameData.CurrentSchemaVersion;
                     data.savedAtUtc = DateTime.UtcNow.ToString("O");
                     if (string.IsNullOrWhiteSpace(data.gameVersion))
@@ -125,17 +140,13 @@ namespace WhereTheSoundingsEnd.Persistence
                     string json = JsonUtility.ToJson(data, true);
                     if (string.IsNullOrWhiteSpace(json))
                     {
-                        return SaveOperationResult.Failed("Unity could not serialize the save data.");
+                        return SaveOperationResult.Failed("Unity could not serialize the " + label + " data.");
                     }
 
                     Directory.CreateDirectory(_saveDirectory);
                     byte[] bytes = new UTF8Encoding(false).GetBytes(json);
 
-                    using (FileStream stream = new FileStream(
-                        temporary,
-                        FileMode.Create,
-                        FileAccess.Write,
-                        FileShare.None))
+                    using (FileStream stream = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         stream.Write(bytes, 0, bytes.Length);
                         stream.Flush();
@@ -162,13 +173,13 @@ namespace WhereTheSoundingsEnd.Persistence
                         File.Move(temporary, destination);
                     }
 
-                    return SaveOperationResult.Succeeded("Saved to slot " + slotNumber + ".");
+                    return SaveOperationResult.Succeeded("Saved " + label + ".");
                 }
                 catch (Exception exception)
                 {
                     TryDelete(temporary);
-                    Debug.LogError("Save failed for slot " + slotNumber + ": " + exception);
-                    return SaveOperationResult.Failed("Could not write save slot " + slotNumber + ": " + exception.Message);
+                    Debug.LogError("Save failed for " + label + ": " + exception);
+                    return SaveOperationResult.Failed("Could not write " + label + ": " + exception.Message);
                 }
             }
         }
@@ -181,15 +192,25 @@ namespace WhereTheSoundingsEnd.Persistence
                 return SaveOperationResult.Failed("Save slot must be between " + MinimumSlot + " and " + MaximumSlot + ".");
             }
 
+            return TryLoadFromPaths(GetSaveFilePath(slotNumber), slotNumber, "slot " + slotNumber, out data);
+        }
+
+        public SaveOperationResult TryLoadAutosave(out SaveGameData data)
+        {
+            return TryLoadFromPaths(GetAutosaveFilePath(), 0, "autosave", out data);
+        }
+
+        private SaveOperationResult TryLoadFromPaths(string primaryPath, int slotNumber, string label, out SaveGameData data)
+        {
+            data = null;
             lock (_syncRoot)
             {
-                string primaryPath = GetSaveFilePath(slotNumber);
                 string backupPath = primaryPath + ".bak";
                 string primaryError;
 
                 if (TryReadValidFile(primaryPath, slotNumber, out data, out primaryError))
                 {
-                    return SaveOperationResult.Succeeded("Loaded slot " + slotNumber + ".");
+                    return SaveOperationResult.Succeeded("Loaded " + label + ".");
                 }
 
                 if (primaryError != null &&
@@ -204,19 +225,37 @@ namespace WhereTheSoundingsEnd.Persistence
                 {
                     data = backupData;
                     return SaveOperationResult.Succeeded(
-                        "The primary save was unavailable. Recovered slot " + slotNumber + " from its backup.",
+                        "The primary " + label + " was unavailable. Recovered from its backup.",
                         true);
                 }
 
                 data = null;
                 if (!File.Exists(primaryPath) && !File.Exists(backupPath))
                 {
-                    return SaveOperationResult.Failed("Save slot " + slotNumber + " is empty.");
+                    return SaveOperationResult.Failed(label + " does not exist.");
                 }
 
                 return SaveOperationResult.Failed(
-                    "Slot " + slotNumber + " could not be loaded. Primary: " + primaryError +
-                    " Backup: " + backupError);
+                    label + " could not be loaded. Primary: " + primaryError + " Backup: " + backupError);
+            }
+        }
+
+        public SaveOperationResult DeleteAutosave()
+        {
+            lock (_syncRoot)
+            {
+                try
+                {
+                    string path = GetAutosaveFilePath();
+                    TryDelete(path);
+                    TryDelete(path + ".bak");
+                    TryDelete(path + ".tmp");
+                    return SaveOperationResult.Succeeded("Deleted autosave.");
+                }
+                catch (Exception exception)
+                {
+                    return SaveOperationResult.Failed("Could not delete autosave: " + exception.Message);
+                }
             }
         }
 

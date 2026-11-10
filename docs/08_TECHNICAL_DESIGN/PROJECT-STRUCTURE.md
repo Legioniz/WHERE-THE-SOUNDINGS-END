@@ -27,7 +27,7 @@ Assets/_Project is the game's first-party content boundary.
 | Prefabs/ | Reusable boat, creature, world, and UI prefabs |
 | Scenes/ | Boot, menu, persistent world, harbour, and region scenes |
 | Scripts/Runtime/ | Runtime gameplay and simulation code |
-| Scripts/Runtime/Persistence/ | Versioned save DTOs, per-slot file storage, and scene save coordination |
+| Scripts/Runtime/Persistence/ | Versioned save DTOs, manual/autosave file storage, autosave scheduling, and scene save coordination |
 | Scripts/Editor/ | Editor-only generation, validation, and authoring tools |
 | Settings/Input/ | Input Action assets and control schemes |
 | Settings/Rendering/ | URP assets and rendering configuration |
@@ -45,11 +45,12 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Core/Pcg32Random.cs: PCG-XSH-RR deterministic random generator.
 - Persistence/SaveGameData.cs: versioned campaign snapshot and migration defaults.
 - Persistence/SaveFileService.cs: five independent JSON slots, backup recovery, listing, and deletion.
-- Persistence/SaveGameCoordinator.cs: scene participant capture/restore contract.
+- Persistence/SaveGameCoordinator.cs: scene participant capture/restore contract for manual saves and autosaves.
+- Persistence/AutosaveController.cs: real-time interval and application/scene lifecycle save triggers.
 - Boat/BoatPrototypeController.cs: temporary Rigidbody handling prototype.
 - Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera with configurable framing.
 - Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, and initial build-scene list.
-- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, starter boat, camera, and SaveGameCoordinator.
+- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, starter boat, camera, SaveGameCoordinator, and AutosaveController.
 
 ## Greyhaven environment generation
 

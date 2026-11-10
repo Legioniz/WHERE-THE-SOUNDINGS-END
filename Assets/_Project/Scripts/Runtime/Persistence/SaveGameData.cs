@@ -18,6 +18,8 @@ namespace WhereTheSoundingsEnd.Persistence
         public string savedAtUtc;
         public string gameVersion;
         public string sceneId;
+        public string saveKind = "manual";
+        public string saveReason = string.Empty;
         public double totalPlaytimeSeconds;
         public string worldSeed;
 
@@ -36,7 +38,9 @@ namespace WhereTheSoundingsEnd.Persistence
                 saveId = Guid.NewGuid().ToString("N"),
                 savedAtUtc = DateTime.UtcNow.ToString("O"),
                 gameVersion = string.Empty,
-                sceneId = activeSceneId ?? string.Empty
+                sceneId = activeSceneId ?? string.Empty,
+                saveKind = slot == 0 ? "autosave" : "manual",
+                saveReason = string.Empty
             };
         }
     }
@@ -286,6 +290,8 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.savedAtUtc == null) data.savedAtUtc = string.Empty;
             if (data.gameVersion == null) data.gameVersion = string.Empty;
             if (data.worldSeed == null) data.worldSeed = string.Empty;
+            if (data.saveKind == null) data.saveKind = data.slotNumber == 0 ? "autosave" : "manual";
+            if (data.saveReason == null) data.saveReason = string.Empty;
 
             if (data.world == null) data.world = new WorldSaveData();
             if (data.player == null) data.player = new PlayerSaveData();

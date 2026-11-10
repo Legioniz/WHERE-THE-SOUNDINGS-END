@@ -48,7 +48,7 @@ Only movement/steering currently affects gameplay. The other actions are mapped 
 
 ### Save and load foundation
 
-The generated Greyhaven scene includes a Save Game Coordinator. Runtime saves are stored outside the project in Application.persistentDataPath/Saves/ as five independent files: slot_01.json through slot_05.json. Each slot keeps a previous-save .bak file for recovery. The coordinator exposes SaveSlot(slot), LoadSlot(slot), GetSlots(), and DeleteSlot(slot); the starter boat currently captures its transform and Rigidbody velocity. A player-facing save/load menu and the remaining gameplay-state participants are not yet implemented. See docs/06_GAMEPLAY_SYSTEMS/SAVE-AND-LOAD.md.
+The generated Greyhaven scene includes a Save Game Coordinator. Runtime saves are stored outside the project in Application.persistentDataPath/Saves/ as five independent files: slot_01.json through slot_05.json. Each slot keeps a previous-save .bak file for recovery. A separate autosave.json is written every five minutes after a 45-second startup delay and on focus loss, application pause/quit, active-scene unload, and requested checkpoints. Autosaves have their own backup and never overwrite manual slots. The coordinator exposes SaveSlot(slot), LoadSlot(slot), SaveAutosave(reason), LoadAutosave(), GetSlots(), and DeleteSlot(slot); the starter boat currently captures its transform and Rigidbody velocity. A player-facing save/load menu and the remaining gameplay-state participants are not yet implemented. See docs/06_GAMEPLAY_SYSTEMS/SAVE-AND-LOAD.md.
 
 ## Project status
 

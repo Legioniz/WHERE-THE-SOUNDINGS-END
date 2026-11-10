@@ -20,6 +20,9 @@ Test file: Assets/_Project/Tests/EditMode/SaveFileServiceTests.cs
 | Save_RejectsInvalidCargoRecords | Missing stable item IDs and invalid quantities fail validation |
 | Delete_RemovesPrimaryAndBackupFiles | Deleting a slot removes its primary, backup and temporary files |
 | Operations_RejectSlotNumbersOutsideConfiguredRange | Slot values outside 1–5 are rejected |
+| Autosave_UsesDedicatedFile_AndDoesNotOverwriteManualSlots | Autosave has its own file and cannot overwrite a manual slot |
+| Autosave_LoadRecoversPreviousAutosaveWhenPrimaryIsCorrupted | A corrupted autosave primary recovers from its previous backup |
+| DeleteAutosave_DoesNotDeleteManualSlots | Removing autosave leaves manual saves untouched |
 
 Tests inject a temporary directory so they do not read or modify the player's actual save folder.
 

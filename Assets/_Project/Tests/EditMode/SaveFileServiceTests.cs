@@ -138,6 +138,71 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(loaded, Is.Null);
         }
 
+
+        [Test]
+        public void Autosave_UsesDedicatedFile_AndDoesNotOverwriteManualSlots()
+        {
+            SaveGameData manual = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            manual.world.activeRegionId = "manual_state";
+            Assert.That(_service.Save(1, manual).Success, Is.True);
+
+            SaveGameData automatic = SaveGameData.CreateNew(0, "Greyhaven_Blockout");
+            automatic.world.activeRegionId = "automatic_state";
+            Assert.That(_service.SaveAutosave(automatic).Success, Is.True);
+
+            Assert.That(File.Exists(_service.GetSaveFilePath(1)), Is.True);
+            Assert.That(File.Exists(_service.GetAutosaveFilePath()), Is.True);
+            Assert.That(_service.GetAutosaveFilePath(), Is.Not.EqualTo(_service.GetSaveFilePath(1)));
+
+            SaveGameData loadedManual;
+            SaveGameData loadedAutosave;
+            Assert.That(_service.TryLoad(1, out loadedManual).Success, Is.True);
+            Assert.That(_service.TryLoadAutosave(out loadedAutosave).Success, Is.True);
+            Assert.That(loadedManual.world.activeRegionId, Is.EqualTo("manual_state"));
+            Assert.That(loadedAutosave.world.activeRegionId, Is.EqualTo("automatic_state"));
+            Assert.That(loadedAutosave.slotNumber, Is.Zero);
+            Assert.That(loadedAutosave.saveKind, Is.EqualTo("autosave"));
+        }
+
+        [Test]
+        public void Autosave_LoadRecoversPreviousAutosaveWhenPrimaryIsCorrupted()
+        {
+            SaveGameData first = SaveGameData.CreateNew(0, "Greyhaven_Blockout");
+            first.world.activeRegionId = "previous_autosave";
+            Assert.That(_service.SaveAutosave(first).Success, Is.True);
+
+            SaveGameData second = SaveGameData.CreateNew(0, "Greyhaven_Blockout");
+            second.world.activeRegionId = "latest_autosave";
+            Assert.That(_service.SaveAutosave(second).Success, Is.True);
+
+            string path = _service.GetAutosaveFilePath();
+            Assert.That(File.Exists(path + ".bak"), Is.True);
+            File.WriteAllText(path, "{ invalid autosave json");
+
+            SaveGameData recovered;
+            SaveOperationResult result = _service.TryLoadAutosave(out recovered);
+
+            Assert.That(result.Success, Is.True, result.Message);
+            Assert.That(result.RecoveredFromBackup, Is.True);
+            Assert.That(recovered.world.activeRegionId, Is.EqualTo("previous_autosave"));
+        }
+
+        [Test]
+        public void DeleteAutosave_DoesNotDeleteManualSlots()
+        {
+            SaveGameData manual = SaveGameData.CreateNew(2, "Greyhaven_Blockout");
+            SaveGameData automatic = SaveGameData.CreateNew(0, "Greyhaven_Blockout");
+            Assert.That(_service.Save(2, manual).Success, Is.True);
+            Assert.That(_service.SaveAutosave(automatic).Success, Is.True);
+
+            Assert.That(_service.DeleteAutosave().Success, Is.True);
+
+            SaveGameData loadedManual;
+            SaveGameData loadedAutosave;
+            Assert.That(_service.TryLoad(2, out loadedManual).Success, Is.True);
+            Assert.That(_service.TryLoadAutosave(out loadedAutosave).Success, Is.False);
+        }
+
         [Test]
         public void Save_RejectsInvalidCargoRecords()
         {

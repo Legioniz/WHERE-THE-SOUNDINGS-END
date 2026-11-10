@@ -13,6 +13,8 @@ The game uses five independent save slots. Every slot is a separate JSON documen
 The runtime storage directory is:
 
 - Unity: Application.persistentDataPath/Saves/
+- Dedicated automatic save: autosave.json
+- Automatic-save backup: autosave.json.bak
 - Primary file: slot_01.json through slot_05.json
 - Previous-save backup: slot_01.json.bak through slot_05.json.bak
 - Temporary write: slot_01.json.tmp through slot_05.json.tmp
@@ -26,6 +28,7 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - SaveGameData is the versioned snapshot DTO. It contains stable IDs and data-only records, not references to GameObjects or components.
 - SaveFileService validates slots, serializes JSON, writes a temporary file, replaces the primary file, rotates the previous primary into a backup, lists slots, loads saves, recovers from a valid backup, and deletes a slot.
 - SaveGameCoordinator is the scene-level entry point. It discovers active and inactive MonoBehaviours implementing ISaveParticipant, asks them to capture state, and restores those participants on load.
+- AutosaveController runs a five-minute unscaled-time interval after a 45-second startup delay, retries failed writes after 30 seconds, and also saves on application pause, focus loss, active-scene unload, application quit, and requested checkpoints. Lifecycle triggers are debounced by 15 seconds.
 - BoatPrototypeController currently implements ISaveParticipant and records the Greyhaven starter boat transform and Rigidbody velocity.
 
 Typical runtime use:
@@ -35,6 +38,7 @@ Typical runtime use:
 3. Call LoadSlot(1) to restore slot one.
 4. Inspect SaveOperationResult.Success and Message before displaying feedback to the player.
 5. Call GetSlots() to populate a future save/load screen and DeleteSlot(slot) to remove a slot.
+6. Call LoadAutosave() to restore the dedicated automatic save, or RequestCheckpointAutosave(checkpointId) on AutosaveController for authored checkpoints.
 
 The generated Greyhaven scene now contains a SaveGameCoordinator. Rebuild the Greyhaven scene in Unity after updating the environment generator so the coordinator GameObject is present.
 
@@ -56,7 +60,9 @@ Implemented now:
 - Five separate save slots.
 - Versioned JSON data schema.
 - Migration entry point for old schema versions.
-- Primary/backup/temp file handling.
+- Primary/backup/temp file handling for manual slots and the dedicated autosave.
+- Timed autosaves using unscaled real time, plus lifecycle and authored-checkpoint triggers.
+- Autosaves never overwrite the five manual save slots.
 - Corrupt-primary fallback to backup.
 - Slot listing and deletion.
 - Scene-level capture/restore participant contract.
@@ -69,7 +75,7 @@ Not yet connected because the corresponding gameplay systems do not exist in the
 - WorldClock instance, day/night and weather runtime state.
 - Quests, journal evidence, discoveries and NPC relationships.
 - Regional fish stocks, creature states, threat state, encounter cooldowns and random stream ownership.
-- A player-facing save/load menu, autosave policy, save confirmation prompt and quit-save flow.
+- A player-facing save/load menu, save confirmation prompt, and UI feedback for autosave status. Autosaving itself is implemented.
 - Loading into a different scene automatically. The coordinator currently requires the target scene to be active before restoring its participants.
 
 A field's presence in SaveGameData is a persistence contract, not proof that the related gameplay feature is implemented. Add a focused ISaveParticipant when each system gains authoritative runtime state.

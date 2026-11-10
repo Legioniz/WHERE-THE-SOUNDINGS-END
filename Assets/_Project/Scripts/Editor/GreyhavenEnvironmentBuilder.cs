@@ -82,6 +82,7 @@ namespace WhereTheSoundingsEnd.Editor
             GameObject coordinator = new GameObject("Save_Game_Coordinator");
             coordinator.transform.SetParent(parent, false);
             coordinator.AddComponent<SaveGameCoordinator>();
+            coordinator.AddComponent<AutosaveController>();
         }
 
         private static void BuildWater(Transform parent, Material material)

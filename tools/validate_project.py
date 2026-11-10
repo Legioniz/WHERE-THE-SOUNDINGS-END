@@ -25,6 +25,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
+    "Assets/_Project/Scripts/Runtime/Persistence/AutosaveController.cs",
     "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs",
     "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs",
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",

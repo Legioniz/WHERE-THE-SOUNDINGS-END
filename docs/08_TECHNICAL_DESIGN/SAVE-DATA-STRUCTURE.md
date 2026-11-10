@@ -8,7 +8,7 @@
 
 ## Storage layout
 
-The runtime writes one file per slot to Application.persistentDataPath/Saves/.
+The runtime writes five manual save files and one dedicated autosave to Application.persistentDataPath/Saves/.
 
 | Slot | Primary file | Backup file |
 |---|---|---|
@@ -18,7 +18,7 @@ The runtime writes one file per slot to Application.persistentDataPath/Saves/.
 | 4 | slot_04.json | slot_04.json.bak |
 | 5 | slot_05.json | slot_05.json.bak |
 
-Temporary writes use the .tmp suffix. Corrupt files are not treated as valid saves. A valid backup is loaded when the primary file cannot be read or validated.
+Temporary writes use the .tmp suffix. The automatic save uses autosave.json and autosave.json.bak; it is separate from all manual slots. Corrupt files are not treated as valid saves. A valid backup is loaded when the primary file cannot be read or validated.
 
 ## Schema v1
 
@@ -32,6 +32,8 @@ Root DTO: SaveGameData.
 | savedAtUtc | UTC ISO-8601 timestamp |
 | gameVersion | Application version that wrote the file |
 | sceneId | Unity scene required before restoration |
+| saveKind | manual or autosave |
+| saveReason | autosave trigger or checkpoint identifier |
 | totalPlaytimeSeconds | Campaign playtime |
 | worldSeed | Campaign seed represented as a string to preserve exact integer text |
 | world | Simulation clock, region, weather, tide and disturbance |
@@ -70,12 +72,18 @@ Do not repurpose an existing field with a new meaning. Add a new field, migrate,
 
 - SaveFileService.Save(slot, data)
 - SaveFileService.TryLoad(slot, out data)
+- SaveFileService.SaveAutosave(data)
+- SaveFileService.TryLoadAutosave(out data)
+- SaveFileService.DeleteAutosave()
 - SaveFileService.GetSlotInfos()
 - SaveFileService.Delete(slot)
 - SaveGameCoordinator.SaveSlot(slot)
 - SaveGameCoordinator.LoadSlot(slot)
+- SaveGameCoordinator.SaveAutosave(reason)
+- SaveGameCoordinator.LoadAutosave()
 - SaveGameCoordinator.GetSlots()
 - SaveGameCoordinator.DeleteSlot(slot)
+- SaveGameCoordinator.DeleteAutosave()
 
 The coordinator calls ISaveParticipant.CaptureSaveData and ISaveParticipant.RestoreSaveData for scene components that own mutable runtime state. Components should only write their own defined portion of the DTO.
 
