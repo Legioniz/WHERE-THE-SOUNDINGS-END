@@ -27,7 +27,7 @@ namespace WhereTheSoundingsEnd.World
         [SerializeField, Min(1f)] private float minimumLayerSeparationMeters = 90f;
         [SerializeField, Min(1f)] private float siteDetectionRangeMultiplier = 1f;
 
-        private InputActionAsset controls;
+        [SerializeField] private InputActionAsset controls;
         private InputAction pulseAction;
         private DeepOceanSurveyRegion[] regions = Array.Empty<DeepOceanSurveyRegion>();
         private DeepOceanPhenomenonSite[] sites = Array.Empty<DeepOceanPhenomenonSite>();
