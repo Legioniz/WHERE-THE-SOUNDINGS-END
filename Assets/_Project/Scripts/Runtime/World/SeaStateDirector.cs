@@ -118,7 +118,6 @@ namespace WhereTheSoundingsEnd.World
             bool pausedByUi = Time.timeScale <= 0.0001f ||
                               (dialogueRunner != null && dialogueRunner.IsDialogueRunning);
             float speed = vesselBody == null ? 0f : HorizontalSpeed(vesselBody.linearVelocity);
-            bool moving = speed >= movementThreshold;
             IsAdvancing = ActionDrivenClockPolicy.ShouldAdvance(speed, movementThreshold, harvestingActive, pausedByUi);
 
             if (!IsAdvancing)
@@ -189,11 +188,7 @@ namespace WhereTheSoundingsEnd.World
 
         private void UpdateHallucination(float gameDelta)
         {
-            hallucinationCooldown -= gameDelta;
-            if (panicLevel < 0.72f || hallucinationCooldown > 0f || vesselBody == null || !IsNight)
-                return;
-
-            hallucinationCooldown = Random.Range(55f, 105f);
+            // Once the omen has appeared, its countdown must continue independently of the next event cooldown.
             if (birdEventPending)
             {
                 birdEventCountdown -= gameDelta;
@@ -213,11 +208,15 @@ namespace WhereTheSoundingsEnd.World
                 return;
             }
 
+            hallucinationCooldown -= gameDelta;
+            if (panicLevel < 0.72f || hallucinationCooldown > 0f || vesselBody == null || !IsNight)
+                return;
+
+            hallucinationCooldown = Random.Range(55f, 105f);
             if (panicLevel > 0.9f && Random.value < 0.34f)
             {
                 birdEventPending = true;
                 birdEventCountdown = 105f;
-                hallucinationCooldown = Random.Range(150f, 240f);
                 latestOmen = "Black wings gather above the fog. Keep the catch covered.";
                 return;
             }
