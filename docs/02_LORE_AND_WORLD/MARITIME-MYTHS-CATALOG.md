@@ -52,3 +52,9 @@ These are real categories of ocean or atmospheric phenomena. Their presence in t
 ## Individual drafts
 
 The current quest drafts are indexed in [Maritime Mysteries](../03_STORY_AND_NARRATIVE/SIDE_QUESTS/MARITIME_MYSTERIES/README.md).
+
+## Expanded research dossier
+
+The detailed, source-traceable expansion is now maintained in [Ocean Legends and Sea Monsters](OCEAN-LEGENDS-AND-SEA-MONSTERS.md). It covers the *Essex* / Mocha Dick history behind *Moby-Dick*, medieval Norse hafgufa and lyngbakr, the Kraken, Leviathan, Jörmungandr, Scylla and Charybdis, the Flying Dutchman, Davy Jones, Japanese sea apparitions and deities, Māori and Inuit traditions, Philippine Bakunawa and kataw accounts, Caribbean Lusca, selkies, and sea-serpent reports.
+
+The expansion separates historical events, historical testimony, literary fiction, mythic / religious texts, living oral traditions, and scientific comparisons. It includes original links and cultural-use cautions. It remains non-canon.
