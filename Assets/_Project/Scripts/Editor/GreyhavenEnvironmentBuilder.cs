@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 using WhereTheSoundingsEnd.Boat;
 using WhereTheSoundingsEnd.CameraSystem;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.Inventory;
+using WhereTheSoundingsEnd.Narrative;
 
 namespace WhereTheSoundingsEnd.Editor
 {
@@ -83,6 +85,7 @@ namespace WhereTheSoundingsEnd.Editor
             coordinator.transform.SetParent(parent, false);
             coordinator.AddComponent<SaveGameCoordinator>();
             coordinator.AddComponent<AutosaveController>();
+            coordinator.AddComponent<YarnDialogueSaveParticipant>();
         }
 
         private static void BuildWater(Transform parent, Material material)
@@ -446,6 +449,7 @@ namespace WhereTheSoundingsEnd.Editor
 
             BoatPrototypeController controller = boat.AddComponent<BoatPrototypeController>();
             controller.InputActions = controls;
+            boat.AddComponent<SpatialCargoHold>();
         }
 
         private static void BuildCameraAndLight(Transform parent, Transform playerRoot)
