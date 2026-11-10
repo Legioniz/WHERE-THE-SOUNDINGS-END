@@ -143,3 +143,26 @@ All background life events use stable IDs and deterministic random streams. Feed
 - Quest state transitions are idempotent.
 - Event logs reproduce a test encounter from seed + opportunity ID.
 - A missing schedule entry uses a safe default and records a diagnostic.
+
+## 10. Legendary sightings and location-bound world events
+
+The World Simulation owns the opportunity clock and deterministic event identity for rare legendary appearances. It does not independently spawn or move a legendary creature; the Threat Director selects an eligible event and the local encounter controller runs its authored phase sequence.
+
+Use opportunity boundaries rather than frame checks:
+- region / fishing-ground entry;
+- voyage segment completion;
+- tide turn or current reversal;
+- named weather / visibility window;
+- Sounding Rig deployment or qualifying pulse;
+- salvage / anchor / winch tension event;
+- authored lunar, seasonal, or progression window.
+
+Every opportunity receives a stable ID such as `legend:hafgufa:outer_shoals:pelagic_segment_014`. Persist the evaluated result so the same opportunity cannot be rerolled after a scene transition, save/load, or repeated tool input.
+
+The scheduler must check region, depth, time, tide, weather, progression flags, global legendary cooldown, individual cooldown, safe-zone state, and the availability of warning and escape anchors. An inactive region must not simulate a lethal chase. Defer the event until the player returns or resolve only a harmless distant omen.
+
+A rare event may first appear as a rumor, surface sign, call, instrument mismatch, or distant silhouette. A later opportunity can produce contact if the player enters the defined boundary. Do not escalate a harmless sighting to lethal contact without a new trigger and a readable warning.
+
+All legendary events share the existing major-threat lock with The Sleeper. If a major hostile encounter is active, defer the legendary event. Harmless ambient signs may still occur only when they cannot become contact.
+
+The encounter phases, trigger matrix, rarity bands, escape rules, and save-state contract are defined in [Legendary Maritime Encounters](LEGENDARY-ENCOUNTER-SCHEDULER.md).
