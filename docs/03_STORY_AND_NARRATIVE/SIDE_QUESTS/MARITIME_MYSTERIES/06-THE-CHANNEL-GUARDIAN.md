@@ -52,3 +52,33 @@ The personal blog is a secondary lead, not an authority.
 ## Scope note
 
 Use a route hazard, current-state rules, two NPC dialogue flags, and one buoy interaction. No creature encounter is necessary.
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- Evaluate on tide transition while the player is inside the channel bounds and the quest is active.
+- Current surge presentation chance: **20% per eligible tide transition**; once the quest requires the hazard evidence, the event becomes deterministic on the next adverse tide.
+- Tide state, route force, and warning timing are generated from the saved tide-cycle ID. Do not roll a different current every physics frame.
+
+### Behaviour states
+`Stable Channel → Adverse Tide Warning → Lateral Current → Safe Window / Surge Decay`.
+The "guardian" is the channel itself, not a monster. Current vectors interpolate over 8 seconds. Severe lateral force is applied only inside the marked channel polygon and only during the adverse tide state. A buoy rhythm becomes irregular at the boundary to warn the player.
+
+### Perception / FOV
+No creature FOV and no player vision cone. A dark surface band and foam streak indicate the current direction within 30–50 m in clear weather. Fog reduces visual range, but the compass/current indicator and buoy audio still indicate the safe heading.
+
+### Sound behaviour
+Buoy bell rate slows and becomes uneven as the current strengthens. The sound is a navigational warning, not a monster voice. Caption: `[channel buoy rings irregularly]`.
+
+### Attacks and chase
+**No attack and no chase.** The surge can push the boat laterally; damage only occurs if the player collides with mapped rocks. Apply a 3-second buildup before maximum force, clamp lateral acceleration, and provide a clear escape heading. No force may be applied in safe zones.
+
+### Lore reveal
+Two local fishers explain the same warning differently: one says a guardian occupies the channel; the mechanic describes an unusual tide-driven flow around submerged rock. The quest preserves both readings and does not confirm a named Māori being or other real-world deity.
+
+### Acceptance tests
+- Current force matches the saved tide state.
+- Player receives a warning before severe force.
+- No hostile AI or attack component is created.
+- A safe heading is discoverable with visual or accessibility cues.
