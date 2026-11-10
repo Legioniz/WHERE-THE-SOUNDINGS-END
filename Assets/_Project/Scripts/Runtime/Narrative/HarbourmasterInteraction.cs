@@ -27,6 +27,8 @@ namespace WhereTheSoundingsEnd.Narrative
         public DialogueRunner Runner { get => dialogueRunner; set => dialogueRunner = value; }
         public GreyhavenRuntimeUI Interface { get => runtimeUI; set => runtimeUI = value; }
         public InputActionAsset Controls { get => controls; set => controls = value; }
+        public string DialogueNode { get => dialogueNode; set => dialogueNode = value; }
+        public string DisplayName { get => displayName; set => displayName = value; }
 
         private void Awake()
         {
