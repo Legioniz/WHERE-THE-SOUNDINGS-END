@@ -631,6 +631,17 @@ namespace WhereTheSoundingsEnd.Editor
             site.transform.SetParent(parent, false);
             site.transform.position = new Vector3(30f, -0.25f, 55f);
             SalvageSite salvage = site.AddComponent<SalvageSite>();
+            DeepOceanPhenomenonSite surveyMarker = site.AddComponent<DeepOceanPhenomenonSite>();
+            surveyMarker.Configure(
+                "greyhaven.outer_channel_wreck",
+                "greyhaven",
+                DeepOceanPhenomenonType.DerelictVessel,
+                "Outer Channel Wreck Field",
+                18f,
+                58f,
+                0.72f,
+                "A low, broken return rests close to the channel floor. Its shape matches the wreck field marked on the harbour chart; no movement is detected.",
+                "Fictional world site");
 
             GameObject brokenHull = Block("Wrecked_Hull_Remnant", site.transform,
                 site.transform.position + new Vector3(0f, -0.55f, 0f), new Vector3(5.5f, 0.7f, 2.4f), timber);
