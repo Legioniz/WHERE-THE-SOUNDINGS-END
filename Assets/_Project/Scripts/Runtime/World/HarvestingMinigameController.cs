@@ -38,6 +38,13 @@ namespace WhereTheSoundingsEnd.World
         public bool IsActionActive => action != HarvestActionType.None;
         public HarvestActionType ActiveAction => action;
 
+        public void Configure(InputActionAsset input, SpatialCargoHold hold, SeaStateDirector director)
+        {
+            controls = input;
+            cargoHold = hold;
+            seaState = director;
+        }
+
         private void Awake()
         {
             if (cargoHold == null) cargoHold = GetComponent<SpatialCargoHold>();
@@ -45,11 +52,17 @@ namespace WhereTheSoundingsEnd.World
             targetTexture = CreateArcTexture(128, 0.22f, new Color(0.86f, 0.37f, 0.22f, 0.95f));
         }
 
-        private void OnEnable()
+        private void Start()
         {
             if (controls == null) return;
             fishAction = controls.FindAction("Fish", false);
             dredgeAction = controls.FindAction("Dredge", false);
+        }
+
+        private void OnDestroy()
+        {
+            if (ringTexture != null) Destroy(ringTexture);
+            if (targetTexture != null) Destroy(targetTexture);
         }
 
         private void Update()
