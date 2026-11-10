@@ -97,7 +97,7 @@ namespace WhereTheSoundingsEnd.Boat
             float steeringAuthority = Mathf.Clamp01(speed / steeringReferenceSpeed);
 
             _body.AddTorque(
-                Vector3.up * (-steering * turnAcceleration * steeringAuthority * travelDirection),
+                Vector3.up * (steering * turnAcceleration * steeringAuthority * travelDirection),
                 ForceMode.Acceleration);
         }
     }
