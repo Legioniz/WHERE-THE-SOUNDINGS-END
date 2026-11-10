@@ -110,6 +110,29 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.IsFalse(DeepOceanSurveyMath.IsDistinctMidwaterReturn(-1f, 1450f, 90f));
         }
 
+
+        [Test]
+        public void PhenomenonSite_RequiresMatchingRegionAndDetectionRadius()
+        {
+            GameObject siteObject = new GameObject("SurveySiteTest");
+            siteObject.transform.SetParent(root.transform, false);
+            DeepOceanPhenomenonSite site = siteObject.AddComponent<DeepOceanPhenomenonSite>();
+            site.Configure(
+                "test.outer_shoals.whale_fall",
+                "the_outer_shoals",
+                DeepOceanPhenomenonType.WhaleFall,
+                "Test Whale Fall",
+                2100f,
+                40f,
+                0.8f,
+                "Bone-associated fauna detected.",
+                "Established science");
+
+            Assert.IsTrue(site.IsDetectableFrom(new Vector3(20f, 0f, 0f), "the_outer_shoals"));
+            Assert.IsFalse(site.IsDetectableFrom(new Vector3(20f, 0f, 0f), "greyhaven"));
+            Assert.IsFalse(site.IsDetectableFrom(new Vector3(60f, 0f, 0f), "the_outer_shoals"));
+        }
+
         [Test]
         public void SurveyOpportunityKey_IsStableAcrossRepeatedEvaluation()
         {
