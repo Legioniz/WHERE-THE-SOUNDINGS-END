@@ -49,6 +49,7 @@ namespace WhereTheSoundingsEnd.World
 
         public double ElapsedGameSeconds => elapsedGameSeconds;
         public double TimeOfDaySeconds => timeOfDaySeconds;
+        public int DayNumber => Mathf.FloorToInt((float)(elapsedGameSeconds / 86400.0)) + 1;
         public float PanicLevel => panicLevel;
         public float SeaDisturbance => seaDisturbance;
         public bool IsNight => CurrentHour >= nightStartsAtHour || CurrentHour < dayStartsAtHour;
