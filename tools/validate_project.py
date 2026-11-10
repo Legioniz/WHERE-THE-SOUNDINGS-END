@@ -34,12 +34,14 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/World/VesselConditionController.cs",
     "Assets/_Project/Scripts/Runtime/World/HarvestingMinigameController.cs",
     "Assets/_Project/Scripts/Runtime/World/SalvageSite.cs",
+    "Assets/_Project/Tests/EditMode/SeaStateAndCargoDamageTests.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/YarnDialogueSaveParticipant.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs",
     "Assets/_Project/Dialogue/Greyhaven.yarnproject",
     "Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn",
     "Assets/_Project/Tests/EditMode/CargoGridGeometryTests.cs",
+    "docs/06_GAMEPLAY_SYSTEMS/ACTION-DRIVEN-SEA-STATE.md",
     "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs",
     "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs",
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
@@ -96,6 +98,15 @@ def main() -> int:
             ]
             if len(identifiers) != len(set(identifiers)):
                 failures.append("Input action/binding identifiers must be unique.")
+
+        save_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs").read_text(encoding="utf-8")
+        if "CurrentSchemaVersion = 3" not in save_source:
+            failures.append("SaveGameData schema must be version 3 after sea-state persistence changes.")
+
+        sea_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs").read_text(encoding="utf-8")
+        for required_text in ("movementThreshold", "SetHarvesting", "panicLevel", "timeOfDaySeconds"):
+            if required_text not in sea_source:
+                failures.append(f"SeaStateDirector is missing expected runtime feature: {required_text}")
 
         yarn_project = load_json("Assets/_Project/Dialogue/Greyhaven.yarnproject")
         if yarn_project.get("projectFileVersion") != 3:
