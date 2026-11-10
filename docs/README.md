@@ -23,6 +23,8 @@
 ## World geography and regional ecology
 
 - [World Bible](02_LORE_AND_WORLD/WORLD-BIBLE.md)
+- [World Map](05_WORLD_AND_LEVEL_DESIGN/WORLD-MAP.md)
+- [Greyhaven environment and first-hub layout](05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md)
 - [Regional ecology and creature distribution](05_WORLD_AND_LEVEL_DESIGN/REGIONAL-ECOLOGY-AND-CREATURES.md)
 - [Location catalog](05_WORLD_AND_LEVEL_DESIGN/LOCATION-CATALOG.md)
 - [Exploration design](05_WORLD_AND_LEVEL_DESIGN/EXPLORATION-DESIGN.md)
@@ -71,7 +73,7 @@ Population rules are authored per species and fishing ground. The simulation tra
 - [Ocean legends and sea monsters — research catalogue](02_LORE_AND_WORLD/OCEAN-LEGENDS-AND-SEA-MONSTERS.md)
 - [Legendary maritime encounter scheduler](12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-SCHEDULER.md)
 
-Legend-inspired encounters are rare, location-bound events evaluated by the Threat Director. They may be harmless sightings, environmental omens, dangerous contacts, or lethal hazards with authored warnings and possible escape routes.
+Legend-inspired encounters are rare, location-bound events. They may be harmless sightings, environmental omens, dangerous contacts, or lethal hazards with authored warnings and possible escape routes.
 
 ## Legendary encounter art and discoveries
 

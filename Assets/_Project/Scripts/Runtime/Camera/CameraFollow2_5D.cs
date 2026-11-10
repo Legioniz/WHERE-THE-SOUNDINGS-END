@@ -14,26 +14,16 @@ namespace WhereTheSoundingsEnd.CameraSystem
 
         private Vector3 _smoothVelocity;
 
-        public Transform Target
-        {
-            get => target;
-            set => target = value;
-        }
+        public Transform Target { get => target; set => target = value; }
+        public Vector3 Offset { get => offset; set => offset = value; }
+        public Vector3 CameraEulerAngles { get => cameraEulerAngles; set => cameraEulerAngles = value; }
+        public float SmoothTime { get => smoothTime; set => smoothTime = Mathf.Max(0.01f, value); }
 
         private void LateUpdate()
         {
-            if (target == null)
-            {
-                return;
-            }
-
-            Vector3 desiredPosition = target.position + offset;
-            transform.position = Vector3.SmoothDamp(
-                transform.position,
-                desiredPosition,
-                ref _smoothVelocity,
-                smoothTime);
-
+            if (target == null) return;
+            Vector3 desired = target.position + offset;
+            transform.position = Vector3.SmoothDamp(transform.position, desired, ref _smoothVelocity, smoothTime);
             transform.rotation = Quaternion.Euler(cameraEulerAngles);
         }
     }

@@ -3,7 +3,7 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Implemented scaffold; expandable baseline  
 > Owner: Project lead  
-> Version: 0.2  
+> Version: 0.3  
 > Last reviewed: 2026-11-10
 
 ## Repository root
@@ -43,10 +43,17 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Core/WorldClock.cs: engine-independent simulation-time primitive.
 - Core/Pcg32Random.cs: PCG-XSH-RR deterministic random generator.
 - Boat/BoatPrototypeController.cs: temporary Rigidbody handling prototype.
-- Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera.
-- Editor/ProjectFoundationSetup.cs: creates URP assets and Greyhaven blockout on explicit menu command.
+- Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera with configurable framing.
+- Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, and initial build-scene list.
+- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, starter boat, and camera.
 
-The editor setup command generates the Greyhaven scene, initial URP assets, materials, and the Unity build-scene list. Generated Unity assets and their corresponding .meta files should be committed after successful editor initialization.
+## Greyhaven environment generation
+
+Run Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation on first setup. It creates the initial URP assets and generates Assets/_Project/Scenes/Greyhaven_Blockout.unity.
+
+Use Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment after changing the environment generator. The command warns before replacing the generated scene. Generated Unity assets and their corresponding .meta files should be committed after successful Editor initialization.
+
+Greyhaven is a working technical greybox. Its coordinates and dimensions are prototype scale values; final terrain, water, architecture, collision, and camera framing require in-Editor testing.
 
 ## Rules
 
@@ -57,5 +64,3 @@ The editor setup command generates the Greyhaven scene, initial URP assets, mate
 5. Isolate third-party assets and maintain their license records.
 6. Do not commit Library, Temp, Obj, generated IDE projects, or build output.
 7. Do not label a feature implemented until it exists in runtime code and has passed its relevant tests.
-
-The project folder tree will expand as real systems are built. Empty planned directories are created by the initialization tool rather than committed as artificial placeholders.

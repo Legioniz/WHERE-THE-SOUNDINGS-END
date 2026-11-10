@@ -26,8 +26,10 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs",
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
+    "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs",
     "Assets/_Project/Tests/EditMode/WhereTheSoundingsEnd.Tests.EditMode.asmdef",
     "Assets/_Project/Tests/EditMode/CoreFoundationTests.cs",
+    "docs/05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md",
 ]
 
 
@@ -41,7 +43,6 @@ def load_json(relative_path: str) -> dict:
 
 def main() -> int:
     failures: list[str] = []
-
     for relative_path in REQUIRED_FILES:
         if not (ROOT / relative_path).is_file():
             failures.append(f"Missing required file: {relative_path}")
@@ -70,7 +71,6 @@ def main() -> int:
             expected_actions = {"Move", "Interact", "Fish", "SoundingPulse", "Pause"}
             if not expected_actions.issubset(action_names):
                 failures.append("Boat action map is missing one or more required actions.")
-
             identifiers = [
                 item.get("id")
                 for item in boat_map.get("actions", []) + boat_map.get("bindings", [])
@@ -85,12 +85,12 @@ def main() -> int:
     except (ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         failures.append(str(error))
 
-    gitignore_path = ROOT / ".gitignore"
-    if gitignore_path.exists():
-        ignore_text = gitignore_path.read_text(encoding="utf-8")
-        for ignored in ("[Ll]ibrary/", "[Tt]emp/", "[Oo]bj/"):
-            if ignored not in ignore_text:
-                failures.append(f".gitignore is missing {ignored}")
+    gitignore = ROOT / ".gitignore"
+    if gitignore.exists():
+        text = gitignore.read_text(encoding="utf-8")
+        for pattern in ("[Ll]ibrary/", "[Tt]emp/", "[Oo]bj/"):
+            if pattern not in text:
+                failures.append(f".gitignore is missing {pattern}")
 
     if failures:
         for failure in failures:
