@@ -9,7 +9,7 @@ namespace WhereTheSoundingsEnd.World
 {
     /// <summary>
     /// Greyhaven action-driven clock and psychological pressure director.
-    /// Time advances only while the vessel is genuinely moving or a harvest action is active.
+    /// Time advances only while the vessel is genuinely moving or a supported harvest / survey action is active.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SeaStateDirector : MonoBehaviour, ISaveParticipant
