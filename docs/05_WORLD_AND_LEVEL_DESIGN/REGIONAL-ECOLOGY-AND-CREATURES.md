@@ -504,3 +504,52 @@ The following sources support the ecological patterns used in this proposal. The
 - [Location catalog](LOCATION-CATALOG.md)
 
 The six major regions and all named sublocations remain proposed until the master bathymetric map and world scale are approved.
+
+## 11. Local fishing pressure and regional recovery
+
+Population depletion is tracked at individual fishing grounds, not only at the six-region level. A bay channel, seagrass meadow, reef edge, surge channel, flooded settlement pool, pelagic corridor, and deep slope can each have a different stock condition even when they share a region label.
+
+The same species may therefore be plentiful on one side of an island and scarce on the other. Regional totals are weighted summaries of local grounds; they are not a reason to refill every patch equally.
+
+### 11.1 Regional ecological signatures under heavy fishing
+
+| Region | Vulnerable grounds | Likely ecological consequence of repeated extraction | Recovery character |
+|---|---|---|---|
+| Greyhaven | River mouth, East Channel, mangrove edge, pilings | Smaller mullet and anchovy schools; fewer juvenile fish in nursery channels; rays and diving birds may find less prey | Connected estuary channels can recolonize a rested ground, but damaged nursery roots and water quality slow recovery |
+| The Shallows | Seagrass beds, reef heads, sand gutters, lagoon edges | Reef fish and grazer sightings thin locally; juvenile shelter use declines if seagrass is damaged; predators may move to a better-fed reef | Reef-associated adults and habitat recovery can be slow; healthy neighbouring patches act as sources only along valid routes |
+| Blackrock Reach | Surge channels, basalt cracks, wave-cut ledges | Lobsters, morays, octopuses, and crevice-associated fish become harder to find in repeatedly worked shelters | Shelter-dependent and slow-growing animals need longer rest periods; rough access does not make a population renewable |
+| The Drowned Parish | Flooded streets, old river channel, brackish pools, submerged foundations | Local eel, crab, and small-fish populations decline; nursery and feeding activity becomes concentrated in connected channels | Tidal / freshwater connection controls recolonization; isolated pools can remain depleted after the player leaves |
+| The Outer Shoals | Migratory corridor, offshore ridge, seamount edge, pelagic feeding zone | A passing school may be absent for a season or shift its route; repeated targeting can reduce local availability and adult size structure | Mobile pelagic species can return with migration, but migration is a transfer, not new archipelago-wide biomass |
+| The Hollow Trench | Upper slope, canyon ledge, deep hardground, trench margin | Deep-slope and deepwater catches fall sharply; mature animals become rare; local spawning can fail when breeders are removed | Recovery is deliberately slow; long-lived deep species do not refill after a few nights or one short rest |
+
+These are gameplay signatures, not a claim that every listed animal is present in every ground. The species catalogue and habitat suitability determine the actual local roster.
+
+### 11.2 Ecological feedback rules
+
+- Predators respond to prey availability. A depleted forage-fish ground may cause a predator to search a neighbouring feeding area, reduce activity, or switch prey where its diet permits.
+- Removing herbivorous grazers can change algae pressure only in habitats where that trophic relationship is authored. Do not apply a universal reef-collapse effect.
+- Fishing a nursery ground can reduce juvenile survival even if adult catch rates initially remain high.
+- Taking large mature adults can reduce spawning-stock biomass and future recruitment after an authored delay.
+- Catching juveniles can reduce the number of fish that would otherwise mature later.
+- Discarded catch may attract scavengers, but it does not replenish the harvested stock.
+- Natural migration can recolonize a local patch only where a continuous habitat route or species migration corridor exists.
+
+### 11.3 Habitat and stock recovery are separate
+
+A fish population may begin to recover before a damaged seagrass bed, reef refuge, or brooding site has recovered. Conversely, a healthy habitat does not instantly create adult fish if the local breeders have been removed.
+
+Track habitat quality, nursery capacity, and animal abundance independently. Anchoring, dragging gear, removing holdfasts, or repeatedly disturbing breeding sites may lower habitat suitability and slow recruitment. A player can help by rotating grounds, observing temporary closures, removing ghost gear, or completing authored habitat-restoration work.
+
+### 11.4 World presentation
+
+Use visible and audible evidence rather than a universal red warning icon:
+- fewer or smaller schools in the same known location;
+- weaker Sounding Rig returns;
+- less feeding, courtship, or juvenile activity;
+- fewer large adults in a size distribution;
+- predators following prey elsewhere;
+- fishers discussing empty nets or a ground that needs rest.
+
+The exact stock percentage can be exposed through surveys or research upgrades, while ordinary exploration gives descriptive condition reports.
+
+Related authoritative model: [Fish Population and Food-Web Model](../07_GAME_RULES_AND_BALANCING/FISH-POPULATION-MODEL.md).
