@@ -212,3 +212,7 @@ Do not persist a transient audio source handle or a Unity instance reference. Re
 - Warning always precedes impact.
 - Only hostile attack code can damage the boat through a creature strike.
 - All twelve maritime quest entries resolve their required clue without unbounded RNG failure.
+
+## Related AI behaviour specification
+
+For advanced predator behaviour, evidence-based escalation, utility action selection, predictive pursuit, stalking, limited group coordination, destructive tendencies, fairness, and validation, see [AI Coordination and Hunting Logic](../12_AI_AND_SIMULATION/AI-COORDINATION-AND-HUNTING-LOGIC.md). This is a design specification; it does not mean runtime AI code has been implemented in the Unity project.
