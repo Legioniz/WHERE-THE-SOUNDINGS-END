@@ -261,9 +261,9 @@ The payout is for evidence and research delivery, not for the specimen's mass. U
 
 For a normal eligible sale:
 
-`SaleValue = round(EligibleWeightKg × BasePricePerKg × Quality × Freshness × Demand)`
+`SaleValue = round(SaleQuantity × BasePrice × Quality × Freshness × Demand × LiveCondition)`
 
-For a per-individual item, replace weight with the eligible individual count. Calculate per species / buyer line, then sum the transaction. Apply all factors once only.
+For a per-individual item, `SaleQuantity` is the eligible individual count and `BasePrice` is the listed per-individual rate. `LiveCondition` is 1.00 by default; use 1.10–1.15 only for an eligible live crab / lobster handed over alive and intact to a buyer that explicitly accepts live stock. Calculate per species / buyer line, then sum the transaction. Apply all factors once only.
 
 | Factor | Working value | Rule |
 |---|---:|---|
@@ -276,6 +276,7 @@ For a per-individual item, replace weight with the eligible individual count. Ca
 | Freshness: aging | 0.70–0.85 | Delayed sale with acceptable quality remaining |
 | Freshness: poor | 0.35–0.60 | Warm, long delay, or visibly deteriorated |
 | Local demand | 0.75–1.35 | Buyer stock, menu, event, weather disruption or posted order |
+| Live condition | 1.00–1.15 | Only for eligible live, intact crab / lobster; otherwise 1.00 |
 | Legal eligibility | 0 or 1 | Ineligible catch is rejected; do not apply a fractional legal multiplier |
 
 Quality, freshness, and demand should be visible to the player. Buyers must explain a discount or refusal. Do not roll hidden price penalties after the catch lands.
