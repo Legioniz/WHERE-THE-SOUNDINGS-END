@@ -51,3 +51,33 @@ Treat this as an index, not a final source.
 ## Scope note
 
 Use the existing Living Current simulation and a scripted surface cue. No companion creature AI, ritual system, or new faction is necessary.
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- Trigger evaluation on an authored tide transition while the player is inside the shoal corridor and the quest is active.
+- Surface wake appearance chance: **25% per eligible tide transition**. The safe current route itself is discoverable deterministically from current readings and buoy observations.
+- After two missed wake rolls, guarantee a wake on the next eligible transition. The route clue cannot be RNG-locked.
+
+### Behaviour states
+`Normal Current → Current Shift → Wake Appears → Lane Stabilizes → Lane Decays`.
+The wake is a wildlife / surface disturbance cue. It follows the boundary of the safe current lane for 15–25 seconds, then fades. It does not steer toward the player or orbit the boat. The current vector changes smoothly over 8–12 seconds, with a visible foam / debris line.
+
+### Perception / FOV
+No hostile FOV. Player camera visibility range is governed by fog; the wake has a high-contrast foam edge at 35–60 m in clear conditions and shorter range in fog. The camera can show the wake moving across the screen, but does not auto-rotate or lock to it.
+
+### Sound behaviour
+Use a soft water rush and occasional animal movement splash. No roar, sting, or threat heartbeat. The sound should communicate direction only when the wake is close; the compass and current arrow remain the reliable navigation tools.
+
+### Attacks and chase
+**None.** The animal/wake is non-hostile and does not follow, ram, or bite the player. Incorrectly entering the channel at an adverse tide can push the boat laterally toward marked rocks. That is a predictable environmental hazard, not an attack. Give at least 3 seconds of visual / instrument warning before severe lateral force.
+
+### Lore reveal
+The lighthouse keeper's notes show that earlier fishers recorded the same safe-current window but disagreed about what moved through it. The quest never confirms a divine guide or identifies the wake as a named mythic being.
+
+### Acceptance tests
+- Wake and current vector share one saved tide-cycle seed.
+- No chase or damage call is made by the wildlife cue.
+- Player can chart the lane without seeing the wake by comparing instruments.
+- Unsafe current force is preceded by a warning.
