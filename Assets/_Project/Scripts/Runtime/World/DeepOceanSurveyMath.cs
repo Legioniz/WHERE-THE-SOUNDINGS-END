@@ -38,6 +38,11 @@ namespace WhereTheSoundingsEnd.World
             return Clamp01(usableSignal * (0.35f + Clamp01(density) * 0.65f));
         }
 
+        public static float CalculateSiteSignalConfidence(float signalStrength, float signalQuality, float attenuation)
+        {
+            return Clamp01(Clamp01(signalStrength) * Clamp01(signalQuality) * (1f - Clamp01(attenuation)));
+        }
+
         public static bool IsIndependentLayerObservation(
             string previousRegionId,
             string currentRegionId,
