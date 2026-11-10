@@ -39,7 +39,7 @@ namespace WhereTheSoundingsEnd.World
             if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             if (vesselBody == null)
             {
-                Boat.BoatPrototypeController boat = FindFirstObjectByType<Boat.BoatPrototypeController>();
+                WhereTheSoundingsEnd.Boat.BoatPrototypeController boat = FindFirstObjectByType<Boat.BoatPrototypeController>();
                 if (boat != null) vesselBody = boat.GetComponent<Rigidbody>();
             }
             if (worldRoot == null) worldRoot = transform;
@@ -271,6 +271,23 @@ namespace WhereTheSoundingsEnd.World
             AudioClip clip = AudioClip.Create(clipName, samples.Length, 1, sampleRate, false);
             clip.SetData(samples, 0);
             return clip;
+        }
+    }
+}
+
+namespace WhereTheSoundingsEnd.World
+{
+    /// <summary>Attaches the atmosphere layer to scenes that already contain the sea-state system.</summary>
+    internal static class FishermanAtmosphereBootstrap
+    {
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void AttachToGreyhaven()
+        {
+            SeaStateDirector seaState = Object.FindFirstObjectByType<SeaStateDirector>();
+            if (seaState == null || seaState.GetComponent<FishermanAtmosphereDirector>() != null)
+                return;
+
+            seaState.gameObject.AddComponent<FishermanAtmosphereDirector>();
         }
     }
 }
