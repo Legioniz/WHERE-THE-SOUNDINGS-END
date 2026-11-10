@@ -51,3 +51,34 @@ This is a starting index only; consult specialist scholarship and community-info
 ## Scope note
 
 Implement with a short dialogue tree, one tide-pool prop, a local stock modifier, and a clear timed reset. No supernatural NPC model is required.
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- The pool state activates once the player has the coin clue and the local fishing-pressure flag is above its threshold.
+- Market / pool update runs at the dawn market-refresh boundary, not per frame.
+- Coin glint presentation: **20% per eligible dawn**; the actual coin evidence and quest resolution are deterministic after the clue prerequisites are met.
+- Taking the coin is a player choice, not a random outcome. Save the selected choice and apply its stock modifier once.
+
+### Behaviour states
+`Unnoticed Pool → Coin Evidence → Comparison Available → Player Choice → Regional Stock Response → Resolved`.
+No creature or sentient pool AI is required. Local fish abundance is adjusted by an authored temporary modifier and then returns through the fish-population recovery model. Do not make it an unexplained infinite resource.
+
+### Perception / FOV
+No AI vision cone. Coin glint can be seen at 10–18 m in clear weather and should be highlighted by a small reflection cue. Camera framing must not force the player to use pixel-perfect search; inspection range and an optional journal clue support discovery.
+
+### Sound behaviour
+The pool is nearly silent. A soft drip / tide resonance plays when the player is within interaction range. No whisper, roar, or chase cue. Captions describe the sound without claiming a supernatural speaker.
+
+### Attacks and chase
+**None.** The pool never damages the player, spawns an attacker, or chases the boat. The consequence is economic/ecological: a one-time payout can coincide with reduced local stock and altered NPC dialogue.
+
+### Lore reveal
+The archive records the same coin shape in an old market ledger, but the currency's origin is unknown. The game never declares that a real-world water spirit is responsible. NPCs disagree: debt, fraud, offering, or a natural deposit.
+
+### Acceptance tests
+- Market response executes once per dawn tick.
+- Taking the coin cannot duplicate currency after load.
+- Stock modifier recovers through the normal ecology rules.
+- No threat or hull damage event is emitted.
