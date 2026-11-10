@@ -155,9 +155,14 @@ namespace WhereTheSoundingsEnd.World
                 {
                     float heading = vesselBody.rotation.eulerAngles.y;
                     bool independentPing = previousLayerDepth > 0f &&
-                        string.Equals(previousLayerRegionId, region.RegionId, StringComparison.OrdinalIgnoreCase) &&
-                        Math.Abs(Mathf.DeltaAngle(previousHeading, heading)) >= 25f &&
-                        (seaState == null || seaState.ElapsedGameSeconds - previousPingGameTime <= 600.0);
+                        DeepOceanSurveyMath.IsIndependentLayerObservation(
+                            previousLayerRegionId,
+                            region.RegionId,
+                            previousHeading,
+                            heading,
+                            seaState != null ? seaState.ElapsedGameSeconds - previousPingGameTime : 0.0,
+                            600.0,
+                            25f);
 
                     consecutiveLayerEvidence = independentPing
                         ? consecutiveLayerEvidence + 1
