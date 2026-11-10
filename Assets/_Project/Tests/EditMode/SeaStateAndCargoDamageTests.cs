@@ -3,6 +3,7 @@ using UnityEngine;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.Core;
+using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Tests
 {
@@ -89,8 +90,54 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.AreEqual(1, hold.Placements.Count);
         }
 
+
         [Test]
-        public void SaveMigration_VersionTwoAddsPanicAndDamagedCellDefaults()
+        public void ScatteringLayer_MigratesFromDeepDayDepthToShallowerNightDepth()
+        {
+            float dayDepth = DeepOceanSurveyMath.GetScatteringLayerDepth(12f, 520f, 190f);
+            float nightDepth = DeepOceanSurveyMath.GetScatteringLayerDepth(0f, 520f, 190f);
+
+            Assert.That(dayDepth, Is.GreaterThan(500f));
+            Assert.That(nightDepth, Is.LessThan(210f));
+            Assert.That(nightDepth, Is.LessThan(dayDepth));
+        }
+
+        [Test]
+        public void ScatteringLayer_IsASeparateWaterColumnReturnNotTheSeabed()
+        {
+            Assert.IsTrue(DeepOceanSurveyMath.IsDistinctMidwaterReturn(190f, 1450f, 90f));
+            Assert.IsFalse(DeepOceanSurveyMath.IsDistinctMidwaterReturn(1390f, 1450f, 90f));
+            Assert.IsFalse(DeepOceanSurveyMath.IsDistinctMidwaterReturn(-1f, 1450f, 90f));
+        }
+
+        [Test]
+        public void SurveyOpportunityKey_IsStableAcrossRepeatedEvaluation()
+        {
+            ulong first = DeepOceanSurveyMath.StableKey("the_outer_shoals:day:3:sounding:14");
+            ulong second = DeepOceanSurveyMath.StableKey("the_outer_shoals:day:3:sounding:14");
+            ulong different = DeepOceanSurveyMath.StableKey("the_outer_shoals:day:3:sounding:15");
+
+            Assert.AreEqual(first, second);
+            Assert.AreNotEqual(first, different);
+        }
+
+        [Test]
+        public void RegionalSurveyProfiles_KeepDeepLayerOutOfGreyhaven()
+        {
+            DeepOceanSurveyRegion region = root.AddComponent<DeepOceanSurveyRegion>();
+
+            region.ConfigureForRegion("greyhaven");
+            Assert.IsFalse(region.HasScatteringLayer);
+            Assert.That(region.NominalSeabedDepthMeters, Is.LessThan(30f));
+
+            region.ConfigureForRegion("the_outer_shoals");
+            Assert.IsTrue(region.HasScatteringLayer);
+            Assert.That(region.NominalSeabedDepthMeters, Is.GreaterThan(1000f));
+            Assert.That(region.GetLayerDepth(0f), Is.LessThan(region.GetLayerDepth(12f)));
+        }
+
+        [Test]
+        public void SaveMigration_VersionTwoAddsPanicDamageAndSurveyDefaults()
         {
             SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
             data.schemaVersion = 2;
@@ -100,7 +147,7 @@ namespace WhereTheSoundingsEnd.Tests
 
             string error;
             Assert.IsTrue(SaveGameDataMigration.TryPrepare(data, out error), error);
-            Assert.AreEqual(3, data.schemaVersion);
+            Assert.AreEqual(4, data.schemaVersion);
             Assert.AreEqual(0.42f, data.world.panicLevel, 0.001f);
             Assert.AreEqual(63f, data.vessel.hullIntegrity, 0.001f);
             Assert.AreEqual(1, data.inventory.damagedCells.Count);
