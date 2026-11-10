@@ -49,3 +49,34 @@ Find Welsh cultural, archival, and scholarly sources before making specific hist
 ## Scope note
 
 The first version can use a single hand-authored ruin pocket, a sonar-like search, and a dialogue choice. Full underwater swimming is not required; the player can investigate from the boat and recover the fragment with equipment.
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- Quest becomes active after the retired fisher gives the chart.
+- Bell event activates deterministically when the player is inside the ruin bounds during the authored low-tide / turning-tide window.
+- Optional second harmonic variation: **35% per eligible listen**, seeded by tide-cycle ID. The required bell clue never depends on this roll.
+- The structure can be rediscovered after the quest, but the fragment can only be collected once.
+
+### Behaviour states
+`Silent Structure → Tide Window → Bell Resonance → Rig Scan → Fragment Available → Resolved`.
+The bell is a static environmental sound source. Tide changes its audible range and decay. The Sounding Rig maps the tower frame and hollow cavity; the UI exposes a broad depth band and confidence, not an exact outline until enough readings are collected.
+
+### Perception / FOV
+No creature vision or player FOV cone. The player can see the tower only inside the camera's visible underwater / surface reveal range. Use a faint vertical bubble line and a small debris movement cue when the sound is active. Do not put the full tower in view before the survey step.
+
+### Sound behaviour
+One bell strike at tide start, then a decaying harmonic tail. A faint second strike may occur after the optional RNG roll. Sound range is weather- and position-dependent; the quest log provides a text timing clue so players who cannot hear the tail can still progress.
+
+### Attacks and chase
+**None.** No hostile entity, chase, or direct damage. Rock collision and current force remain normal world hazards. The ruin does not collapse as a surprise attack.
+
+### Lore reveal
+The fragment bears a date notation and a tide mark that conflicts with the village story. It proves that people worked and maintained the submerged structure, but does not prove the legendary drowned kingdom existed as told.
+
+### Acceptance tests
+- Bell activates at the same tide boundary for a fixed save.
+- The clue is accessible with audio muted.
+- Fragment is not duplicated after reload.
+- No creature, attack, or chase event is emitted.
