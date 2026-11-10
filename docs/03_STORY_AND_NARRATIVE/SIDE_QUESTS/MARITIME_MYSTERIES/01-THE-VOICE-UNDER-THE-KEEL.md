@@ -82,3 +82,31 @@ The recovered log reveals three different witnesses describing the same pause pa
 - No damage or pursuit event is emitted.
 - Required bearing clue is guaranteed after the retry limit.
 - Known buoy signals remain distinguishable from the false voice.
+
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- Quest starts after the skiff report and entry into Outer Shoals with the Sounding Rig installed.
+- Evaluate only on a valid Rig deployment at night or in heavy fog. Initial chance: **18% per eligible deployment**.
+- After three failed eligible deployments, guarantee the clue on the next deployment. Save by opportunity ID; never reroll on load.
+- Seeded signal variants: familiar voice contour, doubled syllable, or delayed final note. Variants change presentation, not clue availability.
+
+### Behaviour, perception, and FOV
+States: `Dormant → First Echo → Repeated Echo → Bearing Drift → Resolved / Cooldown`. The anomaly has no physical body, health, collision, or creature AI. No hostile FOV and no player vision cone. Surface rings may appear within 40–70 m in clear weather; fog shortens this. The actual source remains concealed until triangulated.
+
+### Sound behaviour
+The first return is low and distant; a second return arrives 1.2–2.0 seconds later from an inconsistent bearing. It must not mask buoy or lighthouse cues. Caption: `[a familiar voice repeats beneath the hull]`.
+
+### Attacks and chase
+**None.** The signal does not pursue, hit, damage, or physically spawn. The only danger is navigational misdirection toward known reef hazards. Hull damage can only result from actual collision.
+
+### Lore reveal
+Three witnesses describe the same pause pattern but hear different familiar voices. The anomaly imitates memory; its cause remains unknown.
+
+### Acceptance tests
+- Fixed seed + opportunity reproduces the same echo sequence.
+- No damage or chase event is emitted.
+- Required clue is guaranteed after the retry limit.
+- Known buoy signals remain distinguishable.
