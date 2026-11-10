@@ -46,9 +46,9 @@ A regional assignment means the species may occur there under suitable habitat a
 
 ### Trade-value index
 
-These are balancing multipliers, not real-world prices. Final currency values will be defined in the economy specification.
+T1–T5 is a legacy relative-value classification used when organizing the roster. The multipliers below are **not applied at runtime** and must not be multiplied by the fixed PHP rates in the [Seafood Selling Price Schedule](../07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md). The schedule's species-specific dockside price is authoritative.
 
-| Tier | Name | Relative base value | Purpose |
+| Tier | Name | Legacy relative index (reference only) | Purpose |
 |---|---|---:|---|
 | T1 | Bulk | 1.0× | Frequent small catches and bulk lots |
 | T2 | Standard | 1.4× | Regular individual fish and seafood |
