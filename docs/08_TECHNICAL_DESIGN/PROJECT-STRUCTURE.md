@@ -28,7 +28,7 @@ Assets/_Project is the game's first-party content boundary.
 | Scenes/ | Boot, menu, persistent world, harbour, and region scenes |
 | Scripts/Runtime/ | Runtime gameplay and simulation code |
 | Scripts/Runtime/Persistence/ | Versioned save DTOs, manual/autosave file storage, autosave scheduling, and scene save coordination |
-| Scripts/Runtime/Inventory/ | Spatial cargo definitions, grid geometry, hold placement and persistence |
+| Scripts/Runtime/Inventory/ | Spatial cargo definitions, grid geometry, hold placement and persistence |\n| Scripts/Runtime/World/ | Action-driven sea state, regional survey profiles, Sounding Rig, acoustic event contract, world incidents and site discovery |
 | Scripts/Runtime/Narrative/ | Yarn Spinner dialogue state, runtime UI Toolkit presenter, Harbourmaster interaction and narrative persistence |
 | Dialogue/ | Yarn project and authored dialogue source |
 | Settings/UI/ | Runtime UI Toolkit PanelSettings assets |
@@ -48,7 +48,7 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - WhereTheSoundingsEnd.Editor: editor tooling; excluded from player builds.
 - WhereTheSoundingsEnd.Tests.EditMode: unit-level tests.
 - Core/WorldClock.cs: engine-independent simulation-time primitive.
-- Core/Pcg32Random.cs: PCG-XSH-RR deterministic random generator.
+- Core/Pcg32Random.cs: PCG-XSH-RR deterministic random generator.\n- World/DeepOceanSurveyMath.cs: pure diel layer migration, depth separation, confidence and stable-key calculations.\n- World/DeepOceanSurveyRegion.cs: region-bounded bathymetry and acoustic profile; six baseline region configurations.\n- World/DeepOceanPhenomenonSite.cs: authored, stable-ID deep-ocean and maritime survey marker.\n- World/SoundingRigController.cs: Q / gamepad survey input, sonar result interpretation, site discovery, event publishing and save participation.\n- World/AcousticEventBus.cs: typed acoustic gameplay signal metadata for future AI / navigation listeners.
 - Persistence/SaveGameData.cs: versioned campaign snapshot and migration defaults.
 - Persistence/SaveFileService.cs: five independent JSON slots, backup recovery, listing, and deletion.
 - Persistence/SaveGameCoordinator.cs: scene participant capture/restore contract for manual saves and autosaves.
@@ -81,3 +81,14 @@ Greyhaven is a working technical greybox. Its coordinates and dimensions are pro
 6. Do not commit Library, Temp, Obj, generated IDE projects, or build output.
 7. Save files belong in Application.persistentDataPath and must never be committed to the repository.
 8. Do not label a feature implemented until it exists in runtime code and has passed its relevant tests.
+
+
+## Deep-ocean survey integration
+
+The generated Greyhaven scene attaches DeepOceanSurveyRegion to Sheltered_Bay_Surface and configures it as shallow coastal water. The starter boat receives SoundingRigController, which consumes the existing SoundingPulse Input Action. Greyhaven's profile deliberately reports no deep scattering layer.
+
+The region component contains baseline profiles for all six named regions. Future region scene builders must attach one profile to the correct world / water root and place authored DeepOceanPhenomenonSite markers. Merely having a profile in code does not mean a region scene or site is playable.
+
+The survey subsystem uses AcousticEventBus as the gameplay signal source. Future creature perception should subscribe to this event contract rather than scanning scene AudioSources. Current implementation publishes Sounding Rig pulses only; creature listeners are not yet connected.
+
+Save schema v4 adds survey pulse count, discovered site IDs and evaluated opportunity IDs. See [Deep-Ocean Survey Implementation](DEEP-OCEAN-SURVEY-IMPLEMENTATION.md) for the file-by-file dependency map, runtime flow, tuning assumptions and remaining integration work.
