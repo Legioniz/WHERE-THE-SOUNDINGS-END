@@ -71,7 +71,7 @@ The starter water surface is a static, opaque material plane. It is a placeholde
 
 Navigation readability is built around three cues: the lighthouse silhouette on the west headland, red/green channel markers at the harbor mouth, and a red outer-approach buoy beyond the inner piers.
 
-The current scene does not implement animated tide, wind, wave forces, current fields, acoustic propagation, buoy sounds, or a working lighthouse beam. Those features require their own gameplay and technical specifications.
+The current scene does not implement animated tide, wind, wave forces, current fields, acoustic propagation, buoy sounds, or a working lighthouse beam. The action-driven clock, panic pressure, and basic fog/light transition are implemented, but dynamic tide/current simulation and authored audio assets remain future work.
 
 ## 5. Environment response and ecology
 
@@ -79,9 +79,21 @@ Greyhaven must retain its protected-harbor rule. The inner harbor is not a place
 
 The regional ecology baseline supports mudflat crabs and shorebirds during suitable low tide, juvenile fish and mullet using shallow channels and sheltered margins, attached filter feeders on pilings, small fish sheltering around roots and dock structures, and a non-hostile Mooring Ray visiting the outer harbor on an incoming tide.
 
-The greybox does not spawn, animate, or simulate these animals. Do not read prop placement as implemented ecology.
+The greybox does not spawn, animate, or simulate these ordinary animals. Do not read prop placement as implemented ecology. A wreck/debris field is placed in the outer channel as the first localized dredging site.
 
-## 6. Visual and atmosphere targets
+## 6. Action-driven gameplay in Greyhaven
+
+- The sea clock starts at 07:00 and advances at 72 in-game seconds per real second only while the vessel's horizontal speed exceeds 0.25 m/s or a fishing/dredging action is active. This produces a 24-hour cycle in approximately 20 real minutes.
+- Bringing the boat to a complete stop freezes time. Opening the cargo hold or entering dialogue also freezes time. The inventory remains a deliberate planning pause.
+- Night begins at 19:00 and ends at 05:00. Night and heavy fog increase panic; daylight reduces it, with faster recovery in the sheltered harbor.
+- Panic alters fog colour/density and directional-light intensity. At high panic, phantom reef shapes and leviathan-scale shadows can appear. They are visual hallucinations, not collision geometry. At extreme panic, phantom seabirds may steal one ordinary fish from the hold after a warning omen.
+- F starts a three-beat fishing timing challenge. Successful catches enter the shared spatial hold. Aberrant variants have unique item IDs and 2.8×–3.8× prototype value multipliers.
+- G starts a four-beat dredging challenge only when the boat is stopped within range of the outer-channel wreck field. The site yields timber, salt-stiff canvas and corroded fittings, with three pulls per in-game day.
+- Engine, handline rod and deck lantern begin installed in the same 7×9 grid as cargo. Hard collisions reduce hull and engine condition, map the impact point to a hold cell, destroy the item occupying that cell and leave the cell blocked. Damaged cells and vessel condition are saved.
+
+These values are first-pass prototype tuning, not final balance. The current soundscape code adjusts pitch and volume on registered AudioSources, but no authored music/ambience clips or mixer snapshots are connected yet.
+
+## 7. Visual and atmosphere targets
 
 The first pass uses primitive geometry with restrained coastal colours: dark blue-green water; weathered timber and metal; muted basalt and concrete; sand and mud at the shoreline; subdued vegetation; overcast, low-contrast lighting with moderate coastal fog.
 
