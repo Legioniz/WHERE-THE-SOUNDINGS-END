@@ -15,6 +15,7 @@
 - Save DTO validation and schema migration.
 - Stable opportunity identity and idempotent event evaluation.
 - Acoustic signal construction, range/loudness/sensitivity/noise scoring, event deduplication and listener persistence.
+- NPC schedule resolution, overnight schedule boundaries, and NPC relationship save/restore.
 
 ### Play Mode
 - Boat handling, speed gating and Sounding Rig input.
@@ -37,6 +38,8 @@
 - Confirm keyboard and gamepad HarvestBeat bindings both register timed minigame beats.
 - Confirm weather/fog durations, shift cooldowns, hallucination cooldowns and pending seabird warning state survive save/load.
 - Confirm maritime incident caption, hush and false-navigation-light state restore without rerolling the event.
+- Confirm all Greyhaven NPC IDs are unique, each interaction starts the correct Yarn node, schedule changes use SeaStateDirector.CurrentHour, and NPC movement pauses with the action-driven clock.
+- Confirm NPC relationship scores and Yarn first-meeting/trust variables restore independently after a save/load cycle.
 - Confirm Outer Shoals and Hollow Trench sandbox scenes contain valid regional profiles and authored site markers.
 
 ### Performance
@@ -63,6 +66,8 @@ The Edit Mode test source includes:
 - Same-region, changed-heading and fresh-time-window requirements for independent scattering-layer observations.
 - Separate confidence calculation for seabed and sparse biological-layer returns.
 - Site signal confidence from authored signal strength and acoustic attenuation.
+- NPC day/overnight schedule boundaries and missing-window behaviour.
+- NPC stable-ID relationship persistence.
 
 The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v5, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 
