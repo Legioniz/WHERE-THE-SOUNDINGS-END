@@ -77,6 +77,7 @@ Implemented now:
 - Spatial cargo placements, damaged hold cells and equipment placements through SpatialCargoHold.
 - Action-driven day/time, panic and sea disturbance.
 - Hull/engine condition and wreck-site daily depletion.
+- Greyhaven NPC stable IDs, last activity IDs, region IDs and relationship scores through NpcAgent.
 - Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).\n- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs in schema v5.
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
@@ -85,7 +86,7 @@ Not yet connected because the corresponding gameplay systems do not exist in the
 - Sale transactions, regional market state and freshness decay (not yet implemented).
 - Dialogue presentation cursor and mid-line resume state.
 - Dynamic tide/current/weather simulation and authored audio mixer state.
-- Quests, journal evidence, discoveries and NPC relationships.
+- Full quest, journal evidence and discovery progression; dialogue-driven NPC relationship changes and structured NPC memories remain future work.
 - Regional fish stocks, creature states, threat state, encounter cooldowns and random stream ownership.\n- Persistent physical state for deep-ocean sites (brine-pool disturbance, vent/seep condition, hydrate stability, whale-fall succession); current site markers record discovery only.
 - A player-facing save/load menu, save confirmation prompt, and UI feedback for autosave status. Autosaving itself is implemented.
 - Loading into a different scene automatically. The coordinator currently requires the target scene to be active before restoring its participants.
