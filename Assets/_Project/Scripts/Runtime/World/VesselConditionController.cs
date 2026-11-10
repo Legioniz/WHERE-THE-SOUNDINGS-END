@@ -33,8 +33,7 @@ namespace WhereTheSoundingsEnd.World
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (collision == null || collision.collider == null ||
-                collision.collider.CompareTag("SafeHarbourStructure"))
+            if (collision == null || collision.collider == null)
                 return;
 
             float impactSpeed = collision.relativeVelocity.magnitude;
