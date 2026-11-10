@@ -1,7 +1,7 @@
 {
   "name": "WhereTheSoundingsEnd.Runtime",
   "rootNamespace": "WhereTheSoundingsEnd",
-  "references": ["Unity.InputSystem"],
+  "references": ["Unity.InputSystem", "YarnSpinner.Unity"],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
