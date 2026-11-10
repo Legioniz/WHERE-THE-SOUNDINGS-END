@@ -288,10 +288,10 @@ Quality, freshness, and demand should be visible to the player. Buyers must expl
 
 | Catch | Calculation | Base result |
 |---|---|---:|
-| 2.0 kg Milkfish | 2.0 × $2.30 × 1.00 × 1.00 × 1.00 | $4.60 |
-| 3.0 kg Mangrove red snapper | 3.0 × $4.60 × 1.00 × 1.00 × 1.00 | $13.80 |
-| 1.0 kg Giant tiger prawn | 1.0 × $6.66 × 1.00 × 1.00 × 1.00 | $6.66 |
-| 4.0 kg Yellowfin tuna | 4.0 × $5.23 × 1.00 × 0.95 × 1.00 | $19.89 |
+| 2.0 kg Milkfish (neutral market) | 2.0 × $2.30 × 1.00 island × 1.00 quality × 1.00 freshness × 1.00 demand × 1.00 live | $4.60 |
+| 3.0 kg Mangrove red snapper (neutral market) | 3.0 × $4.60 × 1.00 island × 1.00 quality × 1.00 freshness × 1.00 demand × 1.00 live | $13.80 |
+| 1.0 kg Giant tiger prawn (neutral market) | 1.0 × $6.66 × 1.00 island × 1.00 quality × 1.00 freshness × 1.00 demand × 1.00 live | $6.66 |
+| 4.0 kg Yellowfin tuna (neutral market, chilled) | 4.0 × $5.23 × 1.00 island × 1.00 quality × 0.95 freshness × 1.00 demand × 1.00 live | $19.87 |
 | 5 mature approved sea urchins | 5 × $0.71 | $3.55 |
 
 
@@ -332,7 +332,7 @@ These are base dockside rates after the island factor, before catch quality, fre
 | Giant tiger prawn | INVERTEBRATE | $6.66/kg | $7.33 | $7.66 | $6.33 | $7.66 | $5.66 | $4.66 |
 | Sea grapes / lato | SEAWEED | $2.22/kg wet | $2.33 | $2.55 | $1.89 | $2.44 | $1.67 | $1.11 |
 
-A player may compare prices on a market board before travelling. Travel time, fuel, ice, storage loss, and boat risk must be considered before chasing a distant premium. Selling is permitted only at an actual buyer or contract terminal in that destination market. The game must never apply the destination multiplier merely because the catch originated there.
+A player may compare prices on a market board before travelling. The regional unit rates in the example table are rounded for display; actual sale revenue uses the two-decimal base rate multiplied by the island factor and quantity, then rounds the completed sale line to cents. Travel time, fuel, ice, storage loss, and boat risk must be considered before chasing a distant premium. Selling is permitted only at an actual buyer or contract terminal in that destination market. The game must never apply the destination multiplier merely because the catch originated there.
 
 ## 10. Buyer behavior and market modifiers
 
