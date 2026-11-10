@@ -65,6 +65,7 @@ namespace WhereTheSoundingsEnd.World
         public bool IsNight => CurrentHour >= nightStartsAtHour || CurrentHour < dayStartsAtHour;
         public float CurrentHour => (float)(timeOfDaySeconds / 3600.0);
         public bool IsAdvancing { get; private set; }
+        public bool IsDialogueActive => dialogueRunner != null && dialogueRunner.IsDialogueRunning;
         public string LatestOmen => latestOmen;
 
         private void Awake()
