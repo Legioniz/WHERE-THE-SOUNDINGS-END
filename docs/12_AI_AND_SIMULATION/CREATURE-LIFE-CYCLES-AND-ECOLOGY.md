@@ -436,3 +436,19 @@ Do not implement all species, reproduction stages, or anomaly families before th
 - [Unity AI Implementation Blueprint](../08_TECHNICAL_DESIGN/AI-IMPLEMENTATION-BLUEPRINT.md) — Unity/C# component boundaries and implementation sequence.
 
 The life-cycle model governs ecological behaviour. The threat model governs player-directed hostile encounters. The anomaly model defines deliberate exceptions. Keep those responsibilities separate.
+
+## 18. Daily body growth and cohort persistence
+
+The world advances animal age and size on completed in-game days, including while the player's scene is unloaded. A fish that survives for several days can become longer and heavier; a juvenile cohort can pass a maturity threshold; a crustacean can approach or complete a molt. This must be represented without creating a GameObject for every animal.
+
+The population service owns aggregate abundance and cohort growth. The creature life controller owns the detailed behaviour of nearby visible individuals. They share species definitions but must not independently create duplicate births, growth, or mortality.
+
+- Fish cohorts use species-specific length / weight growth parameters and maturity gates.
+- Crabs and lobsters grow through authored molt stages; post-molt animals may temporarily shelter.
+- Squid, cuttlefish, shrimp, bivalves, echinoderms, and sea cucumbers use their own growth profile rather than a universal fish curve.
+- Named persistent individuals may have their own age, size, injury, and route state.
+- Anomalous beings do not inherit biological growth by default; their dossier must explicitly define it.
+
+Growth increases the cohort's mean weight and therefore biomass. It does not create additional individuals. Reproduction adds delayed juvenile recruitment; mortality and fishing reduce abundance. The two processes must never be conflated.
+
+The detailed formulas and species-profile fields are in [Fish Population and Food-Web Model](../07_GAME_RULES_AND_BALANCING/FISH-POPULATION-MODEL.md). Unity services, save state, daily scheduling, and tests are defined in [Regional Population Simulation](../08_TECHNICAL_DESIGN/REGIONAL-POPULATION-SIMULATION.md).
