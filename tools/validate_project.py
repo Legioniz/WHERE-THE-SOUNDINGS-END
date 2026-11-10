@@ -88,7 +88,7 @@ def main() -> int:
     gitignore_path = ROOT / ".gitignore"
     if gitignore_path.exists():
         ignore_text = gitignore_path.read_text(encoding="utf-8")
-        for ignored in ("Library/", "Temp/", "Obj/"):
+        for ignored in ("[Ll]ibrary/", "[Tt]emp/", "[Oo]bj/"):
             if ignored not in ignore_text:
                 failures.append(f".gitignore is missing {ignored}")
 
