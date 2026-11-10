@@ -13,6 +13,7 @@ EXPECTED_PACKAGES = {
     "com.unity.inputsystem": "1.20.1",
     "com.unity.render-pipelines.universal": "17.3.0",
     "com.unity.test-framework": "1.4.6",
+    "dev.yarnspinner.unity": "https://github.com/YarnSpinnerTool/YarnSpinner-Unity.git#v3.2.8",
 }
 
 REQUIRED_FILES = [
@@ -26,7 +27,16 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/AutosaveController.cs",
-    "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs",
+    "Assets/_Project/Scripts/Runtime/Inventory/CargoItemDefinition.cs",
+    "Assets/_Project/Scripts/Runtime/Inventory/CargoGridGeometry.cs",
+    "Assets/_Project/Scripts/Runtime/Inventory/SpatialCargoHold.cs",
+    "Assets/_Project/Scripts/Runtime/Narrative/YarnDialogueSaveParticipant.cs",
+    "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs",
+    "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs",
+    "Assets/_Project/Dialogue/Greyhaven.yarnproject",
+    "Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn",
+    "Assets/_Project/Tests/EditMode/CargoGridGeometryTests.cs",
+    "Assets/_Project/Scripts/Boat/BoatPrototypeController.cs",
     "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs",
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
@@ -73,7 +83,7 @@ def main() -> int:
             failures.append("PlayerControls.inputactions has no Boat action map.")
         else:
             action_names = {action["name"] for action in boat_map.get("actions", [])}
-            expected_actions = {"Move", "Interact", "Fish", "SoundingPulse", "Pause"}
+            expected_actions = {"Move", "Interact", "Fish", "SoundingPulse", "Pause", "Inventory"}
             if not expected_actions.issubset(action_names):
                 failures.append("Boat action map is missing one or more required actions.")
             identifiers = [
@@ -82,6 +92,30 @@ def main() -> int:
             ]
             if len(identifiers) != len(set(identifiers)):
                 failures.append("Input action/binding identifiers must be unique.")
+
+        yarn_project = load_json("Assets/_Project/Dialogue/Greyhaven.yarnproject")
+        if yarn_project.get("projectFileVersion") != 3:
+            failures.append("Greyhaven Yarn project must use projectFileVersion 3.")
+        if "Source/**/*.yarn" not in yarn_project.get("sourceFiles", []):
+            failures.append("Greyhaven Yarn project must include Source/**/*.yarn.")
+
+        yarn_source = ROOT / "Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn"
+        if yarn_source.exists():
+            yarn_text = yarn_source.read_text(encoding="utf-8")
+            for required_text in (
+                "title: Greyhaven_Harbourmaster",
+                "Ask about the missing boats.",
+                "Ask for work.",
+                '<<checkpoint "greyhaven.sounding_buoy_accepted">>',
+            ):
+                if required_text not in yarn_text:
+                    failures.append(f"Harbourmaster Yarn source is missing: {required_text}")
+
+        input_map = maps.get("Boat")
+        if input_map is not None:
+            action_ids = {action["name"]: action.get("id") for action in input_map.get("actions", [])}
+            if action_ids.get("Inventory") != "b0a70000000000000000000000000007":
+                failures.append("Inventory input action ID does not match the committed control map.")
 
         for path in ROOT.glob("Assets/_Project/**/*.asmdef"):
             definition = json.loads(path.read_text(encoding="utf-8"))
