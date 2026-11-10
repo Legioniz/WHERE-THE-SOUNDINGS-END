@@ -256,6 +256,10 @@ namespace WhereTheSoundingsEnd.Editor
             SeaStateDirector seaState = parent.gameObject.AddComponent<SeaStateDirector>();
             harvesting.Configure(controls, hold, seaState);
             seaState.Configure(body, dialogueRunner, harvesting, hold);
+
+            SoundingRigController soundingRig = boat.gameObject.AddComponent<SoundingRigController>();
+            soundingRig.Configure(controls, seaState, body);
+
             boat.gameObject.AddComponent<VesselConditionController>();
         }
 
@@ -310,6 +314,10 @@ namespace WhereTheSoundingsEnd.Editor
             plane.transform.localScale = new Vector3(29f, 1f, 27f);
             plane.GetComponent<Renderer>().sharedMaterial = material;
             UnityEngine.Object.DestroyImmediate(plane.GetComponent<Collider>());
+
+            // Greyhaven is a shallow coastal survey area. It intentionally has no deep scattering layer.
+            DeepOceanSurveyRegion surveyRegion = plane.AddComponent<DeepOceanSurveyRegion>();
+            surveyRegion.ConfigureForRegion("greyhaven");
         }
 
         private static void BuildTerrain(Transform parent, Material soil, Material sand, Material grass, Material rock)
