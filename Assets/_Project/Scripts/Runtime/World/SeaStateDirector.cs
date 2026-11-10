@@ -1,5 +1,7 @@
 using UnityEngine;
 using Yarn.Unity;
+using System.Collections.Generic;
+using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Persistence;
 
 namespace WhereTheSoundingsEnd.World
@@ -15,6 +17,7 @@ namespace WhereTheSoundingsEnd.World
         [SerializeField] private Rigidbody vesselBody;
         [SerializeField] private DialogueRunner dialogueRunner;
         [SerializeField] private HarvestingMinigameController harvesting;
+        [SerializeField] private SpatialCargoHold cargoHold;
 
         [Header("Clock")]
         [SerializeField, Min(1f)] private float gameSecondsPerRealSecond = 72f;
@@ -41,6 +44,8 @@ namespace WhereTheSoundingsEnd.World
         private bool harvestingActive;
         private float hallucinationCooldown;
         private string latestOmen = string.Empty;
+        private Light[] sceneLights = System.Array.Empty<Light>();
+        private AudioSource[] soundscapeSources = System.Array.Empty<AudioSource>();
 
         public double ElapsedGameSeconds => elapsedGameSeconds;
         public double TimeOfDaySeconds => timeOfDaySeconds;
@@ -53,15 +58,18 @@ namespace WhereTheSoundingsEnd.World
 
         private void Awake()
         {
+            sceneLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+            soundscapeSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
             if (timeOfDaySeconds <= 0.0)
                 timeOfDaySeconds = startingHour * 3600.0;
         }
 
-        public void Configure(Rigidbody boat, DialogueRunner runner, HarvestingMinigameController harvest)
+        public void Configure(Rigidbody boat, DialogueRunner runner, HarvestingMinigameController harvest, SpatialCargoHold hold)
         {
             vesselBody = boat;
             dialogueRunner = runner;
             harvesting = harvest;
+            cargoHold = hold;
         }
 
         public void SetHarvesting(bool active)
@@ -142,13 +150,20 @@ namespace WhereTheSoundingsEnd.World
             RenderSettings.fogDensity = baseFogDensity + nightBlend * 0.0011f + panicFog;
             RenderSettings.fogColor = Color.Lerp(dayFog, nightFog, Mathf.Clamp01(nightBlend + panicLevel * 0.35f));
 
-            Light[] lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-            for (int i = 0; i < lights.Length; i++)
+            for (int i = 0; i < sceneLights.Length; i++)
             {
-                if (lights[i].type != LightType.Directional) continue;
+                if (sceneLights[i] == null || sceneLights[i].type != LightType.Directional) continue;
                 float target = Mathf.Lerp(0.92f, 0.22f, nightBlend);
                 target *= 1f - panicLevel * 0.16f;
-                lights[i].intensity = Mathf.MoveTowards(lights[i].intensity, target, Time.unscaledDeltaTime * 0.2f);
+                sceneLights[i].intensity = Mathf.MoveTowards(sceneLights[i].intensity, target, Time.unscaledDeltaTime * 0.2f);
+            }
+
+            float soundWarp = Mathf.Clamp01(nightBlend * 0.55f + panicLevel * 0.45f);
+            for (int i = 0; i < soundscapeSources.Length; i++)
+            {
+                if (soundscapeSources[i] == null) continue;
+                soundscapeSources[i].pitch = Mathf.Lerp(1f, 0.88f, soundWarp);
+                soundscapeSources[i].volume = Mathf.Lerp(1f, 0.72f, panicLevel * 0.5f);
             }
         }
 
@@ -159,9 +174,17 @@ namespace WhereTheSoundingsEnd.World
                 return;
 
             hallucinationCooldown = Random.Range(55f, 105f);
-            latestOmen = Random.value < 0.5f
-                ? "A reef shape moves against the swell."
-                : "Something large turns beneath the boat.";
+            if (panicLevel > 0.9f && Random.value < 0.34f && TryStealFish())
+            {
+                latestOmen = "Black wings break the fog. Something is tearing at the catch.";
+                SpawnBirdSwarm();
+                return;
+            }
+
+            bool leviathan = Random.value < 0.38f;
+            latestOmen = leviathan
+                ? "A vast shadow passes beneath the swell."
+                : "A reef shape moves against the swell.";
 
             // Visual-only phantom obstruction. It deliberately has no collider and cannot damage the boat.
             Vector3 forward = vesselBody.transform.forward;
@@ -169,19 +192,64 @@ namespace WhereTheSoundingsEnd.World
             Vector3 position = vesselBody.position + forward * Random.Range(22f, 36f) +
                                side * Random.Range(-13f, 13f);
             GameObject phantom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            phantom.name = "Panic_Hallucination_Phantom_Reef";
+            phantom.name = leviathan ? "Panic_Hallucination_Leviathan_Shadow" : "Panic_Hallucination_Phantom_Reef";
             phantom.transform.position = position;
-            phantom.transform.localScale = new Vector3(5f, 1.4f, 8f);
+            phantom.transform.localScale = leviathan ? new Vector3(22f, 1.8f, 46f) : new Vector3(5f, 1.4f, 8f);
             Renderer renderer = phantom.GetComponent<Renderer>();
-            renderer.material = new Material(Shader.Find("Universal Render Pipeline/Lit") ??
-                                             Shader.Find("Standard"));
-            renderer.material.color = new Color(0.015f, 0.025f, 0.03f, 0.7f);
-            renderer.material.SetFloat("_Surface", 1f);
-            renderer.material.SetFloat("_AlphaClip", 0f);
-            renderer.material.renderQueue = 3000;
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+            if (shader != null)
+            {
+                Material phantomMaterial = new Material(shader);
+                phantomMaterial.color = new Color(0.015f, 0.025f, 0.03f, 0.7f);
+                if (phantomMaterial.HasProperty("_Surface")) phantomMaterial.SetFloat("_Surface", 1f);
+                if (phantomMaterial.HasProperty("_SrcBlend")) phantomMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                if (phantomMaterial.HasProperty("_DstBlend")) phantomMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                if (phantomMaterial.HasProperty("_ZWrite")) phantomMaterial.SetFloat("_ZWrite", 0f);
+                phantomMaterial.renderQueue = 3000;
+                renderer.material = phantomMaterial;
+                Destroy(phantomMaterial, 6f);
+            }
             Collider collider = phantom.GetComponent<Collider>();
             if (collider != null) Destroy(collider);
             Destroy(phantom, 6f);
+        }
+
+        private bool TryStealFish()
+        {
+            if (cargoHold == null) return false;
+            IReadOnlyList<CargoPlacement> placements = cargoHold.Placements;
+            List<CargoPlacement> exposedFish = new List<CargoPlacement>();
+            for (int i = 0; i < placements.Count; i++)
+            {
+                CargoPlacement placement = placements[i];
+                CargoItemDefinition definition = placement == null ? null : cargoHold.GetItemDefinition(placement.itemId);
+                if (definition != null && definition.Category == CargoItemCategory.Fish && !definition.IsQuestCritical)
+                    exposedFish.Add(placement);
+            }
+            if (exposedFish.Count == 0) return false;
+            CargoPlacement stolen = exposedFish[Random.Range(0, exposedFish.Count)];
+            CargoPlacement removed;
+            return cargoHold.TryRemove(stolen.instanceId, out removed);
+        }
+
+        private void SpawnBirdSwarm()
+        {
+            if (vesselBody == null) return;
+            GameObject swarm = new GameObject("Panic_Hallucination_Bird_Swarm");
+            swarm.transform.position = vesselBody.position + Vector3.up * 7f;
+            for (int i = 0; i < 7; i++)
+            {
+                GameObject bird = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                bird.name = "Phantom_Seabird";
+                bird.transform.SetParent(swarm.transform, false);
+                bird.transform.localPosition = new Vector3(Random.Range(-5f, 5f), Random.Range(-1f, 2f), Random.Range(-5f, 5f));
+                bird.transform.localScale = new Vector3(0.45f, 0.18f, 0.8f);
+                Collider birdCollider = bird.GetComponent<Collider>();
+                if (birdCollider != null) Destroy(birdCollider);
+                Renderer birdRenderer = bird.GetComponent<Renderer>();
+                birdRenderer.material.color = new Color(0.015f, 0.02f, 0.025f);
+            }
+            Destroy(swarm, 5f);
         }
 
         private void OnGUI()
