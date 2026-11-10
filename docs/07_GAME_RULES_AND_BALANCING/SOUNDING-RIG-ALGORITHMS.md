@@ -124,7 +124,7 @@ DeepOceanPhenomenonRules is the runtime authority for whether an authored marker
 
 These are setting constraints for the current provisional island-arc geography, not universal statements about where such phenomena exist in the real ocean. If the world tectonic model changes, revise the rule table and tests together. Brine pools remain restricted to the Hollow Trench until a specific geologically credible basin is authored elsewhere.
 
-The site return now reports marker depth and signal confidence. Signal confidence is a survey-quality estimate, not a probability that the interpretation is correct or that a hostile entity exists.
+The site return now reports marker depth and signal confidence. Site confidence uses marker signal strength × signal quality × (1 − attenuation). Scattering-layer confidence uses layer density × signal quality × (1 − attenuation), with a baseline density factor. These values are survey-quality estimates, not probabilities that an interpretation is correct or that a hostile entity exists.
 
 ## 9. Acoustic event contract
 
