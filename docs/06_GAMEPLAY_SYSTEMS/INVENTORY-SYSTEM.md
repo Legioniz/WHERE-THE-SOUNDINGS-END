@@ -1,9 +1,9 @@
 # Spatial Cargo and Inventory System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime grid foundation implemented; authoring and player UI in progress  
+> Status: Runtime grid and first player interface implemented; fishing/economy integration pending  
 > Owner: Project lead  
-> Version: 0.2  
+> Version: 0.3  
 > Last reviewed: 2026-11-10
 
 ## Design intent
@@ -24,16 +24,6 @@ The system takes inspiration from the broader spatial-inventory design space des
 - Damaged or inaccessible cells are represented by the blocked-cell mask, not by deleting items.
 - Quest-critical items must have explicit acceptance/decline handling before they are granted; do not destroy player cargo to make room without a clear player decision.
 
-## Gameplay implications
-
-- Fish shapes should communicate approximate body length and handling, not just price.
-- Large or awkward catches create opportunity cost and can force the player to return early.
-- Freshness is time-sensitive and belongs to the catch instance/stack, not to a global species counter.
-- Equipment uses dedicated mounting slots in a later equipment pass; it should not be mixed into the fish-placement API without explicit slot rules.
-- Hull damage may disable cells or dislodge cargo only after the damage model is implemented and communicated.
-- Auto-place may be offered as an accessibility/quick action, but must be opt-in and must never silently rearrange the player's existing hold.
-- Inventory pause cadence must be tested. Catch acquisition should not interrupt every few seconds with a mandatory packing screen.
-
 ## Runtime implementation
 
 Located in `Assets/_Project/Scripts/Runtime/Inventory/`:
@@ -41,8 +31,22 @@ Located in `Assets/_Project/Scripts/Runtime/Inventory/`:
 - `CargoItemDefinition`: ScriptableObject defining stable ID, category, shape and handling metadata.
 - `CargoGridGeometry`: deterministic shape rotation, normalization, blocked-cell map and placement validation.
 - `SpatialCargoHold`: runtime placements, fit checks, move/remove/place operations and `ISaveParticipant` capture/restore.
+- `TryPlaceFirstFit`: explicit acquisition helper that searches for the first valid location and never rearranges existing cargo.
+- Query methods expose item definitions, occupied cells, blocked cells and used-cell count to the UI without making the UI an owner of cargo state.
 
-The grid logic is deliberately separated from presentation. A future UI can render the exact same placement model with mouse, keyboard and controller input.
+## Player interface
+
+`GreyhavenRuntimeUI` builds the first runtime UI Toolkit interface in the generated Greyhaven scene.
+
+- Press **I** or the on-screen CARGO HOLD control to open the hold; **Esc** closes it.
+- The 7×9 hold is rendered as clickable cells. Each item occupies the exact cells defined by its ScriptableObject shape.
+- Click any cell belonging to an item to select it. Click an empty, unblocked cell to move the selected item.
+- Press **R** or ROTATE to preview the next 90-degree orientation. Click an empty cell to commit the rotation and move. An invalid placement leaves the original placement unchanged.
+- REMOVE deletes the selected non-quest item. Quest-critical definitions are protected from accidental discard.
+- The selection readout displays quantity, quality, freshness and rotation. The header reports occupied cells.
+- The hold pauses the prototype simulation while open. This cadence is provisional and must be play-tested.
+
+The catch-intake column exposes the Greyhaven catalogue as **prototype test intake controls**. Each control adds one item through `TryPlaceFirstFit` at test quality/freshness values. It exists to exercise the real grid and persistence model before fishing output is connected; it is not a fishing mechanic and should be replaced by actual catch results when fishing is implemented.
 
 ## Save integration
 
@@ -56,16 +60,15 @@ The versioned save DTO stores hold dimensions and placement records:
 - quality
 - freshness
 
-The live hold's dimensions remain authoritative during restore. Unknown item IDs and placements that no longer fit are skipped with a warning rather than corrupting the whole save.
+The live hold's dimensions remain authoritative during restore. Unknown item IDs and placements that no longer fit are skipped with a warning rather than corrupting the whole save. Manual slots and the dedicated autosave both capture the same `SpatialCargoHold` participant.
 
-## Current limitations
+## Remaining work
 
-- No inventory screen, drag/drop interaction, item hover preview, rotation key binding or controller navigation yet.
-- No content item assets are authored yet; item definitions must be created through the Cargo Item asset menu and added to the hold's catalogue.
-- No fishing system currently creates cargo placements.
-- No sell/buy transaction or freshness-decay tick is wired yet.
+- Real fishing results must create cargo through the authoritative hold API; the prototype intake buttons are temporary.
+- Drag-and-drop, controller focus navigation, item hover details and accessibility scaling are not complete. Current placement uses click-select then click-destination, with keyboard rotation.
+- No sell/buy transaction, freshness-decay tick or market integration is wired yet.
 - No equipment mount slots, hull damage, cargo loss or storage upgrade gameplay is implemented.
-- Grid geometry has been implemented; it still needs Unity Edit Mode tests and in-editor validation.
+- Grid geometry tests are present in Edit Mode, but Unity execution and Play Mode interaction still require validation in Unity 6000.3.28f1.
 
 ## Reference
 
