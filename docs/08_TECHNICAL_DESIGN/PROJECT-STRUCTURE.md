@@ -61,7 +61,7 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Boat/BoatPrototypeController.cs: temporary Rigidbody handling prototype.
 - Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera with configurable framing.
 - Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, and initial build-scene list.
-- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, starter boat, camera, spatial cargo catalogue, save/autosave coordinator, Yarn DialogueRunner and presenter, runtime UI input module, and Harbourmaster interaction trigger.
+- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, starter boat, camera, spatial cargo catalogue, save/autosave coordinator, Yarn DialogueRunner and presenter, UI Toolkit PanelSettings asset, and Harbourmaster interaction trigger.
 
 ## Greyhaven environment generation
 
