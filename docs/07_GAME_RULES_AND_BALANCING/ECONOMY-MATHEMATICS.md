@@ -11,7 +11,7 @@
 
 Define how fishing income, research rewards, operating costs, buyer demand, and equipment progression interact. The economy should reward knowledge, preparation, and safe landings without allowing one species, buyer, anomaly, or repeatable contract to dominate every other activity.
 
-The [Seafood Selling Price Schedule](SEAFOOD-SELLING-PRICE-SCHEDULE.md) is the single source of truth for USD species prices, sale units, six destination-island market factors, aberrant specimen outcomes, and finite anomaly rewards. This document defines the calculations that use those values.
+The [Seafood Selling Price Schedule](SEAFOOD-SELLING-PRICE-SCHEDULE.md) is the single source of truth for USD species prices, sale units, six destination-island market factors, aberrant specimen outcomes, and finite anomaly rewards. This document defines the calculations that use those values. The USD conversion anchor is fixed at PHP 63.06 per USD for design conversion only; in-game exchange rates do not float. Use the two-decimal USD unit prices in the schedule as runtime values.
 
 ## 2. Revenue model
 
@@ -34,7 +34,7 @@ Where:
 
 `ExpectedProfitPerHour = AverageTripNet ÷ AverageTripDurationHours`
 
-Calculate each species / buyer line separately, round to the nearest cent, and then sum the transaction. Do not round intermediate factors or apply the same modifier twice.
+Calculate each species / buyer line separately, use the two-decimal USD unit rate from the schedule, round the completed line to the nearest cent (midpoints away from zero), and then sum the transaction. Do not round intermediate modifiers or apply the same modifier twice.
 
 Island-market multipliers are distinct from temporary demand. The regional factor is stable for each market class; demand changes with visible buyer stock, orders, events, and shortages.
 
@@ -66,7 +66,7 @@ There is no separate rarity multiplier in the sale equation. Rarity controls enc
 
 - Aberrant specimens inherit a base species rate and use the inspection result and condition rule in the price schedule.
 - A first verified research reward is paid once per ABR ID per save, after the record is Reviewed and submitted.
-- Unnatural specimens use a fixed first-record contract, not a per-kg product sale. Each UNC ID pays once per save after the evidence is accepted.
+- Unnatural specimens use a fixed first-record contract, not a per-kg product sale. Each UNC ID pays once per save after the evidence is accepted. Research-contract payouts are fixed USD amounts and do not receive island-market multipliers.
 - Protected wildlife remains unsellable. A conservation reward compensates documentation, rescue, or safe release; it does not transfer ownership of the animal.
 - Duplicate catches, replayed events, save reloads, repeated samples, and repeated dialogue cannot reset a claimed reward.
 
@@ -143,7 +143,7 @@ Run each against:
 
 Acceptance checks:
 - Verify the schedule's 100 fish, 47 invertebrate, and 8 algae price IDs are complete and unique.
-- A 2 kg standard milkfish sale returns $4.60 at neutral market factor 1.00 before other modifiers.
+- A 2 kg standard milkfish sale returns $4.60 at neutral market factor 1.00 before other modifiers; at Greyhaven's INSHORE factor of 1.08 it returns $4.97.
 - Five approved mature sea urchins return $3.55 before modifiers.
 - Ineligible catch returns zero ordinary-sale revenue.
 - A first-time research contract cannot be claimed twice.
