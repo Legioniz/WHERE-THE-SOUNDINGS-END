@@ -136,7 +136,7 @@ def validate_repository_policy() -> list[str]:
             "Protect save compatibility",
             "Do not commit secrets",
             "Destructive operations",
-            "Review the final diff",
+            "Review the diff",
         ):
             if phrase.lower() not in agents.lower():
                 failures.append(f"AGENTS.md is missing safeguard rule: {phrase}")
