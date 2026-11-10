@@ -38,6 +38,36 @@ namespace WhereTheSoundingsEnd.World
             return Clamp01(usableSignal * (0.35f + Clamp01(density) * 0.65f));
         }
 
+        public static bool IsIndependentLayerObservation(
+            string previousRegionId,
+            string currentRegionId,
+            float previousHeading,
+            float currentHeading,
+            double elapsedSeconds,
+            double maximumAgeSeconds,
+            float minimumHeadingChangeDegrees)
+        {
+            if (string.IsNullOrWhiteSpace(previousRegionId) ||
+                string.IsNullOrWhiteSpace(currentRegionId) ||
+                !string.Equals(previousRegionId, currentRegionId, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            if (double.IsNaN(elapsedSeconds) || double.IsInfinity(elapsedSeconds) ||
+                elapsedSeconds < 0.0 || elapsedSeconds > maximumAgeSeconds)
+                return false;
+
+            return Math.Abs(currentHeading - previousHeading) >= minimumHeadingChangeDegrees &&
+                   Math.Abs(MathfDeltaAngle(previousHeading, currentHeading)) >= minimumHeadingChangeDegrees;
+        }
+
+        private static float MathfDeltaAngle(float current, float target)
+        {
+            float delta = (target - current) % 360f;
+            if (delta > 180f) delta -= 360f;
+            if (delta < -180f) delta += 360f;
+            return delta;
+        }
+
         /// <summary>Stable FNV-1a key for a named survey opportunity; independent of runtime RNG order.</summary>
         public static ulong StableKey(string value)
         {
