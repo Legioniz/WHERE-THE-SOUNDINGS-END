@@ -39,7 +39,7 @@ Functions:
 - GetNightWeight: smooth 24-hour day/night weighting.
 - GetScatteringLayerDepth: interpolates authored day and night depths.
 - IsDistinctMidwaterReturn: checks whether the biological return is sufficiently separated from the seabed.
-- CalculateReturnConfidence: combines signal quality, density and acoustic attenuation.
+- CalculateReturnConfidence: combines signal quality, biological-layer density and acoustic attenuation.\n- CalculateSiteSignalConfidence: combines authored site signal strength, signal quality and attenuation.
 - StableKey: FNV-1a hash for repeatable opportunity seeding.
 - NormalizeHour: wraps hour values safely.
 
