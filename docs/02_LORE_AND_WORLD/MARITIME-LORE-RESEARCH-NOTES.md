@@ -74,3 +74,16 @@ For every research-inspired quest, record:
 ## Canon boundary
 
 Everything in the maritime research collection is **Proposed / Non-canon**. The World Bible remains authoritative. No real-world legend or historical claim automatically becomes part of Greyhaven's fictional history.
+
+## Expanded source audit — November 10, 2026
+
+A new [Ocean Legends and Sea Monsters research expansion](OCEAN-LEGENDS-AND-SEA-MONSTERS.md) adds a larger collection of individually sourced dossiers. The most useful improvements are:
+
+- NOAA, the Smithsonian, and the University of Nebraska digital edition are used to distinguish the historical *Essex* disaster, the reported Mocha Dick, and Melville's fictional whale.
+- A 13th-century Norse account of hafgufa is compared with a peer-reviewed study of cetacean trap-feeding; the comparison is suggestive, not proof of the creature's identity.
+- Sea-serpent reports are treated as historical testimony, while museum sources explain how real oarfish may have contributed to some sightings without explaining all of them.
+- Māori, Inuit, Ainu-associated, Philippine, and other living traditions receive explicit attribution and adaptation cautions.
+- The Bakunawa section uses the National Museum of the Philippines' Abaknon material and a 2025 scholarly study, while warning that one community account is not a universal Filipino version.
+- Japanese sea-deity material uses the Kokugakuin University Encyclopedia of Shinto to distinguish Ryūjin / local sea-kami worship from a generic monster profile.
+
+The expansion still does not constitute an exhaustive global folklore survey. Several community-specific traditions need primary-language research and consultation before direct representation. The catalogue remains non-canon; source links document stories and beliefs, not the biological existence of monsters.
