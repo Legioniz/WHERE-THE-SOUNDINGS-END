@@ -28,6 +28,7 @@ namespace WhereTheSoundingsEnd.Editor
             if (controls == null) throw new ArgumentNullException(nameof(controls));
             EnsureFolder(MaterialsPath);
             List<CargoItemDefinition> cargoCatalog = BuildCargoCatalog();
+            AssetDatabase.SaveAssets();
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
