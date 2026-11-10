@@ -42,6 +42,8 @@ namespace WhereTheSoundingsEnd.World
         private double elapsedGameSeconds;
         private double timeOfDaySeconds;
         private float seaDisturbance;
+        private float weatherFogPressure;
+        private Material birdMaterial;
         private bool harvestingActive;
         private float hallucinationCooldown;
         private bool birdEventPending;
@@ -95,6 +97,11 @@ namespace WhereTheSoundingsEnd.World
             seaDisturbance = Mathf.Clamp01(seaDisturbance + amount);
         }
 
+        public void SetWeatherFogPressure(float normalizedPressure)
+        {
+            weatherFogPressure = Mathf.Clamp01(normalizedPressure);
+        }
+
         public void AddPanic(float amount)
         {
             panicLevel = Mathf.Clamp01(panicLevel + amount);
@@ -132,7 +139,7 @@ namespace WhereTheSoundingsEnd.World
         private void UpdatePanic(float gameDelta)
         {
             float minutes = gameDelta / 60f;
-            bool foggy = RenderSettings.fog && RenderSettings.fogDensity > baseFogDensity * 1.35f;
+            bool foggy = weatherFogPressure > 0.1f;
 
             if (IsNight)
                 panicLevel += nightPanicPerGameMinute * minutes;
@@ -270,7 +277,18 @@ namespace WhereTheSoundingsEnd.World
         {
             if (vesselBody == null) return;
             GameObject swarm = new GameObject("Panic_Hallucination_Bird_Swarm");
-            swarm.transform.position = vesselBody.position + Vector3.up * 7f;
+            swarm.transform.SetParent(vesselBody.transform, false);
+            swarm.transform.localPosition = Vector3.up * 7f;
+            swarm.AddComponent<PanicBirdSwarmVisual>();
+            if (birdMaterial == null)
+            {
+                Shader birdShader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                if (birdShader != null)
+                {
+                    birdMaterial = new Material(birdShader);
+                    birdMaterial.color = new Color(0.015f, 0.02f, 0.025f);
+                }
+            }
             for (int i = 0; i < 7; i++)
             {
                 GameObject bird = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -281,9 +299,14 @@ namespace WhereTheSoundingsEnd.World
                 Collider birdCollider = bird.GetComponent<Collider>();
                 if (birdCollider != null) Destroy(birdCollider);
                 Renderer birdRenderer = bird.GetComponent<Renderer>();
-                birdRenderer.material.color = new Color(0.015f, 0.02f, 0.025f);
+                if (birdMaterial != null) birdRenderer.sharedMaterial = birdMaterial;
             }
             Destroy(swarm, 5f);
+        }
+
+        private void OnDestroy()
+        {
+            if (birdMaterial != null) Destroy(birdMaterial);
         }
 
         private void OnGUI()
