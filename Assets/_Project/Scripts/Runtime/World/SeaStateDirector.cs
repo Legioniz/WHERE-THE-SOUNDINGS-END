@@ -399,7 +399,7 @@ namespace WhereTheSoundingsEnd.World
         {
             data.world.elapsedGameSeconds = worldClock.ElapsedSeconds;
             data.world.timeOfDaySeconds = timeOfDaySeconds;
-            data.world.dayNumber = Mathf.FloorToInt((float)(elapsedGameSeconds / 86400.0)) + 1;
+            data.world.dayNumber = Mathf.FloorToInt((float)(worldClock.ElapsedSeconds / 86400.0)) + 1;
             data.world.panicLevel = panicLevel;
             data.world.seaDisturbance = seaDisturbance;
             data.world.weatherId = weatherFogPressure >= 0.65f ? "dense_fog" : weatherFogPressure > 0.1f ? "mist" : "clear";
