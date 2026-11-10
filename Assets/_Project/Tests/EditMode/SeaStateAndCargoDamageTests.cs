@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.Core;
 
 namespace WhereTheSoundingsEnd.Tests
 {
@@ -31,6 +32,17 @@ namespace WhereTheSoundingsEnd.Tests
         {
             if (root != null) Object.DestroyImmediate(root);
             if (cargoDefinition != null) Object.DestroyImmediate(cargoDefinition);
+        }
+
+        [TestCase(0f, false, false, false)]
+        [TestCase(0.26f, false, false, true)]
+        [TestCase(0f, true, false, true)]
+        [TestCase(8f, true, true, false)]
+        public void ActionDrivenClockPolicy_OnlyAdvancesForMovementOrActionUnlessPaused(
+            float speed, bool actionActive, bool paused, bool expected)
+        {
+            Assert.AreEqual(expected,
+                ActionDrivenClockPolicy.ShouldAdvance(speed, 0.25f, actionActive, paused));
         }
 
         [Test]
