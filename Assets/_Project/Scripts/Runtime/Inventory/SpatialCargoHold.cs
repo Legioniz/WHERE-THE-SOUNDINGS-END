@@ -41,6 +41,7 @@ namespace WhereTheSoundingsEnd.Inventory
         public int Width { get { return width; } }
         public int Height { get { return height; } }
         public IReadOnlyList<CargoPlacement> Placements { get { return placements; } }
+        public IReadOnlyList<CargoItemDefinition> ItemDefinitions { get { return itemDefinitions; } }
 
         private void Awake()
         {
@@ -156,6 +157,95 @@ namespace WhereTheSoundingsEnd.Inventory
                 CargoGridGeometry.BuildBlockedGrid(width, height, blockedCells),
                 CargoGridGeometry.RotateAndNormalize(definition.OccupiedCells, rotationQuarterTurns),
                 new Vector2Int(x, y));
+        }
+
+        /// <summary>
+        /// Places a newly received catch in the first available location without rearranging existing cargo.
+        /// The UI and future fishing system can use this same acquisition path.
+        /// </summary>
+        public bool TryPlaceFirstFit(
+            string itemId,
+            int quantity,
+            float quality,
+            float freshness,
+            out string instanceId)
+        {
+            instanceId = null;
+            if (FindDefinition(itemId) == null || quantity < 1) return false;
+
+            for (int rotation = 0; rotation < 4; rotation++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (TryPlace(itemId, x, y, rotation, quantity, quality, freshness, out instanceId))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public CargoItemDefinition GetItemDefinition(string itemId)
+        {
+            return FindDefinition(itemId);
+        }
+
+        public bool IsCellBlocked(int x, int y)
+        {
+            if (x < 0 || y < 0 || x >= width || y >= height || blockedCells == null)
+                return false;
+
+            for (int i = 0; i < blockedCells.Length; i++)
+            {
+                if (blockedCells[i].x == x && blockedCells[i].y == y)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public bool TryGetPlacementAtCell(int x, int y, out CargoPlacement result)
+        {
+            result = null;
+            if (x < 0 || y < 0 || x >= width || y >= height) return false;
+
+            Vector2Int target = new Vector2Int(x, y);
+            for (int i = 0; i < placements.Count; i++)
+            {
+                CargoPlacement placement = placements[i];
+                if (placement == null) continue;
+
+                CargoItemDefinition definition = FindDefinition(placement.itemId);
+                if (definition == null) continue;
+
+                Vector2Int[] shape = CargoGridGeometry.RotateAndNormalize(
+                    definition.OccupiedCells,
+                    placement.rotationQuarterTurns);
+
+                for (int cellIndex = 0; cellIndex < shape.Length; cellIndex++)
+                {
+                    if (new Vector2Int(placement.anchorX, placement.anchorY) + shape[cellIndex] == target)
+                    {
+                        result = placement;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public int GetUsedCellCount()
+        {
+            bool[,] occupied = BuildOccupiedGrid(null);
+            int count = 0;
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                    if (occupied[x, y]) count++;
+            return count;
         }
 
         public void CaptureSaveData(SaveGameData data)
