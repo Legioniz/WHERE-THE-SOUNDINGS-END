@@ -120,7 +120,6 @@ namespace WhereTheSoundingsEnd.NPC
                 return;
 
             Vector3 target = destination.position;
-            target.y = transform.position.y;
             Vector3 previous = transform.position;
             transform.position = Vector3.MoveTowards(
                 previous,
