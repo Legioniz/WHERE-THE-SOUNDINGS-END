@@ -53,6 +53,7 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - World/DeepOceanSurveyMath.cs: pure diel layer migration, depth separation, confidence and stable-key calculations.
 - World/DeepOceanSurveyRegion.cs: region-bounded bathymetry and acoustic profile; six baseline region configurations.
 - World/DeepOceanPhenomenonSite.cs: authored, stable-ID deep-ocean and maritime survey marker.
+- World/DeepOceanPhenomenonRules.cs: central region/depth eligibility policy for site placement and discovery.
 - World/SoundingRigController.cs: Q / gamepad survey input, sonar result interpretation, site discovery, event publishing and save participation.
 - World/AcousticEventBus.cs: typed acoustic gameplay signal metadata for future AI / navigation listeners.
 - Persistence/SaveGameData.cs: versioned campaign snapshot and migration defaults.
