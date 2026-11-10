@@ -31,6 +31,7 @@
 
 - [Catchable seafood and market species catalog](04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)
 - [Fish species index](04_CHARACTERS_AND_ENTITIES/FISH-SPECIES.md)
+- [Mutated and unnatural catchable specimens](04_CHARACTERS_AND_ENTITIES/MUTATED-AND-UNNATURAL-CATCHES.md)
 - [Creature Bible](04_CHARACTERS_AND_ENTITIES/CREATURE-BIBLE.md)
 - [Creature behaviour source map](04_CHARACTERS_AND_ENTITIES/CREATURE-BEHAVIORS.md)
 - [Anomalous species and site-specific entities](04_CHARACTERS_AND_ENTITIES/ANOMALOUS-SPECIES.md)
