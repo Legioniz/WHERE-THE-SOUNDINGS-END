@@ -43,6 +43,16 @@ Not every threat uses every state. A creature may move from Investigating to Dis
 
 Transitions must be driven by explicit conditions and timers. No state may randomly teleport an entity next to the player.
 
+### 3.1 Life behaviour is separate from threat behaviour
+
+The threat state machine above governs a creature's relationship to the player during a potential hostile encounter. It is not the creature's complete daily life.
+
+A creature may independently be active, resting, sleeping, feeding, hunting ordinary prey, recovering from injury, migrating, sheltering, or breeding. Those long-term ecological states are owned by the life-cycle controller. Short-term actions such as wandering, patrolling, stalking prey, or fleeing are tactical choices. Player-directed pursuit and attacks remain owned by the ThreatBrain.
+
+For example, a shark-like predator may wake, leave a resting site, hunt a fish school, feed, and return to deeper water. This is ordinary feeding behaviour and must not automatically trigger a player encounter. The Sleeper's hunt of the boat is a distinct hostile profile.
+
+Use the three-layer model and needs / schedule rules in [Creature Life Cycles and Ecological Behaviour](CREATURE-LIFE-CYCLES-AND-ECOLOGY.md). Do not duplicate its life-state machine inside this threat-state document.
+
 ## 4. Perception model
 
 ### 4.1 Visual sensing
