@@ -104,7 +104,29 @@ Supported types include biological layer, brine pool, hydrothermal vent, cold se
 
 The current site component only reports and discovers a marker. It does not implement the site's physical hazard. Brine chemistry, vent heat, seep gas, hydrate stability, whale-fall succession and derelict-vessel boarding each require separate environment / interaction controllers with their own tests and warning rules.
 
-## 8. Acoustic event contract
+## 8. Phenomenon placement and depth eligibility
+
+DeepOceanPhenomenonRules is the runtime authority for whether an authored marker is plausible in its region and depth band. Invalid markers are logged during survey-controller initialization and excluded from discovery.
+
+| Phenomenon | Allowed region(s) | Depth band |
+|---|---|---:|
+| Biological scattering layer | Outer Shoals, Hollow Trench | 80–1,400 m |
+| Brine pool | Hollow Trench only | 1,000–6,000 m |
+| Hydrothermal vent | Outer Shoals, Hollow Trench | 200–6,000 m |
+| Cold seep | Outer Shoals, Hollow Trench | 200–6,000 m |
+| Gas hydrate | Outer Shoals, Hollow Trench | 500–6,000 m |
+| Whale fall | Outer Shoals, Hollow Trench | 300–6,000 m |
+| Bioluminescence | All marine regions | 0–1,200 m |
+| Water-mass front | Shallows, Blackrock Reach, Outer Shoals | 0–1,000 m |
+| Derelict vessel | All marine regions | 0–6,000 m |
+| Damaged fishing gear | All marine regions | 0–2,000 m |
+| Unclassified acoustic return | All marine regions | 0–6,000 m |
+
+These are setting constraints for the current provisional island-arc geography, not universal statements about where such phenomena exist in the real ocean. If the world tectonic model changes, revise the rule table and tests together. Brine pools remain restricted to the Hollow Trench until a specific geologically credible basin is authored elsewhere.
+
+The site return now reports marker depth and signal confidence. Signal confidence is a survey-quality estimate, not a probability that the interpretation is correct or that a hostile entity exists.
+
+## 9. Acoustic event contract
 
 A successful pulse publishes an AcousticSignal with:
 - stable event ID;
@@ -117,7 +139,7 @@ A successful pulse publishes an AcousticSignal with:
 
 The event bus is a gameplay metadata channel. AI should subscribe and score audibility using range, occlusion, environment and hearing capability. Do not have every creature poll every AudioSource. Do not interpret the nominal radius as a physically exact sound-pressure boundary.
 
-## 9. Save and load
+## 10. Save and load
 
 Schema v4 stores:
 - total accepted Sounding Rig pulse count;
@@ -126,7 +148,7 @@ Schema v4 stores:
 
 Old saves migrate with empty survey collections. A future site-state system must persist resolved interactions separately from discovery. Do not save transient UI captions, procedural audio clips, or temporary sonar visual effects.
 
-## 10. Future full acoustic model
+## 11. Future full acoustic model
 
 When the project moves beyond the prototype, add in this order:
 1. Sound speed / depth-band propagation approximation and attenuation curves.
@@ -141,7 +163,7 @@ When the project moves beyond the prototype, add in this order:
 
 Keep simulation and presentation separate. The same AcousticSignal can inform sonar UI, creature perception, and narrative evidence, but no single consumer should own the underlying world event.
 
-## 11. Acceptance tests
+## 12. Acceptance tests
 
 - Greyhaven profile never reports a deep scattering layer.
 - Outer Shoals and Hollow Trench profiles provide a shallower layer at night than at noon.
