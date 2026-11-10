@@ -181,3 +181,20 @@ The research and balancing authority is [Maritime Anomaly Rules](../07_GAME_RULE
 - Events that affect equipment, site condition, or journal progression must persist their resolved outcome.
 
 Do not create a separate “deep-sea scare spawner”. The existing World Simulation owns scheduling; the existing Threat Director owns hostile selection; the local phenomenon controller owns presentation and physical interactions.
+
+
+## 12. Acoustic event delivery
+
+The first runtime publisher is the Sounding Rig. It emits typed AcousticSignal metadata through AcousticEventBus; this is a gameplay event channel, not an AudioSource registry.
+
+Listener rules:
+- Subscribe on enable and unsubscribe on disable / destroy.
+- Reject events from inactive regions unless an explicit aggregate simulation rule applies.
+- Evaluate range, region attenuation, occlusion, background noise and listener sensitivity before assigning a hearing score.
+- Route a heard signal into the creature's existing perception state machine (curiosity / investigate / ignore / flee / stalk only when species and context permit).
+- Do not promote a heard pulse directly to pursuit or attack.
+- Use event IDs to prevent duplicate reaction to the same pulse.
+- Keep presentation audio and gameplay perception separate; muting a clip must not change AI hearing, and playing a clip must not create a gameplay signal by itself.
+- Do not poll every AudioSource per creature or per rendered frame.
+
+Current status: AcousticEventBus and Sounding Rig publication are implemented. No creature, navigation or radio listener adapter is currently connected. A future adapter must use the existing threat and creature state machines, not create a parallel acoustic threat spawner.
