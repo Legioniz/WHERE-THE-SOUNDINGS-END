@@ -49,3 +49,33 @@ For historical accuracy, consult translations and scholarship on Plato's *Timaeu
 ## Scope note
 
 Use one small ruin cluster and three evidence objects. Do not expand this into an entire civilization until the core world map and story justify it.
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- Survey begins after the archivist's chart clue and region unlock.
+- Three primary evidence objects are authored and always present. Optional loose artifact chance: **15% per completed survey run**, evaluated once on first survey completion.
+- Store the survey result and optional artifact roll. Reloading the site cannot reroll the loot or evidence.
+
+### Behaviour states
+`Survey Available → Structure Detected → Evidence Points Revealed → Samples Recovered → Report Choice → Archive Updated`.
+The "city" is a static environment. It contains aligned walls, a road-like formation, tile, and household object. The player must compare geometry before the journal labels the location human-built. No autonomous city simulation is required.
+
+### Perception / FOV
+No creature FOV. Evidence markers appear within 12–20 m after the player scans the correct sector. Camera visibility is controlled by underwater reveal / fog. Important architecture receives silhouette lighting and depth cues; no tiny collectible is hidden outside the main camera view.
+
+### Sound behaviour
+Low-frequency returns and structural creaks are ambience only. They do not track the boat and must not use the Sleeper's attack motif. Caption examples: `[a hollow structure answers the Rig]`, `[stone shifts somewhere below]`.
+
+### Attacks and chase
+**None.** No monster, chase, collapse attack, or surprise damage. If a falling-silt visual is used, it is cosmetic and cannot damage the boat. Avoid a false "city wakes up" boss twist; this quest is about evidence and interpretation.
+
+### Lore reveal
+The recovered object suggests ordinary domestic life in a settlement that is now submerged. The cause and date remain uncertain. Archive wording must say "evidence consistent with a human-built structure" rather than claiming Atlantis or a lost super-civilization.
+
+### Acceptance tests
+- Three main evidence points are always available.
+- Optional artifact roll occurs once and is saved.
+- Player can understand the evidence without sound.
+- No hostile AI or damage is triggered by the site.
