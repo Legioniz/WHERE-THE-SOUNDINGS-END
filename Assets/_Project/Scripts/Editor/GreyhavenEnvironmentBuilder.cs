@@ -64,7 +64,7 @@ namespace WhereTheSoundingsEnd.Editor
             Transform player = Group("07_Player_Prototype", world.transform);
             Transform lighting = Group("08_Lighting_and_Atmosphere", world.transform);
 
-            BuildWater(water, ocean);
+            WhereTheSoundingsEnd.World.MaritimeSurfaceBehaviour seaSurface = BuildWater(water, ocean);
             BuildSalvageSite(water, wood, metal);
             BuildTerrain(terrain, soil, sand, grass, rock);
             BuildBreakwater(harbor, rock, concrete);
@@ -74,7 +74,7 @@ namespace WhereTheSoundingsEnd.Editor
             BuildLighthouse(landmarks, concrete, roof, red, beacon);
             BuildBuoys(landmarks, red, green, metal);
             BuildBoat(player, controls, hull, wood, metal, cargoCatalog);
-            BuildCameraAndLight(lighting, player);
+            BuildCameraAndLight(lighting, player, seaSurface);
 
             YarnDialogueSaveParticipant dialogueSave = BuildSaveCoordinator(world.transform);
             SpatialCargoHold cargoHold = player.Find("Player_Boat_Blockout").GetComponent<SpatialCargoHold>();
@@ -415,7 +415,7 @@ namespace WhereTheSoundingsEnd.Editor
             return anchor.transform;
         }
 
-        private static void BuildWater(Transform parent, Material material)
+        private static WhereTheSoundingsEnd.World.MaritimeSurfaceBehaviour BuildWater(Transform parent, Material material)
         {
             GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             plane.name = "Sheltered_Bay_Surface";
@@ -424,10 +424,13 @@ namespace WhereTheSoundingsEnd.Editor
             plane.transform.localScale = new Vector3(29f, 1f, 27f);
             plane.GetComponent<Renderer>().sharedMaterial = material;
             UnityEngine.Object.DestroyImmediate(plane.GetComponent<Collider>());
+            WhereTheSoundingsEnd.World.MaritimeSurfaceBehaviour seaSurface =
+                plane.AddComponent<WhereTheSoundingsEnd.World.MaritimeSurfaceBehaviour>();
 
             // Greyhaven is a shallow coastal survey area. It intentionally has no deep scattering layer.
             DeepOceanSurveyRegion surveyRegion = plane.AddComponent<DeepOceanSurveyRegion>();
             surveyRegion.ConfigureForRegion("greyhaven");
+            return seaSurface;
         }
 
         private static void BuildTerrain(Transform parent, Material soil, Material sand, Material grass, Material rock)
@@ -820,7 +823,10 @@ namespace WhereTheSoundingsEnd.Editor
             cargoHold.TryPlace("GEAR-LAMP-01", 5, 0, 0, 1, 1f, 1f, out _);
         }
 
-        private static void BuildCameraAndLight(Transform parent, Transform playerRoot)
+        private static void BuildCameraAndLight(
+            Transform parent,
+            Transform playerRoot,
+            WhereTheSoundingsEnd.World.MaritimeSurfaceBehaviour seaSurface)
         {
             Transform boat = playerRoot.Find("Player_Boat_Blockout");
             if (boat == null) throw new InvalidOperationException("Greyhaven player boat was not created.");
@@ -845,6 +851,7 @@ namespace WhereTheSoundingsEnd.Editor
             follow.Offset = new Vector3(0f, 48f, -36f);
             follow.CameraEulerAngles = new Vector3(55f, 0f, 0f);
             follow.SmoothTime = 0.28f;
+            follow.SeaSurface = seaSurface;
 
             GameObject sunObject = new GameObject("Overcast_Directional_Light");
             sunObject.transform.SetParent(parent, false);

@@ -54,7 +54,7 @@ The harvesting timing action now uses one shared Input System action for keyboar
 
 ## Implemented runtime foundations
 
-- Rigidbody boat steering and a fixed-angle follow camera.
+- Rigidbody boat steering and an elevated orthographic follow camera with velocity look-ahead, turn damping, and shared ocean-surface response.
 - Movement/action-driven sea time: the day advances while the boat is genuinely moving or the player is performing a supported harvesting or survey action.
 - Timed fishing and dredging minigames using spatial cargo placement.
 - Cargo hold geometry, blocked/damaged cells, item placement, salvage-site depletion, and vessel hull/engine condition.

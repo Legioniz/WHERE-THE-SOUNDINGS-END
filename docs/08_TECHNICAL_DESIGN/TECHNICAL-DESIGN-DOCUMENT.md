@@ -29,7 +29,7 @@ The repository now includes:
 - Runtime, Editor, and Edit Mode test assemblies.
 - Input Action map for keyboard and gamepad.
 - Engine-independent WorldClock and PCG32 random stream.
-- First-pass Rigidbody boat handling and fixed-angle orthographic camera.
+- First-pass Rigidbody boat handling and a velocity-aware orthographic follow camera that samples the shared maritime surface.
 - An Editor setup command that generates URP assets and a Greyhaven blockout scene.
 - Static repository validation through tools/validate_project.py and GitHub Actions.
 
