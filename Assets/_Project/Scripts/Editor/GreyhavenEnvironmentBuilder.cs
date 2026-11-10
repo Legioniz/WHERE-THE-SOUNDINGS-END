@@ -250,7 +250,7 @@ namespace WhereTheSoundingsEnd.Editor
             HarvestingMinigameController harvesting = boat.gameObject.AddComponent<HarvestingMinigameController>();
             SeaStateDirector seaState = parent.gameObject.AddComponent<SeaStateDirector>();
             harvesting.Configure(controls, hold, seaState);
-            seaState.Configure(body, dialogueRunner, harvesting);
+            seaState.Configure(body, dialogueRunner, harvesting, hold);
             boat.gameObject.AddComponent<VesselConditionController>();
         }
 
