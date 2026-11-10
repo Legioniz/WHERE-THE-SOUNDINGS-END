@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -20,11 +21,13 @@ namespace WhereTheSoundingsEnd.Editor
     public static class GreyhavenEnvironmentBuilder
     {
         private const string MaterialsPath = "Assets/_Project/Art/Materials";
+        private const string CargoDefinitionsPath = "Assets/_Project/Data/Inventory";
 
         public static void Build(InputActionAsset controls, string scenePath)
         {
             if (controls == null) throw new ArgumentNullException(nameof(controls));
             EnsureFolder(MaterialsPath);
+            List<CargoItemDefinition> cargoCatalog = BuildCargoCatalog();
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -62,7 +65,7 @@ namespace WhereTheSoundingsEnd.Editor
             BuildEstuary(estuary, soil, wood, foliage, rock);
             BuildLighthouse(landmarks, concrete, roof, red, beacon);
             BuildBuoys(landmarks, red, green, metal);
-            BuildBoat(player, controls, hull, wood, metal);
+            BuildBoat(player, controls, hull, wood, metal, cargoCatalog);
             BuildCameraAndLight(lighting, player);
             BuildSaveCoordinator(world.transform);
 
@@ -77,6 +80,64 @@ namespace WhereTheSoundingsEnd.Editor
 
             EditorSceneManager.SaveScene(scene, scenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(scenePath, true) };
+        }
+
+
+        private static List<CargoItemDefinition> BuildCargoCatalog()
+        {
+            EnsureFolder("Assets/_Project/Data");
+            EnsureFolder(CargoDefinitionsPath);
+
+            List<CargoItemDefinition> definitions = new List<CargoItemDefinition>
+            {
+                CreateCargoDefinition("FSH-001", "Milkfish", CargoItemCategory.Fish,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.right * 2 }, 0.006f),
+                CreateCargoDefinition("FSH-002", "Flathead Grey Mullet", CargoItemCategory.Fish,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.right * 2 }, 0.0065f),
+                CreateCargoDefinition("FSH-003", "Asian Seabass", CargoItemCategory.Fish,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.right * 2,
+                            Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0.007f),
+                CreateCargoDefinition("FSH-005", "Silver Sillago", CargoItemCategory.Fish,
+                    new[] { Vector2Int.zero, Vector2Int.right }, 0.005f),
+                CreateCargoDefinition("FSH-007", "Splendid Ponyfish", CargoItemCategory.Fish,
+                    new[] { Vector2Int.zero }, 0.004f),
+                CreateCargoDefinition("SALVAGE-WOOD-01", "Waterlogged Timber", CargoItemCategory.Salvage,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f),
+                CreateCargoDefinition("QUEST-SEALED-PARCEL", "Sealed Survey Parcel", CargoItemCategory.Quest,
+                    new[] { Vector2Int.zero, Vector2Int.up }, 0f)
+            };
+
+            return definitions;
+        }
+
+        private static CargoItemDefinition CreateCargoDefinition(
+            string itemId,
+            string displayName,
+            CargoItemCategory category,
+            Vector2Int[] cells,
+            float freshnessLossPerGameMinute)
+        {
+            string path = CargoDefinitionsPath + "/" + itemId + ".asset";
+            CargoItemDefinition existing = AssetDatabase.LoadAssetAtPath<CargoItemDefinition>(path);
+            if (existing != null) return existing;
+
+            CargoItemDefinition definition = ScriptableObject.CreateInstance<CargoItemDefinition>();
+            definition.name = itemId;
+            SerializedObject serialized = new SerializedObject(definition);
+            serialized.FindProperty("itemId").stringValue = itemId;
+            serialized.FindProperty("displayName").stringValue = displayName;
+            serialized.FindProperty("category").enumValueIndex = (int)category;
+            serialized.FindProperty("freshnessLossPerGameMinute").floatValue = freshnessLossPerGameMinute;
+            SerializedProperty shape = serialized.FindProperty("occupiedCells");
+            shape.arraySize = cells.Length;
+            for (int i = 0; i < cells.Length; i++)
+            {
+                SerializedProperty cell = shape.GetArrayElementAtIndex(i);
+                cell.vector2IntValue = cells[i];
+            }
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            AssetDatabase.CreateAsset(definition, path);
+            return definition;
         }
 
         private static void BuildSaveCoordinator(Transform parent)
@@ -404,7 +465,7 @@ namespace WhereTheSoundingsEnd.Editor
             Cylinder(name + "_Antenna", parent, p + Vector3.up * 2.6f, new Vector3(0.09f, 0.85f, 0.09f), metal);
         }
 
-        private static void BuildBoat(Transform parent, InputActionAsset controls, Material hull, Material deck, Material metal)
+        private static void BuildBoat(Transform parent, InputActionAsset controls, Material hull, Material deck, Material metal, List<CargoItemDefinition> cargoCatalog)
         {
             GameObject boat = new GameObject("Player_Boat_Blockout");
             boat.transform.SetParent(parent, false);
@@ -449,7 +510,8 @@ namespace WhereTheSoundingsEnd.Editor
 
             BoatPrototypeController controller = boat.AddComponent<BoatPrototypeController>();
             controller.InputActions = controls;
-            boat.AddComponent<SpatialCargoHold>();
+            SpatialCargoHold cargoHold = boat.AddComponent<SpatialCargoHold>();
+            cargoHold.SetItemDefinitions(cargoCatalog);
         }
 
         private static void BuildCameraAndLight(Transform parent, Transform playerRoot)
