@@ -53,7 +53,17 @@
 
 - [Maritime myths and motifs catalogue](02_LORE_AND_WORLD/MARITIME-MYTHS-CATALOG.md)
 - [Maritime research notes and source-quality cautions](02_LORE_AND_WORLD/MARITIME-LORE-RESEARCH-NOTES.md)
+- [Ocean legends and sea monsters — expanded research](02_LORE_AND_WORLD/OCEAN-LEGENDS-AND-SEA-MONSTERS.md)
 - [Maritime side-quest collection](03_STORY_AND_NARRATIVE/SIDE_QUESTS/MARITIME_MYSTERIES/README.md)
+
+## Deep-ocean phenomena and mariner horror
+
+- [Deep-ocean phenomena and mariner experiences](06_GAMEPLAY_SYSTEMS/DEEP-OCEAN-PHENOMENA-AND-MARINER-EXPERIENCES.md)
+- [Maritime anomaly rules and encounter balancing](07_GAME_RULES_AND_BALANCING/MARITIME-ANOMALY-RULES.md)
+- [Maritime Horror Director](06_GAMEPLAY_SYSTEMS/MARITIME-HORROR-DIRECTOR.md)
+- [Audio Design](10_AUDIO_AND_SOUND_DESIGN/AUDIO-DESIGN-DOCUMENT.md)
+
+The deep-ocean document separates established science, documented maritime practice, reported accounts, folklore, unsupported claims, and fictional anomalies. The balancing document governs event eligibility, RNG, cooldowns, warnings, player counterplay, Operational Strain, persistence, and accessibility. These are design specifications, not claims of completed Unity implementation.
 
 The existing docs/technical folder is retained because it contains the established Unity/C# performance and programming-language guidance.
 
@@ -66,18 +76,9 @@ Status labels: Approved baseline, Working baseline, Proposed, Placeholder, Depre
 
 Population rules are authored per species and fishing ground. The simulation tracks cohort growth, breeding stock, daily recruitment, fishing mortality, migration, and recovery. These are specifications; Unity runtime implementation remains separate.
 
-- [Ocean legends and sea monsters — expanded research](02_LORE_AND_WORLD/OCEAN-LEGENDS-AND-SEA-MONSTERS.md)
-
 ## Rare legendary encounters
 
-- [Ocean legends and sea monsters — research catalogue](02_LORE_AND_WORLD/OCEAN-LEGENDS-AND-SEA-MONSTERS.md)
 - [Legendary maritime encounter scheduler](12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-SCHEDULER.md)
-
-Legend-inspired encounters are rare, location-bound events. They may be harmless sightings, environmental omens, dangerous contacts, or lethal hazards with authored warnings and possible escape routes.
-
-## Legendary encounter art and discoveries
-
-- [Legendary encounter scheduler](12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-SCHEDULER.md)
 - [Legendary encounter visual, behaviour, and discoverable lore dossiers](12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-VISUAL-AND-LORE-DOSSIERS.md)
 
-The dossiers define silhouettes, anatomy, scale, movement, audio, surface / underwater effects, danger cues, discoverable records, clue locations, journal confidence, and cultural-use boundaries.
+Legend-inspired encounters are rare, location-bound events. They may be harmless sightings, environmental omens, dangerous contacts, or lethal hazards with authored warnings and possible escape routes. They share the existing major-threat lock with The Sleeper.
