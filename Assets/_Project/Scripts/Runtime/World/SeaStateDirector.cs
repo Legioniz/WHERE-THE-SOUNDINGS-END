@@ -47,6 +47,7 @@ namespace WhereTheSoundingsEnd.World
         private float weatherShiftCooldown;
         private Material birdMaterial;
         private bool harvestingActive;
+        private bool surveyingActive;
         private float hallucinationCooldown;
         private bool birdEventPending;
         private float birdEventCountdown;
@@ -95,6 +96,11 @@ namespace WhereTheSoundingsEnd.World
             harvestingActive = active;
         }
 
+        public void SetSurveying(bool active)
+        {
+            surveyingActive = active;
+        }
+
         public void AddDisturbance(float amount)
         {
             seaDisturbance = Mathf.Clamp01(seaDisturbance + amount);
@@ -121,7 +127,7 @@ namespace WhereTheSoundingsEnd.World
             bool pausedByUi = Time.timeScale <= 0.0001f ||
                               (dialogueRunner != null && dialogueRunner.IsDialogueRunning);
             float speed = vesselBody == null ? 0f : HorizontalSpeed(vesselBody.linearVelocity);
-            IsAdvancing = ActionDrivenClockPolicy.ShouldAdvance(speed, movementThreshold, harvestingActive, pausedByUi);
+            IsAdvancing = ActionDrivenClockPolicy.ShouldAdvance(speed, movementThreshold, harvestingActive || surveyingActive, pausedByUi);
 
             if (!IsAdvancing)
             {
