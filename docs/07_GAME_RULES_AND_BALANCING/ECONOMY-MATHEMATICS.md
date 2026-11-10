@@ -17,7 +17,7 @@ The [Seafood Selling Price Schedule](SEAFOOD-SELLING-PRICE-SCHEDULE.md) is the s
 
 For an ordinary eligible product line:
 
-`LineRevenue = round(SaleQuantity × BaseDocksidePrice × QualityFactor × FreshnessFactor × DemandFactor)`
+`LineRevenue = round(SaleQuantity × BaseDocksidePrice × QualityFactor × FreshnessFactor × DemandFactor × LiveConditionFactor)`
 
 Where:
 - `SaleQuantity` is saleable whole weight in kg, unless the schedule defines an individual, processed, or special weight unit.
@@ -25,6 +25,7 @@ Where:
 - `QualityFactor` represents visible size grade, damage, and landing condition.
 - `FreshnessFactor` represents time, temperature, and storage since landing.
 - `DemandFactor` represents the selected buyer's current stock and posted demand.
+- `LiveConditionFactor` is 1.00 by default, or 1.10–1.15 for an eligible crab / lobster delivered alive and intact to a buyer that accepts live stock.
 
 `TripGross = Σ(LineRevenue) + AcceptedContracts + FirstTimeResearchRewards`
 
