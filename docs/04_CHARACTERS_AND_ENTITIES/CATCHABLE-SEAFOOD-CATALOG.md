@@ -608,3 +608,16 @@ These exclusions are a conservative game-design rule. Actual local legal status 
 - NAST Philippines, [Philippine seaweeds and fishery by-products](https://www.nast.dost.gov.ph/index.php/13-news-press-releases/971-philippine-seaweeds-and-fishery-by-products-are-raw-materials-for-locally-made-bioplastics) — Philippine seaweed species and farmed groups.
 - BFAR Administrative Order / Fisheries Administrative Order 208 s. 2001, [Conservation of rare, threatened and endangered fishery species](https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/10/44018) — includes protected mollusk taxa such as *Trochus niloticus* and *Turbo marmoratus*.
 
+
+## 17. Mutated and unnatural catchable specimens
+
+The standard seafood roster is supplemented by two separate discovery classes. These variants and entities do **not** increase the normal species totals.
+
+- **8 aberrant specimen variants (ABR-001–ABR-008):** unusual pigmentation, healed injury, skeletal or jaw deformity, ocular opacity, fin regrowth, and parasite-marked specimens attached to existing base species. These are not automatically new species or supernatural creatures.
+- **8 unnatural catchables (UNC-001–UNC-008):** impossible or contradictory specimens associated with Greyhaven, the Drowned Parish, the Blue Maw, the Outer Shoals, Lantern Drift, and the Siltfall Scar.
+- Aberrant specimens require condition-appropriate inspection. Harmless pigment variation is not automatically unsafe; severe deformity, parasites, lesions, or uncertain tissue are held for research.
+- Unnatural specimens are not food. They are retained only through authored specimen events and finite research contracts. They cannot be farmed for unlimited money.
+- The player may receive a research reward for observing, sampling, photographing, releasing, or recovering an approved specimen.
+
+The authoritative names, habitat, behavior, catch conditions, handling, specimen journal, trade rules, and acceptance tests are in [Mutated and Unnatural Catchable Specimens](MUTATED-AND-UNNATURAL-CATCHES.md).
+
