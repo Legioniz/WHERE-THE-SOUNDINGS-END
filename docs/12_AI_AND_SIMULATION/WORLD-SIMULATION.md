@@ -108,6 +108,33 @@ When the player leaves a region:
 - preserve unresolved quest triggers until the player returns;
 - never let a background simulation silently destroy a quest-critical item or NPC.
 
+## 8.1 Creature schedules and life-cycle boundaries
+
+Creature schedules use simulation time, not wall-clock time. A species profile may define daylight, night, dawn/dusk, tide-linked, weather-linked, or depth-linked activity. These are suitability windows, not rigid global rules: injury, disturbance, food availability, and authored anomalies may change the selected behaviour.
+
+Schedule boundaries should emit stable opportunities such as:
+- activity_window:species_id:region_id:night_12
+- rest_cycle:creature_id:cycle_04
+- feeding_window:species_id:feeding_ground:cycle_09
+- breeding_window:species_id:region_id:season_02
+- migration_step:species_id:corridor_id:season_02
+
+Life-state transitions are event-driven where possible. Do not poll every creature every rendered frame. Needs such as hunger and energy can be advanced in bounded time steps, while activity, migration, feeding, and breeding are evaluated at their authored opportunity boundaries.
+
+## 8.2 Inactive-region life simulation
+
+When a region is inactive, use aggregate simulation instead of local GameObject behaviour:
+- Advance regional fish stock, migration, and breeding cohorts in coarse steps.
+- Advance only the hunger / energy / injury values needed to choose a future state.
+- Resolve an ordinary feeding or predation event as a bounded stock change, not a full local chase.
+- Resolve rest and recovery as elapsed-time outcomes.
+- Preserve named and quest-critical creatures unless an explicit authored story event changes them.
+- Do not run off-screen local pursuit, attack, or high-frequency anomaly movement.
+
+For an inactive region, a creature may be represented by a stable regional record containing species ID, habitat, life phase, condition band, route / feeding-ground ID, and next scheduled opportunity. Reconstruct presentation objects only when the region becomes active.
+
+All background life events use stable IDs and deterministic random streams. Feeding, reproduction, migration, and anomaly outcomes must apply once across save / load. Cosmetic schooling never consumes gameplay RNG.
+
 ## 9. Acceptance tests
 
 - Loading an evaluated event never rerolls it.
