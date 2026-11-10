@@ -57,6 +57,15 @@ namespace WhereTheSoundingsEnd.Persistence
         public string tideStateId = "unknown";
         public float seaDisturbance;
         public float panicLevel;
+        public List<SalvageSiteSaveData> salvageSites = new List<SalvageSiteSaveData>();
+    }
+
+    [Serializable]
+    public sealed class SalvageSiteSaveData
+    {
+        public string siteId;
+        public int remainingPulls;
+        public int lastRefillDay;
     }
 
     [Serializable]
@@ -342,6 +351,24 @@ namespace WhereTheSoundingsEnd.Persistence
                 }
             }
 
+            if (float.IsNaN(data.world.panicLevel) || float.IsInfinity(data.world.panicLevel) ||
+                data.world.panicLevel < 0f || data.world.panicLevel > 1f)
+            {
+                error = "The save contains an invalid panic value.";
+                return false;
+            }
+
+            for (int index = 0; index < data.inventory.damagedCells.Count; index++)
+            {
+                GridCellSaveData cell = data.inventory.damagedCells[index];
+                if (cell == null || cell.x < 0 || cell.y < 0 ||
+                    cell.x >= data.inventory.holdWidth || cell.y >= data.inventory.holdHeight)
+                {
+                    error = "The save contains an invalid damaged hold cell at index " + index + ".";
+                    return false;
+                }
+            }
+
             for (int index = 0; index < data.inventory.placements.Count; index++)
             {
                 CargoPlacementSaveData placement = data.inventory.placements[index];
@@ -391,6 +418,7 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.saveReason == null) data.saveReason = string.Empty;
 
             if (data.world == null) data.world = new WorldSaveData();
+            if (data.world.salvageSites == null) data.world.salvageSites = new List<SalvageSiteSaveData>();
             data.world.panicLevel = Math.Max(0f, Math.Min(1f, data.world.panicLevel));
             if (data.player == null) data.player = new PlayerSaveData();
             if (data.vessel == null) data.vessel = new VesselSaveData();
