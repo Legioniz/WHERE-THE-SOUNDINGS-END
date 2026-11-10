@@ -5,23 +5,24 @@
 > Owner: Project lead  
 > Version: 0.2  
 > Last reviewed: 2026-11-10  
-> Currency: Philippine peso (PHP / ₱)
+> Currency: US dollar (USD / $) — in-game dollars
 
 ## 1. Purpose
 
 Define how fishing income, research rewards, operating costs, buyer demand, and equipment progression interact. The economy should reward knowledge, preparation, and safe landings without allowing one species, buyer, anomaly, or repeatable contract to dominate every other activity.
 
-The [Seafood Selling Price Schedule](SEAFOOD-SELLING-PRICE-SCHEDULE.md) is the single source of truth for species prices, sale units, mutant specimen outcomes, and finite anomaly rewards. This document defines the calculations that use those values.
+The [Seafood Selling Price Schedule](SEAFOOD-SELLING-PRICE-SCHEDULE.md) is the single source of truth for USD species prices, sale units, six destination-island market factors, aberrant specimen outcomes, and finite anomaly rewards. This document defines the calculations that use those values.
 
 ## 2. Revenue model
 
 For an ordinary eligible product line:
 
-`LineRevenue = round(SaleQuantity × BaseDocksidePrice × QualityFactor × FreshnessFactor × DemandFactor × LiveConditionFactor)`
+`LineRevenueUSD = roundToCent(SaleQuantity × BaseDocksidePriceUSD × IslandMarketFactor × QualityFactor × FreshnessFactor × DemandFactor × LiveConditionFactor)`
 
 Where:
 - `SaleQuantity` is saleable whole weight in kg, unless the schedule defines an individual, processed, or special weight unit.
-- `BaseDocksidePrice` comes from the price schedule. It is not a retail price.
+- `BaseDocksidePriceUSD` comes from the price schedule. It is not a retail price.
+- `IslandMarketFactor` comes from the market class and the island where the product is sold. It is applied once and does not depend on where the catch was caught.
 - `QualityFactor` represents visible size grade, damage, and landing condition.
 - `FreshnessFactor` represents time, temperature, and storage since landing.
 - `DemandFactor` represents the selected buyer's current stock and posted demand.
@@ -33,12 +34,15 @@ Where:
 
 `ExpectedProfitPerHour = AverageTripNet ÷ AverageTripDurationHours`
 
-Calculate each species / buyer line separately, round to the nearest whole peso, and then sum the transaction. Do not round intermediate factors or apply the same modifier twice.
+Calculate each species / buyer line separately, round to the nearest cent, and then sum the transaction. Do not round intermediate factors or apply the same modifier twice.
+
+Island-market multipliers are distinct from temporary demand. The regional factor is stable for each market class; demand changes with visible buyer stock, orders, events, and shortages.
 
 ## 3. Modifier boundaries
 
 | Factor | Working range | Application |
 |---|---:|---|
+| Island market | 0.50–1.40 | Destination market and seafood class; see the seafood price schedule |
 | Quality | 0.60–1.20 | Poor handling / damage to premium condition |
 | Freshness | 0.35–1.00 | Warm delay to promptly chilled or properly held catch |
 | Demand | 0.75–1.35 | Buyer inventory, local event, season, storm shortage, or posted order |
@@ -106,7 +110,7 @@ For every purchasable upgrade, record:
 
 Use the incremental profit created by the upgrade, not the player's full fishing income. If the upgrade has no measurable payback, document its non-financial purpose (safety, access, story, or convenience).
 
-The first boat and starter gear must support reliable income in Greyhaven and the Shallows. Progression into offshore and deep-slope fishing should require both capability and operating-cost planning, not merely a price gate.
+The first boat and starter gear must support reliable income in Greyhaven and the Shallows. The player should be able to view destination-market prices before committing to a longer trade route. Progression into offshore and deep-slope fishing should require both capability and operating-cost planning, not merely a price gate.
 
 ## 9. Initial playtest targets
 
@@ -114,12 +118,12 @@ The following are initial gross-revenue targets before fuel, bait, repairs, and 
 
 | Activity | Target gross return | Intended role |
 |---|---:|---|
-| Short inshore trip | ₱250–₱700 | Starter income; low gear and fuel risk |
-| Productive coastal trip | ₱700–₱1,800 | Regular progression income |
-| Targeted reef / crab / squid trip | ₱900–₱2,500 | Skill and location reward |
-| Offshore pelagic trip | ₱1,800–₱5,000 | Mid-to-late progression, meaningful fuel and risk |
-| Deep-slope contract trip | ₱2,000–₱5,500 | Specialized gear and controlled catch volume |
-| First verified unnatural record | ₱1,200–₱3,600 | One-time research reward, not repeatable income |
+| Short inshore trip | $3.96–$11.10 | Starter income; low gear and fuel risk |
+| Productive coastal trip | $11.10–$28.54 | Regular progression income |
+| Targeted reef / crab / squid trip | $14.27–$39.64 | Skill and location reward |
+| Offshore pelagic trip | $28.54–$79.29 | Mid-to-late progression, meaningful fuel and risk |
+| Deep-slope contract trip | $31.72–$87.22 | Specialized gear and controlled catch volume |
+| First verified unnatural record | $19.03–$57.09 | One-time research reward, not repeatable income |
 
 A trip is balanced by net income per hour, risk, fuel use, and required skill—not by gross sale value alone. No activity should dominate every other route in income, safety, and convenience simultaneously.
 
@@ -139,12 +143,13 @@ Run each against:
 
 Acceptance checks:
 - Verify the schedule's 100 fish, 47 invertebrate, and 8 algae price IDs are complete and unique.
-- A 2 kg standard milkfish sale returns ₱290 before modifiers.
-- Five approved mature sea urchins return ₱225 before modifiers.
+- A 2 kg standard milkfish sale returns $4.60 at neutral market factor 1.00 before other modifiers.
+- Five approved mature sea urchins return $3.55 before modifiers.
 - Ineligible catch returns zero ordinary-sale revenue.
 - A first-time research contract cannot be claimed twice.
 - No buyer or contract can be refreshed by a scene reload.
 - No rarity tier is multiplied on top of an explicit species base price.
+- Island-market factors apply once at the destination buyer; they are not stacked with a second hidden regional premium.
 - Compare gross return, net return, and net income per hour before approving upgrade costs.
 
 ## 11. Related specifications
