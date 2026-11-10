@@ -33,6 +33,11 @@ namespace WhereTheSoundingsEnd.World
         private Light falseNavigationLightSource;
         private float falseLightRemaining;
         private Material falseLightMaterial;
+        private MaritimeSurfaceBehaviour seaSurface;
+        private AudioSource[] hushSources = System.Array.Empty<AudioSource>();
+        private float[] hushBaseVolumes = System.Array.Empty<float>();
+        private float hushRemaining;
+        private float hushBlend = 1f;
 
         private void Awake()
         {
@@ -43,6 +48,18 @@ namespace WhereTheSoundingsEnd.World
                 if (boat != null) vesselBody = boat.GetComponent<Rigidbody>();
             }
             if (worldRoot == null) worldRoot = transform;
+
+            GameObject waterObject = GameObject.Find("Sheltered_Bay_Surface");
+            if (waterObject != null)
+            {
+                seaSurface = waterObject.GetComponent<MaritimeSurfaceBehaviour>();
+                if (seaSurface == null) seaSurface = waterObject.AddComponent<MaritimeSurfaceBehaviour>();
+            }
+
+            hushSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+            hushBaseVolumes = new float[hushSources.Length];
+            for (int i = 0; i < hushSources.Length; i++)
+                hushBaseVolumes[i] = hushSources[i] != null ? hushSources[i].volume : 0f;
 
             incidentAudio = gameObject.AddComponent<AudioSource>();
             incidentAudio.playOnAwake = false;
@@ -69,6 +86,7 @@ namespace WhereTheSoundingsEnd.World
             }
 
             UpdateFalseLight(realDelta);
+            UpdateHush(realDelta);
 
             if (seaState == null || vesselBody == null || !seaState.IsAdvancing)
                 return;
@@ -86,19 +104,21 @@ namespace WhereTheSoundingsEnd.World
         private void RollIncident()
         {
             float roll = Random.value;
-            if (roll < 0.36f)
+            if (roll < 0.25f) TriggerDeadCalm();
+            else if (roll < 0.48f) TriggerWrongWaySwell();
+            else if (roll < 0.62f)
             {
                 PlayAtBoat(hullKnockClip, vesselBody.position + vesselBody.transform.right * Random.Range(-0.8f, 0.8f), 0.42f);
                 ShowCaption("[two hollow knocks travel through the hull]");
             }
-            else if (roll < 0.69f)
+            else if (roll < 0.77f)
             {
                 Vector3 bellPosition = vesselBody.position + vesselBody.transform.forward * Random.Range(28f, 52f)
                     + vesselBody.transform.right * Random.Range(-24f, 24f);
                 PlayAtBoat(buoyBellClip, bellPosition, 0.31f);
                 ShowCaption("[a navigation bell rings somewhere beyond the fog]");
             }
-            else if (roll < 0.91f)
+            else if (roll < 0.92f)
             {
                 SpawnFalseNavigationLight();
                 ShowCaption("[a warm light drifts across the water. No wake follows it]");
@@ -107,6 +127,33 @@ namespace WhereTheSoundingsEnd.World
             {
                 PlayAtBoat(distantCallClip, vesselBody.position + vesselBody.transform.forward * Random.Range(35f, 65f), 0.2f);
                 ShowCaption("[a long animal call carries over the water]");
+            }
+        }
+
+        private void TriggerDeadCalm()
+        {
+            if (seaSurface != null) seaSurface.TriggerDeadCalm(Random.Range(12f, 20f));
+            hushRemaining = Random.Range(8f, 14f);
+            ShowCaption("[the wind stops. The waves flatten. Even the water against the hull goes quiet]");
+        }
+
+        private void TriggerWrongWaySwell()
+        {
+            if (seaSurface != null) seaSurface.TriggerWrongWaySwell(Random.Range(14f, 22f));
+            hushRemaining = Random.Range(3f, 6f);
+            ShowCaption("[the swell begins moving against the wind]");
+        }
+
+        private void UpdateHush(float deltaTime)
+        {
+            if (hushRemaining > 0f) hushRemaining -= deltaTime;
+            float target = hushRemaining > 0f ? 0f : 1f;
+            hushBlend = Mathf.MoveTowards(hushBlend, target, deltaTime * (target < hushBlend ? 1.8f : 0.32f));
+
+            for (int i = 0; i < hushSources.Length; i++)
+            {
+                if (hushSources[i] == null || hushSources[i] == incidentAudio) continue;
+                hushSources[i].volume = hushBaseVolumes[i] * Mathf.Lerp(0.025f, 1f, hushBlend);
             }
         }
 
