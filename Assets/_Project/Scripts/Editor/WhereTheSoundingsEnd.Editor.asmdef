@@ -4,7 +4,8 @@
   "references": [
     "WhereTheSoundingsEnd.Runtime",
     "Unity.RenderPipelines.Universal.Runtime",
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "YarnSpinner.Unity"
   ],
   "includePlatforms": [
     "Editor"
