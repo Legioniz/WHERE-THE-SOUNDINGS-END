@@ -51,3 +51,34 @@ Use the link only to locate classical literary sources; it is not a final schola
 ## Scope note
 
 Build as a short signal-reading mission using existing Sounding Rig and buoy systems. Do not create a new AI creature or voice-imitation system for the first implementation.
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- Quest starts after the player receives the skiff report and enters the Outer Shoals with the Sounding Rig installed.
+- Evaluate only on a valid Rig deployment at night or in heavy fog. Initial chance: **18% per eligible deployment**.
+- If the player has three failed eligible deployments, the next deployment guarantees the clue. The clue is saved by opportunity ID and never rerolls on load.
+- The signal variant is selected from a seeded list: familiar voice contour, doubled syllable, or delayed final note. Variant changes presentation, not clue availability.
+
+### Behaviour states
+`Dormant → First Echo → Repeated Echo → Bearing Drift → Evidence Resolved / Cooldown`.
+The anomaly has no physical body, target, health, collision, or creature AI. Each Rig pulse creates one return event. The second return appears 1.2–2.0 seconds later, with a deliberately inconsistent bearing. The interval repeats exactly enough for the player to recognize a pattern.
+
+### Perception / FOV
+There is no creature FOV and no player-facing vision cone. The elevated camera can reveal surface ripples inside the current camera view. At 40–70 m, a subtle ring or wake may appear if fog permits. The camera must not reveal the actual source before the player triangulates it. A non-spatial caption and waveform cue provide accessibility support.
+
+### Sound behaviour
+The signal uses a voice-like harmonic contour without copying a real person's voice. First return is low and distant; the second is slightly clearer but arrives from an impossible bearing. It should not be loud enough to mask buoy or lighthouse cues. Caption example: `[a familiar voice repeats beneath the hull]`.
+
+### Attacks and chase
+**None.** The anomaly does not pursue, hit, damage, or physically spawn. The danger is navigational: the false bearing can lead toward known reef hazards. The player always has the map, buoy pattern, and a second observation as counter-evidence. Any hull damage comes from an actual collision, never from the voice.
+
+### Lore reveal
+The recovered log reveals three different witnesses describing the same pause pattern but hearing different people. This supports the idea that the anomaly imitates remembered voices; it does not confirm whether a creature, geology, or the sea itself causes the signal.
+
+### Acceptance tests
+- Same seed and Rig opportunity produce the same echo sequence.
+- No damage or pursuit event is emitted.
+- Required bearing clue is guaranteed after the retry limit.
+- Known buoy signals remain distinguishable from the false voice.
