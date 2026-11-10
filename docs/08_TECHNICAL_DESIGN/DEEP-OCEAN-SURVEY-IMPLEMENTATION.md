@@ -195,7 +195,9 @@ The current opportunity list is bounded to 256 entries because the monotonically
 ## 8. Current tests and quality gates
 
 Edit Mode tests cover:
-- day/night scattering-layer depth ordering;\n- same-region / changed-heading / time-window requirements for independent layer observations;\n- seabed confidence versus sparse-layer confidence;
+- day/night scattering-layer depth ordering;
+- same-region / changed-heading / time-window requirements for independent layer observations;
+- seabed confidence versus sparse-layer confidence;
 - mid-water versus seabed separation;
 - stable opportunity hashing;
 - shallow Greyhaven versus deep Outer Shoals profile configuration;
