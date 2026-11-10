@@ -432,6 +432,39 @@ Acceptance tests:
 - The game does not make all creatures attack the player.
 - Ecological activity remains legible when the player is not directly looking at the animals.
 
+## 8.1 Signature wildlife for each difficult sublocation
+
+These are **game-native natural fauna**, not supernatural enemies. Their names are fictional working names. Each has a recognizable ecological role and a behavior the player can observe. A few may become dangerous when cornered or disturbed, but most should be neutral.
+
+| Location | Signature creature | Ecological niche and behavior | Resting / dormant behavior | Player-facing interaction |
+|---|---|---|---|---|
+| The Needle Gate | **Gatejaw Grouper** | Large ambush fish that waits beside current-swept rock fissures and captures baitfish pushed through the passage | Holds station in a crevice during strong flow; feeds during favorable current windows | The player may see prey fish compress against the opposite wall before the grouper strikes |
+| The Roaring Narrows | **Foamrunner Scad** | Fast schooling fish that uses back-eddies as temporary refuge and crosses the channel during slack water | School tightens and holds in low-flow pockets when current is strongest | The school reveals current direction and can be followed for fishing; a predator may trail it |
+| The Widow's Teeth | **Whitewake Shearwater** | Game-native seabird that nests on isolated ledges and dives on baitfish schools | Rests on exposed ledges between feeding flights; avoids landing during heavy swell | Circling and synchronized dives provide distant clues to surface fish activity; disturbing nesting ledges causes defensive flight |
+| The Undercliff | **Glassgill Shrimp** | Small cave-dwelling scavenger that feeds on detritus and organic matter carried into the cave | Clusters in damp cracks and retreats deeper when surge or light increases | A sudden retreat of the colony can reveal a larger animal moving through the cave |
+| The Drowned Steps | **Tidemark Crab** | Intertidal crab that feeds on algae, detritus, and small invertebrates across exposed terraces | Seals itself into a crevice or burrow as water falls; emerges when the next tide floods its feeding zone | Its activity makes tidal height visible; predators may forage across the same terrace |
+| The Blue Maw | **Pale-thread Eel** | Low-activity cave predator that hunts small crustaceans and fish along the sinkhole wall | Remains in a narrow crack during bright or turbulent periods | The player can detect its route through small prey movements and repeated shallow acoustic returns |
+| The Siltfall Scar | **Siltmantle Grenadier** | Slow bottom-associated scavenger that patrols the margin of sediment deposits and feeds on carrion and small invertebrates | Rests close to the bottom with reduced movement when food cues are absent | Its approach can indicate a recent food fall; its movement may precede a sediment cloud |
+| The Outer Wall | **Edgefin Tuna** | Fast pelagic predator that tracks baitfish along the shelf break and current fronts | Continues broad-ranging movement rather than using a fixed den; activity follows prey availability | Surface strikes and baitfish compression reveal a feeding front; it should not attack the boat |
+| The Broken Caldera | **Ashfin Cardinalfish** | Small cave-associated fish that schools in cooled lava cavities and emerges to feed in low light | Hides deep inside cavities during daylight or when larger predators approach | A school withdrawing into the lava tubes can foreshadow a predator entering the caldera |
+| The Last Anchorage | **Anchorback** | A recurring mature green-turtle-like individual that returns to a sheltered seagrass patch to feed and rest | Rests quietly in a protected underwater pocket between feeding bouts | A non-hostile recognizable wildlife encounter; repeated visits can show habitat recovery or disturbance |
+| The Bone Orchard | **Bonepicker Isopod** | Scavenging crustacean that detects carrion and joins other scavengers at large food falls | Remains buried or inactive when food is scarce; gathers around new carrion | Its arrival indicates a recent carcass or food fall; populations shift as the carcass is consumed |
+| The Black Chimneys | **Cinderlip Vent Shrimp** | Game-native vent-associated shrimp that grazes microbial films and occupies the cooler outer margins of a vent community | Clusters in stable temperature and chemical gradients; retreats from plume changes | Its distribution can indicate which side of a vent field is less chemically extreme |
+| The Lantern Drift | **Lantern-thread Squid** | Small midwater squid that follows prey and participates in nightly vertical movement | Descends with the deeper scattering layer during daylight | Its synchronized movement helps the player distinguish a biological layer from an anomalous light pattern |
+| The Sulfur Orchard | **Siphon Crown Tubeworm** | Seep-associated tube worm supported by symbiotic microbes that use chemical energy | Remains anchored to the seep substrate; retracts its exposed crown when disturbed | Dense patches reveal stable seep conditions; damaged patches recover slowly |
+| The Hanging Garden | **Veilfin Octopus** | Deep-water octopus that hunts small crustaceans and uses coral and sponge structure as cover | A brooding female remains at a stable, oxygenated site and guards eggs for an extended period | The player can discover a long-term brooding site; disturbing it should have lasting ecological and ethical consequences |
+| The Driftglass Fields | **Raftclaw Crab** | Small crab that lives among floating macroalgae and feeds on attached organisms and trapped organic matter | Hides deep in the raft when birds or larger fish approach | Its presence helps establish that floating algae is a living habitat, not disposable scenery |
+
+### 8.2 Local species distribution rules
+
+- Do not place every signature creature in every visit. Use habitat suitability, time, tide, weather, season, and disturbance.
+- A named individual such as Anchorback should persist across visits. Do not respawn it as a disposable random animal.
+- A breeding or brooding animal should have a stable site and a clear recovery or abandonment rule.
+- Schooling animals should move as a group with spacing, compression, split, and reunion behaviors rather than as dozens of independent random fish.
+- A predator's presence should be supported by prey availability. If its prey population moves away, the predator should follow, reduce activity, or leave.
+- Deep-sea organisms should have slower movement and fewer unnecessary high-energy actions.
+- Avoid placing fragile corals, tube worms, or sponge gardens on exposed high-energy surfaces where their habitat would be implausible.
+
 ## 9. Research references
 
 The following sources support the ecological patterns used in this proposal. They do not validate fictional creatures or every design abstraction.
