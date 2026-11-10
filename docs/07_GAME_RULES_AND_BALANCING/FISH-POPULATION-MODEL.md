@@ -326,8 +326,8 @@ Measure abundance, biomass, SSB, average size, juvenile/adult ratio, catch per u
 ## 15. Related specifications
 
 - [Regional population simulation — Unity architecture](../08_TECHNICAL_DESIGN/REGIONAL-POPULATION-SIMULATION.md)
-- [Regional ecology and creature distribution](../../05_WORLD_AND_LEVEL_DESIGN/REGIONAL-ECOLOGY-AND-CREATURES.md)
-- [Creature life cycles and ecological behaviour](../../12_AI_AND_SIMULATION/CREATURE-LIFE-CYCLES-AND-ECOLOGY.md)
+- [Regional ecology and creature distribution](../05_WORLD_AND_LEVEL_DESIGN/REGIONAL-ECOLOGY-AND-CREATURES.md)
+- [Creature life cycles and ecological behaviour](../12_AI_AND_SIMULATION/CREATURE-LIFE-CYCLES-AND-ECOLOGY.md)
 - [Seafood selling price schedule](SEAFOOD-SELLING-PRICE-SCHEDULE.md)
 - [Economy mathematics](ECONOMY-MATHEMATICS.md)
 - [Balancing and simulation](BALANCING-AND-SIMULATION.md)
