@@ -7,6 +7,7 @@ using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using WhereTheSoundingsEnd.Boat;
 using WhereTheSoundingsEnd.CameraSystem;
+using WhereTheSoundingsEnd.Persistence;
 
 namespace WhereTheSoundingsEnd.Editor
 {
@@ -61,6 +62,7 @@ namespace WhereTheSoundingsEnd.Editor
             BuildBuoys(landmarks, red, green, metal);
             BuildBoat(player, controls, hull, wood, metal);
             BuildCameraAndLight(lighting, player);
+            BuildSaveCoordinator(world.transform);
 
             RenderSettings.ambientMode = AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(0.30f, 0.35f, 0.37f);
@@ -73,6 +75,13 @@ namespace WhereTheSoundingsEnd.Editor
 
             EditorSceneManager.SaveScene(scene, scenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(scenePath, true) };
+        }
+
+        private static void BuildSaveCoordinator(Transform parent)
+        {
+            GameObject coordinator = new GameObject("Save_Game_Coordinator");
+            coordinator.transform.SetParent(parent, false);
+            coordinator.AddComponent<SaveGameCoordinator>();
         }
 
         private static void BuildWater(Transform parent, Material material)

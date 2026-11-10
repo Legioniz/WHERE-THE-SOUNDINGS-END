@@ -22,6 +22,9 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/WhereTheSoundingsEnd.Runtime.asmdef",
     "Assets/_Project/Scripts/Runtime/Core/WorldClock.cs",
     "Assets/_Project/Scripts/Runtime/Core/Pcg32Random.cs",
+    "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs",
+    "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
+    "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
     "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs",
     "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs",
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
@@ -29,6 +32,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs",
     "Assets/_Project/Tests/EditMode/WhereTheSoundingsEnd.Tests.EditMode.asmdef",
     "Assets/_Project/Tests/EditMode/CoreFoundationTests.cs",
+    "Assets/_Project/Tests/EditMode/SaveFileServiceTests.cs",
     "docs/05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md",
 ]
 

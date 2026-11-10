@@ -27,6 +27,7 @@ Assets/_Project is the game's first-party content boundary.
 | Prefabs/ | Reusable boat, creature, world, and UI prefabs |
 | Scenes/ | Boot, menu, persistent world, harbour, and region scenes |
 | Scripts/Runtime/ | Runtime gameplay and simulation code |
+| Scripts/Runtime/Persistence/ | Versioned save DTOs, per-slot file storage, and scene save coordination |
 | Scripts/Editor/ | Editor-only generation, validation, and authoring tools |
 | Settings/Input/ | Input Action assets and control schemes |
 | Settings/Rendering/ | URP assets and rendering configuration |
@@ -42,10 +43,13 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - WhereTheSoundingsEnd.Tests.EditMode: unit-level tests.
 - Core/WorldClock.cs: engine-independent simulation-time primitive.
 - Core/Pcg32Random.cs: PCG-XSH-RR deterministic random generator.
+- Persistence/SaveGameData.cs: versioned campaign snapshot and migration defaults.
+- Persistence/SaveFileService.cs: five independent JSON slots, backup recovery, listing, and deletion.
+- Persistence/SaveGameCoordinator.cs: scene participant capture/restore contract.
 - Boat/BoatPrototypeController.cs: temporary Rigidbody handling prototype.
 - Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera with configurable framing.
 - Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, and initial build-scene list.
-- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, starter boat, and camera.
+- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, starter boat, camera, and SaveGameCoordinator.
 
 ## Greyhaven environment generation
 
@@ -63,4 +67,5 @@ Greyhaven is a working technical greybox. Its coordinates and dimensions are pro
 4. Keep mutable world state in runtime models with clear ownership.
 5. Isolate third-party assets and maintain their license records.
 6. Do not commit Library, Temp, Obj, generated IDE projects, or build output.
-7. Do not label a feature implemented until it exists in runtime code and has passed its relevant tests.
+7. Save files belong in Application.persistentDataPath and must never be committed to the repository.
+8. Do not label a feature implemented until it exists in runtime code and has passed its relevant tests.
