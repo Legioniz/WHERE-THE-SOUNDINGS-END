@@ -29,7 +29,7 @@ Panic is a 0–1 psychological-pressure value. It is not hunger, oxygen or a con
 - The sheltered Greyhaven harbor reduces panic faster during daylight.
 - Panic persists through save/load.
 
-Panic changes environmental presentation: fog density/colour and directional-light intensity. At high panic, non-colliding phantom reef shapes and leviathan-scale shadows can appear. At extreme panic, a phantom seabird event can steal one ordinary fish from the cargo hold after an omen. It cannot steal quest cargo or equipment. These hallucination visuals are not authoritative collision objects; actual threats remain the responsibility of creature/encounter systems.
+Panic changes environmental presentation: fog density/colour and directional-light intensity. At high panic, non-colliding phantom reef shapes and leviathan-scale shadows can appear. At extreme panic, a phantom seabird event gives a brief omen before stealing one ordinary fish from the cargo hold. It cannot steal quest cargo or equipment. These hallucination visuals are not authoritative collision objects; actual threats remain the responsibility of creature/encounter systems.
 
 AudioSources present when the director initializes have their pitch and volume warped by night and panic. Authored score, ambience, mixer snapshots and dedicated threat cues are not yet connected.
 
@@ -43,7 +43,7 @@ Aberrant variants have distinct stable IDs and item definitions. Their prototype
 
 ## Dredging
 
-Press G within the interaction radius of a wreck/debris field while the boat is stopped. The Greyhaven outer-channel wreck site is the first authored site.
+Press G within the interaction radius of a wreck/debris field while the boat is stopped. The Greyhaven outer-channel wreck site is the first authored site, approximately 13 metres from the site marker.
 
 - Four timing beats.
 - Three pulls per in-game day.
