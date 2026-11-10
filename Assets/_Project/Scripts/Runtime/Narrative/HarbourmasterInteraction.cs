@@ -7,7 +7,7 @@ using Yarn.Unity;
 namespace WhereTheSoundingsEnd.Narrative
 {
     /// <summary>
-    /// Starts the Harbourmaster conversation when the player vessel enters the interaction radius.
+    /// Starts the configured resident conversation when the player vessel enters the interaction radius.
     /// The player is still in the boat in this Greyhaven prototype; a walkable character is later work.
     /// </summary>
     [DisallowMultipleComponent]
@@ -72,9 +72,18 @@ namespace WhereTheSoundingsEnd.Narrative
 
         private void Update()
         {
-            if (_vesselColliders.Count == 0 || dialogueRunner == null ||
-                runtimeUI == null || runtimeUI.IsInventoryOpen ||
-                dialogueRunner.IsDialogueRunning || _interactAction == null)
+            if (_vesselColliders.Count == 0 || runtimeUI == null)
+                return;
+
+            if (runtimeUI.IsInventoryOpen ||
+                (dialogueRunner != null && dialogueRunner.IsDialogueRunning))
+            {
+                runtimeUI.SetInteractionPrompt(string.Empty);
+                return;
+            }
+
+            UpdatePrompt();
+            if (dialogueRunner == null || _interactAction == null)
                 return;
 
             if (_interactAction.WasPressedThisFrame())
