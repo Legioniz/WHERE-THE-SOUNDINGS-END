@@ -3,7 +3,7 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Runtime foundation implemented; gameplay coverage in progress  
 > Owner: Project lead  
-> Version: 0.3  
+> Version: 0.4  
 > Last reviewed: 2026-11-10
 
 ## Player-facing behaviour
@@ -30,7 +30,7 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - SaveGameCoordinator is the scene-level entry point. It discovers active and inactive MonoBehaviours implementing ISaveParticipant, asks them to capture state, and restores those participants on load.
 - AutosaveController runs a five-minute unscaled-time interval after a 45-second startup delay, retries failed writes after 30 seconds, and also saves on application pause, focus loss, active-scene unload, application quit, and requested checkpoints. Lifecycle triggers are debounced by 15 seconds to avoid duplicate focus/pause/scene notifications. Explicit checkpoints and application quit bypass this debounce so important progress and the final session state are written.
 - BoatPrototypeController records the Greyhaven starter boat transform and Rigidbody velocity.
-- SeaStateDirector persists elapsed game time, time of day, panic and sea disturbance.
+- SeaStateDirector persists elapsed game time, time of day, panic and sea disturbance.\n- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.
 - VesselConditionController persists hull and engine condition.
 - SpatialCargoHold persists cargo placements and damaged-cell coordinates.
 - SalvageSite persists daily remaining pulls by stable site ID.
@@ -74,7 +74,7 @@ Implemented now:
 - Spatial cargo placements, damaged hold cells and equipment placements through SpatialCargoHold.
 - Action-driven day/time, panic and sea disturbance.
 - Hull/engine condition and wreck-site daily depletion.
-- Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).
+- Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).\n- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs in schema v4.
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
 
@@ -83,7 +83,7 @@ Not yet connected because the corresponding gameplay systems do not exist in the
 - Dialogue presentation cursor and mid-line resume state.
 - Dynamic tide/current/weather simulation and authored audio mixer state.
 - Quests, journal evidence, discoveries and NPC relationships.
-- Regional fish stocks, creature states, threat state, encounter cooldowns and random stream ownership.
+- Regional fish stocks, creature states, threat state, encounter cooldowns and random stream ownership.\n- Persistent physical state for deep-ocean sites (brine-pool disturbance, vent/seep condition, hydrate stability, whale-fall succession); current site markers record discovery only.
 - A player-facing save/load menu, save confirmation prompt, and UI feedback for autosave status. Autosaving itself is implemented.
 - Loading into a different scene automatically. The coordinator currently requires the target scene to be active before restoring its participants.
 
@@ -94,3 +94,14 @@ A field's presence in SaveGameData is a persistence contract, not proof that the
 - Technical field map: docs/08_TECHNICAL_DESIGN/SAVE-DATA-STRUCTURE.md
 - Verification: docs/14_TESTING_AND_QUALITY/SAVE-LOAD-TESTS.md
 - Project architecture: docs/08_TECHNICAL_DESIGN/PROJECT-STRUCTURE.md
+
+## Deep-ocean survey persistence
+
+Save schema v4 adds three fields to WorldSaveData:
+- soundingPulseCount: monotonic accepted-pulse sequence used in stable opportunity IDs;
+- discoveredPhenomenonSiteIds: stable site IDs already found by the player;
+- evaluatedSurveyOpportunityIds: recent opportunity IDs retained as a duplicate-evaluation guard.
+
+Schema 0–3 saves migrate to v4 with zero pulses and empty discovery/opportunity collections. This preserves older campaigns without granting discoveries.
+
+SoundingRigController is an ISaveParticipant. Its temporary sonar caption, generated AudioClip, current echo display, and temporary confirmation window are intentionally not persisted. A future physical site controller must add its own state only when the site can actually be altered by player actions.
