@@ -136,6 +136,18 @@ namespace WhereTheSoundingsEnd.Tests
 
 
 
+
+        [Test]
+        public void SiteSignalConfidence_UsesSignalStrengthAndAcousticAttenuation()
+        {
+            float strongClearReturn = DeepOceanSurveyMath.CalculateSiteSignalConfidence(0.9f, 0.9f, 0.1f);
+            float weakNoisyReturn = DeepOceanSurveyMath.CalculateSiteSignalConfidence(0.3f, 0.7f, 0.5f);
+
+            Assert.That(strongClearReturn, Is.GreaterThan(weakNoisyReturn));
+            Assert.That(strongClearReturn, Is.InRange(0f, 1f));
+            Assert.That(weakNoisyReturn, Is.InRange(0f, 1f));
+        }
+
         [Test]
         public void PhenomenonRules_KeepGeologyInPlausibleRegionalDepthBands()
         {
