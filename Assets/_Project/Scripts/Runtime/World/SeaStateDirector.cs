@@ -39,7 +39,7 @@ namespace WhereTheSoundingsEnd.World
         [SerializeField] private Color dayFog = new Color(0.15f, 0.20f, 0.21f);
         [SerializeField] private Color nightFog = new Color(0.025f, 0.045f, 0.065f);
 
-        private double elapsedGameSeconds;
+        private readonly WorldClock worldClock = new WorldClock();
         private double timeOfDaySeconds;
         private float seaDisturbance;
         private float weatherFogPressure;
@@ -57,14 +57,15 @@ namespace WhereTheSoundingsEnd.World
         private Light[] sceneLights = System.Array.Empty<Light>();
         private AudioSource[] soundscapeSources = System.Array.Empty<AudioSource>();
 
-        public double ElapsedGameSeconds => elapsedGameSeconds;
+        public double ElapsedGameSeconds => worldClock.ElapsedSeconds;
         public double TimeOfDaySeconds => timeOfDaySeconds;
-        public int DayNumber => Mathf.FloorToInt((float)(elapsedGameSeconds / 86400.0)) + 1;
+        public int DayNumber => Mathf.FloorToInt((float)(worldClock.ElapsedSeconds / 86400.0)) + 1;
         public float PanicLevel => panicLevel;
         public float SeaDisturbance => seaDisturbance;
         public bool IsNight => CurrentHour >= nightStartsAtHour || CurrentHour < dayStartsAtHour;
         public float CurrentHour => (float)(timeOfDaySeconds / 3600.0);
         public bool IsAdvancing { get; private set; }
+        public float LastGameDeltaSeconds { get; private set; }
         public bool IsDialogueActive => dialogueRunner != null && dialogueRunner.IsDialogueRunning;
         public string LatestOmen => latestOmen;
 
@@ -132,12 +133,14 @@ namespace WhereTheSoundingsEnd.World
 
             if (!IsAdvancing)
             {
+                LastGameDeltaSeconds = 0f;
                 UpdateAtmosphere(0f);
                 return;
             }
 
             float gameDelta = Time.deltaTime * gameSecondsPerRealSecond;
-            elapsedGameSeconds += gameDelta;
+            LastGameDeltaSeconds = gameDelta;
+            worldClock.Advance(gameDelta);
             timeOfDaySeconds = (timeOfDaySeconds + gameDelta) % 86400.0;
             UpdateWeather(gameDelta);
             UpdatePanic(gameDelta);
@@ -372,7 +375,7 @@ namespace WhereTheSoundingsEnd.World
             };
             GUI.Box(new Rect(18, 18, 190, 54), GUIContent.none);
             GUI.Label(new Rect(30, 23, 170, 24),
-                "DAY " + (Mathf.FloorToInt((float)(elapsedGameSeconds / 86400.0)) + 1) +
+                "DAY " + DayNumber +
                 "   " + twelveHour.ToString("00") + ":" + minute.ToString("00") + " " + period, text);
             GUI.Label(new Rect(30, 47, 170, 20), IsAdvancing ? "SEA TIME: RUNNING" : "SEA TIME: HELD", text);
 
@@ -394,23 +397,38 @@ namespace WhereTheSoundingsEnd.World
 
         public void CaptureSaveData(SaveGameData data)
         {
-            data.world.elapsedGameSeconds = elapsedGameSeconds;
+            data.world.elapsedGameSeconds = worldClock.ElapsedSeconds;
             data.world.timeOfDaySeconds = timeOfDaySeconds;
             data.world.dayNumber = Mathf.FloorToInt((float)(elapsedGameSeconds / 86400.0)) + 1;
             data.world.panicLevel = panicLevel;
             data.world.seaDisturbance = seaDisturbance;
             data.world.weatherId = weatherFogPressure >= 0.65f ? "dense_fog" : weatherFogPressure > 0.1f ? "mist" : "clear";
+            data.world.weatherFogPressure = weatherFogPressure;
+            data.world.weatherRemainingGameSeconds = System.Math.Max(0.0, fogRemainingGameSeconds);
+            data.world.weatherShiftCooldownGameSeconds = System.Math.Max(0.0, weatherShiftCooldown);
+            data.world.hallucinationCooldownGameSeconds = System.Math.Max(0.0, hallucinationCooldown);
+            data.world.birdEventPending = birdEventPending;
+            data.world.birdEventCountdownGameSeconds = System.Math.Max(0.0, birdEventCountdown);
+            data.world.latestOmen = latestOmen ?? string.Empty;
         }
 
         public void RestoreSaveData(SaveGameData data)
         {
             if (data == null || data.world == null) return;
-            elapsedGameSeconds = System.Math.Max(0.0, data.world.elapsedGameSeconds);
+            worldClock.Reset(System.Math.Max(0.0, data.world.elapsedGameSeconds));
             timeOfDaySeconds = System.Math.Max(0.0, System.Math.Min(86399.0, data.world.timeOfDaySeconds));
             panicLevel = Mathf.Clamp01(data.world.panicLevel);
             seaDisturbance = Mathf.Clamp01(data.world.seaDisturbance);
-            weatherFogPressure = data.world.weatherId == "dense_fog" ? 0.85f : data.world.weatherId == "mist" ? 0.4f : 0f;
-            fogRemainingGameSeconds = weatherFogPressure > 0f ? 600f : 0f;
+            weatherFogPressure = Mathf.Clamp01(data.world.weatherFogPressure);
+            if (weatherFogPressure <= 0f)
+                weatherFogPressure = data.world.weatherId == "dense_fog" ? 0.85f :
+                    data.world.weatherId == "mist" ? 0.4f : 0f;
+            fogRemainingGameSeconds = (float)System.Math.Max(0.0, data.world.weatherRemainingGameSeconds);
+            weatherShiftCooldown = (float)System.Math.Max(0.0, data.world.weatherShiftCooldownGameSeconds);
+            hallucinationCooldown = (float)System.Math.Max(0.0, data.world.hallucinationCooldownGameSeconds);
+            birdEventPending = data.world.birdEventPending;
+            birdEventCountdown = (float)System.Math.Max(0.0, data.world.birdEventCountdownGameSeconds);
+            latestOmen = data.world.latestOmen ?? string.Empty;
         }
 
         private static float HorizontalSpeed(Vector3 velocity)

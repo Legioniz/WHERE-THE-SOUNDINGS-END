@@ -25,6 +25,7 @@ namespace WhereTheSoundingsEnd.World
 
         private InputAction fishAction;
         private InputAction dredgeAction;
+        private InputAction harvestBeatAction;
         private HarvestActionType action;
         private float beatTimer;
         private int beatIndex;
@@ -58,6 +59,7 @@ namespace WhereTheSoundingsEnd.World
             if (controls == null) return;
             fishAction = controls.FindAction("Fish", false);
             dredgeAction = controls.FindAction("Dredge", false);
+            harvestBeatAction = controls.FindAction("HarvestBeat", false);
         }
 
         private void OnDestroy()
@@ -79,8 +81,7 @@ namespace WhereTheSoundingsEnd.World
 
             beatTimer += Time.deltaTime;
             needlePhase = Mathf.Repeat(beatTimer / beatDuration, 1f);
-            if (Keyboard.current != null &&
-                (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.enterKey.wasPressedThisFrame))
+            if (harvestBeatAction != null && harvestBeatAction.WasPressedThisFrame())
                 RegisterBeat();
 
             if (beatTimer >= beatDuration)

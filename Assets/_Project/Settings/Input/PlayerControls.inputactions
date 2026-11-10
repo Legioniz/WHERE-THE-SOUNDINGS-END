@@ -6,38 +6,352 @@
             "name": "Boat",
             "id": "b0a70000000000000000000000000001",
             "actions": [
-                {"name":"Move","type":"Value","id":"b0a70000000000000000000000000002","expectedControlType":"Vector2","processors":"","interactions":"","initialStateCheck":true},
-                {"name":"Interact","type":"Button","id":"b0a70000000000000000000000000003","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false},
-                {"name":"Fish","type":"Button","id":"b0a70000000000000000000000000004","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false},
-                {"name":"SoundingPulse","type":"Button","id":"b0a70000000000000000000000000005","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false},
-                {"name":"Pause","type":"Button","id":"b0a70000000000000000000000000006","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false},
-                {"name":"Inventory","type":"Button","id":"b0a70000000000000000000000000007","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false},
-                {"name":"Dredge","type":"Button","id":"b0a70000000000000000000000000026","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false}
+                {
+                    "name": "Move",
+                    "type": "Value",
+                    "id": "b0a70000000000000000000000000002",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Interact",
+                    "type": "Button",
+                    "id": "b0a70000000000000000000000000003",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Fish",
+                    "type": "Button",
+                    "id": "b0a70000000000000000000000000004",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SoundingPulse",
+                    "type": "Button",
+                    "id": "b0a70000000000000000000000000005",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "b0a70000000000000000000000000006",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Inventory",
+                    "type": "Button",
+                    "id": "b0a70000000000000000000000000007",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Dredge",
+                    "type": "Button",
+                    "id": "b0a70000000000000000000000000026",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "HarvestBeat",
+                    "type": "Button",
+                    "id": "b0a70000000000000000000000000029",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
             ],
             "bindings": [
-                {"name":"WASD","id":"b0a70000000000000000000000000010","path":"2DVector","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Move","isComposite":true,"isPartOfComposite":false},
-                {"name":"up","id":"b0a70000000000000000000000000011","path":"<Keyboard>/w","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Move","isComposite":false,"isPartOfComposite":true},
-                {"name":"down","id":"b0a70000000000000000000000000012","path":"<Keyboard>/s","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Move","isComposite":false,"isPartOfComposite":true},
-                {"name":"left","id":"b0a70000000000000000000000000013","path":"<Keyboard>/a","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Move","isComposite":false,"isPartOfComposite":true},
-                {"name":"right","id":"b0a70000000000000000000000000014","path":"<Keyboard>/d","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Move","isComposite":false,"isPartOfComposite":true},
-                {"name":"","id":"b0a70000000000000000000000000015","path":"<Gamepad>/leftStick","interactions":"","processors":"","groups":"Gamepad","action":"Move","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000016","path":"<Keyboard>/e","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Interact","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000017","path":"<Gamepad>/buttonSouth","interactions":"","processors":"","groups":"Gamepad","action":"Interact","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000018","path":"<Keyboard>/f","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Fish","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000019","path":"<Gamepad>/buttonWest","interactions":"","processors":"","groups":"Gamepad","action":"Fish","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000020","path":"<Keyboard>/q","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"SoundingPulse","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000021","path":"<Gamepad>/rightShoulder","interactions":"","processors":"","groups":"Gamepad","action":"SoundingPulse","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000022","path":"<Keyboard>/escape","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Pause","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000023","path":"<Gamepad>/start","interactions":"","processors":"","groups":"Gamepad","action":"Pause","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000024","path":"<Keyboard>/i","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Inventory","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000025","path":"<Gamepad>/buttonNorth","interactions":"","processors":"","groups":"Gamepad","action":"Inventory","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000027","path":"<Keyboard>/g","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Dredge","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000028","path":"<Gamepad>/rightTrigger","interactions":"","processors":"","groups":"Gamepad","action":"Dredge","isComposite":false,"isPartOfComposite":false}
+                {
+                    "name": "WASD",
+                    "id": "b0a70000000000000000000000000010",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Move",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "b0a70000000000000000000000000011",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "b0a70000000000000000000000000012",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "b0a70000000000000000000000000013",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "b0a70000000000000000000000000014",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000015",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000016",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000017",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000018",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Fish",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000019",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Fish",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000020",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "SoundingPulse",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000021",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "SoundingPulse",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000022",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000023",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000024",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Inventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000025",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Inventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000027",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Dredge",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000028",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Dredge",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000030",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "HarvestBeat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000031",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "HarvestBeat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000032",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "HarvestBeat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0a70000000000000000000000000033",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "HarvestBeat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
             ]
         }
     ],
     "controlSchemes": [
-        {"name":"Keyboard&Mouse","bindingGroup":"Keyboard&Mouse","devices":[{"devicePath":"<Keyboard>","isOptional":false,"isOR":false},{"devicePath":"<Mouse>","isOptional":true,"isOR":false}]},
-        {"name":"Gamepad","bindingGroup":"Gamepad","devices":[{"devicePath":"<Gamepad>","isOptional":false,"isOR":false}]}
+        {
+            "name": "Keyboard&Mouse",
+            "bindingGroup": "Keyboard&Mouse",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": true,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "Gamepad",
+            "bindingGroup": "Gamepad",
+            "devices": [
+                {
+                    "devicePath": "<Gamepad>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
     ]
 }

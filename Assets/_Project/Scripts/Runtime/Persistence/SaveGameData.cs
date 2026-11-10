@@ -10,7 +10,7 @@ namespace WhereTheSoundingsEnd.Persistence
     [Serializable]
     public sealed class SaveGameData
     {
-        public const int CurrentSchemaVersion = 4;
+        public const int CurrentSchemaVersion = 5;
 
         public int schemaVersion;
         public int slotNumber;
@@ -61,6 +61,34 @@ namespace WhereTheSoundingsEnd.Persistence
         public int soundingPulseCount;
         public List<string> discoveredPhenomenonSiteIds = new List<string>();
         public List<string> evaluatedSurveyOpportunityIds = new List<string>();
+        public List<string> inspectedPhenomenonSiteIds = new List<string>();
+
+        // Action-driven weather and horror state; timer fields are game seconds unless named RealSeconds.
+        public float weatherFogPressure;
+        public double weatherRemainingGameSeconds;
+        public double weatherShiftCooldownGameSeconds = 900.0;
+        public double hallucinationCooldownGameSeconds = 60.0;
+        public bool birdEventPending;
+        public double birdEventCountdownGameSeconds;
+        public string latestOmen = string.Empty;
+
+        // Event-driven acoustic perception history.
+        public float acousticPressure;
+        public string lastAcousticEventId = string.Empty;
+        public string lastAcousticRegionId = string.Empty;
+        public Vector3SaveData lastAcousticPosition = new Vector3SaveData();
+        public double lastAcousticGameTimestamp;
+        public List<string> heardAcousticEventIds = new List<string>();
+
+        // Temporary maritime-atmosphere state.
+        public double atmosphereIncidentCountdownGameSeconds;
+        public string atmosphereCaption = string.Empty;
+        public double atmosphereCaptionRemainingRealSeconds;
+        public double atmosphereHushRemainingRealSeconds;
+        public float atmosphereHushBlend = 1f;
+        public bool atmosphereFalseLightActive;
+        public Vector3SaveData atmosphereFalseLightPosition = new Vector3SaveData();
+        public double atmosphereFalseLightRemainingRealSeconds;
     }
 
     [Serializable]
@@ -325,6 +353,21 @@ namespace WhereTheSoundingsEnd.Persistence
                         data.schemaVersion = 4;
                         break;
 
+                    case 4:
+                        NormalizeDefaults(data);
+                        data.world.weatherFogPressure = data.world.weatherId == "dense_fog" ? 0.85f :
+                            data.world.weatherId == "mist" ? 0.4f : 0f;
+                        data.world.weatherRemainingGameSeconds = data.world.weatherFogPressure > 0f ? 600.0 : 0.0;
+                        data.world.weatherShiftCooldownGameSeconds = 900.0;
+                        data.world.hallucinationCooldownGameSeconds = 60.0;
+                        data.world.birdEventPending = false;
+                        data.world.birdEventCountdownGameSeconds = 0.0;
+                        data.world.latestOmen = string.Empty;
+                        data.world.atmosphereIncidentCountdownGameSeconds = 420.0;
+                        data.world.atmosphereHushBlend = 1f;
+                        data.schemaVersion = 5;
+                        break;
+
                     default:
                         error = "No migration path exists for save schema version " + data.schemaVersion + ".";
                         return false;
@@ -364,6 +407,39 @@ namespace WhereTheSoundingsEnd.Persistence
             {
                 error = "The save contains an invalid panic value.";
                 return false;
+            }
+
+            if (float.IsNaN(data.world.weatherFogPressure) || float.IsInfinity(data.world.weatherFogPressure) ||
+                data.world.weatherFogPressure < 0f || data.world.weatherFogPressure > 1f ||
+                float.IsNaN(data.world.acousticPressure) || float.IsInfinity(data.world.acousticPressure) ||
+                data.world.acousticPressure < 0f || data.world.acousticPressure > 1f ||
+                float.IsNaN(data.world.atmosphereHushBlend) || float.IsInfinity(data.world.atmosphereHushBlend) ||
+                data.world.atmosphereHushBlend < 0f || data.world.atmosphereHushBlend > 1f)
+            {
+                error = "The save contains an invalid atmospheric or acoustic pressure value.";
+                return false;
+            }
+
+            double[] eventTimers =
+            {
+                data.world.weatherRemainingGameSeconds,
+                data.world.weatherShiftCooldownGameSeconds,
+                data.world.hallucinationCooldownGameSeconds,
+                data.world.birdEventCountdownGameSeconds,
+                data.world.atmosphereIncidentCountdownGameSeconds,
+                data.world.atmosphereCaptionRemainingRealSeconds,
+                data.world.atmosphereHushRemainingRealSeconds,
+                data.world.atmosphereFalseLightRemainingRealSeconds,
+                data.world.lastAcousticGameTimestamp
+            };
+            for (int index = 0; index < eventTimers.Length; index++)
+            {
+                if (double.IsNaN(eventTimers[index]) || double.IsInfinity(eventTimers[index]) ||
+                    eventTimers[index] < 0.0)
+                {
+                    error = "The save contains an invalid event timer at index " + index + ".";
+                    return false;
+                }
             }
 
             for (int index = 0; index < data.inventory.damagedCells.Count; index++)
@@ -429,6 +505,19 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.world.salvageSites == null) data.world.salvageSites = new List<SalvageSiteSaveData>();
             if (data.world.discoveredPhenomenonSiteIds == null) data.world.discoveredPhenomenonSiteIds = new List<string>();
             if (data.world.evaluatedSurveyOpportunityIds == null) data.world.evaluatedSurveyOpportunityIds = new List<string>();
+            if (data.world.inspectedPhenomenonSiteIds == null) data.world.inspectedPhenomenonSiteIds = new List<string>();
+            if (data.world.heardAcousticEventIds == null) data.world.heardAcousticEventIds = new List<string>();
+            if (data.world.latestOmen == null) data.world.latestOmen = string.Empty;
+            if (data.world.lastAcousticEventId == null) data.world.lastAcousticEventId = string.Empty;
+            if (data.world.lastAcousticRegionId == null) data.world.lastAcousticRegionId = string.Empty;
+            if (data.world.atmosphereCaption == null) data.world.atmosphereCaption = string.Empty;
+            if (data.world.lastAcousticPosition == null) data.world.lastAcousticPosition = new Vector3SaveData();
+            if (data.world.atmosphereFalseLightPosition == null) data.world.atmosphereFalseLightPosition = new Vector3SaveData();
+            if (data.world.weatherFogPressure == 0f && data.world.weatherId != "clear")
+                data.world.weatherFogPressure = data.world.weatherId == "dense_fog" ? 0.85f : 0.4f;
+            data.world.weatherFogPressure = Math.Max(0f, Math.Min(1f, data.world.weatherFogPressure));
+            data.world.acousticPressure = Math.Max(0f, Math.Min(1f, data.world.acousticPressure));
+            data.world.atmosphereHushBlend = Math.Max(0f, Math.Min(1f, data.world.atmosphereHushBlend));
             if (data.world.soundingPulseCount < 0) data.world.soundingPulseCount = 0;
             data.world.panicLevel = Math.Max(0f, Math.Min(1f, data.world.panicLevel));
             if (data.player == null) data.player = new PlayerSaveData();

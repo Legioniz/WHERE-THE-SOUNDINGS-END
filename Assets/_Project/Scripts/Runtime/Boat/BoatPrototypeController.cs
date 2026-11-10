@@ -28,7 +28,11 @@ namespace WhereTheSoundingsEnd.Boat
         public InputActionAsset InputActions
         {
             get => inputActions;
-            set => inputActions = value;
+            set
+            {
+                inputActions = value;
+                if (isActiveAndEnabled) BindInputActions();
+            }
         }
 
         private void Awake()
@@ -45,13 +49,20 @@ namespace WhereTheSoundingsEnd.Boat
 
         private void OnEnable()
         {
+            BindInputActions();
+        }
+
+        private void BindInputActions()
+        {
             if (inputActions == null)
             {
-                Debug.LogError("BoatPrototypeController is missing PlayerControls.inputactions.", this);
-                enabled = false;
+                // The environment builder assigns this property immediately after AddComponent.
+                // Keep the controller enabled so that assignment can bind the map correctly.
+                Debug.LogWarning("BoatPrototypeController is waiting for PlayerControls.inputactions.", this);
                 return;
             }
 
+            if (_boatMap != null) _boatMap.Disable();
             _boatMap = inputActions.FindActionMap("Boat", true);
             _moveAction = _boatMap.FindAction("Move", true);
             _boatMap.Enable();
@@ -60,6 +71,8 @@ namespace WhereTheSoundingsEnd.Boat
         private void OnDisable()
         {
             _boatMap?.Disable();
+            _boatMap = null;
+            _moveAction = null;
             _moveInput = Vector2.zero;
         }
 
