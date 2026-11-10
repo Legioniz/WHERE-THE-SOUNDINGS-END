@@ -72,6 +72,8 @@ These are rare individuals or local morphs of existing species. They do not rece
 
 Do not implement a universal "mutant multiplier." Value comes from an actual buyer's request and specimen condition, not from the word "mutated."
 
+Exact base-species rates, inspection discounts, first-record research rewards, and the one-time contract payouts for UNC specimens are defined in the [Seafood Selling Price Schedule](../07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md). That schedule is authoritative; do not duplicate or independently rebalance prices in this document.
+
 ## 4. Unnatural catchables — impossible specimens
 
 These entities are physically catchable under specific conditions but are not food animals. They are minor discovery encounters, not additional major bosses. Their unnatural rule must be observable before capture.
@@ -181,6 +183,7 @@ Do not put these values into a shared base-species ScriptableObject if they vary
 
 ## 11. Related specifications
 
+- [Seafood Selling Price Schedule](../07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md)
 - [Catchable Seafood and Market Species Catalog](CATCHABLE-SEAFOOD-CATALOG.md)
 - [Fish Species Index](FISH-SPECIES.md)
 - [Creature Bible](CREATURE-BIBLE.md)
