@@ -6,14 +6,22 @@
 
 title: Greyhaven_Harbourmaster
 ---
+<<if not $gh_met_harbourmaster>>
 Harbourmaster: You're the new hand on the old boat, then.
 Harbourmaster: Keep her inside the buoys until you know how the channel behaves.
+<<else>>
+Harbourmaster: Back already? The channel has not become any kinder.
+<<endif>>
 
 -> Ask about the missing boats.
-    <<set $gh_heard_missing_boat_warning = true>>
-    Harbourmaster: Three boats went out past the outer marker. Only one came back.
-    Harbourmaster: Its skipper would not speak about what followed him.
-    Harbourmaster: He kept asking whether the bell was still ringing.
+    <<if not $gh_heard_missing_boat_warning>>
+        <<set $gh_heard_missing_boat_warning = true>>
+        Harbourmaster: Three boats went out past the outer marker. Only one came back.
+        Harbourmaster: Its skipper would not speak about what followed him.
+        Harbourmaster: He kept asking whether the bell was still ringing.
+    <<else>>
+        Harbourmaster: The same three boats. The same one that returned. Nobody has found the other two.
+    <<endif>>
     -> Ask about the bell.
         <<set $gh_asked_about_bell = true>>
         Harbourmaster: The lighthouse bell? It has been silent for eleven years.
@@ -21,14 +29,22 @@ Harbourmaster: Keep her inside the buoys until you know how the channel behaves.
         <<set $gh_harbourmaster_trust = $gh_harbourmaster_trust + 1>>
     -> Leave the subject alone.
         Harbourmaster: Sensible. The sea has enough listeners.
+
 -> Ask for work.
-    <<set $gh_accepted_sounding_job = true>>
-    Harbourmaster: A sounding buoy washed in near the western mudflat.
-    Harbourmaster: Bring it back intact. Do not switch it on.
-    Harbourmaster: If it starts answering, drop the line.
+    <<if not $gh_accepted_sounding_job>>
+        Harbourmaster: A sounding buoy washed in near the western mudflat.
+        Harbourmaster: Bring it back intact. Do not switch it on.
+        Harbourmaster: If it starts answering, drop the line.
+        <<set $gh_accepted_sounding_job = true>>
+        <<checkpoint "greyhaven.sounding_buoy_accepted">>
+    <<else>>
+        Harbourmaster: The western mudflat. Bring the buoy back intact. And keep it switched off.
+    <<endif>>
+
 -> Ask about the channel.
     Harbourmaster: The western channel is shallow at ebb. The eastern marker lies over broken stone.
     Harbourmaster: Keep your engine low near the mangroves. The water carries sound there.
+
 -> Say nothing.
     Harbourmaster: Then listen before you leave.
 
