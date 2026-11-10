@@ -23,6 +23,7 @@
 ## AI, event, and encounter implementation
 
 - [Creature AI and threat behaviour](12_AI_AND_SIMULATION/CREATURE-AI.md)
+- [Creature life cycles and ecological behaviour](12_AI_AND_SIMULATION/CREATURE-LIFE-CYCLES-AND-ECOLOGY.md)
 - [AI coordination and hunting logic](12_AI_AND_SIMULATION/AI-COORDINATION-AND-HUNTING-LOGIC.md)
 - [Threat Director and encounter scheduling](12_AI_AND_SIMULATION/THREAT-DIRECTOR.md)
 - [World event scheduler](12_AI_AND_SIMULATION/WORLD-SIMULATION.md)
