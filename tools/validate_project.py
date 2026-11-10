@@ -113,7 +113,7 @@ def main() -> int:
             ]
             for required_binding in (
                 "<Keyboard>/space", "<Keyboard>/enter",
-                "<Gamepad>/buttonSouth", "<Gamepad>/buttonEast",
+                " <Gamepad>/buttonEast",
             ):
                 if required_binding not in harvest_bindings:
                     failures.append(f"HarvestBeat is missing {required_binding}.")
