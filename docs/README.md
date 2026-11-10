@@ -27,8 +27,10 @@
 - [Location catalog](05_WORLD_AND_LEVEL_DESIGN/LOCATION-CATALOG.md)
 - [Exploration design](05_WORLD_AND_LEVEL_DESIGN/EXPLORATION-DESIGN.md)
 
-## Creature roster and behaviour
+## Creature roster, fishing, and trade
 
+- [Catchable seafood and market species catalog](04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)
+- [Fish species index](04_CHARACTERS_AND_ENTITIES/FISH-SPECIES.md)
 - [Creature Bible](04_CHARACTERS_AND_ENTITIES/CREATURE-BIBLE.md)
 - [Creature behaviour source map](04_CHARACTERS_AND_ENTITIES/CREATURE-BEHAVIORS.md)
 - [Anomalous species and site-specific entities](04_CHARACTERS_AND_ENTITIES/ANOMALOUS-SPECIES.md)
