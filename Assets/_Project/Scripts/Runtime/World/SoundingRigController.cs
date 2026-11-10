@@ -135,12 +135,14 @@ namespace WhereTheSoundingsEnd.World
             seabedDepth = Mathf.Max(2f, seabedDepth);
 
             float signalQuality = Mathf.Clamp01(1f - region.BackgroundNoise);
-            float confidence = DeepOceanSurveyMath.CalculateReturnConfidence(
+            float seabedConfidence = DeepOceanSurveyMath.CalculateReturnConfidence(
+                1f, signalQuality, region.AcousticAttenuation);
+            float layerConfidence = DeepOceanSurveyMath.CalculateReturnConfidence(
                 region.LayerDensity, signalQuality, region.AcousticAttenuation);
 
             string reading = "SOUNDING — " + region.RegionId.ToUpperInvariant() +
                 "\nSEABED RETURN: " + Mathf.RoundToInt(seabedDepth) + " m" +
-                "  ·  CONFIDENCE " + Mathf.RoundToInt(signalQuality * 100f) + "%";
+                "  ·  CONFIDENCE " + Mathf.RoundToInt(seabedConfidence * 100f) + "%";
 
             if (region.HasScatteringLayer)
             {
@@ -170,17 +172,21 @@ namespace WhereTheSoundingsEnd.World
                         ? "\nINTERPRETATION: repeatable biological scattering layer. Not the seabed."
                         : "\nINTERPRETATION: possible biological layer. Repeat from another heading to verify.";
                     reading += "\nDENSITY: " + Mathf.RoundToInt(region.LayerDensity * 100f) +
-                        "%  ·  RETURN CONFIDENCE " + Mathf.RoundToInt(confidence * 100f) + "%";
+                        "%  ·  RETURN CONFIDENCE " + Mathf.RoundToInt(layerConfidence * 100f) + "%";
                 }
                 else
                 {
                     consecutiveLayerEvidence = 0;
+                    previousLayerDepth = -1f;
+                    previousLayerRegionId = string.Empty;
                     reading += "\nMID-WATER RETURN: not resolved above the bottom.";
                 }
             }
             else
             {
                 consecutiveLayerEvidence = 0;
+                previousLayerDepth = -1f;
+                previousLayerRegionId = string.Empty;
                 reading += "\nWATER COLUMN: no configured deep scattering layer in this habitat.";
             }
 
