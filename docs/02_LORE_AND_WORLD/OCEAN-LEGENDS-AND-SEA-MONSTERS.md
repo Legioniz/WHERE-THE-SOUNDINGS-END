@@ -320,3 +320,11 @@ These are **motif recommendations**, not direct imports of named beings into the
 - [Maritime Mysteries side-quest collection](../03_STORY_AND_NARRATIVE/SIDE_QUESTS/MARITIME_MYSTERIES/README.md)
 
 All material in this file remains research reference and non-canon until a specific, culturally reviewed adaptation is approved.
+
+## 13. Runtime appearance design
+
+The legends in this research file are now connected to a separate [Legendary Maritime Encounter Scheduler](../12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-SCHEDULER.md). That document defines specific regions, named sublocations, tide / weather / time gates, opportunity-based appearance odds, harmless sightings, dangerous contact, lethal escape windows, and aftermath rules.
+
+A legend does not need to be a hostile creature. Some are distant sightings, wildlife-like encounters, current hazards, lunar events, guardian omens, phantom ships, or mythic-scale environmental events. Some culturally specific or geographically mismatched traditions remain contextual until their setting and adaptation have been reviewed.
+
+All entries remain research inspiration, not canon.
