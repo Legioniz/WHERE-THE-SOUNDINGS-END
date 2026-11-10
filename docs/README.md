@@ -65,7 +65,7 @@
 - [Maritime Horror Director](06_GAMEPLAY_SYSTEMS/MARITIME-HORROR-DIRECTOR.md)
 - [Audio Design](10_AUDIO_AND_SOUND_DESIGN/AUDIO-DESIGN-DOCUMENT.md)
 
-The deep-ocean document separates established science, documented maritime practice, reported accounts, folklore, unsupported claims, and fictional anomalies. The balancing document governs event eligibility, RNG, cooldowns, warnings, player counterplay, Operational Strain, persistence, and accessibility. The Sounding Rig, Greyhaven shallow survey profile, regional profile data contract, acoustic event publisher, and survey save fields now exist in Unity runtime code. Only Greyhaven is wired into a generated scene; deep-region profiles and phenomenon-site markers still require authored region scenes and site controllers.
+The deep-ocean document separates established science, documented maritime practice, reported accounts, folklore, unsupported claims, and fictional anomalies. The balancing document governs event eligibility, RNG, cooldowns, warnings, player counterplay, Operational Strain, persistence, and accessibility. The Sounding Rig, Greyhaven shallow survey profile, regional profile data contract, acoustic event publisher, and survey save fields now exist in Unity runtime code. Only Greyhaven is wired into a generated scene, with one shallow outer-channel wreck marker. The Outer Shoals and Hollow Trench profiles are available in code but still require authored region scenes, real site placement and site-specific physical controllers.
 
 The existing docs/technical folder is retained because it contains the established Unity/C# performance and programming-language guidance.
 
