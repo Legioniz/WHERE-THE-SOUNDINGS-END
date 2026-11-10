@@ -32,6 +32,11 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Inventory/CargoGridGeometry.cs",
     "Assets/_Project/Scripts/Runtime/Inventory/SpatialCargoHold.cs",
     "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs",
+    "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyMath.cs",
+    "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyRegion.cs",
+    "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonSite.cs",
+    "Assets/_Project/Scripts/Runtime/World/AcousticEventBus.cs",
+    "Assets/_Project/Scripts/Runtime/World/SoundingRigController.cs",
     "Assets/_Project/Scripts/Runtime/World/VesselConditionController.cs",
     "Assets/_Project/Scripts/Runtime/World/HarvestingMinigameController.cs",
     "Assets/_Project/Scripts/Runtime/World/SalvageSite.cs",
@@ -102,8 +107,18 @@ def main() -> int:
                 failures.append("Input action/binding identifiers must be unique.")
 
         save_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs").read_text(encoding="utf-8")
-        if "CurrentSchemaVersion = 3" not in save_source:
-            failures.append("SaveGameData schema must be version 3 after sea-state persistence changes.")
+        if "CurrentSchemaVersion = 4" not in save_source:
+            failures.append("SaveGameData schema must be version 4 after deep-ocean survey persistence changes.")
+
+        survey_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SoundingRigController.cs").read_text(encoding="utf-8")
+        for required_text in ("SoundingPulse", "discoveredPhenomenonSiteIds", "evaluatedSurveyOpportunityIds", "AcousticEventBus.Publish"):
+            if required_text not in survey_source:
+                failures.append(f"SoundingRigController is missing expected survey feature: {required_text}")
+
+        region_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyRegion.cs").read_text(encoding="utf-8")
+        for required_region in ("greyhaven", "the_outer_shoals", "the_hollow_trench"):
+            if required_region not in region_source:
+                failures.append(f"DeepOceanSurveyRegion is missing regional profile: {required_region}")
 
         sea_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs").read_text(encoding="utf-8")
         for required_text in ("movementThreshold", "SetHarvesting", "panicLevel", "timeOfDaySeconds"):
