@@ -333,7 +333,7 @@ namespace WhereTheSoundingsEnd.Narrative
             catalogueTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
             catalogue.Add(catalogueTitle);
 
-            Label catalogueNote = new Label("Prototype test intake. Real fishing output is not connected yet.");
+            Label catalogueNote = new Label("F: timed fishing  ·  G: precision dredging. Prototype intake remains available for testing.");
             catalogueNote.style.color = new Color(0.62f, 0.70f, 0.66f);
             catalogueNote.style.fontSize = 11;
             catalogueNote.style.whiteSpace = WhiteSpace.Normal;
@@ -549,9 +549,9 @@ namespace WhereTheSoundingsEnd.Narrative
             }
 
             CargoItemDefinition definition = cargoHold.GetItemDefinition(selected.itemId);
-            if (definition != null && definition.IsQuestCritical)
+            if (definition != null && (definition.IsQuestCritical || definition.Category == CargoItemCategory.Equipment))
             {
-                SetStatus("Quest-critical cargo cannot be discarded.");
+                SetStatus("Quest cargo and installed equipment cannot be discarded here.");
                 return;
             }
 
