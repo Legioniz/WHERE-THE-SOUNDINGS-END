@@ -128,11 +128,28 @@ namespace WhereTheSoundingsEnd.Tests
                 "Bone-associated fauna detected.",
                 "Established science");
 
+            Assert.IsTrue(site.IsValidForRegion);
             Assert.IsTrue(site.IsDetectableFrom(new Vector3(20f, 0f, 0f), "the_outer_shoals"));
             Assert.IsFalse(site.IsDetectableFrom(new Vector3(20f, 0f, 0f), "greyhaven"));
             Assert.IsFalse(site.IsDetectableFrom(new Vector3(60f, 0f, 0f), "the_outer_shoals"));
         }
 
+
+
+        [Test]
+        public void PhenomenonRules_KeepGeologyInPlausibleRegionalDepthBands()
+        {
+            Assert.IsTrue(DeepOceanPhenomenonRules.IsAllowed(
+                DeepOceanPhenomenonType.BrinePool, "the_hollow_trench", 2500f));
+            Assert.IsFalse(DeepOceanPhenomenonRules.IsAllowed(
+                DeepOceanPhenomenonType.BrinePool, "greyhaven", 18f));
+            Assert.IsTrue(DeepOceanPhenomenonRules.IsAllowed(
+                DeepOceanPhenomenonType.DerelictVessel, "greyhaven", 18f));
+            Assert.IsFalse(DeepOceanPhenomenonRules.IsAllowed(
+                DeepOceanPhenomenonType.WhaleFall, "greyhaven", 18f));
+            Assert.IsTrue(DeepOceanPhenomenonRules.IsAllowed(
+                DeepOceanPhenomenonType.WaterMassFront, "the_shallows", 40f));
+        }
 
         [Test]
         public void ScatteringLayerConfirmation_RequiresSameRegionDifferentHeadingAndFreshEvidence()
