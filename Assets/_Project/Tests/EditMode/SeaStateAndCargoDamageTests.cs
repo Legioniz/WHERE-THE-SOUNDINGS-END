@@ -141,6 +141,8 @@ namespace WhereTheSoundingsEnd.Tests
         {
             SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
             data.schemaVersion = 2;
+            data.world.discoveredPhenomenonSiteIds = null;
+            data.world.evaluatedSurveyOpportunityIds = null;
             data.world.panicLevel = 0.42f;
             data.vessel.hullIntegrity = 63f;
             data.inventory.damagedCells.Add(new GridCellSaveData { x = 2, y = 4 });
@@ -151,6 +153,9 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.AreEqual(0.42f, data.world.panicLevel, 0.001f);
             Assert.AreEqual(63f, data.vessel.hullIntegrity, 0.001f);
             Assert.AreEqual(1, data.inventory.damagedCells.Count);
+            Assert.AreEqual(0, data.world.soundingPulseCount);
+            Assert.IsNotNull(data.world.discoveredPhenomenonSiteIds);
+            Assert.IsNotNull(data.world.evaluatedSurveyOpportunityIds);
         }
     }
 }
