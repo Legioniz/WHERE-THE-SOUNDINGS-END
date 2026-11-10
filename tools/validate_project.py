@@ -197,13 +197,13 @@ def main() -> int:
         if "if (isActiveAndEnabled) BindInputActions();" not in boat_source:
             failures.append("BoatPrototypeController must bind input assigned by the environment builder after AddComponent.")
 
+        atmosphere_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishermanAtmosphereDirector.cs").read_text(encoding="utf-8")
         if "seaState.LastGameDeltaSeconds" not in atmosphere_source or "realDelta * 72f" in atmosphere_source:
             failures.append("FishermanAtmosphereDirector must schedule incidents from the authoritative simulation clock.")
 
         if "worldClock.ElapsedSeconds / 86400.0" not in sea_source or "elapsedGameSeconds / 86400.0" in sea_source:
             failures.append("SeaStateDirector save capture must derive day number from WorldClock.ElapsedSeconds.")
 
-        atmosphere_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishermanAtmosphereDirector.cs").read_text(encoding="utf-8")
         if "ISaveParticipant" not in atmosphere_source or "atmosphereFalseLightPosition" not in atmosphere_source:
             failures.append("FishermanAtmosphereDirector must persist its active incident presentation state.")
 
