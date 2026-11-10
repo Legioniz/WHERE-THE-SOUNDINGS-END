@@ -10,7 +10,7 @@ namespace WhereTheSoundingsEnd.Persistence
     [Serializable]
     public sealed class SaveGameData
     {
-        public const int CurrentSchemaVersion = 2;
+        public const int CurrentSchemaVersion = 3;
 
         public int schemaVersion;
         public int slotNumber;
@@ -56,6 +56,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public string weatherId = "clear";
         public string tideStateId = "unknown";
         public float seaDisturbance;
+        public float panicLevel;
     }
 
     [Serializable]
@@ -90,6 +91,14 @@ namespace WhereTheSoundingsEnd.Persistence
         public int holdWidth = 7;
         public int holdHeight = 9;
         public List<CargoPlacementSaveData> placements = new List<CargoPlacementSaveData>();
+        public List<GridCellSaveData> damagedCells = new List<GridCellSaveData>();
+    }
+
+    [Serializable]
+    public sealed class GridCellSaveData
+    {
+        public int x;
+        public int y;
     }
 
     [Serializable]
@@ -294,6 +303,11 @@ namespace WhereTheSoundingsEnd.Persistence
                         data.schemaVersion = 2;
                         break;
 
+                    case 2:
+                        NormalizeDefaults(data);
+                        data.schemaVersion = 3;
+                        break;
+
                     default:
                         error = "No migration path exists for save schema version " + data.schemaVersion + ".";
                         return false;
@@ -377,6 +391,7 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.saveReason == null) data.saveReason = string.Empty;
 
             if (data.world == null) data.world = new WorldSaveData();
+            data.world.panicLevel = Math.Max(0f, Math.Min(1f, data.world.panicLevel));
             if (data.player == null) data.player = new PlayerSaveData();
             if (data.vessel == null) data.vessel = new VesselSaveData();
             if (data.inventory == null) data.inventory = new InventorySaveData();
@@ -394,6 +409,7 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.inventory.cargo == null) data.inventory.cargo = new List<InventoryStackSaveData>();
             if (data.inventory.equipment == null) data.inventory.equipment = new List<EquipmentSaveData>();
             if (data.inventory.placements == null) data.inventory.placements = new List<CargoPlacementSaveData>();
+            if (data.inventory.damagedCells == null) data.inventory.damagedCells = new List<GridCellSaveData>();
             if (data.inventory.holdWidth <= 0) data.inventory.holdWidth = 7;
             if (data.inventory.holdHeight <= 0) data.inventory.holdHeight = 9;
 
