@@ -1,0 +1,36 @@
+title: Greyhaven_Harbourmaster
+---
+<<declare $gh_met_harbourmaster = false>>
+<<declare $gh_heard_missing_boat_warning = false>>
+<<declare $gh_accepted_sounding_job = false>>
+<<declare $gh_asked_about_bell = false>>
+<<declare $gh_harbourmaster_trust = 0>>
+
+Harbourmaster: You're the new hand on the old boat, then.
+Harbourmaster: Keep her inside the buoys until you know how the channel behaves.
+
+-> Ask about the missing boats.
+    <<set $gh_heard_missing_boat_warning = true>>
+    Harbourmaster: Three boats went out past the outer marker. Only one came back.
+    Harbourmaster: Its skipper would not speak about what followed him.
+    Harbourmaster: He kept asking whether the bell was still ringing.
+    -> Ask about the bell.
+        <<set $gh_asked_about_bell = true>>
+        Harbourmaster: The lighthouse bell? It has been silent for eleven years.
+        Harbourmaster: Do not answer a bell you cannot place.
+        <<set $gh_harbourmaster_trust = $gh_harbourmaster_trust + 1>>
+    -> Leave the subject alone.
+        Harbourmaster: Sensible. The sea has enough listeners.
+-> Ask for work.
+    <<set $gh_accepted_sounding_job = true>>
+    Harbourmaster: A sounding buoy washed in near the western mudflat.
+    Harbourmaster: Bring it back intact. Do not switch it on.
+    Harbourmaster: If it starts answering, drop the line.
+-> Ask about the channel.
+    Harbourmaster: The western channel is shallow at ebb. The eastern marker lies over broken stone.
+    Harbourmaster: Keep your engine low near the mangroves. The water carries sound there.
+-> Say nothing.
+    Harbourmaster: Then listen before you leave.
+
+<<set $gh_met_harbourmaster = true>>
+===
