@@ -50,3 +50,74 @@ Harbourmaster: Back already? The channel has not become any kinder.
 
 <<set $gh_met_harbourmaster = true>>
 ===
+
+<<declare $gh_met_mara = false>>
+<<declare $gh_mara_trust = 0>>
+<<declare $gh_met_tomas = false>>
+<<declare $gh_tomas_trust = 0>>
+<<declare $gh_met_inez = false>>
+<<declare $gh_inez_trust = 0>>
+
+title: Greyhaven_Fishmonger
+---
+<<if not $gh_met_mara>>
+Mara Venn: If you're here to sell, put the catch down gently. I can tell a rough landing by the bruises.
+Mara Venn: First time at my stall? Mara. I keep the market open while there's something worth weighing.
+<<else>>
+Mara Venn: Back with another hold of surprises? Let me see what the water gave you.
+<<endif>>
+-> Ask about the fish.
+    Mara Venn: Most of what comes through here is ordinary. Mullet, milkfish, sillago. They smell like the sea should.
+    Mara Venn: Lately, a few catches arrive cold in the middle. Not spoiled. Just cold, as if they were lifted from deeper water.
+    <<set $gh_mara_trust = $gh_mara_trust + 1>>
+-> Ask about the missing boats.
+    Mara Venn: One of the missing crews owed me for ice. I still set aside their crate every morning.
+    Mara Venn: Habit is a stubborn thing. Hope is worse.
+-> Ask about selling unusual catches.
+    Mara Venn: Don't hide a strange catch from the person weighing it. I won't promise a good price, but I won't pretend I didn't see it.
+-> Leave.
+    Mara Venn: Keep the catch shaded. Sun ruins good work faster than a bad buyer.
+<<set $gh_met_mara = true>>
+===
+
+title: Greyhaven_Mechanic
+---
+<<if not $gh_met_tomas>>
+Tomas Vale: Stop there. I want to hear that engine idle before you tell me what's wrong with it.
+Tomas Vale: Tomas. I keep the repair shed running. Mostly engines, sometimes boats, occasionally bad decisions.
+<<else>>
+Tomas Vale: That engine still sounds like it has something to confess.
+<<endif>>
+-> Ask about repairs.
+    Tomas Vale: Bring her in before the hull starts taking water. A small repair is cheap. A tow from the outer marker isn't.
+    <<set $gh_tomas_trust = $gh_tomas_trust + 1>>
+-> Ask about strange noises beneath boats.
+    Tomas Vale: I've heard knocks travel through a hull. Loose fittings, trapped timber, a line caught under the keel. There are explanations.
+    Tomas Vale: The trouble starts when the knocking keeps pace with the engine.
+-> Ask about the missing boats.
+    Tomas Vale: The boat that came back had fresh scoring under the waterline. No matching scrape on the rocks. I logged it as unknown damage.
+-> Leave.
+    Tomas Vale: Don't ignore a change in engine pitch. The boat usually tells you before it quits.
+<<set $gh_met_tomas = true>>
+===
+
+title: Greyhaven_NetMender
+---
+<<if not $gh_met_inez>>
+Inez Sarmiento: Mind the mesh. A torn net can be mended. A careless knot can lose the whole catch.
+Inez Sarmiento: Inez. If your lines come back cut clean, bring them to me. Don't decide what did it before you look.
+<<else>>
+Inez Sarmiento: Show me the line. I can tell a snag from a cut if there's enough left to examine.
+<<endif>>
+-> Ask about the nets.
+    Inez Sarmiento: Reef stone frays a line. Propellers shred it. But some of the recovered nets have cuts that begin on the inside.
+    <<set $gh_inez_trust = $gh_inez_trust + 1>>
+-> Ask about the missing crews.
+    Inez Sarmiento: One crew used to tie three turns around the float line before leaving harbour. Their gear came back with every knot still fastened.
+    Inez Sarmiento: The net was empty. Not torn. Empty.
+-> Ask about local rules.
+    Inez Sarmiento: If the birds leave the water all at once, don't follow the fish. Check the wind. Check the current. Then decide whether you still want to be out there.
+-> Leave.
+    Inez Sarmiento: Bring the damaged line back. Don't throw away evidence just because it frightens you.
+<<set $gh_met_inez = true>>
+===
