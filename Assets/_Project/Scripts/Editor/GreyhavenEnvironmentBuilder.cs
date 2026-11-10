@@ -6,6 +6,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
+using Yarn.Unity;
 using WhereTheSoundingsEnd.Boat;
 using WhereTheSoundingsEnd.CameraSystem;
 using WhereTheSoundingsEnd.Persistence;
@@ -22,6 +26,8 @@ namespace WhereTheSoundingsEnd.Editor
     {
         private const string MaterialsPath = "Assets/_Project/Art/Materials";
         private const string CargoDefinitionsPath = "Assets/_Project/Data/Inventory";
+        private const string DialogueProjectPath = "Assets/_Project/Dialogue/Greyhaven.yarnproject";
+        private const string PanelSettingsPath = "Assets/_Project/Settings/UI/GreyhavenPanelSettings.asset";
 
         public static void Build(InputActionAsset controls, string scenePath)
         {
@@ -68,7 +74,13 @@ namespace WhereTheSoundingsEnd.Editor
             BuildBuoys(landmarks, red, green, metal);
             BuildBoat(player, controls, hull, wood, metal, cargoCatalog);
             BuildCameraAndLight(lighting, player);
-            BuildSaveCoordinator(world.transform);
+
+            YarnDialogueSaveParticipant dialogueSave = BuildSaveCoordinator(world.transform);
+            SpatialCargoHold cargoHold = player.Find("Player_Boat_Blockout").GetComponent<SpatialCargoHold>();
+            DialogueRunner dialogueRunner = BuildDialogueSystem(world.transform, cargoHold, controls);
+            dialogueSave.Runner = dialogueRunner;
+            BuildHarbourmaster(village, wood, concrete, dialogueRunner,
+                dialogueRunner.GetComponent<GreyhavenRuntimeUI>(), controls);
 
             RenderSettings.ambientMode = AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(0.30f, 0.35f, 0.37f);
@@ -141,13 +153,115 @@ namespace WhereTheSoundingsEnd.Editor
             return definition;
         }
 
-        private static void BuildSaveCoordinator(Transform parent)
+        private static YarnDialogueSaveParticipant BuildSaveCoordinator(Transform parent)
         {
             GameObject coordinator = new GameObject("Save_Game_Coordinator");
             coordinator.transform.SetParent(parent, false);
             coordinator.AddComponent<SaveGameCoordinator>();
             coordinator.AddComponent<AutosaveController>();
-            coordinator.AddComponent<YarnDialogueSaveParticipant>();
+            return coordinator.AddComponent<YarnDialogueSaveParticipant>();
+        }
+
+        private static DialogueRunner BuildDialogueSystem(
+            Transform parent,
+            SpatialCargoHold cargoHold,
+            InputActionAsset controls)
+        {
+            if (cargoHold == null)
+                throw new InvalidOperationException("Greyhaven cargo hold was not created.");
+            if (AssetDatabase.LoadAssetAtPath<YarnProject>(DialogueProjectPath) == null)
+            {
+                AssetDatabase.ImportAsset(DialogueProjectPath, ImportAssetOptions.ForceSynchronousImport);
+            }
+
+            YarnProject project = AssetDatabase.LoadAssetAtPath<YarnProject>(DialogueProjectPath);
+            if (project == null)
+                throw new InvalidOperationException(
+                    "Yarn Spinner could not import " + DialogueProjectPath +
+                    ". Check the Yarn Spinner package import and compile errors.");
+
+            EnsureFolder("Assets/_Project/Settings/UI");
+            PanelSettings panel = AssetDatabase.LoadAssetAtPath<PanelSettings>(PanelSettingsPath);
+            if (panel == null)
+            {
+                panel = ScriptableObject.CreateInstance<PanelSettings>();
+                panel.name = "GreyhavenPanelSettings";
+                AssetDatabase.CreateAsset(panel, PanelSettingsPath);
+            }
+
+            GameObject dialogueRoot = new GameObject("Dialogue_System_and_Player_Interface");
+            dialogueRoot.transform.SetParent(parent, false);
+
+            UIDocument document = dialogueRoot.AddComponent<UIDocument>();
+            document.panelSettings = panel;
+
+            DialogueRunner runner = dialogueRoot.AddComponent<DialogueRunner>();
+            runner.SetProject(project);
+
+            GreyhavenRuntimeUI runtimeUI = dialogueRoot.AddComponent<GreyhavenRuntimeUI>();
+            runtimeUI.Document = document;
+            runtimeUI.Runner = runner;
+            runtimeUI.CargoHold = cargoHold;
+            runtimeUI.Controls = controls;
+            runner.DialoguePresenters = new List<DialoguePresenterBase> { runtimeUI };
+            runner.AddCommandHandler("checkpoint", new Action<string>(runtimeUI.RequestCheckpointAutosave));
+
+            EnsureRuntimeUiEventSystem(parent);
+            return runner;
+        }
+
+        private static void EnsureRuntimeUiEventSystem(Transform parent)
+        {
+            EventSystem eventSystem = UnityEngine.Object.FindFirstObjectByType<EventSystem>();
+            if (eventSystem != null) return;
+
+            GameObject eventSystemObject = new GameObject("EventSystem");
+            eventSystemObject.transform.SetParent(parent, false);
+            eventSystemObject.AddComponent<EventSystem>();
+            InputSystemUIInputModule inputModule = eventSystemObject.AddComponent<InputSystemUIInputModule>();
+            inputModule.AssignDefaultActions();
+        }
+
+        private static void BuildHarbourmaster(
+            Transform parent,
+            Material clothing,
+            Material trim,
+            DialogueRunner runner,
+            GreyhavenRuntimeUI runtimeUI,
+            InputActionAsset controls)
+        {
+            GameObject npc = new GameObject("Harbourmaster_NPC");
+            npc.transform.SetParent(parent, false);
+            npc.transform.position = new Vector3(
+                -5f,
+                HeightAt(-5f, -10f),
+                -10f);
+
+            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.name = "Harbourmaster_Body_Blockout";
+            body.transform.SetParent(npc.transform, false);
+            body.transform.localPosition = new Vector3(0f, 1.0f, 0f);
+            body.transform.localScale = new Vector3(0.72f, 1.0f, 0.72f);
+            body.GetComponent<Renderer>().sharedMaterial = clothing;
+            UnityEngine.Object.DestroyImmediate(body.GetComponent<Collider>());
+
+            GameObject head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            head.name = "Harbourmaster_Head_Blockout";
+            head.transform.SetParent(npc.transform, false);
+            head.transform.localPosition = new Vector3(0f, 2.1f, 0f);
+            head.transform.localScale = Vector3.one * 0.52f;
+            head.GetComponent<Renderer>().sharedMaterial = trim;
+            UnityEngine.Object.DestroyImmediate(head.GetComponent<Collider>());
+
+            SphereCollider interactionRadius = npc.AddComponent<SphereCollider>();
+            interactionRadius.isTrigger = true;
+            interactionRadius.radius = 18f;
+            interactionRadius.center = new Vector3(0f, 1f, 0f);
+
+            HarbourmasterInteraction interaction = npc.AddComponent<HarbourmasterInteraction>();
+            interaction.Runner = runner;
+            interaction.Interface = runtimeUI;
+            interaction.Controls = controls;
         }
 
         private static void BuildWater(Transform parent, Material material)
