@@ -52,3 +52,10 @@ Every file must state:
 6. Approve, revise, or archive the concept before calling it canon.
 
 These twelve files are a first-pass set based on the report's six expanded examples and twelve suggested filenames. They are not twelve fully researched historical case studies.
+
+## Legendary encounter art and field records
+
+- [Legendary encounter visual, behaviour, and discoverable lore dossiers](../../../../12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-VISUAL-AND-LORE-DOSSIERS.md)
+- [Legendary encounter scheduler](../../../../12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-SCHEDULER.md)
+
+Each legendary presence should have a visual identity and an optional evidence trail. Use field logs, fishing ledgers, coastguard reports, charts, recorders, physical traces, NPC testimony, and contradictory accounts. The journal records confidence and uncertainty rather than presenting a supernatural conclusion as fact.
