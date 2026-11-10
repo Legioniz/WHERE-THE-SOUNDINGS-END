@@ -80,3 +80,30 @@ The fragment bears a date notation and a tide mark that conflicts with the villa
 - The clue is accessible with audio muted.
 - Fragment is not duplicated after reload.
 - No creature, attack, or chase event is emitted.
+
+
+
+## Runtime Behaviour and Implementation
+
+### Event trigger and RNG
+- Activate deterministically when the player is inside the ruin bounds during the authored low / turning-tide window and the quest is active.
+- Optional second harmonic: **35% per eligible listen**, seeded by tide-cycle ID. Required clue never depends on this roll.
+- Fragment can be collected once and is saved.
+
+### Behaviour, perception, and FOV
+States: `Silent Structure → Tide Window → Bell Resonance → Rig Scan → Fragment Available → Resolved`. The bell is a static sound source. Tide changes its audible range and decay. No creature FOV or player vision cone. The tower is concealed until the player obtains the bearing and completes a scan.
+
+### Sound behaviour
+One bell strike at tide start with a long water-muted harmonic tail. Optional second strike is purely additive. Quest log includes a text timing clue so hearing is not mandatory.
+
+### Attacks and chase
+**None.** No hostile entity or direct damage. Normal mapped reef collision and current forces remain active; the ruin does not surprise-collapse.
+
+### Lore reveal
+A recovered date notation and tide mark conflict with the village's oral account. It supports a maintained submerged structure, not proof of a literal drowned kingdom.
+
+### Acceptance tests
+- Bell starts on the same tide boundary for a fixed save.
+- Clue accessible with audio muted.
+- Fragment cannot duplicate after reload.
+- No attack or chase event is emitted.
