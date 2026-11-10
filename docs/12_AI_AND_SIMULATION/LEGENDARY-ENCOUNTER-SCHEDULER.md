@@ -427,3 +427,9 @@ ScriptableObjects hold immutable definitions only; do not mutate shared asset fi
 - [Game Design Document](../01_GAME_DESIGN/GAME-DESIGN-DOCUMENT.md)
 
 All rates, locations, and direct manifestations remain proposed until the world geography, cultural review, and playable encounter tests are approved.
+
+## 13. Visual identity and discoverable lore
+
+The complete art and evidence treatment for every encounter is defined in [Legendary Encounter — Visual, Behaviour, and Discoverable Lore Dossiers](LEGENDARY-ENCOUNTER-VISUAL-AND-LORE-DOSSIERS.md). It contains visual silhouettes, internal scale targets, materials, movement, sound, behaviour, danger presentation, sample in-world records, journal interpretations, and an evidence-placement map.
+
+Every encounter should have a pre-encounter clue, a field clue near its bounds, and a post-encounter record. The player may discover these in any order. Documents and witness statements are not all reliable; the journal distinguishes rumours, traces, testimony, direct sightings, corroboration, and repeatable patterns. A sighting never automatically proves a supernatural explanation.
