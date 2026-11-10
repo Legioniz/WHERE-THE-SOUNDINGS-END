@@ -35,6 +35,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/World/VesselConditionController.cs",
     "Assets/_Project/Scripts/Runtime/World/HarvestingMinigameController.cs",
     "Assets/_Project/Scripts/Runtime/World/SalvageSite.cs",
+    "Assets/_Project/Scripts/Runtime/World/PanicBirdSwarmVisual.cs",
     "Assets/_Project/Tests/EditMode/SeaStateAndCargoDamageTests.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/YarnDialogueSaveParticipant.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs",
