@@ -1,7 +1,7 @@
 # Project Structure
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Unity scaffold with first cargo and dialogue interaction loops  
+> Status: Unity Greyhaven prototype with cargo, dialogue and initial Sounding Rig survey loop  
 > Owner: Project lead  
 > Version: 0.4  
 > Last reviewed: 2026-11-10
@@ -70,7 +70,7 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Boat/BoatPrototypeController.cs: temporary Rigidbody handling prototype.
 - Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera with configurable framing.
 - Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, and initial build-scene list.
-- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, starter boat, camera, spatial cargo catalogue, save/autosave coordinator, Yarn DialogueRunner and presenter, UI Toolkit PanelSettings asset, and Harbourmaster interaction trigger.
+- Editor/GreyhavenEnvironmentBuilder.cs: builds procedural Greyhaven terrain, shore, harbor, piers, village, estuary placeholders, navigation markers, shallow survey profile, outer-channel wreck survey marker, starter boat with Sounding Rig, camera, spatial cargo catalogue, save/autosave coordinator, Yarn DialogueRunner and presenter, UI Toolkit PanelSettings asset, and Harbourmaster interaction trigger.
 
 ## Greyhaven environment generation
 
