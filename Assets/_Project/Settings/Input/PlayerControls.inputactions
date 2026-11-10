@@ -11,7 +11,8 @@
                 {"name":"Fish","type":"Button","id":"b0a70000000000000000000000000004","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false},
                 {"name":"SoundingPulse","type":"Button","id":"b0a70000000000000000000000000005","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false},
                 {"name":"Pause","type":"Button","id":"b0a70000000000000000000000000006","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false},
-                {"name":"Inventory","type":"Button","id":"b0a70000000000000000000000000007","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false}
+                {"name":"Inventory","type":"Button","id":"b0a70000000000000000000000000007","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false},
+                {"name":"Dredge","type":"Button","id":"b0a70000000000000000000000000026","expectedControlType":"Button","processors":"","interactions":"","initialStateCheck":false}
             ],
             "bindings": [
                 {"name":"WASD","id":"b0a70000000000000000000000000010","path":"2DVector","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Move","isComposite":true,"isPartOfComposite":false},
@@ -29,7 +30,9 @@
                 {"name":"","id":"b0a70000000000000000000000000022","path":"<Keyboard>/escape","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Pause","isComposite":false,"isPartOfComposite":false},
                 {"name":"","id":"b0a70000000000000000000000000023","path":"<Gamepad>/start","interactions":"","processors":"","groups":"Gamepad","action":"Pause","isComposite":false,"isPartOfComposite":false},
                 {"name":"","id":"b0a70000000000000000000000000024","path":"<Keyboard>/i","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Inventory","isComposite":false,"isPartOfComposite":false},
-                {"name":"","id":"b0a70000000000000000000000000025","path":"<Gamepad>/buttonNorth","interactions":"","processors":"","groups":"Gamepad","action":"Inventory","isComposite":false,"isPartOfComposite":false}
+                {"name":"","id":"b0a70000000000000000000000000025","path":"<Gamepad>/buttonNorth","interactions":"","processors":"","groups":"Gamepad","action":"Inventory","isComposite":false,"isPartOfComposite":false},
+                {"name":"","id":"b0a70000000000000000000000000027","path":"<Keyboard>/g","interactions":"","processors":"","groups":"Keyboard&Mouse","action":"Dredge","isComposite":false,"isPartOfComposite":false},
+                {"name":"","id":"b0a70000000000000000000000000028","path":"<Gamepad>/rightTrigger","interactions":"","processors":"","groups":"Gamepad","action":"Dredge","isComposite":false,"isPartOfComposite":false}
             ]
         }
     ],
