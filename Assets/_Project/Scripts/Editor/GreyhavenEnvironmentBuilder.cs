@@ -13,6 +13,7 @@ using WhereTheSoundingsEnd.CameraSystem;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Narrative;
+using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Editor
 {
@@ -77,6 +78,7 @@ namespace WhereTheSoundingsEnd.Editor
             SpatialCargoHold cargoHold = player.Find("Player_Boat_Blockout").GetComponent<SpatialCargoHold>();
             DialogueRunner dialogueRunner = BuildDialogueSystem(world.transform, cargoHold, controls);
             dialogueSave.Runner = dialogueRunner;
+            BuildWorldSystems(world.transform, player.Find("Player_Boat_Blockout"), controls, dialogueRunner);
             BuildHarbourmaster(village, wood, concrete, dialogueRunner,
                 dialogueRunner.GetComponent<GreyhavenRuntimeUI>(), controls);
 
@@ -115,7 +117,21 @@ namespace WhereTheSoundingsEnd.Editor
                 CreateCargoDefinition("SALVAGE-WOOD-01", "Waterlogged Timber", CargoItemCategory.Salvage,
                     new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f),
                 CreateCargoDefinition("QUEST-SEALED-PARCEL", "Sealed Survey Parcel", CargoItemCategory.Quest,
-                    new[] { Vector2Int.zero, Vector2Int.up }, 0f, true)
+                    new[] { Vector2Int.zero, Vector2Int.up }, 0f, true),
+                CreateCargoDefinition("ABR-FSH-001", "Milkfish — Glass-Eyed", CargoItemCategory.Fish,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.right * 2, Vector2Int.up }, 0.009f, false, true, 3.2f),
+                CreateCargoDefinition("ABR-FSH-003", "Asian Seabass — Split-Jawed", CargoItemCategory.Fish,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.right * 2,
+                            Vector2Int.up, Vector2Int.up + Vector2Int.right, Vector2Int.up + Vector2Int.right * 2 }, 0.011f, false, true, 3.8f),
+                CreateCargoDefinition("ABR-FSH-005", "Silver Sillago — Lantern-Eyed", CargoItemCategory.Fish,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up }, 0.008f, false, true, 2.8f),
+                CreateCargoDefinition("GEAR-ENGINE-01", "Outboard Engine", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.right * 2,
+                            Vector2Int.up, Vector2Int.up + Vector2Int.right, Vector2Int.up + Vector2Int.right * 2 }, 0f),
+                CreateCargoDefinition("GEAR-ROD-01", "Handline Rod", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero, Vector2Int.up, Vector2Int.up * 2, Vector2Int.up * 3 }, 0f),
+                CreateCargoDefinition("GEAR-LAMP-01", "Deck Lantern", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f)
             };
 
             return definitions;
@@ -127,7 +143,9 @@ namespace WhereTheSoundingsEnd.Editor
             CargoItemCategory category,
             Vector2Int[] cells,
             float freshnessLossPerGameMinute,
-            bool questCritical = false)
+            bool questCritical = false,
+            bool aberrant = false,
+            float sellValueMultiplier = 1f)
         {
             string path = CargoDefinitionsPath + "/" + itemId + ".asset";
             CargoItemDefinition definition = AssetDatabase.LoadAssetAtPath<CargoItemDefinition>(path);
@@ -145,6 +163,10 @@ namespace WhereTheSoundingsEnd.Editor
             serialized.FindProperty("freshnessLossPerGameMinute").floatValue = freshnessLossPerGameMinute;
             SerializedProperty questCriticalProperty = serialized.FindProperty("isQuestCritical");
             if (questCriticalProperty != null) questCriticalProperty.boolValue = questCritical;
+            SerializedProperty aberrantProperty = serialized.FindProperty("isAberrant");
+            if (aberrantProperty != null) aberrantProperty.boolValue = aberrant;
+            SerializedProperty multiplierProperty = serialized.FindProperty("sellValueMultiplier");
+            if (multiplierProperty != null) multiplierProperty.floatValue = sellValueMultiplier;
             SerializedProperty shape = serialized.FindProperty("occupiedCells");
             shape.arraySize = cells.Length;
             for (int i = 0; i < cells.Length; i++)
@@ -214,6 +236,22 @@ namespace WhereTheSoundingsEnd.Editor
             runner.AddCommandHandler("checkpoint", new Action<string>(runtimeUI.RequestCheckpointAutosave));
 
             return runner;
+        }
+
+        private static void BuildWorldSystems(
+            Transform parent,
+            Transform boat,
+            InputActionAsset controls,
+            DialogueRunner dialogueRunner)
+        {
+            if (boat == null) throw new InvalidOperationException("Greyhaven boat root was not created.");
+            Rigidbody body = boat.GetComponent<Rigidbody>();
+            SpatialCargoHold hold = boat.GetComponent<SpatialCargoHold>();
+            HarvestingMinigameController harvesting = boat.gameObject.AddComponent<HarvestingMinigameController>();
+            SeaStateDirector seaState = parent.gameObject.AddComponent<SeaStateDirector>();
+            harvesting.Configure(controls, hold, seaState);
+            seaState.Configure(body, dialogueRunner, harvesting);
+            boat.gameObject.AddComponent<VesselConditionController>();
         }
 
         private static void BuildHarbourmaster(
@@ -621,6 +659,9 @@ namespace WhereTheSoundingsEnd.Editor
             controller.InputActions = controls;
             SpatialCargoHold cargoHold = boat.AddComponent<SpatialCargoHold>();
             cargoHold.SetItemDefinitions(cargoCatalog);
+            cargoHold.TryPlace("GEAR-ENGINE-01", 0, 0, 0, 1, 1f, 1f, out _);
+            cargoHold.TryPlace("GEAR-ROD-01", 3, 0, 0, 1, 1f, 1f, out _);
+            cargoHold.TryPlace("GEAR-LAMP-01", 5, 0, 0, 1, 1f, 1f, out _);
         }
 
         private static void BuildCameraAndLight(Transform parent, Transform playerRoot)
