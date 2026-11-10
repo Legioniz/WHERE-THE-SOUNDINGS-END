@@ -1,7 +1,7 @@
 # Deep-Ocean Survey Implementation — Technical Analysis
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Initial runtime vertical slice committed; regional content integration in progress  
+> Status: Sounding Rig and three survey scenes generated; physical site simulation remains in progress  
 > Owner: Project lead  
 > Version: 0.1  
 > Last reviewed: 2026-11-10
@@ -16,8 +16,8 @@ The project remains Unity 6 LTS / C# / URP. The Greyhaven environment generator 
 
 ## 2. Runtime flow
 
-1. Greyhaven's environment builder attaches a shallow regional survey profile to the sheltered bay water object.
-2. The generated starter boat receives SoundingRigController and the shared PlayerControls asset.
+1. Greyhaven's environment builder attaches a shallow regional survey profile to the sheltered bay water object. DeepOceanSurveySandboxBuilder also generates Outer Shoals and Hollow Trench test scenes with their own profiles and authored phenomenon sites.
+2. Each generated survey boat receives SoundingRigController, DeepOceanSiteInteractionController and the shared PlayerControls asset.
 3. The player presses Q or gamepad right shoulder while the boat is moving slowly enough to survey.
 4. The controller resolves the nearest regional profile containing the boat.
 5. A stable opportunity ID is built from region, day and saved pulse sequence.
@@ -25,7 +25,9 @@ The project remains Unity 6 LTS / C# / URP. The Greyhaven environment generator 
 7. The controller computes a seabed confidence separately from biological-layer confidence, then computes optional scattering-layer depth from the region's photoperiod profile.
 8. It reports the seabed and mid-water returns separately. The first layer detection is explicitly uncertain; a second independent heading in the same region and within ten in-game minutes supports confirmation. Leaving a DSL habitat or receiving no distinct layer return resets that confirmation chain.
 9. Nearby authored phenomenon-site markers may be discovered and add a short evidence note.
-10. The controller publishes an AcousticSignal, adds a small sea-disturbance amount, and contributes its state to SaveGameData schema v4.
+10. The controller publishes an AcousticSignal. AcousticWorldListener evaluates hearing score, deduplicates the event, adds the small sea-disturbance response and exposes SignalHeard to future creature/navigation adapters.
+11. DeepOceanSiteInteractionController allows close-range field-note inspection and saves inspected site IDs.
+12. Survey, weather, horror cooldowns, acoustic history and temporary maritime atmosphere state are preserved in SaveGameData schema v5.
 
 A pulse takes approximately 1.25 real seconds and temporarily counts as an action for the action-driven sea clock. UI pause still prevents the world clock from advancing.
 
@@ -129,7 +131,7 @@ An AcousticSignal carries event ID, kind, region, position, loudness, nominal ra
 
 **Architectural rule:** AI must subscribe to acoustic gameplay events rather than scan every AudioSource every frame. The bus reports a sound event; each listener decides whether it can hear the event using range, occlusion, environment and its own sensory profile.
 
-**Current limitation:** The Sounding Rig is the current publisher. Creature listeners, radio listeners and acoustic navigation adapters have not yet been connected. The radius is an authored gameplay reach, not a physical sound-pressure contour.
+**Current limitation:** AcousticWorldListener is now a connected world-level receiver. It applies hearing-score and disturbance response and exposes SignalHeard for species-specific adapters. Creature, radio and acoustic-navigation AI are still not connected. The radius is an authored gameplay reach, not a physical sound-pressure contour.
 
 ### 3.7 SeaStateDirector.cs
 
@@ -143,12 +145,12 @@ The survey action is included with harvesting as a valid reason for the clock to
 
 **Role:** Data-only persistence contract.
 
-Schema v4 adds:
+Schema v5 adds:
 - soundingPulseCount;
 - discoveredPhenomenonSiteIds;
 - evaluatedSurveyOpportunityIds.
 
-The migration path advances schema 3 to 4 and initializes missing lists. Old campaign saves therefore remain loadable without pretending the player has already surveyed sites.
+The migration path advances schemas 0–4 to 5. Schema 4 saves receive safe weather defaults, no pending bird event, and empty acoustic/inspection history. Old campaign saves remain loadable without inventing player discoveries.
 
 **Persistence rule:** Discovery and evaluated opportunities are durable campaign state. UI captions, audio clips, temporary echoes and presentation objects are transient and must not be saved.
 
@@ -191,7 +193,7 @@ When expanding the system:
 5. Test save/load between survey pulses and after a discovery.
 6. Do not let loading an old save generate a new discovery or a new anomaly roll.
 
-The current opportunity list is bounded to 256 entries because the monotonically increasing pulse count is the primary sequence source. If event identity later becomes independent of pulse sequence, use a dedicated persistent event ledger with explicit compaction rules.
+The current survey opportunity list is bounded to 256 entries because the monotonically increasing pulse count is the primary sequence source. AcousticWorldListener keeps a separate bounded 128-event ledger so the same emitted signal cannot be processed twice across save/load.
 
 ## 7. Performance and lifecycle considerations
 
@@ -220,11 +222,10 @@ These checks do not compile C# or execute Unity. Unity 6000.3.28f1 must still ru
 ## 9. Next implementation sequence
 
 1. Build a real bathymetry data asset and sample it by vessel position.
-2. Add Outer Shoals and Hollow Trench scene builders and attach their region profiles.
+2. Connect species-specific creature perception adapters to AcousticWorldListener.SignalHeard and the existing AI state machines.
 3. Add a water-column ecology volume whose density and movement are driven by regional fish/squid cohorts.
 4. Add multi-contact sonar presentation with range, bearing and confidence.
-5. Connect AcousticEventBus to creature perception through a throttled listener adapter.
-6. Add separate physical controllers for brine pools, vents, seeps, hydrate deposits and whale falls.
+5. Add separate physical controllers for brine pools, vents, seeps, hydrate deposits and whale falls.
 7. Add persistent survey chart and journal evidence with interpretation confidence.
 8. Add a proper sleep/rest loop before considering Operational Strain.
 9. Record and integrate licensed field audio; replace synthesized placeholder pings.

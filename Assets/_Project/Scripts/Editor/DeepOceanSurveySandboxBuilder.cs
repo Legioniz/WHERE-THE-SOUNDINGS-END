@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using WhereTheSoundingsEnd.Boat;
 using WhereTheSoundingsEnd.CameraSystem;
+using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.World;
 

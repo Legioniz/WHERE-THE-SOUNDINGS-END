@@ -46,7 +46,7 @@ Use **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment** after ch
 | Start fishing | F | West face button |
 | Start dredging | G | Right trigger |
 | Sounding pulse | Q | Right shoulder |
-| Harvest timing beat | Space / Enter | South face button / right shoulder |
+| Harvest timing beat | Space / Enter | East face button |
 | Pause | Esc | Start |
 | Inventory | I | North face button |
 
