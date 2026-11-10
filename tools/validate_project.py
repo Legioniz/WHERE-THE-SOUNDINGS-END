@@ -110,8 +110,11 @@ def main() -> int:
         if "CurrentSchemaVersion = 4" not in save_source:
             failures.append("SaveGameData schema must be version 4 after deep-ocean survey persistence changes.")
 
+        if "case 3:" not in save_source or "data.schemaVersion = 4;" not in save_source:
+            failures.append("SaveGameData is missing the schema 3 to 4 survey-state migration.")
+
         survey_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SoundingRigController.cs").read_text(encoding="utf-8")
-        for required_text in ("SoundingPulse", "discoveredPhenomenonSiteIds", "evaluatedSurveyOpportunityIds", "AcousticEventBus.Publish"):
+        for required_text in ("SoundingPulse", "discoveredPhenomenonSiteIds", "evaluatedSurveyOpportunityIds", "AcousticEventBus.Publish", "IsIndependentLayerObservation"):
             if required_text not in survey_source:
                 failures.append(f"SoundingRigController is missing expected survey feature: {required_text}")
 
