@@ -64,3 +64,17 @@ Use Unity AudioSource / AudioMixer for playback, with a shared event bus for gam
 - Audio mixer does not mask the engine / navigation cue.
 - Repeated event reload does not duplicate a persistent audio cue.
 - Different threat states use distinct cues and timing.
+
+
+## 8. Greyhaven prototype status — 2026-11-10
+
+The runtime `FishermanAtmosphereDirector` adds a restrained first layer of maritime unease when a scene contains `SeaStateDirector`:
+
+- two hollow, spatialized hull knocks;
+- a distant synthesized navigation bell;
+- a false warm navigation light that fades without a wake;
+- a quiet distant animal-like call.
+
+These cues are gated by advancing sea time and night / elevated panic. They are not final audio assets and do not alter panic, vessel condition, cargo, navigation, or creature state. The procedural clips are temporary placeholders pending properly licensed or recorded field recordings.
+
+See `docs/06_GAMEPLAY_SYSTEMS/MARITIME-HORROR-DIRECTOR.md` for the full creative rules and acceptance criteria. Authored ambience, a music score, mixer snapshots, radio dialogue and the final threat-audio event bus remain future work.
