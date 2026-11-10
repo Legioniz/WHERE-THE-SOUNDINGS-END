@@ -28,7 +28,7 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - SaveGameData is the versioned snapshot DTO. It contains stable IDs and data-only records, not references to GameObjects or components.
 - SaveFileService validates slots, serializes JSON, writes a temporary file, replaces the primary file, rotates the previous primary into a backup, lists slots, loads saves, recovers from a valid backup, and deletes a slot.
 - SaveGameCoordinator is the scene-level entry point. It discovers active and inactive MonoBehaviours implementing ISaveParticipant, asks them to capture state, and restores those participants on load.
-- AutosaveController runs a five-minute unscaled-time interval after a 45-second startup delay, retries failed writes after 30 seconds, and also saves on application pause, focus loss, active-scene unload, application quit, and requested checkpoints. Lifecycle triggers are debounced by 15 seconds.
+- AutosaveController runs a five-minute unscaled-time interval after a 45-second startup delay, retries failed writes after 30 seconds, and also saves on application pause, focus loss, active-scene unload, application quit, and requested checkpoints. Lifecycle triggers are debounced by 15 seconds to avoid duplicate focus/pause/scene notifications. Explicit checkpoints and application quit bypass this debounce so important progress and the final session state are written.
 - BoatPrototypeController currently implements ISaveParticipant and records the Greyhaven starter boat transform and Rigidbody velocity.
 
 Typical runtime use:

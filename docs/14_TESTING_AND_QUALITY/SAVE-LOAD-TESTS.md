@@ -38,6 +38,9 @@ Run with Unity Editor 6000.3.28f1:
 6. Save into slot 2. Verify slot_02.json exists separately and slot 1 remains unchanged.
 7. Corrupt slot_02.json manually while retaining slot_02.json.bak. Load slot 2 and verify the result reports backup recovery.
 8. Delete slot 1 and verify both its primary and backup are removed.
+9. In Play Mode, request a checkpoint autosave and confirm autosave.json updates immediately even when a periodic autosave just occurred.
+10. Stop Play Mode or close the application and confirm the final quit save is attempted even when another lifecycle autosave ran recently.
+11. Confirm pause and focus-loss notifications that happen together produce no more than one write inside the 15-second debounce window.
 
 ## Acceptance criteria
 

@@ -80,7 +80,7 @@ namespace WhereTheSoundingsEnd.Persistence
 
         private void OnApplicationQuit()
         {
-            if (saveOnApplicationQuit) AttemptAutosave("application_quit", false);
+            if (saveOnApplicationQuit) AttemptAutosave("application_quit", true);
         }
 
         private void HandleSceneUnloading(Scene scene)
@@ -98,7 +98,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public SaveOperationResult RequestCheckpointAutosave(string checkpointId)
         {
             string id = string.IsNullOrWhiteSpace(checkpointId) ? "unnamed" : checkpointId;
-            return AttemptAutosave("checkpoint:" + id, false);
+            return AttemptAutosave("checkpoint:" + id, true);
         }
 
         private SaveOperationResult AttemptAutosave(string reason, bool force)
