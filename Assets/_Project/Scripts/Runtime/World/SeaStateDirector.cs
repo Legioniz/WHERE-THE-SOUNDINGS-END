@@ -29,10 +29,10 @@ namespace WhereTheSoundingsEnd.World
 
         [Header("Panic")]
         [SerializeField, Range(0f, 1f)] private float panicLevel;
-        [SerializeField, Min(0f)] private float nightPanicPerGameMinute = 0.018f;
-        [SerializeField, Min(0f)] private float fogPanicPerGameMinute = 0.009f;
-        [SerializeField, Min(0f)] private float daylightRecoveryPerGameMinute = 0.012f;
-        [SerializeField, Min(0f)] private float safeHarbourRecoveryPerGameMinute = 0.04f;
+        [SerializeField, Min(0f)] private float nightPanicPerGameMinute = 0.0012f;
+        [SerializeField, Min(0f)] private float fogPanicPerGameMinute = 0.0025f;
+        [SerializeField, Min(0f)] private float daylightRecoveryPerGameMinute = 0.00065f;
+        [SerializeField, Min(0f)] private float safeHarbourRecoveryPerGameMinute = 0.0015f;
 
         [Header("Atmosphere")]
         [SerializeField] private float baseFogDensity = 0.0018f;
@@ -282,7 +282,11 @@ namespace WhereTheSoundingsEnd.World
                 Destroy(phantomMaterial, 6f);
             }
             Collider collider = phantom.GetComponent<Collider>();
-            if (collider != null) Destroy(collider);
+            if (collider != null)
+            {
+                collider.enabled = false;
+                Destroy(collider);
+            }
             Destroy(phantom, 6f);
         }
 
@@ -328,7 +332,11 @@ namespace WhereTheSoundingsEnd.World
                 bird.transform.localPosition = new Vector3(Random.Range(-5f, 5f), Random.Range(-1f, 2f), Random.Range(-5f, 5f));
                 bird.transform.localScale = new Vector3(0.45f, 0.18f, 0.8f);
                 Collider birdCollider = bird.GetComponent<Collider>();
-                if (birdCollider != null) Destroy(birdCollider);
+                if (birdCollider != null)
+                {
+                    birdCollider.enabled = false;
+                    Destroy(birdCollider);
+                }
                 Renderer birdRenderer = bird.GetComponent<Renderer>();
                 if (birdMaterial != null) birdRenderer.sharedMaterial = birdMaterial;
             }
