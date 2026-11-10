@@ -10,7 +10,7 @@ namespace WhereTheSoundingsEnd.Persistence
     [Serializable]
     public sealed class SaveGameData
     {
-        public const int CurrentSchemaVersion = 3;
+        public const int CurrentSchemaVersion = 4;
 
         public int schemaVersion;
         public int slotNumber;
@@ -58,6 +58,9 @@ namespace WhereTheSoundingsEnd.Persistence
         public float seaDisturbance;
         public float panicLevel;
         public List<SalvageSiteSaveData> salvageSites = new List<SalvageSiteSaveData>();
+        public int soundingPulseCount;
+        public List<string> discoveredPhenomenonSiteIds = new List<string>();
+        public List<string> evaluatedSurveyOpportunityIds = new List<string>();
     }
 
     [Serializable]
@@ -317,6 +320,11 @@ namespace WhereTheSoundingsEnd.Persistence
                         data.schemaVersion = 3;
                         break;
 
+                    case 3:
+                        NormalizeDefaults(data);
+                        data.schemaVersion = 4;
+                        break;
+
                     default:
                         error = "No migration path exists for save schema version " + data.schemaVersion + ".";
                         return false;
@@ -419,6 +427,9 @@ namespace WhereTheSoundingsEnd.Persistence
 
             if (data.world == null) data.world = new WorldSaveData();
             if (data.world.salvageSites == null) data.world.salvageSites = new List<SalvageSiteSaveData>();
+            if (data.world.discoveredPhenomenonSiteIds == null) data.world.discoveredPhenomenonSiteIds = new List<string>();
+            if (data.world.evaluatedSurveyOpportunityIds == null) data.world.evaluatedSurveyOpportunityIds = new List<string>();
+            if (data.world.soundingPulseCount < 0) data.world.soundingPulseCount = 0;
             data.world.panicLevel = Math.Max(0f, Math.Min(1f, data.world.panicLevel));
             if (data.player == null) data.player = new PlayerSaveData();
             if (data.vessel == null) data.vessel = new VesselSaveData();
