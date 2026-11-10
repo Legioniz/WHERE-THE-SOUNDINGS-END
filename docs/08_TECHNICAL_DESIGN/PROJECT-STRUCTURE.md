@@ -62,8 +62,11 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Inventory/CargoItemDefinition.cs: stable-ID ScriptableObject cargo shapes and handling metadata.
 - Inventory/CargoGridGeometry.cs: rotation, normalization, blocked-cell and collision validation.
 - Inventory/SpatialCargoHold.cs: placement/move/remove runtime model and save participant.
-- Narrative/YarnDialogueSaveParticipant.cs: typed Yarn variable persistence inside the campaign save.\n- Narrative/GreyhavenRuntimeUI.cs: combined cargo-hold UI Toolkit screen and Yarn dialogue presenter.\n- Narrative/HarbourmasterInteraction.cs: boat-proximity trigger and E-key dialogue start.
-- Dialogue/Greyhaven.yarnproject: Yarn Spinner 3.x project definition.\n- Dialogue/Source/Greyhaven_Harbourmaster.yarn: branching first conversation with the Harbourmaster.
+- Narrative/YarnDialogueSaveParticipant.cs: typed Yarn variable persistence inside the campaign save.
+- Narrative/GreyhavenRuntimeUI.cs: combined cargo-hold UI Toolkit screen and Yarn dialogue presenter.
+- Narrative/HarbourmasterInteraction.cs: boat-proximity trigger and E-key dialogue start.
+- Dialogue/Greyhaven.yarnproject: Yarn Spinner 3.x project definition.
+- Dialogue/Source/Greyhaven_Harbourmaster.yarn: branching first conversation with the Harbourmaster.
 - Boat/BoatPrototypeController.cs: temporary Rigidbody handling prototype.
 - Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera with configurable framing.
 - Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, and initial build-scene list.
