@@ -3,6 +3,13 @@
 <<declare $gh_accepted_sounding_job = false>>
 <<declare $gh_asked_about_bell = false>>
 <<declare $gh_harbourmaster_trust = 0>>
+<<declare $gh_met_mara = false>>
+<<declare $gh_mara_trust = 0>>
+<<declare $gh_met_tomas = false>>
+<<declare $gh_tomas_trust = 0>>
+<<declare $gh_met_inez = false>>
+<<declare $gh_inez_trust = 0>>
+
 
 title: Greyhaven_Harbourmaster
 ---
@@ -50,13 +57,6 @@ Harbourmaster: Back already? The channel has not become any kinder.
 
 <<set $gh_met_harbourmaster = true>>
 ===
-
-<<declare $gh_met_mara = false>>
-<<declare $gh_mara_trust = 0>>
-<<declare $gh_met_tomas = false>>
-<<declare $gh_tomas_trust = 0>>
-<<declare $gh_met_inez = false>>
-<<declare $gh_inez_trust = 0>>
 
 title: Greyhaven_Fishmonger
 ---
