@@ -7,8 +7,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem.UI;
 using Yarn.Unity;
 using WhereTheSoundingsEnd.Boat;
 using WhereTheSoundingsEnd.CameraSystem;
@@ -117,7 +115,7 @@ namespace WhereTheSoundingsEnd.Editor
                 CreateCargoDefinition("SALVAGE-WOOD-01", "Waterlogged Timber", CargoItemCategory.Salvage,
                     new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f),
                 CreateCargoDefinition("QUEST-SEALED-PARCEL", "Sealed Survey Parcel", CargoItemCategory.Quest,
-                    new[] { Vector2Int.zero, Vector2Int.up }, 0f)
+                    new[] { Vector2Int.zero, Vector2Int.up }, 0f, true)
             };
 
             return definitions;
@@ -128,19 +126,25 @@ namespace WhereTheSoundingsEnd.Editor
             string displayName,
             CargoItemCategory category,
             Vector2Int[] cells,
-            float freshnessLossPerGameMinute)
+            float freshnessLossPerGameMinute,
+            bool questCritical = false)
         {
             string path = CargoDefinitionsPath + "/" + itemId + ".asset";
-            CargoItemDefinition existing = AssetDatabase.LoadAssetAtPath<CargoItemDefinition>(path);
-            if (existing != null) return existing;
+            CargoItemDefinition definition = AssetDatabase.LoadAssetAtPath<CargoItemDefinition>(path);
+            bool isNewDefinition = definition == null;
+            if (isNewDefinition)
+            {
+                definition = ScriptableObject.CreateInstance<CargoItemDefinition>();
+                definition.name = itemId;
+            }
 
-            CargoItemDefinition definition = ScriptableObject.CreateInstance<CargoItemDefinition>();
-            definition.name = itemId;
             SerializedObject serialized = new SerializedObject(definition);
             serialized.FindProperty("itemId").stringValue = itemId;
             serialized.FindProperty("displayName").stringValue = displayName;
             serialized.FindProperty("category").enumValueIndex = (int)category;
             serialized.FindProperty("freshnessLossPerGameMinute").floatValue = freshnessLossPerGameMinute;
+            SerializedProperty questCriticalProperty = serialized.FindProperty("isQuestCritical");
+            if (questCriticalProperty != null) questCriticalProperty.boolValue = questCritical;
             SerializedProperty shape = serialized.FindProperty("occupiedCells");
             shape.arraySize = cells.Length;
             for (int i = 0; i < cells.Length; i++)
@@ -149,7 +153,10 @@ namespace WhereTheSoundingsEnd.Editor
                 cell.vector2IntValue = cells[i];
             }
             serialized.ApplyModifiedPropertiesWithoutUndo();
-            AssetDatabase.CreateAsset(definition, path);
+            if (isNewDefinition)
+                AssetDatabase.CreateAsset(definition, path);
+            else
+                EditorUtility.SetDirty(definition);
             return definition;
         }
 
@@ -206,20 +213,7 @@ namespace WhereTheSoundingsEnd.Editor
             runner.DialoguePresenters = new List<DialoguePresenterBase> { runtimeUI };
             runner.AddCommandHandler("checkpoint", new Action<string>(runtimeUI.RequestCheckpointAutosave));
 
-            EnsureRuntimeUiEventSystem(parent);
             return runner;
-        }
-
-        private static void EnsureRuntimeUiEventSystem(Transform parent)
-        {
-            EventSystem eventSystem = UnityEngine.Object.FindFirstObjectByType<EventSystem>();
-            if (eventSystem != null) return;
-
-            GameObject eventSystemObject = new GameObject("EventSystem");
-            eventSystemObject.transform.SetParent(parent, false);
-            eventSystemObject.AddComponent<EventSystem>();
-            InputSystemUIInputModule inputModule = eventSystemObject.AddComponent<InputSystemUIInputModule>();
-            inputModule.AssignDefaultActions();
         }
 
         private static void BuildHarbourmaster(
