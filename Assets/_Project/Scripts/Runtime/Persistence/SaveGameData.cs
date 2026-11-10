@@ -10,7 +10,7 @@ namespace WhereTheSoundingsEnd.Persistence
     [Serializable]
     public sealed class SaveGameData
     {
-        public const int CurrentSchemaVersion = 1;
+        public const int CurrentSchemaVersion = 2;
 
         public int schemaVersion;
         public int slotNumber;
@@ -28,6 +28,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public VesselSaveData vessel = new VesselSaveData();
         public InventorySaveData inventory = new InventorySaveData();
         public ProgressSaveData progress = new ProgressSaveData();
+        public DialogueSaveData dialogue = new DialogueSaveData();
 
         public static SaveGameData CreateNew(int slot, string activeSceneId)
         {
@@ -86,6 +87,9 @@ namespace WhereTheSoundingsEnd.Persistence
     {
         public List<InventoryStackSaveData> cargo = new List<InventoryStackSaveData>();
         public List<EquipmentSaveData> equipment = new List<EquipmentSaveData>();
+        public int holdWidth = 7;
+        public int holdHeight = 9;
+        public List<CargoPlacementSaveData> placements = new List<CargoPlacementSaveData>();
     }
 
     [Serializable]
@@ -98,11 +102,54 @@ namespace WhereTheSoundingsEnd.Persistence
     }
 
     [Serializable]
+    public sealed class CargoPlacementSaveData
+    {
+        public string instanceId;
+        public string itemId;
+        public int anchorX;
+        public int anchorY;
+        public int rotationQuarterTurns;
+        public int quantity = 1;
+        public float quality = 1.0f;
+        public float freshness = 1.0f;
+    }
+
+    [Serializable]
     public sealed class EquipmentSaveData
     {
         public string slotId;
         public string itemId;
         public float condition = 1.0f;
+    }
+
+    [Serializable]
+    public sealed class YarnFloatVariableSaveData
+    {
+        public string variableName;
+        public float value;
+    }
+
+    [Serializable]
+    public sealed class YarnStringVariableSaveData
+    {
+        public string variableName;
+        public string value;
+    }
+
+    [Serializable]
+    public sealed class YarnBoolVariableSaveData
+    {
+        public string variableName;
+        public bool value;
+    }
+
+    [Serializable]
+    public sealed class DialogueSaveData
+    {
+        public List<YarnFloatVariableSaveData> floatVariables = new List<YarnFloatVariableSaveData>();
+        public List<YarnStringVariableSaveData> stringVariables = new List<YarnStringVariableSaveData>();
+        public List<YarnBoolVariableSaveData> boolVariables = new List<YarnBoolVariableSaveData>();
+        public List<string> completedNodeIds = new List<string>();
     }
 
     [Serializable]
@@ -242,6 +289,11 @@ namespace WhereTheSoundingsEnd.Persistence
                         data.schemaVersion = 1;
                         break;
 
+                    case 1:
+                        NormalizeDefaults(data);
+                        data.schemaVersion = 2;
+                        break;
+
                     default:
                         error = "No migration path exists for save schema version " + data.schemaVersion + ".";
                         return false;
@@ -298,6 +350,7 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.vessel == null) data.vessel = new VesselSaveData();
             if (data.inventory == null) data.inventory = new InventorySaveData();
             if (data.progress == null) data.progress = new ProgressSaveData();
+            if (data.dialogue == null) data.dialogue = new DialogueSaveData();
 
             if (data.player.position == null) data.player.position = new Vector3SaveData();
             if (data.player.rotationEuler == null) data.player.rotationEuler = new Vector3SaveData();
@@ -309,6 +362,9 @@ namespace WhereTheSoundingsEnd.Persistence
 
             if (data.inventory.cargo == null) data.inventory.cargo = new List<InventoryStackSaveData>();
             if (data.inventory.equipment == null) data.inventory.equipment = new List<EquipmentSaveData>();
+            if (data.inventory.placements == null) data.inventory.placements = new List<CargoPlacementSaveData>();
+            if (data.inventory.holdWidth <= 0) data.inventory.holdWidth = 7;
+            if (data.inventory.holdHeight <= 0) data.inventory.holdHeight = 9;
 
             if (data.progress.discoveredEntryIds == null) data.progress.discoveredEntryIds = new List<string>();
             if (data.progress.unlockedRegionIds == null) data.progress.unlockedRegionIds = new List<string>();
@@ -319,6 +375,10 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.progress.worldFlags == null) data.progress.worldFlags = new List<WorldFlagSaveData>();
             if (data.progress.eventCooldowns == null) data.progress.eventCooldowns = new List<EventCooldownSaveData>();
             if (data.progress.randomStreams == null) data.progress.randomStreams = new List<RandomStreamSaveData>();
+            if (data.dialogue.floatVariables == null) data.dialogue.floatVariables = new List<YarnFloatVariableSaveData>();
+            if (data.dialogue.stringVariables == null) data.dialogue.stringVariables = new List<YarnStringVariableSaveData>();
+            if (data.dialogue.boolVariables == null) data.dialogue.boolVariables = new List<YarnBoolVariableSaveData>();
+            if (data.dialogue.completedNodeIds == null) data.dialogue.completedNodeIds = new List<string>();
 
             for (int index = 0; index < data.progress.quests.Count; index++)
             {
