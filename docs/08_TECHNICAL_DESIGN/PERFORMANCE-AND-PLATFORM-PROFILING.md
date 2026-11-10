@@ -10,6 +10,10 @@
 
 The first shipping target is Windows PC. Do not optimize around mobile-only APIs before a mobile build is an approved platform target.
 
+## Tooling clarification
+
+The DREDGE mobile presentation is a Unity Developer Summit case study. It does not establish a generic product suite named “Unity Studio Productions (USP)”. This repository therefore uses documented Unity and platform profiling tools rather than assuming access to an internal Unity studio toolkit.
+
 ## Universal Unity profiling
 
 Profile early and repeatedly using:
