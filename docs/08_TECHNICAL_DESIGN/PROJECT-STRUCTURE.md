@@ -28,7 +28,8 @@ Assets/_Project is the game's first-party content boundary.
 | Scenes/ | Boot, menu, persistent world, harbour, and region scenes |
 | Scripts/Runtime/ | Runtime gameplay and simulation code |
 | Scripts/Runtime/Persistence/ | Versioned save DTOs, manual/autosave file storage, autosave scheduling, and scene save coordination |
-| Scripts/Runtime/Inventory/ | Spatial cargo definitions, grid geometry, hold placement and persistence |\n| Scripts/Runtime/World/ | Action-driven sea state, regional survey profiles, Sounding Rig, acoustic event contract, world incidents and site discovery |
+| Scripts/Runtime/Inventory/ | Spatial cargo definitions, grid geometry, hold placement and persistence |
+| Scripts/Runtime/World/ | Action-driven sea state, regional survey profiles, Sounding Rig, acoustic event contract, world incidents and site discovery |\n| Scripts/Runtime/World/ | Action-driven sea state, regional survey profiles, Sounding Rig, acoustic event contract, world incidents and site discovery |
 | Scripts/Runtime/Narrative/ | Yarn Spinner dialogue state, runtime UI Toolkit presenter, Harbourmaster interaction and narrative persistence |
 | Dialogue/ | Yarn project and authored dialogue source |
 | Settings/UI/ | Runtime UI Toolkit PanelSettings assets |
@@ -48,7 +49,12 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - WhereTheSoundingsEnd.Editor: editor tooling; excluded from player builds.
 - WhereTheSoundingsEnd.Tests.EditMode: unit-level tests.
 - Core/WorldClock.cs: engine-independent simulation-time primitive.
-- Core/Pcg32Random.cs: PCG-XSH-RR deterministic random generator.\n- World/DeepOceanSurveyMath.cs: pure diel layer migration, depth separation, confidence and stable-key calculations.\n- World/DeepOceanSurveyRegion.cs: region-bounded bathymetry and acoustic profile; six baseline region configurations.\n- World/DeepOceanPhenomenonSite.cs: authored, stable-ID deep-ocean and maritime survey marker.\n- World/SoundingRigController.cs: Q / gamepad survey input, sonar result interpretation, site discovery, event publishing and save participation.\n- World/AcousticEventBus.cs: typed acoustic gameplay signal metadata for future AI / navigation listeners.
+- Core/Pcg32Random.cs: PCG-XSH-RR deterministic random generator.
+- World/DeepOceanSurveyMath.cs: pure diel layer migration, depth separation, confidence and stable-key calculations.
+- World/DeepOceanSurveyRegion.cs: region-bounded bathymetry and acoustic profile; six baseline region configurations.
+- World/DeepOceanPhenomenonSite.cs: authored, stable-ID deep-ocean and maritime survey marker.
+- World/SoundingRigController.cs: Q / gamepad survey input, sonar result interpretation, site discovery, event publishing and save participation.
+- World/AcousticEventBus.cs: typed acoustic gameplay signal metadata for future AI / navigation listeners.\n- World/DeepOceanSurveyMath.cs: pure diel layer migration, depth separation, confidence and stable-key calculations.\n- World/DeepOceanSurveyRegion.cs: region-bounded bathymetry and acoustic profile; six baseline region configurations.\n- World/DeepOceanPhenomenonSite.cs: authored, stable-ID deep-ocean and maritime survey marker.\n- World/SoundingRigController.cs: Q / gamepad survey input, sonar result interpretation, site discovery, event publishing and save participation.\n- World/AcousticEventBus.cs: typed acoustic gameplay signal metadata for future AI / navigation listeners.
 - Persistence/SaveGameData.cs: versioned campaign snapshot and migration defaults.
 - Persistence/SaveFileService.cs: five independent JSON slots, backup recovery, listing, and deletion.
 - Persistence/SaveGameCoordinator.cs: scene participant capture/restore contract for manual saves and autosaves.
