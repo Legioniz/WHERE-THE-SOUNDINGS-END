@@ -45,4 +45,4 @@ Preserve docs/technical/PERFORMANCE_AND_LANGUAGE_GUIDANCE.md. 60 FPS is 16.67 ms
 
 ## Scope boundary
 
-The scaffold is not a completed vertical slice. Fishing, inventory/economy, persistence/migration, world simulation, creature AI, threat director, quests, full navigation/acoustics, production audio/UI/art, and release packaging remain to be implemented and validated.
+The scaffold is not a completed vertical slice. Persistence has a versioned JSON foundation and autosave; the starter boat, spatial cargo grid and Yarn variable state have runtime adapters. Dialogue still needs its Yarn Project/Runner and interaction wiring; cargo still needs its player UI, fishing integration, freshness tick and selling/equipment systems. World simulation, creature AI, threat director, full quest runtime, full navigation/acoustics, production audio/UI/art, and release packaging remain to be implemented and validated.
