@@ -159,3 +159,18 @@ Acceptance checks:
 - [Mutated and Unnatural Catchable Specimens](../../04_CHARACTERS_AND_ENTITIES/MUTATED-AND-UNNATURAL-CATCHES.md)
 - [Fish Population and Food-Web Model](FISH-POPULATION-MODEL.md)
 - [Development Roadmap](../13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md)
+
+## 12. Population condition and sustainable trade
+
+Population condition feeds the fishing system before it feeds the market. When a player repeatedly harvests a ground, vulnerable biomass and expected catch per unit of effort decline. Trip income therefore falls naturally because fewer saleable kilograms are caught per hour; do not solve depletion by silently lowering or raising the listed base price.
+
+Rules:
+- The population key is species ID plus fishing-ground ID. A low stock in one ground does not automatically change catch rates at every island market.
+- Island market factors remain destination-based and apply once. They do not restore depleted stock or create a hidden abundance bonus.
+- Dynamic buyer demand may respond to reduced deliveries over time, but it must remain inside the documented demand range and be observable through buyer stock, orders, or dialogue.
+- Do not automatically multiply price by a scarcity factor when catch rate has already fallen. That would reward overfishing twice and could make the rarest remaining animals the most profitable target.
+- A buyer may post a conservation or restoration contract that pays for monitoring, selective closure, ghost-gear removal, or habitat work. These rewards are paid for the verified task, not for secretly releasing or duplicating fish.
+- Protected species and closed grounds remain ineligible for ordinary sale regardless of scarcity or buyer demand.
+- A depleted ground can make the player travel farther, use a different method, target another species, or rest the ground. Fuel and time then become part of the economic consequence.
+
+The authoritative stock, daily growth, catch-rate, and spawning formulas are in [Fish Population and Food-Web Model](FISH-POPULATION-MODEL.md).
