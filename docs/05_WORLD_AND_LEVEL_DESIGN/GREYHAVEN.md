@@ -88,7 +88,8 @@ The greybox does not spawn, animate, or simulate these ordinary animals. Do not 
 - Night begins at 19:00 and ends at 05:00. Night and heavy fog increase panic; daylight reduces it, with faster recovery in the sheltered harbor.
 - Panic alters fog colour/density and directional-light intensity. At high panic, phantom reef shapes and leviathan-scale shadows can appear. They are visual hallucinations, not collision geometry. At extreme panic, phantom seabirds may steal one ordinary fish from the hold after a warning omen.
 - F starts a three-beat fishing timing challenge. Successful catches enter the shared spatial hold. Aberrant variants have unique item IDs and 2.8×–3.8× prototype value multipliers.
-- G starts a four-beat dredging challenge only when the boat is stopped within range of the outer-channel wreck field. The site yields timber, salt-stiff canvas and corroded fittings, with three pulls per in-game day.\n- Q (or gamepad right shoulder) emits a Sounding Rig pulse when vessel speed is at or below 5 m/s. The survey reports a repeatable shallow seabed return and can discover the outer-channel wreck marker. It does not report a deep scattering layer in Greyhaven.
+- G starts a four-beat dredging challenge only when the boat is stopped within range of the outer-channel wreck field. The site yields timber, salt-stiff canvas and corroded fittings, with three pulls per in-game day.
+- Q (or gamepad right shoulder) emits a Sounding Rig pulse when vessel speed is at or below 5 m/s. The survey reports a repeatable shallow seabed return and can discover the outer-channel wreck marker. It does not report a deep scattering layer in Greyhaven.
 - Engine, handline rod and deck lantern begin installed in the same 7×9 grid as cargo. Hard collisions reduce hull and engine condition, map the impact point to a hold cell, destroy the item occupying that cell and leave the cell blocked. Damaged cells and vessel condition are saved.
 
 These values are first-pass prototype tuning, not final balance. The current soundscape code adjusts pitch and volume on registered AudioSources, but no authored music/ambience clips or mixer snapshots are connected yet.
@@ -120,8 +121,13 @@ Before the greybox is promoted beyond working baseline, verify in Unity:
 - [ ] The boat moves, reverses, and steers in the open channel.
 - [ ] The boat does not collide with the dock at spawn.
 - [ ] Piers, breakwater rocks, and terrain have appropriate collision.
-- [ ] The harbor opening remains navigable at the prototype boat's turning radius.\n- [ ] The boat trigger can enter/exit the Harbourmaster interaction radius and the E prompt appears/disappears correctly.\n- [ ] The Harbourmaster Yarn node presents lines and branches; accepting the buoy job writes a checkpoint autosave.\n- [ ] The cargo hold opens/closes, supports valid move/rotate/reject operations, and restores placements through manual save and autosave.
-- [ ] The lighthouse and channel buoys remain identifiable at gameplay camera scale.\n- [ ] Q emits one survey pulse while stopped, reports shallow depth and can discover the outer-channel wreck marker.\n- [ ] Greyhaven never reports a deep scattering layer.
+- [ ] The harbor opening remains navigable at the prototype boat's turning radius.
+- [ ] The boat trigger can enter/exit the Harbourmaster interaction radius and the E prompt appears/disappears correctly.
+- [ ] The Harbourmaster Yarn node presents lines and branches; accepting the buoy job writes a checkpoint autosave.
+- [ ] The cargo hold opens/closes, supports valid move/rotate/reject operations, and restores placements through manual save and autosave.
+- [ ] The lighthouse and channel buoys remain identifiable at gameplay camera scale.
+- [ ] Q emits one survey pulse while stopped, reports shallow depth and can discover the outer-channel wreck marker.
+- [ ] Greyhaven never reports a deep scattering layer.
 - [ ] The scene is included in the Windows build scene list.
 - [ ] Edit Mode tests and a Windows development build pass.
 
