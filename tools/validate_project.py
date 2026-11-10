@@ -30,6 +30,10 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Inventory/CargoItemDefinition.cs",
     "Assets/_Project/Scripts/Runtime/Inventory/CargoGridGeometry.cs",
     "Assets/_Project/Scripts/Runtime/Inventory/SpatialCargoHold.cs",
+    "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs",
+    "Assets/_Project/Scripts/Runtime/World/VesselConditionController.cs",
+    "Assets/_Project/Scripts/Runtime/World/HarvestingMinigameController.cs",
+    "Assets/_Project/Scripts/Runtime/World/SalvageSite.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/YarnDialogueSaveParticipant.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs",
@@ -83,7 +87,7 @@ def main() -> int:
             failures.append("PlayerControls.inputactions has no Boat action map.")
         else:
             action_names = {action["name"] for action in boat_map.get("actions", [])}
-            expected_actions = {"Move", "Interact", "Fish", "SoundingPulse", "Pause", "Inventory"}
+            expected_actions = {"Move", "Interact", "Fish", "Dredge", "SoundingPulse", "Pause", "Inventory"}
             if not expected_actions.issubset(action_names):
                 failures.append("Boat action map is missing one or more required actions.")
             identifiers = [
