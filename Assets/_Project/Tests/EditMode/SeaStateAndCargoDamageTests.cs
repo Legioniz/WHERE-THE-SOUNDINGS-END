@@ -133,6 +133,31 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.IsFalse(site.IsDetectableFrom(new Vector3(60f, 0f, 0f), "the_outer_shoals"));
         }
 
+
+        [Test]
+        public void ScatteringLayerConfirmation_RequiresSameRegionDifferentHeadingAndFreshEvidence()
+        {
+            Assert.IsTrue(DeepOceanSurveyMath.IsIndependentLayerObservation(
+                "the_outer_shoals", "the_outer_shoals", 10f, 55f, 240.0, 600.0, 25f));
+            Assert.IsFalse(DeepOceanSurveyMath.IsIndependentLayerObservation(
+                "the_outer_shoals", "the_hollow_trench", 10f, 55f, 240.0, 600.0, 25f));
+            Assert.IsFalse(DeepOceanSurveyMath.IsIndependentLayerObservation(
+                "the_outer_shoals", "the_outer_shoals", 10f, 20f, 240.0, 600.0, 25f));
+            Assert.IsFalse(DeepOceanSurveyMath.IsIndependentLayerObservation(
+                "the_outer_shoals", "the_outer_shoals", 10f, 55f, 720.0, 600.0, 25f));
+        }
+
+        [Test]
+        public void ReturnConfidence_SeparatesStrongSeabedEchoFromSparseLayer()
+        {
+            float seabed = DeepOceanSurveyMath.CalculateReturnConfidence(1f, 0.86f, 0.16f);
+            float sparseLayer = DeepOceanSurveyMath.CalculateReturnConfidence(0.1f, 0.86f, 0.16f);
+
+            Assert.That(seabed, Is.GreaterThan(sparseLayer));
+            Assert.That(seabed, Is.InRange(0f, 1f));
+            Assert.That(sparseLayer, Is.InRange(0f, 1f));
+        }
+
         [Test]
         public void SurveyOpportunityKey_IsStableAcrossRepeatedEvaluation()
         {
