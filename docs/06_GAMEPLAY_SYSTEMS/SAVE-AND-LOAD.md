@@ -67,18 +67,21 @@ Implemented now:
 - Slot listing and deletion.
 - Scene-level capture/restore participant contract.
 - Starter boat position, rotation, linear velocity, and angular velocity.
+- Spatial cargo placements through SpatialCargoHold (requires authored CargoItemDefinition assets in its catalogue).
+- Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
 
 - Player character state and player inventory.
-- Fishing catches, cargo and equipment runtime models.
+- Fishing catches, sell/buy transactions, freshness decay and equipment runtime models.
+- Dialogue presentation cursor and mid-line resume state.
 - WorldClock instance, day/night and weather runtime state.
 - Quests, journal evidence, discoveries and NPC relationships.
 - Regional fish stocks, creature states, threat state, encounter cooldowns and random stream ownership.
 - A player-facing save/load menu, save confirmation prompt, and UI feedback for autosave status. Autosaving itself is implemented.
 - Loading into a different scene automatically. The coordinator currently requires the target scene to be active before restoring its participants.
 
-A field's presence in SaveGameData is a persistence contract, not proof that the related gameplay feature is implemented. Add a focused ISaveParticipant when each system gains authoritative runtime state.
+A field's presence in SaveGameData is a persistence contract, not proof that the related gameplay feature is implemented. The current cargo and dialogue adapters are runtime-ready but still need authored item definitions and a configured DialogueRunner in Unity. Add a focused ISaveParticipant when each system gains authoritative runtime state.
 
 ## Related documents
 
