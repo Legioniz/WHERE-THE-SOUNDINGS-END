@@ -1,7 +1,7 @@
 # Spatial Cargo and Inventory System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime grid and first player interface implemented; fishing/economy integration pending  
+> Status: Runtime spatial hold, starter gear, fishing catches, salvage and impact damage implemented; economy integration pending  
 > Owner: Project lead  
 > Version: 0.3  
 > Last reviewed: 2026-11-10
@@ -21,8 +21,10 @@ The system takes inspiration from the broader spatial-inventory design space des
 - Runtime item instances have unique IDs; item definitions use stable content IDs.
 - Quantity, quality and freshness are stored per placed stack.
 - Hold upgrades are authored progression. A save cannot silently resize a live hold.
-- Damaged or inaccessible cells are represented by the blocked-cell mask, not by deleting items.
-- Quest-critical items must have explicit acceptance/decline handling before they are granted; do not destroy player cargo to make room without a clear player decision.
+- Engine, handline rod and deck lantern are installed as equipment placements in the same grid as cargo. They consume physical cells and can be destroyed by a damaging impact.
+- A collision can permanently block a specific cell and destroy the non-protected item occupying it. The destroyed placement is not silently moved elsewhere.
+- Quest-critical cargo and definitions marked non-damageable are protected from cell-damage destruction.
+- A damaged cell is persisted in save data and remains blocked until repaired through the vessel repair API.
 
 ## Runtime implementation
 
@@ -30,7 +32,9 @@ Located in `Assets/_Project/Scripts/Runtime/Inventory/`:
 
 - `CargoItemDefinition`: ScriptableObject defining stable ID, category, shape and handling metadata.
 - `CargoGridGeometry`: deterministic shape rotation, normalization, blocked-cell map and placement validation.
-- `SpatialCargoHold`: runtime placements, fit checks, move/remove/place operations and `ISaveParticipant` capture/restore.
+- `SpatialCargoHold`: runtime placements, fit checks, move/remove/place operations, physical damaged-cell mask, item destruction on impact, repair and `ISaveParticipant` capture/restore.
+- `CargoItemDefinition`: equipment and aberrant-catch metadata, including an aberrant sale-value multiplier.
+- `VesselConditionController`: collision severity, hull/engine condition and impact-to-grid-cell mapping.
 - `TryPlaceFirstFit`: explicit acquisition helper that searches for the first valid location and never rearranges existing cargo.
 - Query methods expose item definitions, occupied cells, blocked cells and used-cell count to the UI without making the UI an owner of cargo state.
 
@@ -42,11 +46,12 @@ Located in `Assets/_Project/Scripts/Runtime/Inventory/`:
 - The 7×9 hold is rendered as clickable cells. Each item occupies the exact cells defined by its ScriptableObject shape.
 - Click any cell belonging to an item to select it. Click an empty, unblocked cell to move the selected item.
 - Press **R** or ROTATE to preview the next 90-degree orientation. Click an empty cell to commit the rotation and move. An invalid placement leaves the original placement unchanged.
-- REMOVE deletes the selected non-quest item. Quest-critical definitions are protected from accidental discard.
+- REMOVE deletes selected ordinary cargo. Quest-critical cargo and installed equipment cannot be discarded from the player interface.
+- Damaged cells show a cross and cannot accept placements. An item hit by a damaged cell is destroyed as a whole, including every occupied cell it used.
 - The selection readout displays quantity, quality, freshness and rotation. The header reports occupied cells.
 - The hold pauses the prototype simulation while open. This cadence is provisional and must be play-tested.
 
-The catch-intake column exposes the Greyhaven catalogue as **prototype test intake controls**. Each control adds one item through `TryPlaceFirstFit` at test quality/freshness values. It exists to exercise the real grid and persistence model before fishing output is connected; it is not a fishing mechanic and should be replaced by actual catch results when fishing is implemented.
+The catch-intake column remains as **prototype test intake controls** for layout verification. Actual fishing now runs through `HarvestingMinigameController` and inserts the selected catch through `TryPlaceFirstFit`. Dredging at the Greyhaven wreck field yields timber, canvas or corroded fittings. Aberrant fish have distinct item IDs and elevated sale-value multipliers.
 
 ## Save integration
 
@@ -59,16 +64,17 @@ The versioned save DTO stores hold dimensions and placement records:
 - quantity
 - quality
 - freshness
+- damaged-cell coordinates (persisted separately from cargo placements)
 
 The live hold's dimensions remain authoritative during restore. Unknown item IDs and placements that no longer fit are skipped with a warning rather than corrupting the whole save. Manual slots and the dedicated autosave both capture the same `SpatialCargoHold` participant.
 
 ## Remaining work
 
-- Real fishing results must create cargo through the authoritative hold API; the prototype intake buttons are temporary.
 - Drag-and-drop, controller focus navigation, item hover details and accessibility scaling are not complete. Current placement uses click-select then click-destination, with keyboard rotation.
-- No sell/buy transaction, freshness-decay tick or market integration is wired yet.
-- No equipment mount slots, hull damage, cargo loss or storage upgrade gameplay is implemented.
-- Grid geometry tests are present in Edit Mode, but Unity execution and Play Mode interaction still require validation in Unity 6000.3.28f1.
+- Sale transactions, freshness-decay ticking, market demand and regional pricing are not connected yet; aberrant value multipliers are metadata only.
+- Equipment is physically shared with cargo, but equipment activation, upgrade replacement and repair-shop transactions remain future work.
+- Damage repair has a runtime API but no repair-shop UI or material cost transaction yet.
+- Grid geometry and damage/save migration tests are present in Edit Mode, but Unity execution, collision tuning and Play Mode interaction still require validation in Unity 6000.3.28f1.
 
 ## Reference
 
