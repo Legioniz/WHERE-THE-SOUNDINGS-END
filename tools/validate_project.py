@@ -118,9 +118,18 @@ def main() -> int:
             failures.append("SaveGameData is missing the schema 3 to 4 survey-state migration.")
 
         survey_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SoundingRigController.cs").read_text(encoding="utf-8")
-        for required_text in ("SoundingPulse", "discoveredPhenomenonSiteIds", "evaluatedSurveyOpportunityIds", "AcousticEventBus.Publish", "IsIndependentLayerObservation", "DeepOceanPhenomenonRules"):
+        for required_text in ("SoundingPulse", "discoveredPhenomenonSiteIds", "evaluatedSurveyOpportunityIds", "AcousticEventBus.Publish", "IsIndependentLayerObservation"):
             if required_text not in survey_source:
                 failures.append(f"SoundingRigController is missing expected survey feature: {required_text}")
+
+        site_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonSite.cs").read_text(encoding="utf-8")
+        if "DeepOceanPhenomenonRules.IsAllowed" not in site_source:
+            failures.append("DeepOceanPhenomenonSite must enforce DeepOceanPhenomenonRules.")
+
+        rules_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonRules.cs").read_text(encoding="utf-8")
+        for required_type in ("BrinePool", "HydrothermalVent", "ColdSeep", "GasHydrate", "WhaleFall", "WaterMassFront"):
+            if required_type not in rules_source:
+                failures.append(f"DeepOceanPhenomenonRules is missing eligibility rule: {required_type}")
 
         region_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyRegion.cs").read_text(encoding="utf-8")
         for required_region in ("greyhaven", "the_outer_shoals", "the_hollow_trench"):
