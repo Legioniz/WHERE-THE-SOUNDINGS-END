@@ -13,6 +13,7 @@ using WhereTheSoundingsEnd.CameraSystem;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Narrative;
+using WhereTheSoundingsEnd.NPC;
 using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Editor
@@ -80,8 +81,21 @@ namespace WhereTheSoundingsEnd.Editor
             DialogueRunner dialogueRunner = BuildDialogueSystem(world.transform, cargoHold, controls);
             dialogueSave.Runner = dialogueRunner;
             BuildWorldSystems(world.transform, player.Find("Player_Boat_Blockout"), controls, dialogueRunner);
-            BuildHarbourmaster(village, wood, concrete, dialogueRunner,
-                dialogueRunner.GetComponent<GreyhavenRuntimeUI>(), controls);
+            GreyhavenRuntimeUI runtimeUI = dialogueRunner.GetComponent<GreyhavenRuntimeUI>();
+            BuildHarbourmaster(village, wood, concrete, dialogueRunner, runtimeUI, controls);
+            SeaStateDirector npcClock = world.GetComponent<SeaStateDirector>();
+            BuildVillageResident(village, "Mara_Venn_NPC", "Mara Venn", "greyhaven.mara_venn",
+                "fishmonger", "Greyhaven_Fishmonger", new Vector3(-27f, HeightAt(-27f, -29f), -29f),
+                wood, concrete, runner: dialogueRunner, runtimeUI: runtimeUI, controls: controls,
+                seaState: npcClock, dayStart: 4f, dayEnd: 16f, dayActivity: "market_shift");
+            BuildVillageResident(village, "Tomas_Vale_NPC", "Tomas Vale", "greyhaven.tomas_vale",
+                "mechanic", "Greyhaven_Mechanic", new Vector3(1f, HeightAt(1f, -40f), -40f),
+                metal, concrete, runner: dialogueRunner, runtimeUI: runtimeUI, controls: controls,
+                seaState: npcClock, dayStart: 6f, dayEnd: 18f, dayActivity: "repair_shift");
+            BuildVillageResident(village, "Inez_Sarmiento_NPC", "Inez Sarmiento", "greyhaven.inez_sarmiento",
+                "net_mender", "Greyhaven_NetMender", new Vector3(-48f, HeightAt(-48f, -46f), -46f),
+                wood, trim, runner: dialogueRunner, runtimeUI: runtimeUI, controls: controls,
+                seaState: npcClock, dayStart: 7f, dayEnd: 17f, dayActivity: "net_mending");
 
             RenderSettings.ambientMode = AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(0.30f, 0.35f, 0.37f);
@@ -310,6 +324,83 @@ namespace WhereTheSoundingsEnd.Editor
             interaction.Runner = runner;
             interaction.Interface = runtimeUI;
             interaction.Controls = controls;
+
+            NpcAgent agent = npc.AddComponent<NpcAgent>();
+            agent.Configure(
+                "greyhaven.harbourmaster",
+                "Harbourmaster",
+                "harbourmaster",
+                "greyhaven",
+                parent.root.GetComponent<SeaStateDirector>(),
+                new List<NpcScheduleEntry>
+                {
+                    new NpcScheduleEntry { startHour = 5f, endHour = 18f, activityId = "quay_watch", destination = npc.transform },
+                    new NpcScheduleEntry { startHour = 18f, endHour = 5f, activityId = "off_duty", destination = npc.transform }
+                });
+        }
+
+        private static void BuildVillageResident(
+            Transform parent,
+            string objectName,
+            string displayName,
+            string npcId,
+            string occupationId,
+            string dialogueNode,
+            Vector3 position,
+            Material clothing,
+            Material trim,
+            DialogueRunner runner,
+            GreyhavenRuntimeUI runtimeUI,
+            InputActionAsset controls,
+            SeaStateDirector seaState,
+            float dayStart,
+            float dayEnd,
+            string dayActivity)
+        {
+            GameObject npc = new GameObject(objectName);
+            npc.transform.SetParent(parent, false);
+            npc.transform.position = position;
+
+            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.name = objectName + "_Body_Blockout";
+            body.transform.SetParent(npc.transform, false);
+            body.transform.localPosition = new Vector3(0f, 1f, 0f);
+            body.transform.localScale = new Vector3(0.68f, 0.95f, 0.68f);
+            body.GetComponent<Renderer>().sharedMaterial = clothing;
+            UnityEngine.Object.DestroyImmediate(body.GetComponent<Collider>());
+
+            GameObject head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            head.name = objectName + "_Head_Blockout";
+            head.transform.SetParent(npc.transform, false);
+            head.transform.localPosition = new Vector3(0f, 2.02f, 0f);
+            head.transform.localScale = Vector3.one * 0.48f;
+            head.GetComponent<Renderer>().sharedMaterial = trim;
+            UnityEngine.Object.DestroyImmediate(head.GetComponent<Collider>());
+
+            SphereCollider interactionRadius = npc.AddComponent<SphereCollider>();
+            interactionRadius.isTrigger = true;
+            interactionRadius.radius = 14f;
+            interactionRadius.center = new Vector3(0f, 1f, 0f);
+
+            HarbourmasterInteraction interaction = npc.AddComponent<HarbourmasterInteraction>();
+            interaction.Runner = runner;
+            interaction.Interface = runtimeUI;
+            interaction.Controls = controls;
+            interaction.DialogueNode = dialogueNode;
+            interaction.DisplayName = displayName;
+
+            NpcAgent agent = npc.AddComponent<NpcAgent>();
+            agent.Configure(
+                npcId,
+                displayName,
+                occupationId,
+                "greyhaven",
+                seaState,
+                new List<NpcScheduleEntry>
+                {
+                    new NpcScheduleEntry { startHour = dayStart, endHour = dayEnd, activityId = dayActivity, destination = npc.transform },
+                    new NpcScheduleEntry { startHour = dayEnd, endHour = dayStart, activityId = "off_duty", destination = npc.transform }
+                });
         }
 
         private static void BuildWater(Transform parent, Material material)
