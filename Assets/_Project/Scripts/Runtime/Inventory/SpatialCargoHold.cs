@@ -238,6 +238,53 @@ namespace WhereTheSoundingsEnd.Inventory
             return false;
         }
 
+        /// <summary>
+        /// Damages one physical hold cell. Cargo occupying that cell is destroyed unless it is quest-critical.
+        /// Equipment and ordinary cargo use the same placement grid and therefore share damage risk.
+        /// </summary>
+        public bool TryDamageCell(int x, int y, out CargoPlacement destroyedCargo)
+        {
+            destroyedCargo = null;
+            if (x < 0 || y < 0 || x >= width || y >= height || IsCellBlocked(x, y))
+                return false;
+
+            CargoPlacement occupying;
+            if (TryGetPlacementAtCell(x, y, out occupying))
+            {
+                CargoItemDefinition definition = FindDefinition(occupying.itemId);
+                if (definition == null || definition.IsQuestCritical || !definition.CanBeDamaged)
+                    return false;
+
+                CargoPlacement removed;
+                if (TryRemove(occupying.instanceId, out removed))
+                    destroyedCargo = removed;
+            }
+
+            List<Vector2Int> cells = new List<Vector2Int>();
+            if (blockedCells != null) cells.AddRange(blockedCells);
+            cells.Add(new Vector2Int(x, y));
+            blockedCells = cells.ToArray();
+            return true;
+        }
+
+        public bool TryRepairCell(int x, int y)
+        {
+            if (!IsCellBlocked(x, y)) return false;
+            List<Vector2Int> cells = new List<Vector2Int>();
+            for (int i = 0; blockedCells != null && i < blockedCells.Length; i++)
+                if (blockedCells[i] != new Vector2Int(x, y))
+                    cells.Add(blockedCells[i]);
+            blockedCells = cells.ToArray();
+            return true;
+        }
+
+        public bool IsEquipment(string instanceId)
+        {
+            CargoPlacement placement = FindPlacement(instanceId);
+            CargoItemDefinition definition = placement == null ? null : FindDefinition(placement.itemId);
+            return definition != null && definition.Category == CargoItemCategory.Equipment;
+        }
+
         public int GetUsedCellCount()
         {
             bool[,] occupied = BuildOccupiedGrid(null);
@@ -256,6 +303,9 @@ namespace WhereTheSoundingsEnd.Inventory
             data.inventory.holdWidth = width;
             data.inventory.holdHeight = height;
             data.inventory.placements.Clear();
+            data.inventory.damagedCells.Clear();
+            for (int cellIndex = 0; blockedCells != null && cellIndex < blockedCells.Length; cellIndex++)
+                data.inventory.damagedCells.Add(new GridCellSaveData { x = blockedCells[cellIndex].x, y = blockedCells[cellIndex].y });
 
             for (int i = 0; i < placements.Count; i++)
             {
@@ -282,6 +332,17 @@ namespace WhereTheSoundingsEnd.Inventory
 
             // Hold upgrades are authored progression. Never resize the live hold from untrusted save data.
             placements.Clear();
+            List<Vector2Int> restoredDamage = new List<Vector2Int>();
+            if (data.inventory.damagedCells != null)
+            {
+                for (int cellIndex = 0; cellIndex < data.inventory.damagedCells.Count; cellIndex++)
+                {
+                    GridCellSaveData cell = data.inventory.damagedCells[cellIndex];
+                    if (cell != null && cell.x >= 0 && cell.y >= 0 && cell.x < width && cell.y < height)
+                        restoredDamage.Add(new Vector2Int(cell.x, cell.y));
+                }
+            }
+            blockedCells = restoredDamage.ToArray();
             if (data.inventory.placements == null) return;
 
             for (int i = 0; i < data.inventory.placements.Count; i++)
