@@ -58,7 +58,9 @@
 
 ## Deep-ocean phenomena and mariner horror
 
-- [Deep-ocean phenomena and mariner experiences](06_GAMEPLAY_SYSTEMS/DEEP-OCEAN-PHENOMENA-AND-MARINER-EXPERIENCES.md)\n- [Sounding Rig algorithms](07_GAME_RULES_AND_BALANCING/SOUNDING-RIG-ALGORITHMS.md)\n- [Deep-ocean survey implementation and file analysis](08_TECHNICAL_DESIGN/DEEP-OCEAN-SURVEY-IMPLEMENTATION.md)
+- [Deep-ocean phenomena and mariner experiences](06_GAMEPLAY_SYSTEMS/DEEP-OCEAN-PHENOMENA-AND-MARINER-EXPERIENCES.md)
+- [Sounding Rig algorithms](07_GAME_RULES_AND_BALANCING/SOUNDING-RIG-ALGORITHMS.md)
+- [Deep-ocean survey implementation and file analysis](08_TECHNICAL_DESIGN/DEEP-OCEAN-SURVEY-IMPLEMENTATION.md)
 - [Maritime anomaly rules and encounter balancing](07_GAME_RULES_AND_BALANCING/MARITIME-ANOMALY-RULES.md)
 - [Maritime Horror Director](06_GAMEPLAY_SYSTEMS/MARITIME-HORROR-DIRECTOR.md)
 - [Audio Design](10_AUDIO_AND_SOUND_DESIGN/AUDIO-DESIGN-DOCUMENT.md)
