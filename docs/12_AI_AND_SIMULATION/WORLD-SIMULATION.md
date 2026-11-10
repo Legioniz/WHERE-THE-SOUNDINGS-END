@@ -1,9 +1,118 @@
-# World Simulation
+# World Simulation and Event Scheduler
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Placeholder  
+> Status: Implementation-ready design specification  
 > Owner: Project lead  
-> Version: 0.1  
+> Version: 0.2  
 > Last reviewed: 2026-11-10
 
-Reserved for the authoritative world simulation specification. Complete it when the feature or production phase is ready. Follow docs/DOCUMENTATION-STANDARD.md and link related design, technical, data, and test documents. File presence does not mean implementation.
+## 1. Simulation layers
+
+Separate the world into four update layers:
+
+1. **Frame presentation:** camera, particles, audio playback, animation, UI. May run each rendered frame.
+2. **Fixed gameplay simulation:** boat physics, collision, current forces, damage resolution.
+3. **Throttled AI:** perception, decisions, creature steering, NPC decisions. Runs at a defined cadence.
+4. **Scheduled world events:** tides, weather transitions, migration, rare signals, seasonal events, quest timers. Runs only at event boundaries.
+
+Do not update every fish, NPC, or threat at full frame rate while its region is inactive. Use region activation and coarse time advancement for off-screen simulation.
+
+## 2. Event record
+
+Every scheduled or player-generated event should have a stable ID and typed payload:
+
+```csharp
+public readonly struct WorldEvent
+{
+    public readonly string EventId;
+    public readonly string RegionId;
+    public readonly string EventType;
+    public readonly long SimulationTick;
+    public readonly string SourceId;
+    public readonly ulong RandomKey;
+}
+```
+
+The runtime may use richer typed C# records/classes; this compact form establishes the data contract.
+
+## 3. Event lifecycle
+
+`Dormant → Eligible → Evaluated → Scheduled → Active → Resolved → Cooldown / Completed`
+
+- **Eligible:** all story, region, and time conditions are true.
+- **Evaluated:** chance is rolled once for the current opportunity ID.
+- **Scheduled:** the event has a start time and location.
+- **Active:** player can perceive or interact with it.
+- **Resolved:** success, failure, retreat, or expiry is recorded.
+- **Cooldown / Completed:** replay rules are applied.
+
+Save state at transitions that can affect progression. On load, an already evaluated opportunity must not roll again.
+
+## 4. Deterministic event opportunity IDs
+
+Use explicit IDs rather than "random chance every 10 seconds". Examples:
+- `rig_ping:outer_shoals:quest_voice:ping_03`
+- `tide_turn:channel_guardian:cycle_12`
+- `night_listen:hollow_trench:night_08`
+- `region_entry:reef_answers:voyage_04`
+
+Opportunity IDs make events testable and prevent save/load rerolls.
+
+## 5. Timing and scheduling
+
+Prototype time rules:
+- World time advances on the game's simulation clock, not wall-clock time.
+- Weather transition checks: every 5 in-game minutes.
+- NPC schedule changes: on authored schedule boundaries.
+- Threat perception: 4 Hz nearby, 1 Hz in an active region at long distance, paused outside active simulation.
+- Wildlife / fish movement: 0.5–2 Hz depending on importance and proximity.
+- Cosmetic water particles are independent of simulation and must not alter gameplay.
+
+Use a priority queue or sorted event list for future scheduled events. Cancel or reschedule by stable event ID when quest state changes.
+
+## 6. Randomness and reproducibility
+
+Use independent streams for:
+- fishing and catch outcomes;
+- fish population / migration;
+- hostile threat selection;
+- ambient anomalies;
+- cosmetic variation.
+
+Gameplay decisions must not change because a particle effect consumed a random value. Use a versioned PRNG and stable event key. Cosmetic randomness can be non-deterministic because it must never affect gameplay.
+
+## 7. Quest event conditions
+
+A quest event definition needs:
+- event ID;
+- required quest flags;
+- required region and bounds;
+- allowed time, tide, weather, and depth;
+- opportunity boundary;
+- chance or deterministic guarantee;
+- cooldown;
+- location selection rule;
+- warning cue;
+- success / failure / retreat outcomes;
+- save-state key;
+- accessibility cue.
+
+Main story and required quest evidence should never be permanently gated by RNG. Randomization may vary approach, audio variant, or discovery order after the mandatory clue is secured.
+
+## 8. Offline / region-inactive simulation
+
+When the player leaves a region:
+- advance fish populations and scheduled tide/weather states in coarse steps;
+- resolve only events that have explicit off-screen outcomes;
+- do not run local creature chase or attacks;
+- preserve unresolved quest triggers until the player returns;
+- never let a background simulation silently destroy a quest-critical item or NPC.
+
+## 9. Acceptance tests
+
+- Loading an evaluated event never rerolls it.
+- Inactive-region simulation does not run expensive local AI.
+- Cosmetic RNG cannot alter catches or threats.
+- Quest state transitions are idempotent.
+- Event logs reproduce a test encounter from seed + opportunity ID.
+- A missing schedule entry uses a safe default and records a diagnostic.
