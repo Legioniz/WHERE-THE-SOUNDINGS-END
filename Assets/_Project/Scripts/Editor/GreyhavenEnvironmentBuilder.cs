@@ -86,16 +86,16 @@ namespace WhereTheSoundingsEnd.Editor
             SeaStateDirector npcClock = world.GetComponent<SeaStateDirector>();
             BuildVillageResident(village, "Mara_Venn_NPC", "Mara Venn", "greyhaven.mara_venn",
                 "fishmonger", "Greyhaven_Fishmonger", new Vector3(-27f, HeightAt(-27f, -29f), -29f),
-                wood, concrete, runner: dialogueRunner, runtimeUI: runtimeUI, controls: controls,
-                seaState: npcClock, dayStart: 4f, dayEnd: 16f, dayActivity: "market_shift");
+                new Vector3(-23f, HeightAt(-23f, -29f), -29f), wood, concrete,
+                dialogueRunner, runtimeUI, controls, npcClock, 4f, 16f, "market_shift");
             BuildVillageResident(village, "Tomas_Vale_NPC", "Tomas Vale", "greyhaven.tomas_vale",
                 "mechanic", "Greyhaven_Mechanic", new Vector3(1f, HeightAt(1f, -40f), -40f),
-                metal, concrete, runner: dialogueRunner, runtimeUI: runtimeUI, controls: controls,
-                seaState: npcClock, dayStart: 6f, dayEnd: 18f, dayActivity: "repair_shift");
+                new Vector3(5f, HeightAt(5f, -38f), -38f), metal, concrete,
+                dialogueRunner, runtimeUI, controls, npcClock, 6f, 18f, "repair_shift");
             BuildVillageResident(village, "Inez_Sarmiento_NPC", "Inez Sarmiento", "greyhaven.inez_sarmiento",
                 "net_mender", "Greyhaven_NetMender", new Vector3(-48f, HeightAt(-48f, -46f), -46f),
-                wood, trim, runner: dialogueRunner, runtimeUI: runtimeUI, controls: controls,
-                seaState: npcClock, dayStart: 7f, dayEnd: 17f, dayActivity: "net_mending");
+                new Vector3(-44f, HeightAt(-44f, -46f), -46f), wood, trim,
+                dialogueRunner, runtimeUI, controls, npcClock, 7f, 17f, "net_mending");
 
             RenderSettings.ambientMode = AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(0.30f, 0.35f, 0.37f);
@@ -325,6 +325,8 @@ namespace WhereTheSoundingsEnd.Editor
             interaction.Interface = runtimeUI;
             interaction.Controls = controls;
 
+            Transform officeAnchor = CreateNpcAnchor(parent, "Harbourmaster_Office_Anchor",
+                new Vector3(21f, HeightAt(21f, -27f), -27f));
             NpcAgent agent = npc.AddComponent<NpcAgent>();
             agent.Configure(
                 "greyhaven.harbourmaster",
@@ -335,7 +337,7 @@ namespace WhereTheSoundingsEnd.Editor
                 new List<NpcScheduleEntry>
                 {
                     new NpcScheduleEntry { startHour = 5f, endHour = 18f, activityId = "quay_watch", destination = npc.transform },
-                    new NpcScheduleEntry { startHour = 18f, endHour = 5f, activityId = "off_duty", destination = npc.transform }
+                    new NpcScheduleEntry { startHour = 18f, endHour = 5f, activityId = "office_duty", destination = officeAnchor }
                 });
         }
 
@@ -347,6 +349,7 @@ namespace WhereTheSoundingsEnd.Editor
             string occupationId,
             string dialogueNode,
             Vector3 position,
+            Vector3 secondaryPosition,
             Material clothing,
             Material trim,
             DialogueRunner runner,
@@ -389,6 +392,7 @@ namespace WhereTheSoundingsEnd.Editor
             interaction.DialogueNode = dialogueNode;
             interaction.DisplayName = displayName;
 
+            Transform secondaryAnchor = CreateNpcAnchor(parent, objectName + "_Secondary_Anchor", secondaryPosition);
             NpcAgent agent = npc.AddComponent<NpcAgent>();
             agent.Configure(
                 npcId,
@@ -399,8 +403,16 @@ namespace WhereTheSoundingsEnd.Editor
                 new List<NpcScheduleEntry>
                 {
                     new NpcScheduleEntry { startHour = dayStart, endHour = dayEnd, activityId = dayActivity, destination = npc.transform },
-                    new NpcScheduleEntry { startHour = dayEnd, endHour = dayStart, activityId = "off_duty", destination = npc.transform }
+                    new NpcScheduleEntry { startHour = dayEnd, endHour = dayStart, activityId = "off_duty", destination = secondaryAnchor }
                 });
+        }
+
+        private static Transform CreateNpcAnchor(Transform parent, string anchorName, Vector3 position)
+        {
+            GameObject anchor = new GameObject(anchorName);
+            anchor.transform.SetParent(parent, false);
+            anchor.transform.position = position;
+            return anchor.transform;
         }
 
         private static void BuildWater(Transform parent, Material material)
