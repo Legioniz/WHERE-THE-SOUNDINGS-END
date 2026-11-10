@@ -259,20 +259,11 @@ Anomalous specimens are rare, quest-gated, and non-renewable unless a story rule
 
 ## 8. Market and catch value rules
 
-Suggested sale model:
+The authoritative PHP base prices, exact sale units, quality / freshness / demand factors, buyer rules, aberrant specimen outcomes, and one-time unnatural research rewards are defined in [Seafood Selling Price Schedule](../07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md).
 
-**Sale Value = Base Species Value × Landed Quantity × Quality Multiplier × Freshness Multiplier × Local Demand Modifier × Legal Eligibility**
+**Sale Value = Eligible Sale Quantity × Base Dockside Price × Quality × Freshness × Local Demand**
 
-Initial balancing ranges:
-
-| Factor | Suggested range | Notes |
-|---|---:|---|
-| Quality | 0.60–1.25 | Size grade, clean landing, no major damage |
-| Freshness | 0.35–1.00 | Time and storage since catch |
-| Local demand | 0.75–1.35 | Buyer stock and current orders |
-| Legal eligibility | 0 or 1 | Protected, undersized, or closed-season catch cannot enter ordinary sale |
-
-These are proposed tuning ranges, not final economy values. Apply quality and freshness to the landed product rather than arbitrary dice rolls. Buyers should explain why a catch receives a lower grade.
+Legal eligibility is a gate, not a discount: an ineligible catch is rejected from ordinary sale. The schedule's species-specific base price already accounts for expected market position; do not multiply it again by rarity or trade tier. The buyer must explain every visible discount or rejection.
 
 ### Product forms
 
@@ -621,3 +612,10 @@ The standard seafood roster is supplemented by two separate discovery classes. T
 
 The authoritative names, habitat, behavior, catch conditions, handling, specimen journal, trade rules, and acceptance tests are in [Mutated and Unnatural Catchable Specimens](MUTATED-AND-UNNATURAL-CATCHES.md).
 
+
+
+## 18. Selling-price schedule
+
+The complete PHP selling-price table is maintained separately to avoid conflicting duplicate values. It assigns a base dockside payout to all 100 fish, 47 invertebrates, and 8 algae / seaweed records, plus fixed rules for ABR-001–ABR-008 and UNC-001–UNC-008.
+
+See [Seafood Selling Price Schedule](../07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md). That schedule is the single source of truth for prices and units. Prices are proposed game-balance values informed by public Philippine market references, not live market quotations or guaranteed real-world fisher earnings.
