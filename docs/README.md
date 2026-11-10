@@ -56,3 +56,10 @@
 The existing docs/technical folder is retained because it contains the established Unity/C# performance and programming-language guidance.
 
 Status labels: Approved baseline, Working baseline, Proposed, Placeholder, Deprecated. A placeholder is not an implementation claim. Research-derived lore drafts are non-canon until reviewed and approved. Every mechanic needs a gameplay specification; every implemented system needs a technical specification and tests. See DOCUMENTATION-STANDARD.md.
+
+## Persistent population and daily creature growth
+
+- [Fish population and food-web model](07_GAME_RULES_AND_BALANCING/FISH-POPULATION-MODEL.md)
+- [Regional population simulation — Unity architecture](08_TECHNICAL_DESIGN/REGIONAL-POPULATION-SIMULATION.md)
+
+Population rules are authored per species and fishing ground. The simulation tracks cohort growth, breeding stock, daily recruitment, fishing mortality, migration, and recovery. These are specifications; Unity runtime implementation remains separate.
