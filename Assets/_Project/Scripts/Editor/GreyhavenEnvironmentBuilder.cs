@@ -435,27 +435,36 @@ namespace WhereTheSoundingsEnd.Editor
 
         private static void BuildTerrain(Transform parent, Material soil, Material sand, Material grass, Material rock)
         {
-            const int nx = 80;
-            const int nz = 48;
-            const float minX = -110f;
-            const float maxX = 110f;
-            const float backZ = -112f;
+            const int nx = GreyhavenTerrainProfile.GridColumns;
+            const int nz = GreyhavenTerrainProfile.GridRows;
 
             Vector3[] vertices = new Vector3[(nx + 1) * (nz + 1)];
-            int[] triangles = new int[nx * nz * 6];
+            Vector2[] uvs = new Vector2[vertices.Length];
+            List<int>[] surfaceTriangles =
+            {
+                new List<int>(),
+                new List<int>(),
+                new List<int>(),
+                new List<int>()
+            };
 
             for (int ix = 0; ix <= nx; ix++)
             {
-                float x = Mathf.Lerp(minX, maxX, ix / (float)nx);
-                float shore = ShorelineZ(x);
+                float x = Mathf.Lerp(
+                    GreyhavenTerrainProfile.MinimumX,
+                    GreyhavenTerrainProfile.MaximumX,
+                    ix / (float)nx);
+                float shore = GreyhavenTerrainProfile.ShorelineZ(x);
+
                 for (int iz = 0; iz <= nz; iz++)
                 {
-                    float z = Mathf.Lerp(backZ, shore, iz / (float)nz);
-                    vertices[ix * (nz + 1) + iz] = new Vector3(x, HeightAt(x, z), z);
+                    float z = Mathf.Lerp(GreyhavenTerrainProfile.BackZ, shore, iz / (float)nz);
+                    int index = ix * (nz + 1) + iz;
+                    vertices[index] = new Vector3(x, GreyhavenTerrainProfile.HeightAt(x, z), z);
+                    uvs[index] = new Vector2(x / 9f, z / 9f);
                 }
             }
 
-            int ti = 0;
             for (int ix = 0; ix < nx; ix++)
             {
                 for (int iz = 0; iz < nz; iz++)
@@ -464,61 +473,119 @@ namespace WhereTheSoundingsEnd.Editor
                     int b = (ix + 1) * (nz + 1) + iz;
                     int c = a + 1;
                     int d = b + 1;
-                    triangles[ti++] = a; triangles[ti++] = c; triangles[ti++] = b;
-                    triangles[ti++] = b; triangles[ti++] = c; triangles[ti++] = d;
+
+                    AddTerrainTriangle(surfaceTriangles, vertices, a, c, b);
+                    AddTerrainTriangle(surfaceTriangles, vertices, b, c, d);
                 }
             }
 
-            Mesh mesh = new Mesh { name = "Greyhaven_Procedural_Terrain", indexFormat = IndexFormat.UInt32 };
+            Mesh mesh = new Mesh
+            {
+                name = "Greyhaven_Procedural_Terrain",
+                indexFormat = IndexFormat.UInt32
+            };
             mesh.vertices = vertices;
-            mesh.triangles = triangles;
+            mesh.uv = uvs;
+            mesh.subMeshCount = surfaceTriangles.Length;
+            for (int surface = 0; surface < surfaceTriangles.Length; surface++)
+                mesh.SetTriangles(surfaceTriangles[surface], surface, true);
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
 
             GameObject land = new GameObject("Irregular_Volcanic_Island_Terrain");
             land.transform.SetParent(parent, false);
             land.AddComponent<MeshFilter>().sharedMesh = mesh;
-            land.AddComponent<MeshRenderer>().sharedMaterial = soil;
+            land.AddComponent<MeshRenderer>().sharedMaterials = new[] { soil, sand, grass, rock };
             land.AddComponent<MeshCollider>().sharedMesh = mesh;
-
-            for (int i = 0; i < 36; i++)
-            {
-                float x = Mathf.Lerp(-105f, 105f, i / 35f);
-                float z = ShorelineZ(x) - 2.0f;
-                Block("Sandy_Shore_Segment_" + i.ToString("00"), parent,
-                    new Vector3(x, HeightAt(x, z) + 0.08f, z),
-                    new Vector3(6.4f, 0.16f, 3.0f), sand);
-            }
 
             System.Random rng = new System.Random(5107);
             for (int i = 0; i < 24; i++)
             {
                 float x = -104f + i * 9f;
                 float z = -88f + (float)rng.NextDouble() * 17f;
-                GameObject mound = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                mound.name = "Inland_Basalt_Outcrop_" + i.ToString("00");
+                Mesh rockMesh = CreateFacetedRockMesh("Greyhaven_Basalt_Outcrop_" + i.ToString("00"), rng);
+
+                GameObject mound = new GameObject("Inland_Basalt_Outcrop_" + i.ToString("00"));
                 mound.transform.SetParent(parent, false);
                 mound.transform.position = new Vector3(x, HeightAt(x, z) + 1.1f, z);
+                mound.transform.rotation = Quaternion.Euler(0f, (float)rng.NextDouble() * 360f, 0f);
                 mound.transform.localScale = new Vector3(
                     7f + (float)rng.NextDouble() * 8f,
                     2.5f + (float)rng.NextDouble() * 4.5f,
                     7f + (float)rng.NextDouble() * 9f);
-                mound.GetComponent<Renderer>().sharedMaterial = i % 5 == 0 ? grass : rock;
+                mound.AddComponent<MeshFilter>().sharedMesh = rockMesh;
+                mound.AddComponent<MeshRenderer>().sharedMaterial = i % 5 == 0 ? grass : rock;
+                mound.AddComponent<MeshCollider>().sharedMesh = rockMesh;
             }
+        }
+
+        private static void AddTerrainTriangle(
+            List<int>[] surfaceTriangles,
+            Vector3[] vertices,
+            int a,
+            int b,
+            int c)
+        {
+            Vector3 normal = Vector3.Cross(vertices[b] - vertices[a], vertices[c] - vertices[a]).normalized;
+            if (normal.y < 0f) normal = -normal;
+
+            Vector3 centre = (vertices[a] + vertices[b] + vertices[c]) / 3f;
+            float slopeDegrees = Vector3.Angle(normal, Vector3.up);
+            GreyhavenTerrainSurface surface = GreyhavenTerrainProfile.ClassifySurface(
+                centre.y,
+                slopeDegrees,
+                GreyhavenTerrainProfile.InlandDistance(centre.x, centre.z));
+
+            surfaceTriangles[(int)surface].Add(a);
+            surfaceTriangles[(int)surface].Add(b);
+            surfaceTriangles[(int)surface].Add(c);
+        }
+
+        private static Mesh CreateFacetedRockMesh(string name, System.Random rng)
+        {
+            const float t = 1.61803398875f;
+            Vector3[] vertices =
+            {
+                new Vector3(-1f, t, 0f), new Vector3(1f, t, 0f),
+                new Vector3(-1f, -t, 0f), new Vector3(1f, -t, 0f),
+                new Vector3(0f, -1f, t), new Vector3(0f, 1f, t),
+                new Vector3(0f, -1f, -t), new Vector3(0f, 1f, -t),
+                new Vector3(t, 0f, -1f), new Vector3(t, 0f, 1f),
+                new Vector3(-t, 0f, -1f), new Vector3(-t, 0f, 1f)
+            };
+            int[] triangles =
+            {
+                0,11,5, 0,5,1, 0,1,7, 0,7,10, 0,10,11,
+                1,5,9, 5,11,4, 11,10,2, 10,7,6, 7,1,8,
+                3,9,4, 3,4,2, 3,2,6, 3,6,8, 3,8,9,
+                4,9,5, 2,4,11, 6,2,10, 8,6,7, 9,8,1
+            };
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                Vector3 direction = vertices[i].normalized;
+                float size = 0.84f + (float)rng.NextDouble() * 0.32f;
+                direction = Vector3.Scale(direction * size,
+                    new Vector3(1f, 0.72f + (float)rng.NextDouble() * 0.22f, 0.92f + (float)rng.NextDouble() * 0.16f));
+                vertices[i] = direction;
+            }
+
+            Mesh mesh = new Mesh { name = name };
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            return mesh;
         }
 
         private static float ShorelineZ(float x)
         {
-            return -18f + 13f * Mathf.Exp(-(x * x) / 1800f) + 1.8f * Mathf.Sin(x * 0.045f);
+            return GreyhavenTerrainProfile.ShorelineZ(x);
         }
 
         private static float HeightAt(float x, float z)
         {
-            float west = 13f * Mathf.Exp(-((x + 68f) * (x + 68f)) / 900f - ((z + 63f) * (z + 63f)) / 2100f);
-            float east = 10f * Mathf.Exp(-((x - 69f) * (x - 69f)) / 1100f - ((z + 68f) * (z + 68f)) / 2300f);
-            float rear = 5f * Mathf.Exp(-(x * x) / 2600f - ((z + 105f) * (z + 105f)) / 600f);
-            float noise = (Mathf.PerlinNoise((x + 180f) * 0.025f, (z + 180f) * 0.025f) - 0.5f) * 1.1f;
-            return Mathf.Max(0.25f, 0.45f + west + east + rear + noise);
+            return GreyhavenTerrainProfile.HeightAt(x, z);
         }
 
         private static void BuildBreakwater(Transform parent, Material rock, Material concrete)
