@@ -104,7 +104,7 @@ The Greyhaven Editor builder places the residents at the following service locat
 
 The Harbourmaster's named office anchor is on the Harbour Office front, not at the quay-watch point. Mara, Tomas and Inez remain close to their relevant service entrances so the current direct waypoint movement does not need to route through the buildings.
 
-The physical chart table on the east half of the T-pier maps the island outline and labels the Harbour Office, Fish Market, Boat Repair and Net Mender Shed with their corresponding residents. It is a fixed local chart, not a live schedule display: a marker means "workplace" and does not promise that the character is present at every hour.
+The physical chart table on the east half of the T-pier maps the island outline and labels resident workplaces with pin letters: H for the Harbourmaster's quay-watch point, O for the Harbour Office after-hours anchor, M for Mara's Fish Market, T for Tomas's Boat Repair Shed, and I for Inez's Net Mender Shed. It is a fixed local chart, not a live schedule display: a marker means "workplace / schedule destination" and does not promise that the character is present at every hour.
 
 Do not change the stable IDs, Yarn dialogue nodes or schedule boundaries when moving visual props. If later navigation work changes these anchors, preserve short obstacle-free routes and update the chart and this placement table together.
 
