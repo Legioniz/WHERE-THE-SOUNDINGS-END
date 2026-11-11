@@ -108,7 +108,7 @@ The boat uses one root-level BoxCollider as its simplified waterline collision h
 
 Unity's Rigidbody solver owns physical separation and momentum. `VesselConditionController` does not multiply or overwrite post-impact Rigidbody velocity. It aggregates the strongest contact-normal impact reported during a physics step and processes one damage event on the next fixed step.
 
-Damage uses only the component of relative velocity along the contact normal. Tangential scraping therefore does not count as a full-speed collision. The initial gameplay rule is:
+Damage uses the contact-point relative velocity of both rigidbodies, including their angular motion, projected onto the contact normal. Tangential scraping therefore does not count as a full-speed collision, while a rotating bow or stern can still register a real strike. The initial gameplay rule is:
 
 - Damage threshold: 4.2 m/s normal impact speed.
 - Hull damage: `clamp((normalImpactSpeed - threshold) × 2.2, 2, 28)` integrity points per accepted impact.

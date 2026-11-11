@@ -262,7 +262,8 @@ def main() -> int:
         vessel_condition = (ROOT / "Assets/_Project/Scripts/Runtime/World/VesselConditionController.cs").read_text(encoding="utf-8")
         for required_text in (
             "VesselImpactMath.CalculateNormalImpactSpeed", "pendingImpactSpeed",
-            "private void FixedUpdate()", "AcousticEventKind.HullImpact",
+            "body.GetPointVelocity(contact.point)", "otherBody.GetPointVelocity(contact.point)",
+            "damagePerImpactSpeed <= 0f", "private void FixedUpdate()", "AcousticEventKind.HullImpact",
             "AcousticEventBus.Publish", "ApplyImpact(impactSpeed, contactPoint)",
         ):
             if required_text not in vessel_condition:

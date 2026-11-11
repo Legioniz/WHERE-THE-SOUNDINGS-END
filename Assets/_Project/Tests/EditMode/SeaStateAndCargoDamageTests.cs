@@ -88,6 +88,8 @@ namespace WhereTheSoundingsEnd.Tests
                 float.NaN, 4.2f, 2.2f));
             Assert.AreEqual(0f, VesselImpactMath.CalculateHullDamage(
                 8f, 4.2f, float.PositiveInfinity));
+            Assert.AreEqual(0f, VesselImpactMath.CalculateHullDamage(
+                8f, 4.2f, 0f));
             Assert.AreEqual(0.396f,
                 VesselImpactMath.CalculateEngineDamage(2.2f, 0.18f), 0.0001f);
         }

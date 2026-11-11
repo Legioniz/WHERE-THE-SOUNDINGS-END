@@ -93,7 +93,7 @@ Record repeatable observations for:
 - actual vessel velocity driving sea-time progression;
 - no major visual/physics mismatch between water mesh and buoyancy probes;
 - hard impacts separate the hull from piers, breakwater rocks, terrain and wrecks without visual-collider seams;
-- damage follows contact-normal speed, one strongest impact is applied per physics step, and glancing scrapes are not treated as head-on impacts;
+- damage follows contact-point normal speed including angular motion, one strongest impact is applied per physics step, and glancing scrapes are not treated as head-on impacts;
 - accepted impacts emit one acoustic HullImpact signal and preserve quest-critical cargo;
 - stable buoyancy response with render caps at 30, 60 and 120 FPS while the fixed timestep remains unchanged;
 - smooth rendered wave interpolation with no render-frame delta feeding the physics water-velocity sample.

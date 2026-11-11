@@ -11,10 +11,10 @@
 **Commit:** Pending CI verification.
 
 ### Implemented
-- Replaced total relative-speed damage with contact-normal impact speed, so tangential scraping does not count as a full-speed collision.
+- Replaced total relative-speed damage with contact-point relative velocity projected onto the contact normal. Rotational point velocity is included, so tangential scraping is not mistaken for a full-speed collision and a rotating bow/stern can still register a real strike.
 - Coalesced the strongest collision contact during a physics step and processed one damage event, reducing duplicate damage from multiple contact reports.
 - Removed manual post-impact linear/angular velocity multipliers; Unity's Rigidbody solver now owns physical collision response.
-- Added NaN/infinity guards, a deterministic capped hull-damage curve, proportional engine damage and existing local cargo-cell damage.
+- Added NaN/infinity guards, a deterministic capped hull-damage curve, proportional engine damage, a true zero-rate damage disable, and existing local cargo-cell damage.
 - Published accepted damaging impacts through the existing acoustic event bus as `HullImpact` signals with region and game-time context.
 - Replaced Greyhaven's overlapping visual-mesh colliders with one root-level hull BoxCollider. Deep-water survey boats retain one root collider.
 - Added deterministic Edit Mode regression tests, static validator checks and Play Mode acceptance criteria.

@@ -25,6 +25,7 @@ namespace WhereTheSoundingsEnd.World
         private const float MaximumImpactDamage = 28f;
         private const float EngineDamageRatio = 0.18f;
 
+        private Rigidbody body;
         private string lastDamageReport = "Hull condition stable.";
         private float pendingImpactSpeed;
         private Vector3 pendingImpactPoint;
@@ -37,6 +38,7 @@ namespace WhereTheSoundingsEnd.World
 
         private void Awake()
         {
+            body = GetComponent<Rigidbody>();
             if (cargoHold == null) cargoHold = GetComponent<SpatialCargoHold>();
             if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             if (regionProfile == null) regionProfile = FindFirstObjectByType<DeepOceanSurveyRegion>();
@@ -53,15 +55,22 @@ namespace WhereTheSoundingsEnd.World
             if (collision == null || collision.collider == null || collision.contactCount <= 0)
                 return;
 
-            Vector3 relativeVelocity = collision.relativeVelocity;
+            Rigidbody otherBody = collision.rigidbody;
             float strongestImpactSpeed = 0f;
             Vector3 strongestContactPoint = transform.position;
 
             for (int index = 0; index < collision.contactCount; index++)
             {
                 ContactPoint contact = collision.GetContact(index);
+                Vector3 vesselPointVelocity = body != null
+                    ? body.GetPointVelocity(contact.point)
+                    : Vector3.zero;
+                Vector3 otherPointVelocity = otherBody != null
+                    ? otherBody.GetPointVelocity(contact.point)
+                    : Vector3.zero;
+                Vector3 relativeContactVelocity = vesselPointVelocity - otherPointVelocity;
                 float normalImpactSpeed = VesselImpactMath.CalculateNormalImpactSpeed(
-                    relativeVelocity, contact.normal);
+                    relativeContactVelocity, contact.normal);
 
                 if (normalImpactSpeed <= strongestImpactSpeed)
                     continue;
@@ -234,7 +243,7 @@ namespace WhereTheSoundingsEnd.World
                 return 0f;
 
             float safeThreshold = Mathf.Max(0f, impactThreshold);
-            if (normalImpactSpeed < safeThreshold)
+            if (normalImpactSpeed < safeThreshold || damagePerImpactSpeed <= 0f)
                 return 0f;
 
             float lower = Mathf.Max(0f, minimumDamage);

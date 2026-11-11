@@ -90,7 +90,7 @@ The code-level fix does not close M0-06. Unity compilation, Edit Mode execution,
 
 ## Collision review update — 2026-11-12
 
-The collision pass extends the existing `VesselConditionController`. Damage now uses contact-normal speed, so a fast tangential scrape is not treated like a head-on strike. Contact reports are coalesced per physics step, and the component no longer applies arbitrary post-collision velocity multipliers. Accepted damaging impacts publish the existing acoustic `HullImpact` signal. Greyhaven now uses one root-level hull BoxCollider while visible hull/bow meshes are non-colliding.
+The collision pass extends the existing `VesselConditionController`. Damage now uses contact-point relative velocity (including angular point velocity) projected onto the contact normal, so a fast tangential scrape is not treated like a head-on strike while rotation-driven bow/stern impacts are still measured. Contact reports are coalesced per physics step, zero impact-damage tuning cleanly disables damage, and the component no longer applies arbitrary post-collision velocity multipliers. Accepted damaging impacts publish the existing acoustic `HullImpact` signal. Greyhaven now uses one root-level hull BoxCollider while visible hull/bow meshes are non-colliding.
 
 Deterministic Edit Mode cases and static repository guards have been added. This is source-level verification only. Unity compilation, Test Runner execution, physical separation/contact behavior, acoustic propagation, cargo-loss balance and Windows build remain open.
 
