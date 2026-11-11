@@ -56,6 +56,8 @@ namespace WhereTheSoundingsEnd.Tests
         {
             Assert.AreEqual(0f, BoatMotorTelemetryMath.CalculateEngineLoad(float.NaN, 4f, 8.5f, 3.2f));
             Assert.AreEqual(0f, BoatMotorTelemetryMath.CalculateEngineLoad(1f, 4f, 0f, 3.2f));
+            Assert.AreEqual(0f, BoatMotorTelemetryMath.CalculateEngineLoad(
+                1f, float.NaN, 8.5f, 3.2f));
             Assert.AreEqual(0f, BoatMotorTelemetryMath.CalculateSpeedRatio(
                 float.PositiveInfinity, 8.5f, 3.2f));
             Assert.AreEqual(BoatMotorTelemetryMath.IdleRpmNormalized,
