@@ -331,7 +331,7 @@ namespace WhereTheSoundingsEnd.Editor
             interaction.Controls = controls;
 
             Transform officeAnchor = CreateNpcAnchor(parent, "Harbourmaster_Office_Anchor",
-                new Vector3(21f, HeightAt(21f, -27f), -27f));
+                new Vector3(21f, HeightAt(21f, -28.5f), -28.5f));
             NpcAgent agent = npc.AddComponent<NpcAgent>();
             agent.Configure(
                 "greyhaven.harbourmaster",
@@ -1010,7 +1010,7 @@ namespace WhereTheSoundingsEnd.Editor
         {
             Transform chart = Group("Greyhaven_Dock_Chart_Table", parent);
             // The table is on the east side of the T-pier, clear of the central mooring lane.
-            chart.position = new Vector3(7.35f, 0.88f, 30.6f);
+            chart.position = new Vector3(7.35f, 0.88f, 33f);
 
             for (int x = -1; x <= 1; x += 2)
             {
@@ -1047,7 +1047,7 @@ namespace WhereTheSoundingsEnd.Editor
             }
 
             Vector2 villageHub = DockChartPoint(0f, -43f);
-            Vector2 dockPoint = DockChartPoint(7.35f, 30.6f);
+            Vector2 dockPoint = DockChartPoint(7.35f, 33f);
             Vector2 market = DockChartPoint(-27f, -35f);
             Vector2 office = DockChartPoint(21f, -32f);
             Vector2 repair = DockChartPoint(1f, -46f);
