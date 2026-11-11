@@ -127,3 +127,11 @@ AI agents must read `AGENTS.md` before modifying the project. Planned content an
 - [Documentation Index](docs/README.md)
 
 Documents distinguish established science, engineering approximations, designer tuning, placeholders, and fictional anomalies. A design specification does not mean its system has been implemented.
+
+## Local machine data and generated files
+
+Unity editor output and local machine state must stay outside version control. The repository ignore rules exclude Unity `Library/`, `Temp/`, `Obj/`, `Logs/`, build folders, editor caches, local environment files, and common signing/key files. Keep Unity `.meta` files tracked because their GUIDs are part of asset identity.
+
+Runtime saves are written under Unity's `Application.persistentDataPath/Saves/`, outside the project source tree. Do not commit player saves, local diagnostic logs, real credentials, signing certificates, private keys, or machine-specific path inventories.
+
+If a real credential is accidentally committed, revoke or rotate it and assess all affected history. A current-branch deletion alone does not remove earlier copies. Follow the destructive-operation safeguards in `AGENTS.md`; do not rewrite shared history without an explicit, carefully scoped procedure.
