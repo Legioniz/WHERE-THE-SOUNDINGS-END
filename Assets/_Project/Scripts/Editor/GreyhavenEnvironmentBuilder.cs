@@ -53,6 +53,11 @@ namespace WhereTheSoundingsEnd.Editor
             Material hull = Mat("Environment_BoatHull.mat", new Color(0.065f, 0.085f, 0.09f), 0.22f);
             Material foliage = Mat("Environment_MangroveFoliage.mat", new Color(0.12f, 0.20f, 0.15f), 0.0f);
             Material beacon = Mat("Environment_LighthouseBeacon.mat", new Color(0.95f, 0.62f, 0.29f), 0.18f);
+            Material chartPaper = Mat("Environment_ChartPaper.mat", new Color(0.72f, 0.68f, 0.56f), 0.04f);
+            Material chartWater = Mat("Environment_ChartWater.mat", new Color(0.34f, 0.48f, 0.49f), 0.02f);
+            Material chartLand = Mat("Environment_ChartLand.mat", new Color(0.48f, 0.49f, 0.38f), 0.02f);
+            Material chartInk = Mat("Environment_ChartInk.mat", new Color(0.10f, 0.16f, 0.16f), 0.02f);
+            Material chartAccent = Mat("Environment_ChartAccent.mat", new Color(0.58f, 0.16f, 0.11f), 0.04f);
 
             GameObject world = new GameObject("GREYHAVEN — Sheltered Bay Blockout");
             Transform terrain = Group("01_Terrain_and_Shore", world.transform);
@@ -68,7 +73,7 @@ namespace WhereTheSoundingsEnd.Editor
             BuildSalvageSite(water, wood, metal);
             BuildTerrain(terrain, soil, sand, grass, rock);
             BuildBreakwater(harbor, rock, concrete);
-            BuildPiers(harbor, wood, metal);
+            BuildPiers(harbor, wood, metal, chartPaper, chartWater, chartLand, chartInk, chartAccent);
             BuildVillage(village, wood, roof, concrete, glass, metal);
             BuildEstuary(estuary, soil, wood, foliage, rock);
             BuildLighthouse(landmarks, concrete, roof, red, beacon);
@@ -85,7 +90,7 @@ namespace WhereTheSoundingsEnd.Editor
             BuildHarbourmaster(village, wood, concrete, dialogueRunner, runtimeUI, controls);
             SeaStateDirector npcClock = world.GetComponent<SeaStateDirector>();
             BuildVillageResident(village, "Mara_Venn_NPC", "Mara Venn", "greyhaven.mara_venn",
-                "fishmonger", "Greyhaven_Fishmonger", new Vector3(-27f, HeightAt(-27f, -29f), -29f),
+                "fishmonger", "Greyhaven_Fishmonger", new Vector3(-27f, HeightAt(-27f, -28.5f), -28.5f),
                 new Vector3(-23f, HeightAt(-23f, -29f), -29f), wood, concrete,
                 dialogueRunner, runtimeUI, controls, npcClock, 4f, 16f, "market_shift");
             BuildVillageResident(village, "Tomas_Vale_NPC", "Tomas Vale", "greyhaven.tomas_vale",
@@ -296,10 +301,8 @@ namespace WhereTheSoundingsEnd.Editor
         {
             GameObject npc = new GameObject("Harbourmaster_NPC");
             npc.transform.SetParent(parent, false);
-            npc.transform.position = new Vector3(
-                -5f,
-                HeightAt(-5f, -10f),
-                -10f);
+            // Day shift: quay watch on the inner main pier, within the marked harbour service area.
+            npc.transform.position = new Vector3(-1.6f, 0.84f, 12f);
 
             GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             body.name = "Harbourmaster_Body_Blockout";
@@ -619,7 +622,15 @@ namespace WhereTheSoundingsEnd.Editor
             }
         }
 
-        private static void BuildPiers(Transform parent, Material wood, Material metal)
+        private static void BuildPiers(
+            Transform parent,
+            Material wood,
+            Material metal,
+            Material chartPaper,
+            Material chartWater,
+            Material chartLand,
+            Material chartInk,
+            Material chartAccent)
         {
             Block("Main_Pier_Deck", parent, new Vector3(0f, 0.45f, 13f), new Vector3(8.5f, 0.75f, 42f), wood);
             Block("Outer_T_Pier_Deck", parent, new Vector3(0f, 0.48f, 34f), new Vector3(27f, 0.8f, 8f), wood);
@@ -645,15 +656,16 @@ namespace WhereTheSoundingsEnd.Editor
                     new Vector3(0.06f, 2.2f, 0.08f), metal);
 
             Crates(parent, new Vector3(-25f, HeightAt(-25f, -27f) + 0.2f, -27f), wood);
+            BuildDockMap(parent, wood, metal, chartPaper, chartWater, chartLand, chartInk, chartAccent);
         }
 
         private static void BuildVillage(Transform parent, Material wood, Material roof, Material concrete, Material glass, Material metal)
         {
-            Building(parent, "Greyhaven_Fish_Market", new Vector3(-27f, 0f, -35f), 0f, 10f, 5.2f, 8f, wood, roof, glass, concrete);
-            Building(parent, "Harbour_Office", new Vector3(21f, 0f, -32f), 0f, 8f, 4.8f, 7f, concrete, roof, glass, metal);
-            Building(parent, "Boat_Repair_Shed", new Vector3(1f, 0f, -46f), 0f, 11f, 5f, 10f, wood, roof, glass, metal);
-            Building(parent, "Net_Mender_Shed", new Vector3(-48f, 0f, -52f), 12f, 7f, 4.2f, 6f, wood, roof, glass, concrete);
-            Building(parent, "Harbour_Inn", new Vector3(39f, 0f, -55f), -8f, 10f, 5.4f, 8f, wood, roof, glass, concrete);
+            Building(parent, "Greyhaven_Fish_Market", new Vector3(-27f, 0f, -35f), 0f, 10f, 5.2f, 8f, wood, roof, glass, concrete, "FISH MARKET");
+            Building(parent, "Harbour_Office", new Vector3(21f, 0f, -32f), 0f, 8f, 4.8f, 7f, concrete, roof, glass, metal, "HARBOUR OFFICE");
+            Building(parent, "Boat_Repair_Shed", new Vector3(1f, 0f, -46f), 0f, 11f, 5f, 10f, wood, roof, glass, metal, "BOAT REPAIR");
+            Building(parent, "Net_Mender_Shed", new Vector3(-48f, 0f, -52f), 12f, 7f, 4.2f, 6f, wood, roof, glass, concrete, "NET MENDER");
+            Building(parent, "Harbour_Inn", new Vector3(39f, 0f, -55f), -8f, 10f, 5.4f, 8f, wood, roof, glass, concrete, "HARBOUR INN");
             Building(parent, "Village_House_West", new Vector3(-55f, 0f, -73f), 5f, 7f, 4.2f, 6f, wood, roof, glass, concrete);
             Building(parent, "Village_House_Centre", new Vector3(-19f, 0f, -78f), -4f, 7f, 4.2f, 6f, wood, roof, glass, concrete);
             Building(parent, "Village_House_East", new Vector3(22f, 0f, -78f), 7f, 7f, 4.2f, 6f, wood, roof, glass, concrete);
@@ -672,24 +684,567 @@ namespace WhereTheSoundingsEnd.Editor
             StreetLamp(parent, new Vector3(-42f, HeightAt(-42f, -62f), -62f), metal);
         }
 
-        private static void Building(Transform parent, string name, Vector3 position, float yaw,
-            float width, float height, float depth, Material wall, Material roof, Material glass, Material trim)
+        private static void Building(
+            Transform parent,
+            string name,
+            Vector3 position,
+            float yaw,
+            float width,
+            float height,
+            float depth,
+            Material wall,
+            Material roof,
+            Material glass,
+            Material trim,
+            string signText = null)
         {
-            Transform b = Group(name, parent);
-            b.position = new Vector3(position.x, HeightAt(position.x, position.z), position.z);
-            b.rotation = Quaternion.Euler(0f, yaw, 0f);
-            LocalCube(b, "Walls", new Vector3(0f, height * 0.5f, 0f), new Vector3(width, height, depth), wall);
-            LocalCube(b, "Roof_Left_Slope", new Vector3(-width * 0.245f, height + 0.95f, 0f),
-                new Vector3(width * 0.58f, 0.45f, depth + 1.1f), roof, new Vector3(0f, 0f, 30f));
-            LocalCube(b, "Roof_Right_Slope", new Vector3(width * 0.245f, height + 0.95f, 0f),
-                new Vector3(width * 0.58f, 0.45f, depth + 1.1f), roof, new Vector3(0f, 0f, -30f));
-            LocalCube(b, "Front_Door", new Vector3(0f, 1.2f, depth * 0.5f + 0.08f), new Vector3(1.15f, 2.4f, 0.16f), trim);
-            LocalCube(b, "Window_Left", new Vector3(-width * 0.29f, height * 0.62f, depth * 0.5f + 0.09f),
-                new Vector3(1.25f, 1.05f, 0.13f), glass);
-            LocalCube(b, "Window_Right", new Vector3(width * 0.29f, height * 0.62f, depth * 0.5f + 0.09f),
-                new Vector3(1.25f, 1.05f, 0.13f), glass);
-            LocalCube(b, "Sign_Board", new Vector3(0f, height + 0.25f, depth * 0.5f + 0.18f),
-                new Vector3(width * 0.72f, 0.65f, 0.18f), trim);
+            Transform building = Group(name, parent);
+            building.position = new Vector3(position.x, HeightAt(position.x, position.z), position.z);
+            building.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+            VisualCube(building, "Stone_Foundation", new Vector3(0f, 0.16f, 0f),
+                new Vector3(width + 0.42f, 0.32f, depth + 0.42f), trim);
+
+            LocalCube(building, "Main_Wall_Mass", new Vector3(0f, height * 0.5f, 0f),
+                new Vector3(width, height, depth), wall);
+
+            BuildGableRoof(building, width, height, depth, wall, roof, trim);
+
+            float front = depth * 0.5f;
+            float sidePostX = width * 0.5f - 0.18f;
+            for (int side = -1; side <= 1; side += 2)
+            {
+                for (int end = -1; end <= 1; end += 2)
+                {
+                    VisualCube(building, "Corner_Post_" + side + "_" + end,
+                        new Vector3(side * sidePostX, height * 0.5f, end * (depth * 0.5f - 0.16f)),
+                        new Vector3(0.22f, height + 0.06f, 0.22f), trim);
+                }
+            }
+
+            VisualCube(building, "Front_Door", new Vector3(0f, 1.2f, front + 0.12f),
+                new Vector3(1.18f, 2.4f, 0.16f), trim);
+            VisualCube(building, "Door_Frame_Left", new Vector3(-0.68f, 1.22f, front + 0.2f),
+                new Vector3(0.16f, 2.48f, 0.2f), wall);
+            VisualCube(building, "Door_Frame_Right", new Vector3(0.68f, 1.22f, front + 0.2f),
+                new Vector3(0.16f, 2.48f, 0.2f), wall);
+            VisualCube(building, "Door_Frame_Lintel", new Vector3(0f, 2.48f, front + 0.2f),
+                new Vector3(1.52f, 0.18f, 0.2f), wall);
+            VisualCube(building, "Door_Step", new Vector3(0f, 0.14f, front + 0.58f),
+                new Vector3(1.75f, 0.24f, 0.82f), trim);
+            VisualCube(building, "Door_Handle", new Vector3(0.38f, 1.25f, front + 0.23f),
+                new Vector3(0.07f, 0.2f, 0.07f), glass);
+
+            BuildFrontWindow(building, "Front_Window_Left",
+                new Vector3(-width * 0.29f, height * 0.62f, front + 0.13f), glass, trim, wall);
+            BuildFrontWindow(building, "Front_Window_Right",
+                new Vector3(width * 0.29f, height * 0.62f, front + 0.13f), glass, trim, wall);
+
+            VisualCube(building, "Front_Eave_Beam", new Vector3(0f, height + 0.08f, front + 0.08f),
+                new Vector3(width + 0.7f, 0.2f, 0.22f), trim);
+
+            if (!string.IsNullOrWhiteSpace(signText))
+            {
+                VisualCube(building, "Service_Sign_Plaque",
+                    new Vector3(0f, height - 0.55f, front + 0.25f),
+                    new Vector3(Mathf.Min(width * 0.78f, 7.7f), 0.66f, 0.13f), trim);
+                AddWorldLabel(building, "Service_Sign_Text", signText,
+                    new Vector3(0f, height - 0.55f, front + 0.33f),
+                    Quaternion.identity, 0.075f, 42, TextAnchor.MiddleCenter, TextAlignment.Center,
+                    new Color(0.08f, 0.11f, 0.11f));
+            }
+
+            BuildBuildingStyle(building, name, width, height, depth, wall, roof, glass, trim);
+        }
+
+        private static void BuildGableRoof(
+            Transform parent,
+            float width,
+            float height,
+            float depth,
+            Material wall,
+            Material roof,
+            Material trim)
+        {
+            float halfWidth = width * 0.5f + 0.45f;
+            float front = depth * 0.5f + 0.38f;
+            float back = -depth * 0.5f - 0.38f;
+            float eave = height + 0.16f;
+            float rise = Mathf.Clamp(width * 0.18f, 1.3f, 2.15f);
+            float ridge = eave + rise;
+
+            Vector3[] roofVertices =
+            {
+                new Vector3(-halfWidth, eave, front),
+                new Vector3(0f, ridge, front),
+                new Vector3(0f, ridge, back),
+                new Vector3(-halfWidth, eave, back),
+                new Vector3(0f, ridge, front),
+                new Vector3(halfWidth, eave, front),
+                new Vector3(halfWidth, eave, back),
+                new Vector3(0f, ridge, back)
+            };
+            int[] roofTriangles =
+            {
+                0, 1, 2, 0, 2, 3,
+                4, 5, 6, 4, 6, 7
+            };
+
+            Mesh roofMesh = new Mesh { name = parent.name + "_Pitched_Roof" };
+            roofMesh.vertices = roofVertices;
+            roofMesh.triangles = roofTriangles;
+            roofMesh.RecalculateNormals();
+            roofMesh.RecalculateBounds();
+
+            GameObject roofObject = new GameObject("Pitched_Roof_Mesh");
+            roofObject.transform.SetParent(parent, false);
+            roofObject.AddComponent<MeshFilter>().sharedMesh = roofMesh;
+            roofObject.AddComponent<MeshRenderer>().sharedMaterial = roof;
+
+            Vector3[] gableVertices =
+            {
+                new Vector3(-width * 0.5f, height, front),
+                new Vector3(0f, ridge, front),
+                new Vector3(width * 0.5f, height, front),
+                new Vector3(-width * 0.5f, height, back),
+                new Vector3(0f, ridge, back),
+                new Vector3(width * 0.5f, height, back)
+            };
+            int[] gableTriangles = { 0, 2, 1, 3, 4, 5 };
+            Mesh gableMesh = new Mesh { name = parent.name + "_Gable_End_Caps" };
+            gableMesh.vertices = gableVertices;
+            gableMesh.triangles = gableTriangles;
+            gableMesh.RecalculateNormals();
+            gableMesh.RecalculateBounds();
+
+            GameObject gables = new GameObject("Gable_End_Caps");
+            gables.transform.SetParent(parent, false);
+            gables.AddComponent<MeshFilter>().sharedMesh = gableMesh;
+            gables.AddComponent<MeshRenderer>().sharedMaterial = wall;
+
+            VisualCube(parent, "Roof_Ridge_Cap", new Vector3(0f, ridge + 0.04f, 0f),
+                new Vector3(0.2f, 0.16f, depth + 1.0f), trim);
+            VisualCube(parent, "Roof_Eave_Left", new Vector3(-width * 0.5f - 0.2f, eave - 0.05f, 0f),
+                new Vector3(0.18f, 0.22f, depth + 0.9f), trim);
+            VisualCube(parent, "Roof_Eave_Right", new Vector3(width * 0.5f + 0.2f, eave - 0.05f, 0f),
+                new Vector3(0.18f, 0.22f, depth + 0.9f), trim);
+        }
+
+        private static void BuildFrontWindow(
+            Transform parent,
+            string name,
+            Vector3 centre,
+            Material glass,
+            Material wood,
+            Material trim)
+        {
+            VisualCube(parent, name + "_Glass", centre, new Vector3(1.22f, 1.02f, 0.11f), glass);
+            VisualCube(parent, name + "_Frame_Left",
+                centre + new Vector3(-0.69f, 0f, 0.015f), new Vector3(0.14f, 1.26f, 0.16f), wood);
+            VisualCube(parent, name + "_Frame_Right",
+                centre + new Vector3(0.69f, 0f, 0.015f), new Vector3(0.14f, 1.26f, 0.16f), wood);
+            VisualCube(parent, name + "_Frame_Top",
+                centre + new Vector3(0f, 0.58f, 0.015f), new Vector3(1.52f, 0.14f, 0.16f), wood);
+            VisualCube(parent, name + "_Frame_Sill",
+                centre + new Vector3(0f, -0.58f, 0.06f), new Vector3(1.62f, 0.16f, 0.28f), trim);
+            VisualCube(parent, name + "_Mullion",
+                centre + new Vector3(0f, 0f, 0.05f), new Vector3(0.07f, 1.0f, 0.17f), wood);
+            VisualCube(parent, name + "_Shutter_Left",
+                centre + new Vector3(-0.9f, 0f, 0.03f), new Vector3(0.23f, 1.15f, 0.12f), trim);
+            VisualCube(parent, name + "_Shutter_Right",
+                centre + new Vector3(0.9f, 0f, 0.03f), new Vector3(0.23f, 1.15f, 0.12f), trim);
+        }
+
+        private static void BuildBuildingStyle(
+            Transform parent,
+            string name,
+            float width,
+            float height,
+            float depth,
+            Material wall,
+            Material roof,
+            Material glass,
+            Material trim)
+        {
+            float front = depth * 0.5f;
+
+            if (name.Contains("Fish_Market"))
+            {
+                VisualCube(parent, "Market_Canopy", new Vector3(0f, height + 0.9f, front + 1.25f),
+                    new Vector3(width * 0.82f, 0.18f, 2.7f), roof, Quaternion.Euler(7f, 0f, 0f));
+                for (int side = -1; side <= 1; side += 2)
+                    VisualCube(parent, "Market_Canopy_Post_" + side,
+                        new Vector3(side * width * 0.37f, height * 0.48f, front + 2.35f),
+                        new Vector3(0.18f, height * 0.92f, 0.18f), trim);
+                VisualCube(parent, "Market_Service_Counter",
+                    new Vector3(0f, 0.92f, front + 0.88f),
+                    new Vector3(width * 0.64f, 1.25f, 0.72f), trim);
+                VisualCube(parent, "Market_Counter_Top",
+                    new Vector3(0f, 1.62f, front + 0.88f),
+                    new Vector3(width * 0.68f, 0.12f, 0.86f), roof);
+                for (int i = -1; i <= 1; i += 2)
+                {
+                    VisualCube(parent, "Market_Crate_" + i,
+                        new Vector3(i * 3.1f, 0.46f, front + 1.15f),
+                        new Vector3(0.9f, 0.82f, 0.85f), wall);
+                }
+                VisualCube(parent, "Market_Fish_Tray",
+                    new Vector3(0f, 1.78f, front + 0.92f),
+                    new Vector3(1.4f, 0.12f, 0.5f), glass);
+            }
+            else if (name.Contains("Harbour_Office"))
+            {
+                VisualCube(parent, "Office_Entry_Porch", new Vector3(0f, 0.18f, front + 1.0f),
+                    new Vector3(width * 0.76f, 0.24f, 2.0f), trim);
+                for (int side = -1; side <= 1; side += 2)
+                    VisualCube(parent, "Office_Porch_Post_" + side,
+                        new Vector3(side * width * 0.31f, 1.55f, front + 1.7f),
+                        new Vector3(0.2f, 3.1f, 0.2f), wall);
+                VisualCube(parent, "Office_Porch_Roof",
+                    new Vector3(0f, 3.18f, front + 1.55f),
+                    new Vector3(width * 0.9f, 0.2f, 2.35f), roof, Quaternion.Euler(5f, 0f, 0f));
+                VisualCube(parent, "Office_Bell_Frame",
+                    new Vector3(width * 0.35f, height + 1.25f, -depth * 0.25f),
+                    new Vector3(0.16f, 2.2f, 0.16f), trim);
+                VisualCube(parent, "Office_Bell_Beam",
+                    new Vector3(width * 0.35f, height + 2.25f, -depth * 0.25f),
+                    new Vector3(1.35f, 0.15f, 0.15f), trim);
+                VisualCube(parent, "Office_Bell_Rope",
+                    new Vector3(width * 0.35f, height + 1.45f, -depth * 0.25f),
+                    new Vector3(0.035f, 1.45f, 0.035f), glass);
+            }
+            else if (name.Contains("Boat_Repair"))
+            {
+                VisualCube(parent, "Repair_Bay_Dark_Opening",
+                    new Vector3(0f, 2.12f, front + 0.105f), new Vector3(5.6f, 3.95f, 0.12f), wall);
+                for (int side = -1; side <= 1; side += 2)
+                    VisualCube(parent, "Repair_Sliding_Door_" + side,
+                        new Vector3(side * 2.25f, 2.1f, front + 0.2f),
+                        new Vector3(0.92f, 3.75f, 0.2f), trim);
+                VisualCube(parent, "Repair_Hoist_Rail",
+                    new Vector3(0f, height - 0.65f, front + 0.75f),
+                    new Vector3(width * 0.72f, 0.18f, 0.18f), trim);
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    VisualCube(parent, "Repair_Hoist_Cable_" + side,
+                        new Vector3(side * 1.3f, height - 1.55f, front + 0.75f),
+                        new Vector3(0.045f, 1.65f, 0.045f), glass);
+                }
+                VisualCube(parent, "Repair_Hoist_Hook",
+                    new Vector3(0f, height - 2.48f, front + 0.75f),
+                    new Vector3(0.42f, 0.12f, 0.12f), trim);
+                VisualCube(parent, "Repair_Tool_Bench",
+                    new Vector3(width * 0.36f, 1.0f, front + 0.85f),
+                    new Vector3(1.65f, 1.0f, 0.65f), wall);
+            }
+            else if (name.Contains("Net_Mender"))
+            {
+                VisualCube(parent, "Net_Mender_Lean_To",
+                    new Vector3(width * 0.5f + 1.25f, 2.45f, 0f),
+                    new Vector3(2.8f, 0.16f, depth + 0.8f), roof, Quaternion.Euler(0f, 0f, -5f));
+                for (int side = -1; side <= 1; side += 2)
+                    VisualCube(parent, "Net_Mender_Lean_To_Post_" + side,
+                        new Vector3(width * 0.5f + 2.45f, 1.15f, side * (depth * 0.35f)),
+                        new Vector3(0.16f, 2.3f, 0.16f), trim);
+                VisualCube(parent, "Net_Mender_Work_Table",
+                    new Vector3(width * 0.5f + 1.4f, 0.9f, 0f),
+                    new Vector3(2.4f, 0.2f, 2.0f), trim);
+                for (int i = 0; i < 7; i++)
+                {
+                    float z = -depth * 0.34f + i * (depth * 0.68f / 6f);
+                    VisualCube(parent, "Hanging_Net_Line_" + i,
+                        new Vector3(width * 0.5f + 1.95f, 1.45f, z),
+                        new Vector3(0.035f, 1.55f, 0.035f), glass);
+                }
+            }
+            else if (name.Contains("Harbour_Inn"))
+            {
+                VisualCube(parent, "Inn_Veranda_Deck",
+                    new Vector3(0f, 0.18f, front + 1.55f),
+                    new Vector3(width + 1.25f, 0.24f, 2.9f), trim);
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    for (int post = -1; post <= 1; post += 2)
+                    {
+                        VisualCube(parent, "Inn_Veranda_Post_" + side + "_" + post,
+                            new Vector3(side * (width * 0.5f + 0.38f), 1.65f, front + 0.45f + (post + 1) * 0.95f),
+                            new Vector3(0.18f, 3.3f, 0.18f), wall);
+                    }
+                    VisualCube(parent, "Inn_Veranda_Rail_" + side,
+                        new Vector3(side * (width * 0.5f + 0.38f), 0.88f, front + 1.7f),
+                        new Vector3(0.14f, 0.16f, 2.35f), trim);
+                }
+                VisualCube(parent, "Inn_Bench",
+                    new Vector3(width * 0.25f, 0.62f, front + 1.7f),
+                    new Vector3(2.3f, 0.18f, 0.65f), wall);
+            }
+            else
+            {
+                VisualCube(parent, "House_Porch_Deck",
+                    new Vector3(0f, 0.15f, front + 0.95f),
+                    new Vector3(width * 0.74f, 0.22f, 1.8f), trim);
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    VisualCube(parent, "House_Porch_Post_" + side,
+                        new Vector3(side * width * 0.3f, 1.35f, front + 1.55f),
+                        new Vector3(0.16f, 2.7f, 0.16f), wall);
+                    VisualCube(parent, "House_Porch_Rail_" + side,
+                        new Vector3(side * width * 0.3f, 0.78f, front + 1.05f),
+                        new Vector3(0.1f, 0.12f, 0.95f), trim);
+                }
+                VisualCube(parent, "House_Chimney",
+                    new Vector3(-width * 0.28f, height + 1.45f, -depth * 0.18f),
+                    new Vector3(0.7f, 2.6f, 0.75f), trim);
+            }
+        }
+
+        private static void BuildDockMap(
+            Transform parent,
+            Material wood,
+            Material metal,
+            Material chartPaper,
+            Material chartWater,
+            Material chartLand,
+            Material chartInk,
+            Material chartAccent)
+        {
+            Transform chart = Group("Greyhaven_Dock_Chart_Table", parent);
+            // The table is on the east side of the T-pier, clear of the central mooring lane.
+            chart.position = new Vector3(7.35f, 0.88f, 30.6f);
+
+            for (int x = -1; x <= 1; x += 2)
+            {
+                for (int z = -1; z <= 1; z += 2)
+                {
+                    VisualCube(chart, "Chart_Table_Leg_" + x + "_" + z,
+                        new Vector3(x * 3.25f, 0.42f, z * 1.95f),
+                        new Vector3(0.24f, 0.84f, 0.24f), metal);
+                }
+            }
+
+            VisualCube(chart, "Chart_Table_Frame",
+                new Vector3(0f, 0.86f, 0f), new Vector3(7.55f, 0.18f, 4.85f), wood);
+            VisualCube(chart, "Chart_Parchment_Surface",
+                new Vector3(0f, 0.98f, 0f), new Vector3(7.3f, 0.06f, 4.6f), chartPaper);
+
+            // A muted sea field makes the chart visibly distinct from the dock timbers.
+            VisualCube(chart, "Chart_Sea_Field",
+                new Vector3(-0.25f, 1.02f, 0f), new Vector3(5.65f, 0.025f, 3.55f), chartWater);
+
+            GameObject island = new GameObject("Chart_Greyhaven_Island_Silhouette");
+            island.transform.SetParent(chart, false);
+            island.AddComponent<MeshFilter>().sharedMesh = CreateDockChartLandMesh();
+            island.AddComponent<MeshRenderer>().sharedMaterial = chartLand;
+
+            // Coastline and a restrained road network are drawn directly into the physical chart.
+            Vector2 previous = DockChartPoint(-110f, GreyhavenTerrainProfile.ShorelineZ(-110f));
+            for (int i = 1; i <= 80; i++)
+            {
+                float x = Mathf.Lerp(-110f, 110f, i / 80f);
+                Vector2 next = DockChartPoint(x, GreyhavenTerrainProfile.ShorelineZ(x));
+                DockChartLine(chart, "Chart_Shoreline_" + i, previous, next, 0.045f, chartInk);
+                previous = next;
+            }
+
+            Vector2 villageHub = DockChartPoint(0f, -43f);
+            Vector2 dockPoint = DockChartPoint(7.35f, 30.6f);
+            Vector2 market = DockChartPoint(-27f, -35f);
+            Vector2 office = DockChartPoint(21f, -32f);
+            Vector2 repair = DockChartPoint(1f, -46f);
+            Vector2 netMender = DockChartPoint(-48f, -52f);
+            Vector2 inn = DockChartPoint(39f, -55f);
+            Vector2 lighthouse = DockChartPoint(-86f, -22f);
+            Vector2 wreck = DockChartPoint(30f, 55f);
+
+            DockChartLine(chart, "Chart_Road_Dock_To_Village", dockPoint, villageHub, 0.055f, chartAccent);
+            DockChartLine(chart, "Chart_Road_Market", villageHub, market, 0.035f, chartInk);
+            DockChartLine(chart, "Chart_Road_Office", villageHub, office, 0.035f, chartInk);
+            DockChartLine(chart, "Chart_Road_Repair", villageHub, repair, 0.035f, chartInk);
+            DockChartLine(chart, "Chart_Road_Net_Mender", villageHub, netMender, 0.035f, chartInk);
+            DockChartLine(chart, "Chart_Road_Inn", villageHub, inn, 0.035f, chartInk);
+            DockChartLine(chart, "Chart_Lighthouse_Path", lighthouse, market, 0.025f, chartInk);
+
+            DockChartMarker(chart, "Chart_Marker_Dock_You_Are_Here", dockPoint, chartAccent, 0.23f);
+            DockChartMarker(chart, "Chart_Marker_Market_Mara", market, chartInk, 0.16f);
+            DockChartMarker(chart, "Chart_Marker_Office_Harbourmaster", office, chartInk, 0.16f);
+            DockChartMarker(chart, "Chart_Marker_Repair_Tomas", repair, chartInk, 0.16f);
+            DockChartMarker(chart, "Chart_Marker_Net_Mender_Inez", netMender, chartInk, 0.16f);
+            DockChartMarker(chart, "Chart_Marker_Inn", inn, chartInk, 0.14f);
+            DockChartMarker(chart, "Chart_Marker_Lighthouse", lighthouse, chartAccent, 0.18f);
+            DockChartMarker(chart, "Chart_Marker_Outer_Channel_Wreck", wreck, chartAccent, 0.16f);
+
+            AddWorldLabel(chart, "Chart_Title", "GREYHAVEN  /  HARBOUR CHART",
+                new Vector3(-3.48f, 1.105f, 2.06f), Quaternion.Euler(-90f, 0f, 0f),
+                0.055f, 48, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_North_Arrow", "N  ↑",
+                new Vector3(2.17f, 1.105f, 1.57f), Quaternion.Euler(-90f, 0f, 0f),
+                0.055f, 42, TextAnchor.MiddleCenter, TextAlignment.Center, chartInk.color);
+
+            AddWorldLabel(chart, "Chart_Key_Header", "KEY / PEOPLE",
+                new Vector3(2.72f, 1.105f, 1.05f), Quaternion.Euler(-90f, 0f, 0f),
+                0.045f, 40, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Dock", "DOCK  •  YOU ARE HERE",
+                new Vector3(2.72f, 1.105f, 0.68f), Quaternion.Euler(-90f, 0f, 0f),
+                0.037f, 32, TextAnchor.MiddleLeft, TextAlignment.Left, chartAccent.color);
+            AddWorldLabel(chart, "Chart_Key_Harbourmaster", "HARBOURMASTER  /  OFFICE",
+                new Vector3(2.72f, 1.105f, 0.28f), Quaternion.Euler(-90f, 0f, 0f),
+                0.034f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Mara", "MARA VENN  /  MARKET",
+                new Vector3(2.72f, 1.105f, -0.08f), Quaternion.Euler(-90f, 0f, 0f),
+                0.034f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Tomas", "TOMAS VALE  /  REPAIR",
+                new Vector3(2.72f, 1.105f, -0.44f), Quaternion.Euler(-90f, 0f, 0f),
+                0.034f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Inez", "INEZ SARMIENTO  /  NET SHED",
+                new Vector3(2.72f, 1.105f, -0.80f), Quaternion.Euler(-90f, 0f, 0f),
+                0.033f, 29, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Landmark", "LIGHTHOUSE  /  WEST HEADLAND",
+                new Vector3(2.72f, 1.105f, -1.16f), Quaternion.Euler(-90f, 0f, 0f),
+                0.031f, 27, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Wreck", "WRECK FIELD  /  OUTER CHANNEL",
+                new Vector3(2.72f, 1.105f, -1.51f), Quaternion.Euler(-90f, 0f, 0f),
+                0.031f, 27, TextAnchor.MiddleLeft, TextAlignment.Left, chartAccent.color);
+
+            VisualCube(chart, "Chart_Frame_Top", new Vector3(0f, 1.035f, 2.23f),
+                new Vector3(7.35f, 0.09f, 0.12f), wood);
+            VisualCube(chart, "Chart_Frame_Bottom", new Vector3(0f, 1.035f, -2.23f),
+                new Vector3(7.35f, 0.09f, 0.12f), wood);
+            VisualCube(chart, "Chart_Frame_Left", new Vector3(-3.62f, 1.035f, 0f),
+                new Vector3(0.12f, 0.09f, 4.5f), wood);
+            VisualCube(chart, "Chart_Frame_Right", new Vector3(3.62f, 1.035f, 0f),
+                new Vector3(0.12f, 0.09f, 4.5f), wood);
+        }
+
+        private static Mesh CreateDockChartLandMesh()
+        {
+            const int columns = 72;
+            const int rows = 28;
+            Vector3[] vertices = new Vector3[(columns + 1) * (rows + 1)];
+            int[] triangles = new int[columns * rows * 6];
+
+            for (int ix = 0; ix <= columns; ix++)
+            {
+                float x = Mathf.Lerp(-110f, 110f, ix / (float)columns);
+                float shore = GreyhavenTerrainProfile.ShorelineZ(x);
+                for (int iz = 0; iz <= rows; iz++)
+                {
+                    float z = Mathf.Lerp(GreyhavenTerrainProfile.BackZ, shore, iz / (float)rows);
+                    int index = ix * (rows + 1) + iz;
+                    vertices[index] = new Vector3(x * 0.0225f, 1.055f, -1.45f + (z + 112f) * 0.018f);
+                }
+            }
+
+            int ti = 0;
+            for (int ix = 0; ix < columns; ix++)
+            {
+                for (int iz = 0; iz < rows; iz++)
+                {
+                    int a = ix * (rows + 1) + iz;
+                    int b = (ix + 1) * (rows + 1) + iz;
+                    int c = a + 1;
+                    int d = b + 1;
+                    triangles[ti++] = a; triangles[ti++] = c; triangles[ti++] = b;
+                    triangles[ti++] = b; triangles[ti++] = c; triangles[ti++] = d;
+                }
+            }
+
+            Mesh mesh = new Mesh { name = "Greyhaven_Dock_Chart_Land" };
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            return mesh;
+        }
+
+        private static Vector2 DockChartPoint(float worldX, float worldZ)
+        {
+            return new Vector2(worldX * 0.0225f, -1.45f + (worldZ + 112f) * 0.018f);
+        }
+
+        private static void DockChartLine(
+            Transform parent,
+            string name,
+            Vector2 start,
+            Vector2 end,
+            float thickness,
+            Material material)
+        {
+            Vector2 delta = end - start;
+            if (delta.sqrMagnitude < 0.0001f) return;
+
+            float yaw = Mathf.Atan2(delta.x, delta.y) * Mathf.Rad2Deg;
+            VisualCube(parent, name, new Vector3((start.x + end.x) * 0.5f, 1.075f, (start.y + end.y) * 0.5f),
+                new Vector3(delta.magnitude, 0.012f, thickness), material,
+                Quaternion.Euler(0f, yaw, 0f));
+        }
+
+        private static void DockChartMarker(
+            Transform parent,
+            string name,
+            Vector2 point,
+            Material material,
+            float diameter)
+        {
+            GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            marker.name = name;
+            marker.transform.SetParent(parent, false);
+            marker.transform.localPosition = new Vector3(point.x, 1.095f, point.y);
+            marker.transform.localScale = new Vector3(diameter, 0.025f, diameter);
+            marker.GetComponent<Renderer>().sharedMaterial = material;
+            UnityEngine.Object.DestroyImmediate(marker.GetComponent<Collider>());
+        }
+
+        private static TextMesh AddWorldLabel(
+            Transform parent,
+            string name,
+            string value,
+            Vector3 localPosition,
+            Quaternion localRotation,
+            float characterSize,
+            int fontSize,
+            TextAnchor anchor,
+            TextAlignment alignment,
+            Color colour)
+        {
+            GameObject label = new GameObject(name);
+            label.transform.SetParent(parent, false);
+            label.transform.localPosition = localPosition;
+            label.transform.localRotation = localRotation;
+
+            TextMesh text = label.AddComponent<TextMesh>();
+            Font font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (font != null) text.font = font;
+
+            text.text = value;
+            text.fontSize = fontSize;
+            text.characterSize = characterSize;
+            text.anchor = anchor;
+            text.alignment = alignment;
+            text.color = colour;
+            text.richText = false;
+            text.lineSpacing = 1f;
+            text.GetComponent<MeshRenderer>().sharedMaterial = text.font != null ? text.font.material : null;
+            return text;
+        }
+
+        private static GameObject VisualCube(
+            Transform parent,
+            string name,
+            Vector3 localPosition,
+            Vector3 localScale,
+            Material material,
+            Quaternion? localRotation = null)
+        {
+            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            go.name = name;
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = localPosition;
+            go.transform.localScale = localScale;
+            if (localRotation.HasValue) go.transform.localRotation = localRotation.Value;
+            go.GetComponent<Renderer>().sharedMaterial = material;
+            UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
+            return go;
         }
 
         private static void Road(Transform parent, Vector3 start, Vector3 end, float width, Material material)
