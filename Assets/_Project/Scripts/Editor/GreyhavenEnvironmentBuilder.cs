@@ -1047,6 +1047,7 @@ namespace WhereTheSoundingsEnd.Editor
 
             Vector2 villageHub = DockChartPoint(0f, -43f);
             Vector2 dockPoint = DockChartPoint(7.35f, 33f);
+            Vector2 quayWatch = DockChartPoint(-1.6f, 12f);
             Vector2 market = DockChartPoint(-27f, -35f);
             Vector2 office = DockChartPoint(21f, -32f);
             Vector2 repair = DockChartPoint(1f, -46f);
@@ -1064,13 +1065,23 @@ namespace WhereTheSoundingsEnd.Editor
             DockChartLine(chart, "Chart_Lighthouse_Path", lighthouse, market, 0.025f, chartInk);
 
             DockChartMarker(chart, "Chart_Marker_Dock_You_Are_Here", dockPoint, chartAccent, 0.23f);
+            DockChartMarker(chart, "Chart_Marker_Harbourmaster_Quay", quayWatch, chartAccent, 0.17f);
             DockChartMarker(chart, "Chart_Marker_Market_Mara", market, chartInk, 0.16f);
-            DockChartMarker(chart, "Chart_Marker_Office_Harbourmaster", office, chartInk, 0.16f);
+            DockChartMarker(chart, "Chart_Marker_Office", office, chartInk, 0.16f);
             DockChartMarker(chart, "Chart_Marker_Repair_Tomas", repair, chartInk, 0.16f);
             DockChartMarker(chart, "Chart_Marker_Net_Mender_Inez", netMender, chartInk, 0.16f);
             DockChartMarker(chart, "Chart_Marker_Inn", inn, chartInk, 0.14f);
             DockChartMarker(chart, "Chart_Marker_Lighthouse", lighthouse, chartAccent, 0.18f);
             DockChartMarker(chart, "Chart_Marker_Outer_Channel_Wreck", wreck, chartAccent, 0.16f);
+
+            DockChartPinLabel(chart, "Chart_Pin_D", "D", dockPoint, chartAccent);
+            DockChartPinLabel(chart, "Chart_Pin_H", "H", quayWatch, chartAccent);
+            DockChartPinLabel(chart, "Chart_Pin_O", "O", office, chartInk);
+            DockChartPinLabel(chart, "Chart_Pin_M", "M", market, chartInk);
+            DockChartPinLabel(chart, "Chart_Pin_T", "T", repair, chartInk);
+            DockChartPinLabel(chart, "Chart_Pin_I", "I", netMender, chartInk);
+            DockChartPinLabel(chart, "Chart_Pin_L", "L", lighthouse, chartAccent);
+            DockChartPinLabel(chart, "Chart_Pin_W", "W", wreck, chartAccent);
 
             AddWorldLabel(chart, "Chart_Title", "GREYHAVEN  /  HARBOUR CHART",
                 new Vector3(-3.48f, 1.105f, 2.06f), Quaternion.Euler(-90f, 0f, 0f),
@@ -1082,27 +1093,30 @@ namespace WhereTheSoundingsEnd.Editor
             AddWorldLabel(chart, "Chart_Key_Header", "KEY / PEOPLE",
                 new Vector3(2.72f, 1.105f, 1.05f), Quaternion.Euler(-90f, 0f, 0f),
                 0.045f, 40, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
-            AddWorldLabel(chart, "Chart_Key_Dock", "DOCK  •  YOU ARE HERE",
+            AddWorldLabel(chart, "Chart_Key_Dock", "D / DOCK CHART TABLE",
                 new Vector3(2.72f, 1.105f, 0.68f), Quaternion.Euler(-90f, 0f, 0f),
-                0.037f, 32, TextAnchor.MiddleLeft, TextAlignment.Left, chartAccent.color);
-            AddWorldLabel(chart, "Chart_Key_Harbourmaster", "HARBOURMASTER  /  OFFICE",
-                new Vector3(2.72f, 1.105f, 0.28f), Quaternion.Euler(-90f, 0f, 0f),
-                0.034f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
-            AddWorldLabel(chart, "Chart_Key_Mara", "MARA VENN  /  MARKET",
-                new Vector3(2.72f, 1.105f, -0.08f), Quaternion.Euler(-90f, 0f, 0f),
-                0.034f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
-            AddWorldLabel(chart, "Chart_Key_Tomas", "TOMAS VALE  /  REPAIR",
-                new Vector3(2.72f, 1.105f, -0.44f), Quaternion.Euler(-90f, 0f, 0f),
-                0.034f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
-            AddWorldLabel(chart, "Chart_Key_Inez", "INEZ SARMIENTO  /  NET SHED",
-                new Vector3(2.72f, 1.105f, -0.80f), Quaternion.Euler(-90f, 0f, 0f),
-                0.033f, 29, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
-            AddWorldLabel(chart, "Chart_Key_Landmark", "LIGHTHOUSE  /  WEST HEADLAND",
-                new Vector3(2.72f, 1.105f, -1.16f), Quaternion.Euler(-90f, 0f, 0f),
-                0.031f, 27, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
-            AddWorldLabel(chart, "Chart_Key_Wreck", "WRECK FIELD  /  OUTER CHANNEL",
-                new Vector3(2.72f, 1.105f, -1.51f), Quaternion.Euler(-90f, 0f, 0f),
-                0.031f, 27, TextAnchor.MiddleLeft, TextAlignment.Left, chartAccent.color);
+                0.032f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartAccent.color);
+            AddWorldLabel(chart, "Chart_Key_Harbourmaster_Quay", "H / HARBOURMASTER QUAY WATCH",
+                new Vector3(2.72f, 1.105f, 0.34f), Quaternion.Euler(-90f, 0f, 0f),
+                0.030f, 28, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Office", "O / HARBOUR OFFICE",
+                new Vector3(2.72f, 1.105f, 0.00f), Quaternion.Euler(-90f, 0f, 0f),
+                0.032f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Mara", "M / MARA VENN - MARKET",
+                new Vector3(2.72f, 1.105f, -0.34f), Quaternion.Euler(-90f, 0f, 0f),
+                0.032f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Tomas", "T / TOMAS VALE - REPAIR",
+                new Vector3(2.72f, 1.105f, -0.68f), Quaternion.Euler(-90f, 0f, 0f),
+                0.032f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Inez", "I / INEZ - NET SHED",
+                new Vector3(2.72f, 1.105f, -1.02f), Quaternion.Euler(-90f, 0f, 0f),
+                0.032f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Landmark", "L / WEST LIGHTHOUSE",
+                new Vector3(2.72f, 1.105f, -1.36f), Quaternion.Euler(-90f, 0f, 0f),
+                0.032f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartInk.color);
+            AddWorldLabel(chart, "Chart_Key_Wreck", "W / OUTER WRECK FIELD",
+                new Vector3(2.72f, 1.105f, -1.70f), Quaternion.Euler(-90f, 0f, 0f),
+                0.032f, 30, TextAnchor.MiddleLeft, TextAlignment.Left, chartAccent.color);
 
             VisualCube(chart, "Chart_Frame_Top", new Vector3(0f, 1.035f, 2.23f),
                 new Vector3(7.35f, 0.09f, 0.12f), wood);
@@ -1191,6 +1205,19 @@ namespace WhereTheSoundingsEnd.Editor
             marker.transform.localScale = new Vector3(diameter, 0.025f, diameter);
             marker.GetComponent<Renderer>().sharedMaterial = material;
             UnityEngine.Object.DestroyImmediate(marker.GetComponent<Collider>());
+        }
+
+        private static void DockChartPinLabel(
+            Transform parent,
+            string name,
+            string label,
+            Vector2 point,
+            Material material)
+        {
+            AddWorldLabel(parent, name, label,
+                new Vector3(point.x + 0.12f, 1.11f, point.y + 0.07f),
+                Quaternion.Euler(-90f, 0f, 0f),
+                0.038f, 34, TextAnchor.MiddleLeft, TextAlignment.Left, material.color);
         }
 
         private static TextMesh AddWorldLabel(
