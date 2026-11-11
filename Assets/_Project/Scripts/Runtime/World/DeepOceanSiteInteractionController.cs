@@ -60,11 +60,6 @@ namespace WhereTheSoundingsEnd.World
                 !DeepOceanInspectionPolicy.IsCooldownReady(Time.unscaledTime, nextInspectionAllowedAt))
                 return;
 
-            if (seaState != null && !seaState.TryClaimInteraction())
-                return;
-
-            nextInspectionAllowedAt = DeepOceanInspectionPolicy.GetNextAllowedTime(
-                Time.unscaledTime, inspectionCooldownRealSeconds);
             DeepOceanPhenomenonSite nearest = null;
             float bestDistance = interactionDistance * interactionDistance;
             Vector2 vesselPosition = new Vector2(vesselBody.position.x, vesselBody.position.z);
@@ -86,6 +81,14 @@ namespace WhereTheSoundingsEnd.World
                 latestInspection = "NO SURVEY SITE WITHIN SAFE INSPECTION RANGE.";
                 return;
             }
+
+            // Claim only after a valid target is found; an empty interaction must not
+            // steal the same-frame input from a nearby harbour NPC.
+            if (seaState != null && !seaState.TryClaimInteraction())
+                return;
+
+            nextInspectionAllowedAt = DeepOceanInspectionPolicy.GetNextAllowedTime(
+                Time.unscaledTime, inspectionCooldownRealSeconds);
 
             bool firstInspection = inspectedSiteIds.Add(nearest.SiteId);
             latestInspection = (firstInspection ? "FIELD NOTE RECORDED: " : "KNOWN SITE: ") +

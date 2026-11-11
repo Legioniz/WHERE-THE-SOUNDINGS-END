@@ -96,7 +96,6 @@ namespace WhereTheSoundingsEnd.World
         private void TryPulse()
         {
             if (Time.timeScale <= 0.0001f ||
-                (seaState != null && !seaState.TryClaimInteraction()) ||
                 Time.unscaledTime < nextPulseAllowedAt)
                 return;
 
@@ -119,18 +118,23 @@ namespace WhereTheSoundingsEnd.World
                 return;
             }
 
-            nextPulseAllowedAt = Time.unscaledTime + pulseCooldownRealSeconds;
-            surveyingRemaining = surveyActionRealSeconds;
-            if (seaState != null) seaState.SetSurveying(true);
-
-            pulseSequence++;
+            int nextPulseSequence = pulseSequence + 1;
             string opportunityId = region.RegionId + ":day:" +
-                (seaState != null ? seaState.DayNumber : 1) + ":sounding:" + pulseSequence;
+                (seaState != null ? seaState.DayNumber : 1) + ":sounding:" + nextPulseSequence;
             if (evaluatedOpportunityIds.Contains(opportunityId))
             {
                 latestReading = "SOUNDING RIG: this survey opportunity is already recorded.";
                 return;
             }
+
+            // Validate the opportunity before claiming or starting the timed action.
+            if (seaState != null && !seaState.TryClaimInteraction())
+                return;
+
+            pulseSequence = nextPulseSequence;
+            nextPulseAllowedAt = Time.unscaledTime + pulseCooldownRealSeconds;
+            surveyingRemaining = surveyActionRealSeconds;
+            if (seaState != null) seaState.SetSurveying(true);
             evaluatedOpportunityIds.Add(opportunityId);
             if (evaluatedOpportunityIds.Count > 256)
                 evaluatedOpportunityIds.RemoveAt(0);

@@ -586,10 +586,19 @@ namespace WhereTheSoundingsEnd.Narrative
 
         private void ToggleInventory()
         {
+            // Closing an already-open panel must remain possible even if another
+            // state became busy after the panel was opened.
+            if (_inventoryOpen)
+            {
+                SetInventoryVisible(false);
+                return;
+            }
+
             if ((dialogueRunner != null && dialogueRunner.IsDialogueRunning) ||
                 (_seaState != null && !_seaState.TryClaimInteraction()))
                 return;
-            SetInventoryVisible(!_inventoryOpen);
+
+            SetInventoryVisible(true);
         }
 
         private void SetInventoryVisible(bool visible)

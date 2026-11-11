@@ -117,8 +117,7 @@ namespace WhereTheSoundingsEnd.World
         private void Begin(HarvestActionType type)
         {
             if (Time.timeScale <= 0.0001f ||
-                (seaState != null &&
-                 (seaState.PanicLevel > 0.98f || !seaState.TryClaimInteraction())))
+                (seaState != null && seaState.PanicLevel > 0.98f))
                 return;
 
             Rigidbody vessel = GetComponent<Rigidbody>();
@@ -144,6 +143,16 @@ namespace WhereTheSoundingsEnd.World
                     activeSalvageSite = null;
                     return;
                 }
+            }
+
+            // Do not claim the interaction frame until the vessel and target pass
+            // their preconditions. If a dredge reservation succeeds but another
+            // action won this frame, release the reservation immediately.
+            if (seaState != null && !seaState.TryClaimInteraction())
+            {
+                ReleaseSalvageReservation();
+                activeSalvageSite = null;
+                return;
             }
 
             action = type;

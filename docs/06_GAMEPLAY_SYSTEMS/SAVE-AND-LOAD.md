@@ -33,7 +33,8 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - SeaStateDirector persists elapsed game time, time of day, panic, sea disturbance, weather intensity/remaining duration/next shift, hallucination cooldown, pending seabird warning and latest omen.
 - FishermanAtmosphereDirector persists its incident countdown, caption/hush timers and active false-navigation-light position/remaining duration.
 - AcousticWorldListener persists hearing pressure, last heard signal metadata and a bounded event-ID deduplication ledger.
-- DeepOceanSiteInteractionController persists inspected phenomenon-site IDs.\n- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.
+- DeepOceanSiteInteractionController persists inspected phenomenon-site IDs.
+- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.
 - VesselConditionController persists hull and engine condition.
 - SpatialCargoHold persists cargo placements and damaged-cell coordinates.
 - SalvageSite persists committed daily pulls by stable site ID; transient reservations are refunded when actions do not complete.
@@ -97,7 +98,8 @@ Implemented now:
 - Action-driven day/time, panic and sea disturbance.
 - Hull/engine condition and wreck-site daily depletion.
 - Greyhaven NPC stable IDs, last activity IDs, region IDs and relationship scores through NpcAgent.
-- Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).\n- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs in schema v5.
+- Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).
+- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs in schema v5.
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
 
@@ -106,7 +108,8 @@ Not yet connected because the corresponding gameplay systems do not exist in the
 - Dialogue presentation cursor and mid-line resume state.
 - Dynamic tide/current/weather simulation and authored audio mixer state.
 - Full quest, journal evidence and discovery progression; dialogue-driven NPC relationship changes and structured NPC memories remain future work.
-- Regional fish stocks, creature states, threat state, encounter cooldowns and random stream ownership.\n- Persistent physical state for deep-ocean sites (brine-pool disturbance, vent/seep condition, hydrate stability, whale-fall succession); current site markers record discovery only.
+- Regional fish stocks, creature states, threat state, encounter cooldowns and random stream ownership.
+- Persistent physical state for deep-ocean sites (brine-pool disturbance, vent/seep condition, hydrate stability, whale-fall succession); current site markers record discovery only.
 - A player-facing save/load menu, save confirmation prompt, and UI feedback for autosave status. Autosaving itself is implemented.
 - Loading into a different scene automatically. The coordinator currently requires the target scene to be active before restoring its participants.
 
