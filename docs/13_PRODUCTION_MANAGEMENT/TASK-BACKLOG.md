@@ -18,7 +18,7 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 
 ## M0 — Foundation stabilization and verification
 
-<badge color="warning">M0 in progress</badge>
+> **Status: M0 in progress.** Unity verification is still required.
 
 | ID | Priority | Task | Size | Dependencies | Status |
 |---|---|---|---|---|---|
