@@ -1,10 +1,10 @@
 # Save Data Structure
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime schema v1 implemented  
+> Status: Runtime schema v6 implemented  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-10
+> Version: 0.3  
+> Last reviewed: 2026-11-12
 
 ## Storage layout
 
@@ -26,7 +26,7 @@ Root DTO: SaveGameData.
 
 | Field | Purpose |
 |---|---|
-| schemaVersion | Migration version; currently 1 |
+| schemaVersion | Migration version; currently 6 |
 | slotNumber | Slot identity, assigned by the file service |
 | saveId | Stable unique identifier for this save record |
 | savedAtUtc | UTC ISO-8601 timestamp |
@@ -51,7 +51,7 @@ All content relationships use stable string IDs. Random stream state and increme
 - EquipmentSaveData stores slotId, itemId and condition.
 - QuestProgressSaveData and ObjectiveProgressSaveData preserve quest stage and objective progress.
 - JournalEntrySaveData preserves entry identity, interpretation and read state.
-- NpcStateSaveData preserves an NPC state and relationship identifier.
+- NpcStateSaveData preserves stable NPC identity, activity/region, relationship score text and a bounded list of once-only relationship event IDs.
 - RegionalStockSaveData stores per-region/per-species population and last simulation time.
 - WorldFlagSaveData stores boolean or string flags.
 - EventCooldownSaveData stores a stable event ID and the game-time deadline.
@@ -61,12 +61,18 @@ All content relationships use stable string IDs. Random stream state and increme
 
 SaveGameData.CurrentSchemaVersion is authoritative.
 
-- Version 0 is treated as the initial/unversioned document and normalized to the v1 structure. Missing nested groups and lists are created with safe defaults.
-- Version 1 is current.
+- Versions 0 through 5 are migrated in ordered steps. The v5-to-v6 migration initializes NPC memory ledgers and maps the old unused zero relationship baseline to neutral 50.
+- Version 6 is current.
 - A version greater than the running build's current version is rejected. It must never be loaded and rewritten by an older executable.
 - Each future schema increase must add an explicit migration step and an Edit Mode test that loads a fixture from the previous version.
 
 Do not repurpose an existing field with a new meaning. Add a new field, migrate, and retain the old value until the migration is proven.
+
+## NPC relationship persistence
+
+Save schema v6 extends each NPC state record with `relationshipMemoryIds`, a per-resident list capped at 128 stable event IDs. Validation rejects null/oversized ledgers, duplicate or malformed IDs, and more than 4096 remembered events across the save.
+
+Schema 5 NPC relationship scores were not modified by gameplay and used zero as their original default. The v5-to-v6 migration maps an empty or zero legacy score to neutral 50, initializes each memory list, and preserves any non-zero score. Later saves store the score and event ledger together.
 
 ## Runtime API
 

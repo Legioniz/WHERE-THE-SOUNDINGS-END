@@ -10,7 +10,7 @@ namespace WhereTheSoundingsEnd.Persistence
     [Serializable]
     public sealed class SaveGameData
     {
-        public const int CurrentSchemaVersion = 5;
+        public const int CurrentSchemaVersion = 6;
 
         public int schemaVersion;
         public int slotNumber;
@@ -248,6 +248,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public string stateId;
         public string relationshipId;
         public string lastKnownRegionId;
+        public List<string> relationshipMemoryIds = new List<string>();
     }
 
     [Serializable]
@@ -310,6 +311,7 @@ namespace WhereTheSoundingsEnd.Persistence
     {
         public const int MaximumCollectionEntries = 2048;
         public const int MaximumStringLength = 4096;
+        public const int MaximumNpcRelationshipMemories = 128;
 
         public static bool TryPrepare(SaveGameData data, out string error)
         {
@@ -369,6 +371,23 @@ namespace WhereTheSoundingsEnd.Persistence
                         data.world.atmosphereIncidentCountdownGameSeconds = 420.0;
                         data.world.atmosphereHushBlend = 1f;
                         data.schemaVersion = 5;
+                        break;
+
+                    case 5:
+                        NormalizeDefaults(data);
+                        // Before schema 6 relationship values were not gameplay-driven.
+                        // An empty or zero legacy value means the previous unused neutral baseline.
+                        for (int npcIndex = 0; npcIndex < data.progress.npcStates.Count; npcIndex++)
+                        {
+                            NpcStateSaveData npc = data.progress.npcStates[npcIndex];
+                            if (npc == null) continue;
+                            if (string.IsNullOrWhiteSpace(npc.relationshipId) ||
+                                string.Equals(npc.relationshipId, "0", StringComparison.Ordinal))
+                                npc.relationshipId = "50";
+                            if (npc.relationshipMemoryIds == null)
+                                npc.relationshipMemoryIds = new List<string>();
+                        }
+                        data.schemaVersion = 6;
                         break;
 
                     default:
@@ -686,6 +705,7 @@ namespace WhereTheSoundingsEnd.Persistence
             }
 
             HashSet<string> npcIds = new HashSet<string>(StringComparer.Ordinal);
+            int totalNpcRelationshipMemories = 0;
             for (int index = 0; index < data.progress.npcStates.Count; index++)
             {
                 NpcStateSaveData npc = data.progress.npcStates[index];
@@ -693,6 +713,27 @@ namespace WhereTheSoundingsEnd.Persistence
                 {
                     error = "The save contains a malformed or duplicate NPC state at index " + index + ".";
                     return false;
+                }
+
+                if (npc.relationshipMemoryIds == null ||
+                    npc.relationshipMemoryIds.Count > MaximumNpcRelationshipMemories)
+                {
+                    error = "The save contains an oversized or malformed NPC relationship memory collection at index " + index + ".";
+                    return false;
+                }
+
+                HashSet<string> npcMemoryIds = new HashSet<string>(StringComparer.Ordinal);
+                for (int memoryIndex = 0; memoryIndex < npc.relationshipMemoryIds.Count; memoryIndex++)
+                {
+                    string memoryId = npc.relationshipMemoryIds[memoryIndex];
+                    totalNpcRelationshipMemories++;
+                    if (string.IsNullOrWhiteSpace(memoryId) || memoryId.Length > 256 ||
+                        !string.Equals(memoryId, memoryId.Trim(), StringComparison.Ordinal) ||
+                        !npcMemoryIds.Add(memoryId) || totalNpcRelationshipMemories > 4096)
+                    {
+                        error = "The save contains a malformed, duplicate, or oversized NPC relationship memory at index " + memoryIndex + ".";
+                        return false;
+                    }
                 }
             }
 
@@ -864,6 +905,12 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.progress.quests == null) data.progress.quests = new List<QuestProgressSaveData>();
             if (data.progress.journalEntries == null) data.progress.journalEntries = new List<JournalEntrySaveData>();
             if (data.progress.npcStates == null) data.progress.npcStates = new List<NpcStateSaveData>();
+            for (int npcIndex = 0; npcIndex < data.progress.npcStates.Count; npcIndex++)
+            {
+                NpcStateSaveData npc = data.progress.npcStates[npcIndex];
+                if (npc != null && npc.relationshipMemoryIds == null)
+                    npc.relationshipMemoryIds = new List<string>();
+            }
             if (data.progress.regionalStocks == null) data.progress.regionalStocks = new List<RegionalStockSaveData>();
             if (data.progress.worldFlags == null) data.progress.worldFlags = new List<WorldFlagSaveData>();
             if (data.progress.eventCooldowns == null) data.progress.eventCooldowns = new List<EventCooldownSaveData>();

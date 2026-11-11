@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using WhereTheSoundingsEnd.Boat;
 using Yarn.Unity;
+using WhereTheSoundingsEnd.NPC;
 using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Narrative
@@ -20,6 +21,7 @@ namespace WhereTheSoundingsEnd.Narrative
         [SerializeField] private InputActionAsset controls;
         [SerializeField] private string dialogueNode = "Greyhaven_Harbourmaster";
         [SerializeField] private string displayName = "Harbourmaster";
+        [SerializeField] private NpcAgent npcAgent;
 
         private readonly HashSet<Collider> _vesselColliders = new HashSet<Collider>();
         private InputAction _interactAction;
@@ -31,6 +33,7 @@ namespace WhereTheSoundingsEnd.Narrative
         public InputActionAsset Controls { get => controls; set => controls = value; }
         public string DialogueNode { get => dialogueNode; set => dialogueNode = value; }
         public string DisplayName { get => displayName; set => displayName = value; }
+        public NpcAgent Agent { get => npcAgent; set => npcAgent = value; }
 
         private void Awake()
         {
@@ -87,22 +90,28 @@ namespace WhereTheSoundingsEnd.Narrative
             }
 
             UpdatePrompt();
-            if (dialogueRunner == null || _interactAction == null)
+            if (dialogueRunner == null || _interactAction == null ||
+                (npcAgent != null && !npcAgent.CanTalk))
                 return;
 
             if (_interactAction.WasPressedThisFrame())
             {
                 runtimeUI.SetInteractionPrompt(string.Empty);
-                runtimeUI.BeginDialogue(dialogueNode);
+                runtimeUI.BeginDialogue(dialogueNode, npcAgent);
             }
         }
 
         private void UpdatePrompt()
         {
             if (runtimeUI == null) return;
-            runtimeUI.SetInteractionPrompt(_vesselColliders.Count > 0
-                ? "E  /  SPEAK WITH " + displayName.ToUpperInvariant()
-                : string.Empty);
+            string prompt = string.Empty;
+            if (_vesselColliders.Count > 0)
+            {
+                prompt = npcAgent != null && !npcAgent.CanTalk
+                    ? displayName.ToUpperInvariant() + "  /  REFUSES TO SPEAK"
+                    : "E  /  SPEAK WITH " + displayName.ToUpperInvariant();
+            }
+            runtimeUI.SetInteractionPrompt(prompt);
         }
     }
 }

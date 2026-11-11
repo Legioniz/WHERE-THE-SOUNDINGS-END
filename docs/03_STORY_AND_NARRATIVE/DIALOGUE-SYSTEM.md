@@ -1,16 +1,16 @@
 # Dialogue System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Yarn Spinner runtime loop and four Greyhaven resident conversations implemented; authoring/content expansion pending  
+> Status: Four relationship-reactive Greyhaven resident conversations and runtime relationship bridge implemented; content expansion pending  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-10
+> Version: 0.3  
+> Last reviewed: 2026-11-12
 
 ## Runtime stack
 
 The project pins Yarn Spinner for Unity to `dev.yarnspinner.unity` v3.2.8. Narrative source is written in `.yarn` files and included by the Unity Yarn project at `Assets/_Project/Dialogue/Greyhaven.yarnproject`.
 
-The Greyhaven scene generator imports the Yarn project, creates a `DialogueRunner`, attaches `GreyhavenRuntimeUI` as its custom `DialoguePresenterBase`, and registers the game's `checkpoint` command. Yarn controls dialogue branching and variable evaluation; the presenter owns only the UI and input that display lines and choices.
+The Greyhaven scene generator imports the Yarn project, creates a `DialogueRunner`, attaches `GreyhavenRuntimeUI` as its custom `DialoguePresenterBase`, and registers the `checkpoint` and `relationship` commands. Each interaction passes its resident's `NpcAgent` to the presenter. The presenter seeds Yarn's shared relationship variables from that agent; C# remains authoritative for score changes and memory deduplication.
 
 ## First interaction loop
 
@@ -33,7 +33,7 @@ The generated scene now exposes four boat-proximity interactions:
 - Tomas Vale — repair advice, engine sounds, hull damage and unexplained knocks.
 - Inez Sarmiento — damaged nets, missing crews, local working rules and preserving evidence.
 
-Each resident has a separate Yarn node and first-meeting/trust variables. Their authored content is in `Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn`.
+Each resident has a separate Yarn node and first-meeting/clue flags. Dialogue branches on the active NPC's live trust value. Positive and negative choices issue stable `<<relationship "event.id" delta>>` commands, with the NPC memory ledger preventing a second reward or penalty for the same event.
 
 ## Implemented Harbourmaster branches
 
@@ -45,7 +45,7 @@ Source: `Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn`.
 - A sounding-buoy recovery job, with a repeat response after acceptance.
 - A quiet/no-question branch.
 
-The Harbourmaster variables track first meeting, whether the missing-boat warning and bell question were heard, whether the buoy job was accepted, and a small trust value. These are deliberately stable Yarn variable names and are saved with the existing campaign save.
+The Harbourmaster's existing flags still track first meeting, whether the missing-boat warning and bell question were heard, and whether the buoy job was accepted. The old trust variable remains for compatibility. The shared `$npc_relationship` variable drives the active resident's dialogue branches; the C# NPC state is authoritative.
 
 ## Persistence and commands
 
@@ -63,8 +63,8 @@ The Yarn project declares English as its base language and uses Yarn's line IDs/
 
 ## Content and production boundaries
 
-- The first NPC schedule and relationship runtime foundation is implemented in `Assets/_Project/Scripts/Runtime/NPC/NpcAgent.cs`; only the four Greyhaven residents are configured.
-- Relationship values are saved but are not yet modified by dialogue choices or connected to shop prices, quests or reputation.
+- Individual trust tiers, a visible 0–100 meter, relationship-event commands, once-only event memory and per-resident conversation/trade gates are implemented for all four Greyhaven residents.
+- The future market can read `CanTrade` and `BuyPriceMultiplier`; sale transactions, price application, repairs, quest rewards and global community reputation remain unimplemented.
 - NPC movement uses short direct waypoints, not NavMesh pathfinding. On-foot interaction, interiors, animation, voice-over, facial animation and localization packages are not connected.
 - Dialogue choices update Yarn variables; broader quest state and world changes must be connected through explicit commands/functions and authoritative gameplay systems.
 - Yarn compilation, line presentation and option selection must be verified in Unity 6000.3.28f1 after package import. Static GitHub checks do not compile Yarn or C#.

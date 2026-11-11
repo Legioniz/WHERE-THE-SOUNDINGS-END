@@ -254,6 +254,7 @@ namespace WhereTheSoundingsEnd.Editor
             dialogueRoot.AddComponent<GreyhavenFrontEndUI>();
             runner.DialoguePresenters = new List<DialoguePresenterBase> { runtimeUI };
             runner.AddCommandHandler("checkpoint", new Action<string>(runtimeUI.RequestCheckpointAutosave));
+            runner.AddCommandHandler("relationship", new Action<string, int>(runtimeUI.ApplyRelationshipCommand));
 
             return runner;
         }
@@ -340,6 +341,7 @@ namespace WhereTheSoundingsEnd.Editor
                     new NpcScheduleEntry { startHour = 5f, endHour = 18f, activityId = "quay_watch", destination = npc.transform },
                     new NpcScheduleEntry { startHour = 18f, endHour = 5f, activityId = "office_duty", destination = officeAnchor }
                 });
+            interaction.Agent = agent;
         }
 
         private static void BuildVillageResident(
@@ -406,6 +408,7 @@ namespace WhereTheSoundingsEnd.Editor
                     new NpcScheduleEntry { startHour = dayStart, endHour = dayEnd, activityId = dayActivity, destination = npc.transform },
                     new NpcScheduleEntry { startHour = dayEnd, endHour = dayStart, activityId = "off_duty", destination = secondaryAnchor }
                 });
+            interaction.Agent = agent;
         }
 
         private static Transform CreateNpcAnchor(Transform parent, string anchorName, Vector3 position)

@@ -134,11 +134,13 @@ def main() -> int:
                 failures.append("Input action/binding identifiers must be unique.")
 
         save_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs").read_text(encoding="utf-8")
-        if "CurrentSchemaVersion = 5" not in save_source:
-            failures.append("SaveGameData schema must be version 5 after atmospheric/acoustic persistence changes.")
+        if "CurrentSchemaVersion = 6" not in save_source:
+            failures.append("SaveGameData schema must be version 6 after NPC relationship-memory persistence changes.")
 
         if "case 4:" not in save_source or "data.schemaVersion = 5;" not in save_source:
             failures.append("SaveGameData is missing the schema 4 to 5 atmosphere-state migration.")
+        if "case 5:" not in save_source or "data.schemaVersion = 6;" not in save_source:
+            failures.append("SaveGameData is missing the schema 5 to 6 NPC relationship-memory migration.")
 
         for required_text in (
             "weatherRemainingGameSeconds", "weatherShiftCooldownGameSeconds",
@@ -342,6 +344,17 @@ def main() -> int:
                     failures.append(f"Harbourmaster Yarn source is missing: {required_text}")
 
         if yarn_source.exists():
+            for required_relationship_text in (
+                "<<declare $npc_relationship = 50>>",
+                "<<relationship ",
+                "$npc_can_trade",
+                "mara.misrepresented_unusual_catch",
+                "tomas.dismissed_repair_advice",
+                "inez.dismissed_net_evidence",
+            ):
+                if required_relationship_text not in yarn_text:
+                    failures.append(f"Greyhaven Yarn relationship content is missing: {required_relationship_text}")
+
             for npc_node in (
                 "title: Greyhaven_Fishmonger",
                 "title: Greyhaven_Mechanic",
@@ -353,7 +366,8 @@ def main() -> int:
         npc_source = (ROOT / "Assets/_Project/Scripts/Runtime/NPC/NpcAgent.cs").read_text(encoding="utf-8")
         for required_text in (
             "NpcScheduleResolver", "SeaStateDirector", "ISaveParticipant",
-            "NpcStateSaveData", "ModifyRelationship", "walkingSpeed",
+            "NpcStateSaveData", "ModifyRelationship", "TryApplyRelationshipEvent",
+            "NpcRelationshipRules", "relationshipMemoryIds", "walkingSpeed",
         ):
             if required_text not in npc_source:
                 failures.append(f"NpcAgent is missing expected runtime feature: {required_text}")
@@ -371,6 +385,16 @@ def main() -> int:
         interaction_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs").read_text(encoding="utf-8")
         if "public string DialogueNode" not in interaction_source or "public string DisplayName" not in interaction_source:
             failures.append("Resident interaction must support per-NPC dialogue nodes and display names.")
+        if "npcAgent.CanTalk" not in interaction_source or "runtimeUI.BeginDialogue(dialogueNode, npcAgent)" not in interaction_source:
+            failures.append("Resident interaction must enforce per-NPC conversation trust and pass the active agent.")
+
+        ui_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs").read_text(encoding="utf-8")
+        for required_text in ("ApplyRelationshipCommand", "SyncRelationshipVariables", "RefreshRelationshipMeter", "_activeNpc"):
+            if required_text not in ui_source:
+                failures.append(f"GreyhavenRuntimeUI is missing relationship dialogue integration: {required_text}")
+
+        if 'runner.AddCommandHandler("relationship"' not in npc_builder:
+            failures.append("Greyhaven scene builder must register the Yarn relationship command.")
 
         input_map = maps.get("Boat")
         if input_map is not None:

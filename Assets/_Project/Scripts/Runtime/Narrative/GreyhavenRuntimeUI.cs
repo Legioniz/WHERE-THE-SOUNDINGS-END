@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 using Yarn.Unity;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.NPC;
 using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Narrative
@@ -36,7 +37,11 @@ namespace WhereTheSoundingsEnd.Narrative
         private Label _selectedItemLabel;
         private Label _speakerLabel;
         private Label _dialogueText;
+        private Label _relationshipStatusLabel;
+        private VisualElement _relationshipPanel;
+        private VisualElement _relationshipMeterFill;
         private Button _continueButton;
+        private NpcAgent _activeNpc;
         private InputAction _inventoryAction;
         private bool _ownsInventoryAction;
         private bool _inventoryOpen;
@@ -207,6 +212,36 @@ namespace WhereTheSoundingsEnd.Narrative
             _speakerLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             _speakerLabel.style.marginBottom = 8;
             _dialoguePanel.Add(_speakerLabel);
+
+            _relationshipPanel = new VisualElement();
+            _relationshipPanel.style.flexDirection = FlexDirection.Column;
+            _relationshipPanel.style.marginBottom = 12;
+            _relationshipPanel.style.display = DisplayStyle.None;
+            _dialoguePanel.Add(_relationshipPanel);
+
+            _relationshipStatusLabel = new Label(string.Empty);
+            _relationshipStatusLabel.style.color = new Color(0.72f, 0.80f, 0.76f);
+            _relationshipStatusLabel.style.fontSize = 10;
+            _relationshipStatusLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _relationshipStatusLabel.style.marginBottom = 5;
+            _relationshipPanel.Add(_relationshipStatusLabel);
+
+            VisualElement relationshipTrack = new VisualElement();
+            relationshipTrack.style.height = 5;
+            relationshipTrack.style.width = new Length(100, LengthUnit.Percent);
+            relationshipTrack.style.backgroundColor = new Color(0.12f, 0.17f, 0.17f);
+            relationshipTrack.style.borderTopLeftRadius = 3;
+            relationshipTrack.style.borderTopRightRadius = 3;
+            relationshipTrack.style.borderBottomLeftRadius = 3;
+            relationshipTrack.style.borderBottomRightRadius = 3;
+            relationshipTrack.style.overflow = Overflow.Hidden;
+            _relationshipPanel.Add(relationshipTrack);
+
+            _relationshipMeterFill = new VisualElement();
+            _relationshipMeterFill.style.height = new Length(100, LengthUnit.Percent);
+            _relationshipMeterFill.style.width = new Length(50, LengthUnit.Percent);
+            _relationshipMeterFill.style.backgroundColor = new Color(0.55f, 0.66f, 0.59f);
+            relationshipTrack.Add(_relationshipMeterFill);
 
             _dialogueText = new Label(string.Empty);
             _dialogueText.style.color = new Color(0.91f, 0.91f, 0.84f);
@@ -654,6 +689,11 @@ namespace WhereTheSoundingsEnd.Narrative
 
         public void BeginDialogue(string nodeName)
         {
+            BeginDialogue(nodeName, null);
+        }
+
+        public void BeginDialogue(string nodeName, NpcAgent npc)
+        {
             if (dialogueRunner == null)
             {
                 Debug.LogError("No DialogueRunner is assigned to GreyhavenRuntimeUI.", this);
@@ -663,12 +703,71 @@ namespace WhereTheSoundingsEnd.Narrative
             if (_inventoryOpen || Time.timeScale <= 0.0001f || dialogueRunner.IsDialogueRunning)
                 return;
 
+            if (npc != null && !npc.CanTalk)
+                return;
+
             if (_seaState != null && !_seaState.TryClaimInteraction())
                 return;
+
+            _activeNpc = npc;
+            SyncRelationshipVariables();
+            RefreshRelationshipMeter();
 
             dialogueRunner.StartDialogue(string.IsNullOrWhiteSpace(nodeName)
                 ? "Greyhaven_Harbourmaster"
                 : nodeName);
+        }
+
+        /// <summary>Yarn command: <<relationship "stable.event.id" delta>>.</summary>
+        public void ApplyRelationshipCommand(string memoryId, int delta)
+        {
+            if (_activeNpc == null || !_activeNpc.TryApplyRelationshipEvent(memoryId, delta))
+                return;
+
+            SyncRelationshipVariables();
+            RefreshRelationshipMeter();
+        }
+
+        private void SyncRelationshipVariables()
+        {
+            if (dialogueRunner == null || dialogueRunner.VariableStorage == null)
+                return;
+
+            float score = _activeNpc != null ? _activeNpc.RelationshipScore : 50f;
+            bool canTalk = _activeNpc == null || _activeNpc.CanTalk;
+            bool canTrade = _activeNpc == null || _activeNpc.CanTrade;
+            float multiplier = _activeNpc != null ? _activeNpc.BuyPriceMultiplier : 1f;
+
+            dialogueRunner.VariableStorage.SetValue("$npc_relationship", score);
+            dialogueRunner.VariableStorage.SetValue("$npc_can_talk", canTalk);
+            dialogueRunner.VariableStorage.SetValue("$npc_can_trade", canTrade);
+            dialogueRunner.VariableStorage.SetValue("$npc_buy_price_multiplier", multiplier);
+        }
+
+        private void RefreshRelationshipMeter()
+        {
+            if (_relationshipPanel == null)
+                return;
+
+            if (_activeNpc == null)
+            {
+                _relationshipPanel.style.display = DisplayStyle.None;
+                return;
+            }
+
+            int score = _activeNpc.RelationshipScore;
+            _relationshipStatusLabel.text = _activeNpc.DisplayName.ToUpperInvariant() +
+                "  /  " + NpcRelationshipRules.GetTierLabel(score).ToUpperInvariant() +
+                "  /  " + score + " / 100";
+            _relationshipMeterFill.style.width = new Length(score, LengthUnit.Percent);
+            _relationshipMeterFill.style.backgroundColor = score < 30
+                ? new Color(0.66f, 0.30f, 0.24f)
+                : score < 45
+                    ? new Color(0.72f, 0.53f, 0.30f)
+                    : score < 60
+                        ? new Color(0.56f, 0.64f, 0.61f)
+                        : new Color(0.35f, 0.67f, 0.54f);
+            _relationshipPanel.style.display = DisplayStyle.Flex;
         }
 
         public void RequestCheckpointAutosave(string checkpointId)
@@ -708,6 +807,8 @@ namespace WhereTheSoundingsEnd.Narrative
                 _dialogueText.text = string.Empty;
                 _continueButton.style.display = DisplayStyle.Flex;
             }
+            _activeNpc = null;
+            RefreshRelationshipMeter();
             ReleasePauseWhenUiClosed();
             return YarnTask.CompletedTask;
         }

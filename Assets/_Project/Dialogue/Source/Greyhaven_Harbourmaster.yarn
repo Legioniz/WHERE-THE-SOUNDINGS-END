@@ -1,3 +1,8 @@
+<<declare $npc_relationship = 50>>
+<<declare $npc_can_talk = true>>
+<<declare $npc_can_trade = true>>
+<<declare $npc_buy_price_multiplier = 1.0>>
+
 <<declare $gh_met_harbourmaster = false>>
 <<declare $gh_heard_missing_boat_warning = false>>
 <<declare $gh_accepted_sounding_job = false>>
@@ -10,12 +15,19 @@
 <<declare $gh_met_inez = false>>
 <<declare $gh_inez_trust = 0>>
 
-
 title: Greyhaven_Harbourmaster
 ---
+<<if $npc_relationship < 15>>
+Harbourmaster: No. I have heard enough about the way you conduct yourself. We have nothing to discuss.
+-> Leave.
+<<else>>
 <<if not $gh_met_harbourmaster>>
 Harbourmaster: You're the new hand on the old boat, then.
 Harbourmaster: Keep her inside the buoys until you know how the channel behaves.
+<<elseif $npc_relationship < 30>>
+Harbourmaster: Back again. I will answer what I must, but don't mistake that for trust.
+<<elseif $npc_relationship >= 75>>
+Harbourmaster: There you are. I was beginning to wonder when you'd bring that boat back in.
 <<else>>
 Harbourmaster: Back already? The channel has not become any kinder.
 <<endif>>
@@ -26,14 +38,20 @@ Harbourmaster: Back already? The channel has not become any kinder.
         Harbourmaster: Three boats went out past the outer marker. Only one came back.
         Harbourmaster: Its skipper would not speak about what followed him.
         Harbourmaster: He kept asking whether the bell was still ringing.
+        <<relationship "harbourmaster.listened_to_missing_boat_warning" 2>>
     <<else>>
         Harbourmaster: The same three boats. The same one that returned. Nobody has found the other two.
     <<endif>>
     -> Ask about the bell.
-        <<set $gh_asked_about_bell = true>>
-        Harbourmaster: The lighthouse bell? It has been silent for eleven years.
-        Harbourmaster: Do not answer a bell you cannot place.
-        <<set $gh_harbourmaster_trust = $gh_harbourmaster_trust + 1>>
+        <<if not $gh_asked_about_bell>>
+            <<set $gh_asked_about_bell = true>>
+            Harbourmaster: The lighthouse bell? It has been silent for eleven years.
+            Harbourmaster: Do not answer a bell you cannot place.
+            <<set $gh_harbourmaster_trust = $gh_harbourmaster_trust + 1>>
+            <<relationship "harbourmaster.asked_about_silent_bell" 2>>
+        <<else>>
+            Harbourmaster: I told you. Eleven years of silence. Keep it that way.
+        <<endif>>
     -> Leave the subject alone.
         Harbourmaster: Sensible. The sea has enough listeners.
 
@@ -43,10 +61,15 @@ Harbourmaster: Back already? The channel has not become any kinder.
         Harbourmaster: Bring it back intact. Do not switch it on.
         Harbourmaster: If it starts answering, drop the line.
         <<set $gh_accepted_sounding_job = true>>
+        <<relationship "harbourmaster.accepted_sounding_buoy_job" 3>>
         <<checkpoint "greyhaven.sounding_buoy_accepted">>
     <<else>>
         Harbourmaster: The western mudflat. Bring the buoy back intact. And keep it switched off.
     <<endif>>
+
+-> Tell him the warnings are superstition.
+    Harbourmaster: Call it what you like. I have buried people who thought the sea was bluffing.
+    <<relationship "harbourmaster.dismissed_harbour_warning" -3>>
 
 -> Ask about the channel.
     Harbourmaster: The western channel is shallow at ebb. The eastern marker lies over broken stone.
@@ -54,70 +77,162 @@ Harbourmaster: Back already? The channel has not become any kinder.
 
 -> Say nothing.
     Harbourmaster: Then listen before you leave.
-
+<<endif>>
 <<set $gh_met_harbourmaster = true>>
 ===
 
 title: Greyhaven_Fishmonger
 ---
+<<if $npc_relationship < 15>>
+Mara Venn: Not today. I won't weigh a thing for someone I cannot trust.
+-> Leave.
+<<else>>
 <<if not $gh_met_mara>>
 Mara Venn: If you're here to sell, put the catch down gently. I can tell a rough landing by the bruises.
 Mara Venn: First time at my stall? Mara. I keep the market open while there's something worth weighing.
+<<elseif $npc_relationship < 30>>
+Mara Venn: I remember you. Keep your hands off the scales until we've settled a few things.
+<<elseif $npc_relationship >= 90>>
+Mara Venn: There you are. Your catch has been getting better, and I haven't forgotten who treated me fairly.
+<<elseif $npc_relationship >= 75>>
+Mara Venn: Back again. I kept the better scale ready; you have earned that much.
 <<else>>
 Mara Venn: Back with another hold of surprises? Let me see what the water gave you.
 <<endif>>
+
 -> Ask about the fish.
     Mara Venn: Most of what comes through here is ordinary. Mullet, milkfish, sillago. They smell like the sea should.
     Mara Venn: Lately, a few catches arrive cold in the middle. Not spoiled. Just cold, as if they were lifted from deeper water.
-    <<set $gh_mara_trust = $gh_mara_trust + 1>>
+    <<if $gh_mara_trust == 0>>
+        <<set $gh_mara_trust = 1>>
+        <<relationship "mara.asked_about_catch" 2>>
+    <<endif>>
+
+-> Tell Mara exactly what you found in the cold catch.
+    Mara Venn: Good. Don't hide a strange catch from the person weighing it. I won't promise a good price, but I won't pretend I didn't see it.
+    <<relationship "mara.was_honest_about_unusual_catch" 4>>
+
+-> Insist the catch is ordinary and hide what you noticed.
+    Mara Venn: I know the smell of a clean catch. Don't ask me to put my name on a lie.
+    <<relationship "mara.misrepresented_unusual_catch" -5>>
+
 -> Ask about the missing boats.
     Mara Venn: One of the missing crews owed me for ice. I still set aside their crate every morning.
     Mara Venn: Habit is a stubborn thing. Hope is worse.
--> Ask about selling unusual catches.
-    Mara Venn: Don't hide a strange catch from the person weighing it. I won't promise a good price, but I won't pretend I didn't see it.
+
+-> Ask about doing business.
+    <<if $npc_can_trade>>
+        <<if $npc_relationship >= 90>>
+            Mara Venn: You've earned a place here. I can offer the best rate I give anyone in Greyhaven.
+        <<elseif $npc_relationship >= 75>>
+            Mara Venn: I trust your handling now. I can afford to be fair with you.
+        <<elseif $npc_relationship >= 60>>
+            Mara Venn: We've done all right by each other. I'll make sure you aren't treated like a stranger.
+        <<elseif $npc_relationship < 45>>
+            Mara Venn: I'll consider sound, ordinary catch. Nothing questionable, and no favours.
+        <<else>>
+            Mara Venn: We can do business at the usual rate. Keep the catch clean and the weights honest.
+        <<endif>>
+    <<else>>
+        Mara Venn: I won't buy from someone who hasn't given me a reason to trust them. Start with honesty.
+    <<endif>>
+
 -> Leave.
     Mara Venn: Keep the catch shaded. Sun ruins good work faster than a bad buyer.
+<<endif>>
 <<set $gh_met_mara = true>>
 ===
 
 title: Greyhaven_Mechanic
 ---
+<<if $npc_relationship < 15>>
+Tomas Vale: Take the boat elsewhere. I won't put my tools near it, and I won't discuss repairs with you.
+-> Leave.
+<<else>>
 <<if not $gh_met_tomas>>
 Tomas Vale: Stop there. I want to hear that engine idle before you tell me what's wrong with it.
 Tomas Vale: Tomas. I keep the repair shed running. Mostly engines, sometimes boats, occasionally bad decisions.
+<<elseif $npc_relationship < 30>>
+Tomas Vale: I remember you. Say what you came to say, then give me room to work.
+<<elseif $npc_relationship >= 90>>
+Tomas Vale: I know that engine note now. You're one of the few who brings a problem in before it becomes a wreck.
+<<elseif $npc_relationship >= 75>>
+Tomas Vale: You're learning to listen to the machine. That makes my work easier.
 <<else>>
 Tomas Vale: That engine still sounds like it has something to confess.
 <<endif>>
+
 -> Ask about repairs.
     Tomas Vale: Bring her in before the hull starts taking water. A small repair is cheap. A tow from the outer marker isn't.
-    <<set $gh_tomas_trust = $gh_tomas_trust + 1>>
+    <<if $gh_tomas_trust == 0>>
+        <<set $gh_tomas_trust = 1>>
+        <<relationship "tomas.asked_about_repairs" 2>>
+    <<endif>>
+
+-> Admit the engine has been making a worse noise than you first said.
+    Tomas Vale: That's useful. I can work with an honest problem. I can't work with a story built to save someone's pride.
+    <<relationship "tomas.admitted_engine_problem" 4>>
+
+-> Dismiss his advice as needless caution.
+    Tomas Vale: Fine. It's your engine. Don't bring me a preventable failure and call it bad luck.
+    <<relationship "tomas.dismissed_repair_advice" -3>>
+
 -> Ask about strange noises beneath boats.
     Tomas Vale: I've heard knocks travel through a hull. Loose fittings, trapped timber, a line caught under the keel. There are explanations.
     Tomas Vale: The trouble starts when the knocking keeps pace with the engine.
+
 -> Ask about the missing boats.
     Tomas Vale: The boat that came back had fresh scoring under the waterline. No matching scrape on the rocks. I logged it as unknown damage.
+
 -> Leave.
     Tomas Vale: Don't ignore a change in engine pitch. The boat usually tells you before it quits.
+<<endif>>
 <<set $gh_met_tomas = true>>
 ===
 
 title: Greyhaven_NetMender
 ---
+<<if $npc_relationship < 15>>
+Inez Sarmiento: I have no work for you. Please leave my tools alone.
+-> Leave.
+<<else>>
 <<if not $gh_met_inez>>
 Inez Sarmiento: Mind the mesh. A torn net can be mended. A careless knot can lose the whole catch.
 Inez Sarmiento: Inez. If your lines come back cut clean, bring them to me. Don't decide what did it before you look.
+<<elseif $npc_relationship < 30>>
+Inez Sarmiento: I remember what happened. I will speak, but I will not pretend it never did.
+<<elseif $npc_relationship >= 90>>
+Inez Sarmiento: I saved a length of good line for you. You return what you borrow and that matters here.
+<<elseif $npc_relationship >= 75>>
+Inez Sarmiento: I can show you a knot my mother taught me. It holds when ordinary line starts to slip.
 <<else>>
 Inez Sarmiento: Show me the line. I can tell a snag from a cut if there's enough left to examine.
 <<endif>>
+
 -> Ask about the nets.
     Inez Sarmiento: Reef stone frays a line. Propellers shred it. But some of the recovered nets have cuts that begin on the inside.
-    <<set $gh_inez_trust = $gh_inez_trust + 1>>
+    <<if $gh_inez_trust == 0>>
+        <<set $gh_inez_trust = 1>>
+        <<relationship "inez.asked_about_net_damage" 2>>
+    <<endif>>
+
+-> Show her the damaged line instead of throwing it away.
+    Inez Sarmiento: Good. Evidence has to be handled before anyone decides what it means. I'll remember that.
+    <<relationship "inez.preserved_damaged_line" 4>>
+
+-> Dismiss her findings without looking.
+    Inez Sarmiento: Then I have nothing useful to add. Carelessness does not become knowledge just because it is confident.
+    <<relationship "inez.dismissed_net_evidence" -3>>
+
 -> Ask about the missing crews.
     Inez Sarmiento: One crew used to tie three turns around the float line before leaving harbour. Their gear came back with every knot still fastened.
     Inez Sarmiento: The net was empty. Not torn. Empty.
+
 -> Ask about local rules.
     Inez Sarmiento: If the birds leave the water all at once, don't follow the fish. Check the wind. Check the current. Then decide whether you still want to be out there.
+
 -> Leave.
     Inez Sarmiento: Bring the damaged line back. Don't throw away evidence just because it frightens you.
+<<endif>>
 <<set $gh_met_inez = true>>
 ===

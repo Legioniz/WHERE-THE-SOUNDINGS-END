@@ -259,6 +259,43 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void Load_MigratesSchemaFiveNpcRelationshipDefaultAndMemoryLedger()
+        {
+            Directory.CreateDirectory(_temporaryDirectory);
+            File.WriteAllText(
+                _service.GetSaveFilePath(1),
+                "{\"schemaVersion\":5,\"saveId\":\"schema-five-npc\",\"progress\":{\"npcStates\":[{\"npcId\":\"greyhaven.mara_venn\",\"relationshipId\":\"0\"}]}}");
+
+            SaveGameData loaded;
+            SaveOperationResult result = _service.TryLoad(1, out loaded);
+
+            Assert.That(result.Success, Is.True, result.Message);
+            Assert.That(loaded.schemaVersion, Is.EqualTo(SaveGameData.CurrentSchemaVersion));
+            Assert.That(loaded.progress.npcStates, Has.Count.EqualTo(1));
+            Assert.That(loaded.progress.npcStates[0].relationshipId, Is.EqualTo("50"));
+            Assert.That(loaded.progress.npcStates[0].relationshipMemoryIds, Is.Not.Null);
+            Assert.That(loaded.progress.npcStates[0].relationshipMemoryIds, Is.Empty);
+        }
+
+        [Test]
+        public void Save_RejectsDuplicateNpcRelationshipMemoryIds()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            data.progress.npcStates.Add(new NpcStateSaveData
+            {
+                npcId = "greyhaven.mara_venn",
+                relationshipId = "50",
+                relationshipMemoryIds = new List<string> { "mara.honest_catch", "mara.honest_catch" }
+            });
+
+            SaveOperationResult result = _service.Save(1, data);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("NPC relationship memory"));
+            Assert.That(File.Exists(_service.GetSaveFilePath(1)), Is.False);
+        }
+
+        [Test]
         public void Load_RejectsOversizedPrimaryFileBeforeDeserialization()
         {
             Directory.CreateDirectory(_temporaryDirectory);

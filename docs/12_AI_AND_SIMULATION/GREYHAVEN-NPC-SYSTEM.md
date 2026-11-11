@@ -1,9 +1,9 @@
 # Greyhaven NPC System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: First runtime foundation and four Greyhaven residents integrated into the generated blockout  
-> Version: 0.1  
-> Last reviewed: 2026-11-10
+> Status: Relationship-reactive dialogue foundation implemented; market transactions remain future integration  
+> Version: 0.2  
+> Last reviewed: 2026-11-12
 
 ## Design goals
 
@@ -21,7 +21,8 @@ Each agent owns:
 - A stable content ID, display name, occupation ID and region ID.
 - An ordered list of daily schedule entries.
 - The current activity ID and an authored destination per schedule entry.
-- A 0–100 relationship score with explicit modification methods.
+- An individual 0–100 trust score, relationship tier, conversation/trade gates and a buy-price multiplier for future market transactions.
+- A bounded, persisted per-NPC memory ledger; each named relationship event is applied at most once.
 - Save/load participation through the existing `ProgressSaveData.npcStates` collection.
 
 NPC IDs are content identifiers, not GameObject names. Do not rename a stable ID after a campaign has recorded it.
@@ -40,17 +41,44 @@ Movement currently uses direct waypoint movement between authored Transform anch
 
 ### Interaction and dialogue
 
-The existing `HarbourmasterInteraction` trigger is now configurable for any Greyhaven resident: dialogue node and display name are set independently. The player still approaches by boat because the on-foot controller is not implemented. Yarn owns authored lines, choices and conversation variables; C# owns NPC identity, schedule and relationship state.
+The existing `HarbourmasterInteraction` trigger is configurable for each Greyhaven resident and passes that resident's `NpcAgent` into the dialogue presenter. The player still approaches by boat because the on-foot controller is not implemented. Yarn owns authored lines and branching; C# owns the authoritative score, event ledger, trust thresholds and relationship variables.
+
+The dialogue UI shows the active resident's name, tier and 0–100 meter. The scene builder registers the Yarn command `<<relationship "stable.event.id" delta>>`; it can only modify the active resident. A memory ID is consumed once per resident, and deltas are limited to -20 through +20.
+
+### Relationship tiers and consequences
+
+| Score | Tier | Conversation | Buying goods | Buy-price multiplier |
+|---:|---|---|---|---:|
+| 0–14 | Hostile | Refuses | Refuses | 0.00× |
+| 15–29 | Distrustful | Brief/guarded | Refuses | 0.00× |
+| 30–44 | Wary | Available | Accepts eligible goods at a discount | 0.85× |
+| 45–59 | Neutral | Normal | Normal market rules | 1.00× |
+| 60–74 | Familiar | Warmer, extra responses | Small premium | 1.05× |
+| 75–89 | Trusted | More personal information | Better premium | 1.10× |
+| 90–100 | Ally | Best access and strongest responses | Best premium | 1.15× |
+
+These are per-resident trust scores. The buy-price multiplier is a runtime policy contract, not an implemented sale transaction. The prototype has no vendor transaction UI or authoritative sale service yet; the future market must check `CanTrade` and `BuyPriceMultiplier` after item eligibility, freshness, stock and currency checks.
+
+All four residents begin at neutral trust (50). Legacy schema-5 NPC records used zero as an unused default; schema 6 migrates that old baseline to 50. Helping Mara does not automatically improve Tomas's opinion.
+
+### Relationship memory and exploit resistance
+
+- Event IDs are stable, unique per NPC and bounded to 128 memories per resident.
+- Replaying a dialogue node cannot repeat a relationship reward or penalty.
+- Invalid/whitespace-padded IDs, zero deltas and deltas outside -20 to +20 are rejected.
+- Critical clues must remain available at neutral-or-better trust; relationship gates should primarily affect optional services, special dialogue and rewards.
+- Hostile residents may refuse conversation. Positive actions must remain available through gameplay systems so trust can be rebuilt; do not create a permanent main-quest soft lock.
 
 ### Persistence
 
 Each agent implements `ISaveParticipant` and contributes one record to `SaveGameData.progress.npcStates`:
 - `npcId`: stable resident identity;
 - `stateId`: last known schedule activity;
-- `relationshipId`: relationship score serialized as an invariant-culture integer string for compatibility with the existing DTO;
-- `lastKnownRegionId`: resident's current region.
+- `relationshipId`: relationship score serialized as an invariant-culture integer string;
+- `lastKnownRegionId`: resident's current region;
+- `relationshipMemoryIds`: bounded stable IDs for relationship events already applied.
 
-This first pass reuses the existing NPC save record and does not change the save schema. Dialogue memories such as first meeting and heard rumours remain in Yarn's existing typed variable storage. A future memory system should add explicit structured fields and a deliberate schema migration rather than packing unrelated data into strings.
+Save schema 6 adds the per-NPC memory ledger and migrates older NPC records from the previous unused zero baseline to neutral 50. Yarn's separate typed storage continues to own first-meeting and clue-heard flags.
 
 ## Initial Greyhaven cast
 
@@ -65,13 +93,9 @@ Names, dialogue and occupations are working canon for this prototype and may be 
 
 ## Dialogue memory and relationship design
 
-Current Yarn variables:
-- Harbourmaster: first meeting, missing-boat warning, bell question, buoy job and trust.
-- Mara: first meeting and trust.
-- Tomas: first meeting and trust.
-- Inez: first meeting and trust.
+Yarn's `$npc_relationship`, `$npc_can_talk`, `$npc_can_trade` and `$npc_buy_price_multiplier` variables are seeded from the active C# resident before each conversation and refreshed after a relationship command. Each resident node includes distinct positive and negative choices, guarded greetings and trust-tier responses. Existing character-specific trust flags remain for save compatibility.
 
-The C# relationship score is persistent and exposed through `ModifyRelationship`, but dialogue choices do not yet modify it. Do not imply that trust currently changes prices, quest availability or NPC schedules. Those are future integrations.
+The C# buy policy is implemented, but the sale transaction is not. Future shop, repair, quest-reward and service systems must use the active NPC agent rather than inventing separate reputation values.
 
 Recommended future relationship dimensions:
 1. Familiarity — whether the resident recognizes the player and remembers repeated visits.
@@ -94,6 +118,9 @@ Avoid one universal morality meter. Different residents should respond to differ
 ## Current implementation boundary
 
 Implemented:
+- Individual trust tiers, visible dialogue meter, conversation refusal threshold and trade willingness/price policy.
+- Idempotent relationship-event memory with save/load and validation.
+- Dialogue-driven positive and negative relationship changes for all four Greyhaven residents.
 - Reusable NPC schedule data and resolver.
 - Overnight schedule windows.
 - Authoritative sea-clock gating.
@@ -109,9 +136,9 @@ Not yet implemented:
 - NavMesh or obstacle-aware pathfinding.
 - Character animation, rigs, facial expression, voice acting and final models.
 - Interior access, doors, sleep locations and full home simulation.
-- Shop transactions, repair services, net crafting or sale-price integration.
-- Dialogue-driven relationship score changes.
-- Structured NPC memory beyond Yarn variables.
+- Shop transactions, repair services, net crafting or sale-price application; the buy-price multiplier is a policy hook only.
+- NPC animation, facial expression, relationship-driven schedules and persistent body-language states.
+- Structured memories of world actions beyond the bounded relationship-event ledger.
 - NPC reactions to weather, missing vessels, world flags, quest stages and anomalies.
 - Regional NPC spawning, population simulation or off-screen schedule simulation.
 
@@ -122,8 +149,10 @@ Not yet implemented:
 3. Confirm schedule windows resolve at their exact start and end boundaries, including overnight windows.
 4. Confirm residents move only while the sea clock advances and remain stationary during dialogue, inventory and stopped-boat states.
 5. Confirm movement remains on the authored clear routes and does not pass through building geometry.
-6. Save after changing an NPC relationship score, reload, and confirm the same stable NPC record restores.
-7. Confirm dialogue first-meeting variables persist independently of NPC schedule activity.
-8. Confirm no NPC interaction can start a second conversation while another dialogue is active.
+6. Apply a positive and negative relationship event, repeat the same event ID, and confirm it changes the score only once.
+7. Confirm score, relationship tier and event-memory IDs survive save/load; load a schema-5 fixture and confirm its unused zero baseline migrates to neutral 50.
+8. Confirm scores below 15 refuse conversation, scores below 30 refuse trade, and required story information remains recoverable.
+9. Confirm the visible meter updates after a Yarn relationship command and matches the agent's authoritative score.
+10. Confirm no NPC interaction can start a second conversation while another dialogue is active.
 
 Unity scene generation, Yarn compilation, runtime movement and save/load behaviour still require verification in Unity 6000.3.28f1. Static repository checks do not establish those runtime results.
