@@ -92,7 +92,11 @@ The forces are applied at the hull sample positions, so wave height differences 
 
 ### Shared visual/physics water surface
 
-`MaritimeSurfaceBehaviour.TrySampleSurface` evaluates the same analytic wave function used to deform the rendered water mesh. Surface height and normal are sampled from the current state. Vertical surface velocity is estimated from the previous and current complete wave states, so it includes phase progression, direction blending and amplitude ramps during dead-calm / wrong-way-swell incidents. The first mesh is generated from the same initial wave state before the first frame is rendered.
+`MaritimeSurfaceBehaviour` owns one analytic wave function for both the rendered surface and physics queries. Its simulation state advances in `FixedUpdate` using `Time.fixedDeltaTime`. The component has execution order `-100`, so it advances and snapshots the water state before the default-order `BoatHydrodynamics.FixedUpdate` samples the four hull points.
+
+Each physics step preserves the previous and current phase, direction and amplitude. `TrySampleSurface` evaluates the current physics snapshot, then estimates vertical surface velocity from the two snapshots over that exact fixed-step duration. This keeps the water velocity supplied to buoyancy independent of render frame rate and includes phase progression, direction blending and amplitude ramps during dead-calm / wrong-way-swell incidents.
+
+The visible water mesh is deformed in `LateUpdate`. It interpolates between the previous and current fixed snapshots using the render interpolation fraction, matching the generated boats' Rigidbody interpolation without feeding presentation state back into buoyancy. The first mesh is generated from the same initial wave state before the first frame is rendered.
 
 Wrong-way swell does not reset phase from absolute application time. Its travel direction blends toward the incident direction and its phase rate eases through reversal. This prevents the water pattern from jumping when an incident begins or ends. The solver still models only vertical surface velocity; horizontal orbital water velocity and currents are not implemented.
 
@@ -138,6 +142,8 @@ Play Mode tests are still required in Unity:
 - releasing throttle produces a believable coast and stopping distance;
 - steering response increases with speed and changes direction in reverse;
 - the vessel does not snag on the visible water mesh;
+- the same buoyancy response is observed with render caps at 30, 60 and 120 FPS while the fixed timestep remains unchanged;
+- the rendered wave mesh interpolates smoothly without changing the physics sampling cadence;
 - the sea-time clock follows the actual vessel Rigidbody velocity;
 - the save/load system restores position and linear/angular velocity without an impulse spike.
 

@@ -2,8 +2,8 @@
 
 > Project: WHERE THE SOUNDINGS END  
 > Status: M0 in progress — source audit recorded; Unity verification pending  
-> Audit date: 2026-11-11  
-> Audited baseline: `main` at `88e9c03`  
+> Audit date: 2026-11-12  
+> Audited baseline: `main` at `3f882eb` (before the fixed-step cadence patch in this review)  
 > Source correction: `06a7004`  
 > Owner: Project lead
 
@@ -65,18 +65,27 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 | AUD-03 | P0 | CI does not compile Unity assemblies or execute Unity tests. | Keep static checks, but require a target-editor import/compile, Edit Mode run, Play Mode/integration run and Windows build before M0 exit. Do not label a passing syntax job as a successful Unity build. | Open |
 | AUD-04 | P0 | Edit Mode tests are authored but have not been executed in the target editor. | Eight Edit Mode test files now contain the previous 59 `[Test]` attributes plus seven new wave/physics `[Test]` cases, and four `[TestCase]` attributes. Run the suite in Unity `6000.3.28f1` and record results. | Open |
 | AUD-05 | P0 | No Play Mode test scripts or Play Mode test assembly are tracked. | Add a small integration suite for boat/water/camera, input, action-driven time, harvesting, NPC/dialogue pause behavior and save lifecycle. | Open |
-| AUD-06 | P0 | Boat, water and camera are connected in source but have no observed runtime acceptance evidence. | Source integration updated in commit `1c58d63`: continuous wave incident transitions, amplitude-aware velocity, capped probe depth, single-source camera heave, and camera water wiring in all generated survey scenes. Still validate stable draft, wave response, stopping distance, turning/reverse behavior, camera framing, drift look-ahead and sea-clock interaction in Unity. | Source pass committed; Unity acceptance open |
+| AUD-06 | P0 | Boat, water and camera are connected in source but have no observed runtime acceptance evidence. | The source integration now includes continuous wave transitions, amplitude-aware velocity, capped probe depth, single-source camera heave, shared-surface camera wiring, and fixed-step wave snapshots before buoyancy with render-only interpolation. Still validate stable draft, wave response, frame-rate independence, stopping distance, turning/reverse behavior, camera framing, drift look-ahead and sea-clock interaction in Unity. | Source pass committed; Unity acceptance open |
 | AUD-07 | P0 | Save participants are discovered without a declared restore ordering contract. | Exercise full capture/restore with boat, world clock, cargo, vessel condition, NPC and Yarn data. If any participant depends on another, introduce explicit restore phases/order and regression tests. | Open |
 | AUD-08 | P1 | The repository is private and the GitHub rulesets endpoint reports that rulesets require GitHub Pro or a public repository. | Required review/status-check enforcement is not established by the committed files alone. Preserve PR discipline and decide separately whether to change plan or visibility; do not change repository visibility automatically. | Blocked by account/repository plan choice |
 | AUD-09 | P1 | Fishing resolves from a catalogue rather than regional availability. | For the slice, constrain catches to Greyhaven's authored species/conditions; later connect habitat, time, disturbance and population rules through the existing design contracts. | Open |
 | AUD-10 | P1 | The water mesh updates 4,225 vertices and recalculates normals/bounds each frame. | Profile on target hardware before adding more water surfaces or dense simulation. Optimize only from measured results. | Open |
 | AUD-11 | P1 | Two Dependabot pull requests are open for major GitHub Actions updates. | Review workflow compatibility and both PR checks before merging. Keep action references pinned to full commit SHAs. | Open |
+| AUD-12 | P0 | Wave state advanced in render-frame `Update`, while buoyancy sampled it in `FixedUpdate`; vertical water velocity was divided by render-frame delta rather than the physics interval. | Advance and snapshot wave state in an early-order `FixedUpdate` using `Time.fixedDeltaTime`; interpolate only the visible mesh in `LateUpdate`; add deterministic interpolation tests and static cadence guards. | Source corrected in this review; Unity acceptance open |
 
 ### CI evidence
 
-The latest completed `main` run inspected during this audit was [run 42875678428](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/actions/runs/42875678428) on baseline SHA `88e9c03`. Both jobs passed: **Validate Unity project and C# syntax** and **Repository safeguards**. The earlier safeguard-only failure on `cb89f31` was followed by the validator correction and a successful run.
+The latest completed `main` run inspected before this review patch was [run 43038724085](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/actions/runs/43038724085) on baseline SHA `3f882eb`. Both jobs passed: **Validate Unity project and C# syntax** and **Repository safeguards**. The current patch triggers a new run after push; its result must be checked separately.
 
 These jobs run repository/configuration validation, Tree-sitter C# syntax parsing and the repository safeguard self-test. The new `MaritimeSurfaceMathTests` suite adds deterministic coverage but remains unexecuted until Unity Test Runner is used. They do not perform Unity semantic compilation, execute the NUnit tests, open generated scenes, run Play Mode, profile performance, or create a Windows player.
+
+## Review update — 2026-11-12
+
+The current source review confirmed that the bounded water mesh is intentionally scaled by each generated scene: Greyhaven uses a 29×27 transform scale and the survey sandboxes use a 220×220 scale. The local ±5 sampling boundary therefore matches the mesh footprint; no ocean-coverage expansion was justified.
+
+The actual integration issue was temporal: render-frame wave updates were being sampled by fixed-step Rigidbody buoyancy. This review moves wave-state advancement to an early-order fixed step, computes vertical surface velocity over `Time.fixedDeltaTime`, and interpolates only the water mesh between physics snapshots. Deterministic tests and the repository validator now cover this contract.
+
+The code-level fix does not close M0-06. Unity compilation, Edit Mode execution, Play Mode checks at 30/60/120 FPS, a complete Greyhaven expedition, and a Windows build are still outstanding. Static CI success must not be presented as gameplay verification.
 
 ## 5. M0 exit criteria
 

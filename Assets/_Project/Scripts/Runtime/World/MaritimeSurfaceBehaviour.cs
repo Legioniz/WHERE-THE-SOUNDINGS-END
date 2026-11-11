@@ -7,6 +7,7 @@ namespace WhereTheSoundingsEnd.World
     /// one continuous analytic wave field. Incident direction and phase changes are eased
     /// so a dead-calm or wrong-way-swell transition cannot teleport the visible wave pattern.
     /// </summary>
+    [DefaultExecutionOrder(-100)]
     [DisallowMultipleComponent]
     public sealed class MaritimeSurfaceBehaviour : MonoBehaviour
     {
@@ -157,11 +158,13 @@ namespace WhereTheSoundingsEnd.World
             return true;
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
-            float dt = Time.deltaTime;
+            float dt = Time.fixedDeltaTime;
+            if (dt <= 0f) return;
 
-            // Preserve the exact previous rendered state for a full-state velocity estimate.
+            // Keep the prior and current wave states on the exact same cadence as Rigidbody
+            // physics. BoatHydrodynamics runs later in this fixed step and samples this state.
             previousAmplitudeBlend = amplitudeBlend;
             previousWavePhase = wavePhase;
             previousWaveDirection = currentWaveDirection;
@@ -185,7 +188,12 @@ namespace WhereTheSoundingsEnd.World
             wavePhaseRate = Mathf.MoveTowards(
                 wavePhaseRate, targetPhaseRate, phaseRateAcceleration * dt);
             wavePhase = MaritimeSurfaceMath.AdvancePhase(wavePhase, wavePhaseRate, dt);
+        }
 
+        private void LateUpdate()
+        {
+            // Rendering interpolates between fixed snapshots. This is presentation-only:
+            // buoyancy always samples the authoritative current physics state.
             ApplyWaveMesh();
         }
 
@@ -195,19 +203,38 @@ namespace WhereTheSoundingsEnd.World
 
             Vector2 direction;
             float phase;
-            GetWaveState(out direction, out phase);
+            float amplitude;
+            GetInterpolatedWaveState(out direction, out phase, out amplitude);
 
             for (int i = 0; i < baseVertices.Length; i++)
             {
                 Vector3 point = baseVertices[i];
                 float height = EvaluateWaveHeight(
-                    point.x, point.z, direction, phase, amplitudeBlend);
+                    point.x, point.z, direction, phase, amplitude);
                 vertices[i] = new Vector3(point.x, height, point.z);
             }
 
             generatedMesh.vertices = vertices;
             generatedMesh.RecalculateNormals();
             generatedMesh.RecalculateBounds();
+        }
+
+        private void GetInterpolatedWaveState(
+            out Vector2 direction,
+            out float phase,
+            out float amplitude)
+        {
+            float fixedStep = Time.fixedDeltaTime;
+            float interpolation = fixedStep > 0.000001f
+                ? Mathf.Clamp01((Time.time - Time.fixedTime) / fixedStep)
+                : 1f;
+
+            direction = MaritimeSurfaceMath.InterpolateDirection(
+                previousWaveDirection, currentWaveDirection, interpolation);
+            phase = MaritimeSurfaceMath.InterpolateScalar(
+                previousWavePhase, wavePhase, interpolation);
+            amplitude = MaritimeSurfaceMath.InterpolateScalar(
+                previousAmplitudeBlend, amplitudeBlend, interpolation);
         }
 
         private void GetWaveState(out Vector2 direction, out float phase)
@@ -291,6 +318,27 @@ namespace WhereTheSoundingsEnd.World
         public static float AdvancePhase(float currentPhase, float phaseRate, float deltaTime)
         {
             return currentPhase + phaseRate * Mathf.Max(0f, deltaTime);
+        }
+
+        public static float InterpolateScalar(float previousValue, float currentValue, float interpolation)
+        {
+            return Mathf.Lerp(previousValue, currentValue, Mathf.Clamp01(interpolation));
+        }
+
+        public static Vector2 InterpolateDirection(
+            Vector2 previousDirection,
+            Vector2 currentDirection,
+            float interpolation)
+        {
+            Vector2 fallback = currentDirection.sqrMagnitude > 0.0001f
+                ? currentDirection.normalized
+                : Vector2.right;
+            Vector2 previous = previousDirection.sqrMagnitude > 0.0001f
+                ? previousDirection.normalized
+                : fallback;
+            Vector2 current = fallback;
+            Vector2 blended = Vector2.Lerp(previous, current, Mathf.Clamp01(interpolation));
+            return blended.sqrMagnitude > 0.0001f ? blended.normalized : current;
         }
 
         public static Vector2 BlendDirection(

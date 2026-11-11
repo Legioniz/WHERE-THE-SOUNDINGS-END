@@ -20,6 +20,7 @@
 ### Play Mode
 - Boat handling, speed gating and Sounding Rig input.
 - Rigidbody buoyancy, wave following, heave/pitch/roll stability, forward/reverse thrust, opposing-throttle braking, speed taper, rudder flow, and lateral water resistance.
+- Water-wave simulation advances on the fixed physics timestep before buoyancy; rendered wave interpolation remains smooth and does not alter physics sampling at 30, 60 and 120 FPS.
 - Survey action advances the sea clock for its configured duration.
 - Pausing or opening dialogue / inventory still freezes sea time.
 - Greyhaven profile returns shallow bathymetry and never reports a deep scattering layer.
@@ -71,6 +72,7 @@ The Edit Mode test source includes eight suites, including deterministic maritim
 - NPC stable-ID relationship persistence.
 - Four-point buoyancy force and damping response, forward/reverse acceleration, braking behaviour, engine/hull condition effects, and flow-dependent rudder authority.
 - Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
+- Fixed-step surface-velocity estimation and normalized interpolation between previous/current wave snapshots.
 
 The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v5, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 

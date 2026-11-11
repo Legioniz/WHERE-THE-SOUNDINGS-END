@@ -4,7 +4,7 @@
 > Status: Active M0 and first vertical-slice backlog  
 > Owner: Project lead  
 > Version: 0.2  
-> Last reviewed: 2026-11-11
+> Last reviewed: 2026-11-12
 
 This is the authoritative implementation backlog. The [Implementation Audit](IMPLEMENTATION-AUDIT.md) records what exists and what is still unverified. The [Development Roadmap](DEVELOPMENT-ROADMAP.md) owns the release forecast; this file owns work order, dependencies and acceptance criteria.
 
@@ -27,7 +27,7 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 | M0-03 | P0 | Verify generated scenes and Build Settings bootstrap | M | M0-02 | Open |
 | M0-04 | P0 | Run the full existing Edit Mode suite | M | M0-02 | Open |
 | M0-05 | P0 | Add and run focused Play Mode integration tests | L | M0-03, M0-04 | Open |
-| M0-06 | P0 | Validate boat, water and camera behavior together | L | M0-03, M0-05 | Open |
+| M0-06 | P0 | Validate boat, water and camera behavior together | L | M0-03, M0-05 | Source integration/cadence corrected; Unity acceptance open |
 | M0-07 | P0 | Verify save/load, autosave, backups and participant restore | M | M0-03, M0-05 | Open |
 | M0-08 | P0 | Produce and smoke-test a clean Windows 64-bit development build | M | M0-03 through M0-07 | Open |
 | M0-09 | P1 | Decide how to enforce main-branch review/check requirements | S | Owner plan/visibility decision | Blocked by private-repository plan limitation |
@@ -65,7 +65,7 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 
 ### M0-04 — Existing Edit Mode verification
 
-Run all seven existing Edit Mode test files in Unity Test Runner, including the current 59 `[Test]` attributes and four `[TestCase]` attributes. Record the editor version, pass/fail counts, failures and commit. Fix root causes; do not disable tests to obtain a green result.
+Run all current Edit Mode test files in Unity Test Runner. Record the editor version, pass/fail counts, failures and commit. Fix root causes; do not disable tests to obtain a green result.
 
 ### M0-05 — Play Mode integration smoke tests
 
@@ -82,7 +82,7 @@ Keep deterministic math in Edit Mode; use Play Mode only where Unity scene/runti
 
 ### M0-06 — Boat/ocean/camera acceptance pass
 
-**Source-level integration update:** commit `1c58d63` now provides continuous incident wave transitions, amplitude-aware surface velocity, a configured probe-depth cap, single-source camera heave, and shared-surface camera wiring in Greyhaven plus the two survey sandboxes. The controller also resolves vessel condition after generated-scene wiring. This does not close M0-06; all handling observations and Play Mode acceptance remain open until run in Unity.
+**Source-level integration update:** the source now provides continuous incident wave transitions, amplitude-aware surface velocity, a configured probe-depth cap, single-source camera heave, and shared-surface camera wiring in Greyhaven plus the two survey sandboxes. The controller resolves vessel condition after generated-scene wiring. This review also moves wave-state advancement to an early-order `FixedUpdate` with `Time.fixedDeltaTime`, then interpolates the mesh in `LateUpdate` without affecting physics samples. This does not close M0-06; all handling observations and Play Mode acceptance remain open until run in Unity.
 
 Record repeatable observations for:
 - stable draft with no sinking or launching;
@@ -91,7 +91,9 @@ Record repeatable observations for:
 - rudder response at rest, low speed, cruising speed and reverse;
 - camera readability while accelerating, drifting, reversing and turning;
 - actual vessel velocity driving sea-time progression;
-- no major visual/physics mismatch between water mesh and buoyancy probes.
+- no major visual/physics mismatch between water mesh and buoyancy probes;
+- stable buoyancy response with render caps at 30, 60 and 120 FPS while the fixed timestep remains unchanged;
+- smooth rendered wave interpolation with no render-frame delta feeding the physics water-velocity sample.
 
 Tune only after recording observations. Keep the small workboat approximation; do not introduce a heavyweight fluid solver without measured need.
 

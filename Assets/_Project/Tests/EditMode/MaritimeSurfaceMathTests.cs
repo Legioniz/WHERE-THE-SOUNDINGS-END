@@ -84,5 +84,44 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.AreEqual(0f, BoatHydrodynamicsMath.ClampSubmersionDepth(0.5f, float.PositiveInfinity));
             Assert.AreEqual(0f, BoatHydrodynamicsMath.ClampSubmersionDepth(-0.5f, 0.65f));
         }
+
+        [Test]
+        public void SurfaceVelocity_UsesTheFixedSimulationInterval()
+        {
+            const float fixedStep = 0.02f;
+            const float renderFrame = 1f / 60f;
+
+            float fixedVelocity = MaritimeSurfaceMath.EstimateVerticalVelocity(
+                0f, 0.04f, fixedStep);
+            float renderCadenceVelocity = MaritimeSurfaceMath.EstimateVerticalVelocity(
+                0f, 0.04f, renderFrame);
+
+            Assert.AreEqual(2f, fixedVelocity, 0.0001f);
+            Assert.That(System.Math.Abs(fixedVelocity - renderCadenceVelocity),
+                Is.GreaterThan(0.3f));
+        }
+
+        [Test]
+        public void WaveRenderInterpolation_ClampsScalarBlendToSnapshotRange()
+        {
+            Assert.AreEqual(0.15f,
+                MaritimeSurfaceMath.InterpolateScalar(0.15f, 0.45f, -1f), 0.0001f);
+            Assert.AreEqual(0.30f,
+                MaritimeSurfaceMath.InterpolateScalar(0.15f, 0.45f, 0.5f), 0.0001f);
+            Assert.AreEqual(0.45f,
+                MaritimeSurfaceMath.InterpolateScalar(0.15f, 0.45f, 2f), 0.0001f);
+        }
+
+        [Test]
+        public void WaveRenderInterpolation_BendsDirectionBetweenPhysicsSnapshots()
+        {
+            Vector2 previous = Vector2.right;
+            Vector2 current = Vector2.up;
+            Vector2 midpoint = MaritimeSurfaceMath.InterpolateDirection(previous, current, 0.5f);
+
+            Assert.That(midpoint.magnitude, Is.EqualTo(1f).Within(0.0001f));
+            Assert.That(Vector2.Angle(previous, midpoint), Is.EqualTo(45f).Within(0.01f));
+            Assert.That(Vector2.Angle(midpoint, current), Is.EqualTo(45f).Within(0.01f));
+        }
     }
 }

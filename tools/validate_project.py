@@ -234,18 +234,46 @@ def main() -> int:
                 failures.append(f"MaritimeSurfaceBehaviour is missing coherent shared-wave behaviour: {required_text}")
         if "Time.time * waveSpeed" in water_source:
             failures.append("MaritimeSurfaceBehaviour must not reset wave phase when an incident changes direction.")
+        surface_tests = (ROOT / "Assets/_Project/Tests/EditMode/MaritimeSurfaceMathTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "SurfaceVelocity_UsesTheFixedSimulationInterval",
+            "WaveRenderInterpolation_ClampsScalarBlendToSnapshotRange",
+            "WaveRenderInterpolation_BendsDirectionBetweenPhysicsSnapshots",
+        ):
+            if f"void {required_test}()" not in surface_tests:
+                failures.append(f"MaritimeSurfaceMathTests is missing regression test: {required_test}")
+        for required_text in (
+            "[DefaultExecutionOrder(-100)]", "private void FixedUpdate()",
+            "float dt = Time.fixedDeltaTime;", "surfaceSampleDeltaTime = dt;",
+            "private void LateUpdate()", "GetInterpolatedWaveState",
+            "InterpolateDirection", "InterpolateScalar",
+        ):
+            if required_text not in water_source:
+                failures.append(f"MaritimeSurfaceBehaviour is missing fixed-step/render interpolation contract: {required_text}")
+        if "Time.deltaTime" in water_source:
+            failures.append("MaritimeSurfaceBehaviour wave state must not advance on the render-frame clock.")
+        fixed_wave_update = water_source.split("private void FixedUpdate()", 1)[1].split("private void LateUpdate()", 1)[0]
+        if "Time.fixedDeltaTime" not in fixed_wave_update or "surfaceSampleDeltaTime = dt;" not in fixed_wave_update:
+            failures.append("MaritimeSurfaceBehaviour must estimate surface velocity over its fixed physics step.")
+        mesh_update = water_source.split("private void ApplyWaveMesh()", 1)[1].split("private void GetInterpolatedWaveState", 1)[0]
+        if "GetInterpolatedWaveState" not in mesh_update:
+            failures.append("The visible water mesh must interpolate between fixed wave snapshots.")
 
         camera_source = (ROOT / "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs").read_text(encoding="utf-8")
         if "TrySampleSurface(" not in camera_source or "waveBobInfluence" in camera_source:
             failures.append("Camera must sample the active wave surface without adding a second wave-height bob.")
 
         greyhaven_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
-        if "hydrodynamics.Configure(seaSurface)" not in greyhaven_builder or "body.useGravity = true;" not in greyhaven_builder:
-            failures.append("Greyhaven must connect the boat buoyancy component and enable Rigidbody gravity.")
+        if ("hydrodynamics.Configure(seaSurface)" not in greyhaven_builder or
+                "body.useGravity = true;" not in greyhaven_builder or
+                "body.interpolation = RigidbodyInterpolation.Interpolate;" not in greyhaven_builder):
+            failures.append("Greyhaven must connect buoyancy, enable gravity and interpolate the vessel Rigidbody.")
 
         deep_builder = (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8")
-        if "hydrodynamics.Configure(waterSurface)" not in deep_builder or "body.useGravity = true;" not in deep_builder:
-            failures.append("Deep-ocean survey boats must use the same Rigidbody buoyancy model.")
+        if ("hydrodynamics.Configure(waterSurface)" not in deep_builder or
+                "body.useGravity = true;" not in deep_builder or
+                "body.interpolation = RigidbodyInterpolation.Interpolate;" not in deep_builder):
+            failures.append("Deep-ocean survey boats must connect buoyancy, enable gravity and interpolate the vessel Rigidbody.")
         if "follow.SeaSurface = waterSurface;" not in deep_builder:
             failures.append("Deep-ocean survey cameras must sample the same water surface as buoyancy.")
 
