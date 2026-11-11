@@ -1,7 +1,7 @@
 {
   "name": "WhereTheSoundingsEnd.Tests.EditMode",
   "rootNamespace": "WhereTheSoundingsEnd.Tests",
-  "references": ["WhereTheSoundingsEnd.Runtime"],
+  "references": ["WhereTheSoundingsEnd.Runtime", "WhereTheSoundingsEnd.Editor"],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

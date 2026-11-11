@@ -66,6 +66,8 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
     "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs",
     "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs",
+    "Assets/_Project/Scripts/Editor/BoatVisualModelBuilder.cs",
+    "Assets/_Project/Tests/EditMode/BoatVisualModelTests.cs",
     "Assets/_Project/Tests/EditMode/WhereTheSoundingsEnd.Tests.EditMode.asmdef",
     "Assets/_Project/Tests/EditMode/CoreFoundationTests.cs",
     "Assets/_Project/Tests/EditMode/SaveFileServiceTests.cs",
@@ -202,6 +204,23 @@ def main() -> int:
         builder_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
         if "DeepOceanSurveySandboxBuilder.EnsureScenes(LoadControls())" not in builder_source:
             failures.append("Project setup must generate the missing deep-ocean survey sandbox scenes.")
+
+        boat_visual_source = (ROOT / "Assets/_Project/Scripts/Editor/BoatVisualModelBuilder.cs").read_text(encoding="utf-8")
+        for required_text in ("BuildHullMesh", "BuildDeckMesh", "BuildCabinMesh", "SaveMeshAsset", "RemoveCollider", "BuildWheelhouse", "BuildBowRails"):
+            if required_text not in boat_visual_source:
+                failures.append(f"BoatVisualModelBuilder is missing its procedural workboat model feature: {required_text}")
+
+        greyhaven_visual_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
+        survey_visual_builder = (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8")
+        if "BoatVisualModelBuilder.Build(boat.transform)" not in greyhaven_visual_builder:
+            failures.append("Greyhaven must use the shared procedural workboat visual model.")
+        if "BoatVisualModelBuilder.Build(boat.transform)" not in survey_visual_builder:
+            failures.append("Deep-ocean survey scenes must use the shared procedural workboat visual model.")
+
+        boat_visual_tests = (ROOT / "Assets/_Project/Tests/EditMode/BoatVisualModelTests.cs").read_text(encoding="utf-8")
+        for required_test in ("WorkboatVisualModel_BuildsTaperedHullAndRaisedWheelhouse", "WorkboatVisualModel_KeepsAllDecorativePartsColliderFree"):
+            if f"void {required_test}()" not in boat_visual_tests:
+                failures.append(f"BoatVisualModelTests is missing regression test: {required_test}")
 
         boat_source = (ROOT / "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs").read_text(encoding="utf-8")
         if "if (isActiveAndEnabled) BindInputActions();" not in boat_source:

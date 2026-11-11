@@ -50,7 +50,6 @@ namespace WhereTheSoundingsEnd.Editor
             Material metal = Mat("Environment_Metal.mat", new Color(0.16f, 0.19f, 0.20f), 0.55f);
             Material red = Mat("Environment_MarkerRed.mat", new Color(0.62f, 0.12f, 0.09f), 0.18f);
             Material green = Mat("Environment_MarkerGreen.mat", new Color(0.12f, 0.38f, 0.25f), 0.16f);
-            Material hull = Mat("Environment_BoatHull.mat", new Color(0.065f, 0.085f, 0.09f), 0.22f);
             Material foliage = Mat("Environment_MangroveFoliage.mat", new Color(0.12f, 0.20f, 0.15f), 0.0f);
             Material beacon = Mat("Environment_LighthouseBeacon.mat", new Color(0.95f, 0.62f, 0.29f), 0.18f);
 
@@ -73,7 +72,7 @@ namespace WhereTheSoundingsEnd.Editor
             BuildEstuary(estuary, soil, wood, foliage, rock);
             BuildLighthouse(landmarks, concrete, roof, red, beacon);
             BuildBuoys(landmarks, red, green, metal);
-            BuildBoat(player, controls, hull, wood, metal, cargoCatalog, seaSurface);
+            BuildBoat(player, controls, cargoCatalog, seaSurface);
             BuildCameraAndLight(lighting, player, seaSurface);
 
             YarnDialogueSaveParticipant dialogueSave = BuildSaveCoordinator(world.transform);
@@ -842,7 +841,7 @@ namespace WhereTheSoundingsEnd.Editor
             radius.radius = salvage.InteractionRadius;
         }
 
-        private static void BuildBoat(Transform parent, InputActionAsset controls, Material hull, Material deck, Material metal, List<CargoItemDefinition> cargoCatalog, MaritimeSurfaceBehaviour seaSurface)
+        private static void BuildBoat(Transform parent, InputActionAsset controls, List<CargoItemDefinition> cargoCatalog, MaritimeSurfaceBehaviour seaSurface)
         {
             GameObject boat = new GameObject("Player_Boat_Blockout");
             boat.transform.SetParent(parent, false);
@@ -858,41 +857,12 @@ namespace WhereTheSoundingsEnd.Editor
             body.angularDamping = 0.18f;
             body.centerOfMass = new Vector3(0f, -0.10f, -0.12f);
 
-            // One stable waterline hull proxy owns collision; visible meshes are decorative.
+            // One stable waterline proxy owns collision; the shaped visual hull is decorative.
             BoxCollider collisionHull = boat.AddComponent<BoxCollider>();
             collisionHull.center = new Vector3(0f, 0.04f, 0f);
             collisionHull.size = new Vector3(2.1f, 0.8f, 5.6f);
 
-            GameObject hullMesh = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            hullMesh.name = "Hull";
-            hullMesh.transform.SetParent(boat.transform, false);
-            hullMesh.transform.localScale = new Vector3(2.1f, 0.62f, 5.6f);
-            hullMesh.GetComponent<Renderer>().sharedMaterial = hull;
-            UnityEngine.Object.DestroyImmediate(hullMesh.GetComponent<Collider>());
-
-            GameObject bow = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            bow.name = "Raised_Bow";
-            bow.transform.SetParent(boat.transform, false);
-            bow.transform.localPosition = new Vector3(0f, 0.25f, 2f);
-            bow.transform.localScale = new Vector3(1.55f, 0.5f, 1.25f);
-            bow.GetComponent<Renderer>().sharedMaterial = hull;
-            UnityEngine.Object.DestroyImmediate(bow.GetComponent<Collider>());
-
-            GameObject cabin = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cabin.name = "Small_Wheelhouse";
-            cabin.transform.SetParent(boat.transform, false);
-            cabin.transform.localPosition = new Vector3(0f, 0.72f, -0.45f);
-            cabin.transform.localScale = new Vector3(1.25f, 0.95f, 1.45f);
-            cabin.GetComponent<Renderer>().sharedMaterial = deck;
-            UnityEngine.Object.DestroyImmediate(cabin.GetComponent<Collider>());
-
-            GameObject engine = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            engine.name = "Outboard_Engine";
-            engine.transform.SetParent(boat.transform, false);
-            engine.transform.localPosition = new Vector3(0f, -0.12f, -3f);
-            engine.transform.localScale = new Vector3(0.65f, 0.65f, 0.55f);
-            engine.GetComponent<Renderer>().sharedMaterial = metal;
-            UnityEngine.Object.DestroyImmediate(engine.GetComponent<Collider>());
+            BoatVisualModelBuilder.Build(boat.transform);
 
             BoatPrototypeController controller = boat.AddComponent<BoatPrototypeController>();
             controller.InputActions = controls;

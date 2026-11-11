@@ -77,7 +77,6 @@ namespace WhereTheSoundingsEnd.Editor
             Material markerMaterial = GetOrCreateMaterial(
                 trench ? "Survey_TrenchSiteMarker.mat" : "Survey_OuterShoalsSiteMarker.mat",
                 trench ? new Color(0.82f, 0.34f, 0.16f) : new Color(0.45f, 0.72f, 0.64f));
-            Material hullMaterial = GetOrCreateMaterial("Survey_TestVessel.mat", new Color(0.07f, 0.09f, 0.10f));
 
             GameObject world = new GameObject(trench
                 ? "WORLD — The Hollow Trench Survey Range"
@@ -112,13 +111,7 @@ namespace WhereTheSoundingsEnd.Editor
             hull.center = new Vector3(0f, 0.04f, 0f);
             hull.size = new Vector3(2.2f, 0.8f, 6f);
 
-            GameObject hullVisual = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            hullVisual.name = "Survey_Vessel_Hull";
-            hullVisual.transform.SetParent(boat.transform, false);
-            hullVisual.transform.localScale = new Vector3(2.2f, 0.8f, 6f);
-            hullVisual.GetComponent<Renderer>().sharedMaterial = hullMaterial;
-            Collider visualCollider = hullVisual.GetComponent<Collider>();
-            if (visualCollider != null) UnityEngine.Object.DestroyImmediate(visualCollider);
+            BoatVisualModelBuilder.Build(boat.transform);
 
             BoatPrototypeController boatController = boat.AddComponent<BoatPrototypeController>();
             boatController.InputActions = controls;
