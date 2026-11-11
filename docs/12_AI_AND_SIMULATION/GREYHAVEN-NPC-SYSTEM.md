@@ -91,6 +91,23 @@ Save schema 6 adds the per-NPC memory ledger and migrates older NPC records from
 
 Names, dialogue and occupations are working canon for this prototype and may be revised before voice production. The Harbourmaster remains unnamed until the wider story establishes why that identity matters.
 
+## Generated workplace placement and wayfinding
+
+The Greyhaven Editor builder places the residents at the following service locations. These are generated world X/Z coordinates; Y is sampled from the Greyhaven terrain profile unless the quay-watch position is explicitly placed on the dock deck.
+
+| Resident | Daytime location | Off-duty anchor |
+|---|---|---|
+| Harbourmaster | Inner main pier quay-watch point (-1.6, 12) | Harbour Office front (21, -28.5) |
+| Mara Venn | Fish Market front (-27, -28.5) | Market-side anchor (-23, -29) |
+| Tomas Vale | Boat Repair Shed front (1, -40) | Repair-side anchor (5, -38) |
+| Inez Sarmiento | Net Mender Shed front (-48, -46) | Net-shed-side anchor (-44, -46) |
+
+The Harbourmaster's named office anchor is on the Harbour Office front, not at the quay-watch point. Mara, Tomas and Inez remain close to their relevant service entrances so the current direct waypoint movement does not need to route through the buildings.
+
+The physical chart table on the east half of the T-pier maps the island outline and labels resident workplaces with pin letters: H for the Harbourmaster's quay-watch point, O for the Harbour Office after-hours anchor, M for Mara's Fish Market, T for Tomas's Boat Repair Shed, and I for Inez's Net Mender Shed. It is a fixed local chart, not a live schedule display: a marker means "workplace / schedule destination" and does not promise that the character is present at every hour.
+
+Do not change the stable IDs, Yarn dialogue nodes or schedule boundaries when moving visual props. If later navigation work changes these anchors, preserve short obstacle-free routes and update the chart and this placement table together.
+
 ## Dialogue memory and relationship design
 
 Yarn's `$npc_relationship`, `$npc_can_talk`, `$npc_can_trade` and `$npc_buy_price_multiplier` variables are seeded from the active C# resident before each conversation and refreshed after a relationship command. Each resident node includes distinct positive and negative choices, guarded greetings and trust-tier responses. Existing character-specific trust flags remain for save compatibility.
@@ -145,10 +162,11 @@ Not yet implemented:
 ## Acceptance checks
 
 1. Rebuild Greyhaven and confirm four resident agents exist with unique stable IDs.
-2. Confirm all four interaction triggers display the correct resident name and start the correct Yarn node.
-3. Confirm schedule windows resolve at their exact start and end boundaries, including overnight windows.
-4. Confirm residents move only while the sea clock advances and remain stationary during dialogue, inventory and stopped-boat states.
-5. Confirm movement remains on the authored clear routes and does not pass through building geometry.
+2. Confirm Harbourmaster quay-watch and office anchors, Mara's market frontage, Tomas's repair frontage and Inez's net-mender frontage match the generated chart legend.
+3. Confirm all four interaction triggers display the correct resident name and start the correct Yarn node.
+4. Confirm schedule windows resolve at their exact start and end boundaries, including overnight windows.
+5. Confirm residents move only while the sea clock advances and remain stationary during dialogue, inventory and stopped-boat states.
+6. Confirm movement remains on the authored clear routes and does not pass through building geometry.
 6. Apply a positive and negative relationship event, repeat the same event ID, and confirm it changes the score only once.
 7. Confirm score, relationship tier and event-memory IDs survive save/load; load a schema-5 fixture and confirm its unused zero baseline migrates to neutral 50.
 8. Confirm scores below 15 refuse conversation, scores below 30 refuse trade, and required story information remains recoverable.

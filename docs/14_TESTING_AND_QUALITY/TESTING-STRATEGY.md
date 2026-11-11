@@ -4,7 +4,7 @@
 > Status: Working baseline with initial deep-ocean survey Edit Mode coverage  
 > Owner: Project lead  
 > Version: 0.2  
-> Last reviewed: 2026-11-10
+> Last reviewed: 2026-11-12
 
 ## Test layers
 
@@ -42,6 +42,9 @@
 - Confirm weather/fog durations, shift cooldowns, hallucination cooldowns and pending seabird warning state survive save/load.
 - Confirm maritime incident caption, hush and false-navigation-light state restore without rerolling the event.
 - Confirm all Greyhaven NPC IDs are unique, each interaction starts the correct Yarn node, schedule changes use SeaStateDirector.CurrentHour, and NPC movement pauses with the action-driven clock.
+- Rebuild the Greyhaven village and confirm service signs, gable roof/gable meshes, windows, porch/awning details, repair hoist, net-mender lean-to, and inn veranda are generated.
+- Confirm the physical dock chart table is entirely on the east half of the T-pier, the central mooring lane remains clear, the map silhouette matches the generated terrain profile, and map markers match the village, dock, lighthouse and wreck coordinates.
+- Confirm the chart legend maps Harbourmaster to the office, Mara to the market, Tomas to repair and Inez to the net shed; signs and TextMesh fonts render at the gameplay camera scale.
 - Confirm NPC relationship scores and Yarn first-meeting/trust variables restore independently after a save/load cycle.
 - Confirm Outer Shoals and Hollow Trench sandbox scenes contain valid regional profiles and authored site markers.
 
@@ -71,7 +74,8 @@ The Edit Mode test source includes eight suites, including deterministic maritim
 - Site signal confidence from authored signal strength and acoustic attenuation.
 - NPC day/overnight schedule boundaries and missing-window behaviour.
 - NPC stable-ID relationship persistence.
-- Contact-point relative velocity including angular motion; contact-normal impact speed, glancing-impact rejection, threshold/capped hull damage, disabled damage-rate tuning, invalid collision inputs and proportional engine damage.\n- Greyhaven shoreline determinism/envelope, bounded multi-scale heightfield, distinct headland and inland-spine elevations, beach/grass/basalt classification and invalid terrain-sample fallback.
+- Contact-point relative velocity including angular motion; contact-normal impact speed, glancing-impact rejection, threshold/capped hull damage, disabled damage-rate tuning, invalid collision inputs and proportional engine damage.
+- Greyhaven shoreline determinism/envelope, bounded multi-scale heightfield, distinct headland and inland-spine elevations, beach/grass/basalt classification and invalid terrain-sample fallback.
 - Four-point buoyancy force and damping response, forward/reverse acceleration, braking behaviour, engine/hull condition effects, and flow-dependent rudder authority.
 - Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
 - Fixed-step surface-velocity estimation and normalized interpolation between previous/current wave snapshots.

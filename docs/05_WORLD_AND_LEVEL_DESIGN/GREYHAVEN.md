@@ -3,7 +3,7 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Working baseline — procedural greybox; geography and final art remain provisional  
 > Owner: Project lead  
-> Version: 0.4  
+> Version: 0.5  
 > Last reviewed: 2026-11-12
 
 ## 1. Purpose
@@ -42,6 +42,7 @@ The shoreline is irregular rather than a straight wall. It pushes seaward near t
 - Main pier with a T-shaped end platform and two finger piers.
 - Mooring piles, working decks, crates, and a net rack.
 - Three navigation buoys mark the inner channel and outer approach.
+- A fixed local harbor chart stands on a table on the east half of the outer T-pier, offset from the central mooring lane. It marks the dock, village services, lighthouse, outer-channel wreck and the workplace of each named resident.
 - The harbor mouth remains open between the west and east breakwater arms.
 - The starter boat spawns outside the main dock with a turning lane to test.
 
@@ -64,6 +65,14 @@ Buildings are readable by silhouette and position. Four blockout residents are g
 - A compact road network connects the market, office, repair shed, inn, and residential lane.
 - Street lamps and crates establish scale and routes.
 - The ridge and headlands frame the harbor without hiding the lighthouse silhouette.
+
+### 3.6 Working buildings and resident wayfinding
+
+The generated service buildings now use distinct static architectural silhouettes rather than identical blank cubes. Shared construction includes a foundation plinth, visible corner posts, pitched gable roof and gable caps, a framed door, divided windows, shutters, steps and service signage. The Fish Market has a public counter and canopy; the Harbour Office has a covered porch and bell frame; Boat Repair has a wide service bay and overhead hoist; the Net Mender Shed has a side lean-to and hanging net lines; and the Inn has a veranda and bench. Four inland houses receive smaller porches and chimneys.
+
+Residents are positioned at the service fronts a player would naturally visit: the Harbourmaster keeps quay watch on the main pier and uses the Harbour Office entrance after hours; Mara works at the Fish Market; Tomas works at Boat Repair; and Inez works at the Net Mender Shed. Their exact generated coordinates and secondary anchors are recorded in [Greyhaven Settlement, Buildings and Wayfinding](GREYHAVEN-SETTLEMENT-AND-WAYFINDING.md). Stable NPC IDs, schedule windows, dialogue nodes and save behavior remain unchanged.
+
+The east half of the T-pier carries a physical chart table. Its schematic land outline is sampled from the same Greyhaven terrain profile as the generated island. The chart marks local services, resident workplaces, dock, lighthouse and wreck field. The "you are here" marker is fixed to the dock chart location; this is not a live minimap or a calibrated nautical chart.
 
 ## 4. Water and navigation
 
@@ -119,7 +128,11 @@ Before the greybox is promoted beyond working baseline, verify in Unity:
 
 - [ ] The setup menu completes without compile or import errors.
 - [ ] The scene opens with the URP pipeline and no missing materials.
-- [ ] The water surface, terrain mesh, shoreline, and terrain material-submesh boundaries render without visible gaps.\n- [ ] The west headland, east ridge, inland spine, and low coastal shelf read as distinct landforms from the gameplay camera.\n- [ ] Sand, soil, grass, and basalt surfaces remain legible under the overcast lighting and fog.\n- [ ] Buildings, roads, NPC anchors, the lighthouse, and breakwater props remain seated on the regenerated heightfield.\n- [ ] The single terrain MeshCollider and faceted outcrop colliders do not create boat-catching seams or unstable contacts.
+- [ ] The water surface, terrain mesh, shoreline, and terrain material-submesh boundaries render without visible gaps.
+- [ ] The west headland, east ridge, inland spine, and low coastal shelf read as distinct landforms from the gameplay camera.
+- [ ] Sand, soil, grass, and basalt surfaces remain legible under the overcast lighting and fog.
+- [ ] Buildings, roads, NPC anchors, the lighthouse, and breakwater props remain seated on the regenerated heightfield.
+- [ ] The single terrain MeshCollider and faceted outcrop colliders do not create boat-catching seams or unstable contacts.
 - [ ] The boat moves, reverses, and steers in the open channel.
 - [ ] The boat does not collide with the dock at spawn.
 - [ ] Piers, breakwater rocks, and terrain have appropriate collision.
@@ -131,6 +144,10 @@ Before the greybox is promoted beyond working baseline, verify in Unity:
 - [ ] Accepting the Harbourmaster's buoy job writes a checkpoint autosave.
 - [ ] The cargo hold opens/closes, supports valid move/rotate/reject operations, and restores placements through manual save and autosave.
 - [ ] The lighthouse and channel buoys remain identifiable at gameplay camera scale.
+- [ ] Service building silhouettes, roof/gable meshes, front signs, porches, market counter, repair hoist, net-mender work lean-to and inn veranda render without missing meshes.
+- [ ] The dock chart table is fully supported on the east T-pier, remains outside the central mooring lane and presents the correct shoreline, workplaces, landmarks and wreck marker.
+- [ ] The chart text and building signs remain readable from the orthographic gameplay camera.
+- [ ] Harbourmaster, Mara, Tomas and Inez occupy their documented service locations during their day windows and use clear nearby secondary anchors.
 - [ ] Q emits one survey pulse while stopped, reports shallow depth and can discover the outer-channel wreck marker.
 - [ ] Greyhaven never reports a deep scattering layer.
 - [ ] The scene is included in the Windows build scene list.
@@ -140,6 +157,6 @@ No Editor rendering, Play Mode, physics, or Windows build result is claimed by r
 
 ## 9. Implementation boundary
 
-Implemented by this pass: deterministic 144 × 96 multi-scale island heightfield, irregular mesh-conforming shoreline and sand band, slope/elevation-based soil/sand/grass/basalt submeshes, faceted basalt outcrops, visual-only procedural swell surface, blockout district geometry, piers, breakwater, navigation markers, lighthouse silhouette, village service and residential placeholders, mangrove/estuary props, starter boat, configurable 2.5D camera framing, a 7×9 spatial cargo hold with runtime interface, the first four Greyhaven NPC blockouts with schedules and separate Yarn dialogue nodes, a shallow regional survey profile, a Sounding Rig pulse loop, and a discoverable outer-channel wreck marker.
+Implemented by this pass: deterministic 144 × 96 multi-scale island heightfield, irregular mesh-conforming shoreline and sand band, slope/elevation-based soil/sand/grass/basalt submeshes, faceted basalt outcrops, service-specific building blockout details and signs, resident workplace placement, fixed schematic harbor chart table, visual-only procedural swell surface, blockout district geometry, piers, breakwater, navigation markers, lighthouse silhouette, village service and residential placeholders, mangrove/estuary props, starter boat, configurable 2.5D camera framing, a 7×9 spatial cargo hold with runtime interface, the first four Greyhaven NPC blockouts with schedules and separate Yarn dialogue nodes, a shallow regional survey profile, a Sounding Rig pulse loop, and a discoverable outer-channel wreck marker.
 
 Not implemented: final environment art, optimized production meshes, animated or physically simulated water/tide/current/weather/waves, walkable character controller, interiors, advanced NPC pathfinding, interiors, shops and sale transactions, full quest objective/journal logic, fishing and real catch intake, fish populations, ordinary wildlife, creature AI, hostile threat logic, acoustic navigation, streaming, or region transitions. Cargo UI prototype intake controls are not a substitute for fishing.

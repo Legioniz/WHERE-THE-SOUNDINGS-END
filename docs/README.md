@@ -47,7 +47,9 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 - [World Bible](02_LORE_AND_WORLD/WORLD-BIBLE.md)
 - [World Map](05_WORLD_AND_LEVEL_DESIGN/WORLD-MAP.md)
 - [Greyhaven NPC system and initial resident cast](12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md)
-- [Greyhaven environment and first-hub layout](05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md)\n- [Greyhaven procedural island terrain](08_TECHNICAL_DESIGN/GREYHAVEN-TERRAIN.md) — deterministic shoreline/elevation profile, material regions, collision ownership and Editor validation.
+- [Greyhaven environment and first-hub layout](05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md)
+- [Greyhaven settlement, buildings and wayfinding](05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN-SETTLEMENT-AND-WAYFINDING.md) — building silhouettes, shopfronts, NPC workplace coordinates and the fixed dock chart.
+- [Greyhaven procedural island terrain](08_TECHNICAL_DESIGN/GREYHAVEN-TERRAIN.md) — deterministic shoreline/elevation profile, material regions, collision ownership and Editor validation.
 - [Regional ecology and creature distribution](05_WORLD_AND_LEVEL_DESIGN/REGIONAL-ECOLOGY-AND-CREATURES.md)
 - [Location catalog](05_WORLD_AND_LEVEL_DESIGN/LOCATION-CATALOG.md)
 - [Exploration design](05_WORLD_AND_LEVEL_DESIGN/EXPLORATION-DESIGN.md)
