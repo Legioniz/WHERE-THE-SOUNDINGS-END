@@ -65,6 +65,18 @@ Milestones are evidence gates, not calendar-only achievements. Dates are approxi
 - Storefront, price, rating jurisdictions, localization, and release date are decisions to be recorded; none are assumed by this plan.
 - A release date is not approved until the release checklist passes.
 
+## Current checkpoint — M0, 2026-11-11
+
+**State: In progress; do not mark M0 complete yet.**
+
+- Audited the tracked repository, existing runtime foundations, Editor scene-generation path, package/configuration files, seven Edit Mode test suites, GitHub Actions and repository protection constraints.
+- Corrected the known undeclared `trim` material argument in the Greyhaven builder (commit `06a7004`). Unity semantic compilation is still required.
+- The pre-correction main baseline's repository integrity and safeguard workflows passed. This is static/configuration evidence only.
+- M0 blockers remain: clean Unity import, tracked package lock and stable `.meta` files, generated-scene/bootstrap verification, Edit Mode execution, Play Mode integration tests, save/restore validation and a clean Windows build.
+- The repository's rulesets endpoint reports a plan restriction for this private repository. Required remote approvals/status checks are therefore not recorded as active.
+
+See [Implementation Audit](IMPLEMENTATION-AUDIT.md) and [Task Backlog](TASK-BACKLOG.md) for evidence and work order.
+
 ## Status updates
 
 Update this document when a milestone changes state. Include:

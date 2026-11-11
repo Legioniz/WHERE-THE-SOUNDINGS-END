@@ -106,6 +106,8 @@ The current production baseline targets a commercial Windows release around **No
 - [Development Roadmap](docs/13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md)
 - [Production Plan](docs/13_PRODUCTION_MANAGEMENT/PRODUCTION-PLAN.md)
 - [Project Milestones](docs/13_PRODUCTION_MANAGEMENT/PROJECT-MILESTONES.md)
+- [Implementation Audit](docs/13_PRODUCTION_MANAGEMENT/IMPLEMENTATION-AUDIT.md)
+- [Task Backlog](docs/13_PRODUCTION_MANAGEMENT/TASK-BACKLOG.md)
 - [Feature Priorities](docs/13_PRODUCTION_MANAGEMENT/FEATURE-PRIORITIES.md)
 - [AI-Assisted Development Workflow](docs/13_PRODUCTION_MANAGEMENT/AI-ASSISTED-DEVELOPMENT.md)
 

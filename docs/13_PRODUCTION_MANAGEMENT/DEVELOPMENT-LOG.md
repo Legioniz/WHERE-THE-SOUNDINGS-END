@@ -6,6 +6,28 @@
 > Version: 0.1  
 > Last reviewed: 2026-11-11
 
+## 2026-11-11 — M0 implementation audit and Greyhaven compile-risk correction
+
+**Commit scope:** Audit the current repository foundation, correct a confirmed source-level compile blocker, and establish the ordered vertical-slice backlog.
+
+### Implemented / recorded
+- Audited the tracked Git tree, Unity/package configuration, runtime owners, generated-scene bootstrap, existing tests, CI workflow, open dependency PRs and repository protection limitations.
+- Found an undeclared `trim` argument in the Inez Sarmiento call inside `GreyhavenEnvironmentBuilder.Build`. Replaced it with the already-declared `concrete` material in commit [`06a7004`](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/commit/06a700406bad809e6671af26163e147dbd309811).
+- Recorded the current implementation boundary and M0 exit criteria in `IMPLEMENTATION-AUDIT.md`.
+- Replaced the Task Backlog placeholder with P0 foundation tasks and a scoped 45–90 minute Greyhaven vertical-slice backlog.
+
+### Verification and limits
+- The pre-correction main baseline had a successful GitHub Actions run for repository/configuration validation, C# syntax parsing and repository safeguard self-tests.
+- The source correction is not considered Unity-verified until Unity `6000.3.28f1` imports and compiles the project.
+- Seven Edit Mode test files are present (59 `[Test]` attributes and four `[TestCase]` attributes); Unity Test Runner execution remains pending.
+- No Play Mode test scripts, committed generated scenes, package lock, or tracked Unity `.meta` files were present in the audited tree.
+- Play Mode, Windows build, profiling and manual gameplay remain unverified.
+
+### Compatibility and risk
+- No save schema, stable content ID, input action name or package version changed.
+- M0 remains in progress. A green syntax parser does not prove symbol resolution or Unity runtime behavior.
+- Remote branch ruleset enforcement remains unavailable/unverified for the current private-repository plan; no visibility or plan setting was changed.
+
 ## 2026-11-11 — Movement-aware ocean camera
 
 **Commit scope:** Upgrade the Greyhaven camera from a position-only fixed-angle follower to a velocity-aware, sea-responsive orthographic camera.

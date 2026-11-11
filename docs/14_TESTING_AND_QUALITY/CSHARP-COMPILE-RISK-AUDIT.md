@@ -31,6 +31,14 @@ GitHub Actions now runs:
 
 Tree-sitter detects malformed syntax and missing syntax nodes. It does not resolve C# symbols, generic overloads, Unity/package APIs, generated code, or asset import dependencies.
 
+## Follow-up source finding — 2026-11-11
+
+A later M0 review of `Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs` found a semantic compile blocker that the earlier targeted review did not identify: the Inez Sarmiento `BuildVillageResident` call passed `trim`, but no local `trim` variable was declared in `Build`. The syntax parser accepted the file because the identifier was syntactically valid; only semantic compilation would resolve the missing name.
+
+The call now passes the existing `concrete` material, matching the other resident placeholder setup. The correction is in commit [`06a7004`](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/commit/06a700406bad809e6671af26163e147dbd309811).
+
+This finding narrows the confidence of the earlier source review: no additional semantic defects are claimed absent a Unity compile. Unity `6000.3.28f1` import/compile and Edit Mode execution remain mandatory.
+
 ## Verification status
 
 | Gate | Status |
