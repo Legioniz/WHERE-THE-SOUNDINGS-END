@@ -38,6 +38,7 @@ namespace WhereTheSoundingsEnd.Boat
         private InputActionMap boatMap;
         private InputAction moveAction;
         private VesselConditionController vesselCondition;
+        private HarvestingMinigameController harvestingController;
         private Vector2 moveInput;
 
         public InputActionAsset InputActions
@@ -105,9 +106,14 @@ namespace WhereTheSoundingsEnd.Boat
             // Resolve lazily so damage still affects thrust in every generated scene.
             if (vesselCondition == null)
                 vesselCondition = GetComponent<VesselConditionController>();
+            if (harvestingController == null)
+                harvestingController = GetComponent<HarvestingMinigameController>();
 
-            float throttle = Mathf.Clamp(moveInput.y, -1f, 1f);
-            float steering = Mathf.Clamp(moveInput.x, -1f, 1f);
+            // Dredging is a stationary deck action; do not let fresh helm input carry the vessel
+            // away from the site while the reserved pull is in progress.
+            bool movementLocked = harvestingController != null && harvestingController.IsDredging;
+            float throttle = movementLocked ? 0f : Mathf.Clamp(moveInput.y, -1f, 1f);
+            float steering = movementLocked ? 0f : Mathf.Clamp(moveInput.x, -1f, 1f);
             Vector3 forward = transform.forward;
             Vector3 right = transform.right;
 

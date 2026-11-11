@@ -1,10 +1,10 @@
 # Save and Load
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime foundation implemented; gameplay coverage in progress  
+> Status: Runtime foundation hardened; Unity verification pending  
 > Owner: Project lead  
-> Version: 0.4  
-> Last reviewed: 2026-11-10
+> Version: 0.6  
+> Last reviewed: 2026-11-12
 
 ## Player-facing behaviour
 
@@ -26,8 +26,8 @@ The exact absolute directory is platform-specific. On Windows, Unity places pers
 The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 
 - SaveGameData is the versioned snapshot DTO. It contains stable IDs and data-only records, not references to GameObjects or components.
-- SaveFileService validates slots, serializes JSON, writes a temporary file, replaces the primary file, rotates the previous primary into a backup, lists slots, loads saves, recovers from a valid backup, and deletes a slot.
-- SaveGameCoordinator is the scene-level entry point. It discovers active and inactive MonoBehaviours implementing ISaveParticipant, asks them to capture state, and restores those participants on load.
+- SaveFileService validates slots and the save DTO, enforces a 1 MiB file limit, serializes JSON, writes a temporary file, replaces the primary file, rotates the previous primary into a backup, lists slots, loads saves, recovers from a valid backup, and deletes a slot.
+- SaveGameCoordinator is the scene-level entry point. It discovers active and inactive MonoBehaviours implementing ISaveParticipant, asks them to capture state, and restores those participants through SaveRestoreTransaction after data and runtime-aware checks pass.
 - AutosaveController runs a five-minute unscaled-time interval after a 45-second startup delay, retries failed writes after 30 seconds, and also saves on application pause, focus loss, active-scene unload, application quit, and requested checkpoints. Lifecycle triggers are debounced by 15 seconds to avoid duplicate focus/pause/scene notifications. Explicit checkpoints and application quit bypass this debounce so important progress and the final session state are written.
 - BoatPrototypeController records the Greyhaven starter boat transform and Rigidbody velocity.
 - SeaStateDirector persists elapsed game time, time of day, panic, sea disturbance, weather intensity/remaining duration/next shift, hallucination cooldown, pending seabird warning and latest omen.
@@ -36,7 +36,12 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - DeepOceanSiteInteractionController persists inspected phenomenon-site IDs.\n- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.
 - VesselConditionController persists hull and engine condition.
 - SpatialCargoHold persists cargo placements and damaged-cell coordinates.
-- SalvageSite persists daily remaining pulls by stable site ID.
+- SalvageSite persists committed daily pulls by stable site ID; transient reservations are refunded when actions do not complete.
+- Dredging reserves daily stock and commits one pull only after the reward is placed; leaving range, pausing, disabling the controller or failing to place cargo refunds the reservation.
+- Save loading validates the full DTO and runtime cargo layout before mutation, then rolls participants back if any restore fails.
+- Save files are capped at 1 MiB; physics vectors, collection counts, identifiers, cargo metadata and nested progression records are validated.
+- Cargo placement identifiers must be non-empty GUIDs and unique within the hold; the live cargo layout is checked before saving and restoring.
+- Dialogue, inventory, harvesting, sounding and survey inspection use exclusive action claims; loading is blocked while a stateful action is active.
 
 Typical runtime use:
 
@@ -48,6 +53,20 @@ Typical runtime use:
 6. Call LoadAutosave() to restore the dedicated automatic save, or RequestCheckpointAutosave(checkpointId) on AutosaveController for authored checkpoints.
 
 The generated Greyhaven scene now contains a SaveGameCoordinator. Rebuild the Greyhaven scene in Unity after updating the environment generator so the coordinator GameObject is present.
+
+## Restore transaction and input safety
+
+A load is a transaction rather than a sequence of best-effort component updates:
+
+1. Migrate and validate the complete DTO before touching live participants.
+2. Enforce a 1 MiB save-file cap, bounded collection counts, finite world/player/vessel coordinates, and sane velocity/rotation ranges before deserialized physics values can reach a Rigidbody.
+3. Run runtime-aware participant validation. The spatial cargo hold rejects unknown item definitions, malformed or duplicate GUID instance IDs, duplicate/out-of-range damaged cells, and placements that do not fit the authored hold.
+4. Capture the current live state through the same save-participant contract, then run the runtime-aware validators against that rollback snapshot as well.
+5. Apply the requested snapshot. If a participant throws, restore the captured snapshot in reverse participant order. If rollback itself fails, stop using the current session and reload the scene.
+
+Dredging uses a transient pull reservation. Reservations reduce the number of pulls available to other in-progress actions but are not persisted as spent stock. A pull is committed only after the salvage item is successfully placed in cargo; an abandoned action, lost interaction range, full hold, controller disable, or expired day reservation releases the pull.
+
+Dialogue, harvesting, sounding, survey-site inspection, and inventory opening use a shared exclusive interaction claim. Repeated inspection is rate-limited, and only the first discovery of a phenomenon site adds the discovery disturbance.
 
 ## Reliability rules
 

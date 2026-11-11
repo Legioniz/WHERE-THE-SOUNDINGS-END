@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using NUnit.Framework;
 using WhereTheSoundingsEnd.Persistence;
 
@@ -258,6 +259,162 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void Load_RejectsOversizedPrimaryFileBeforeDeserialization()
+        {
+            Directory.CreateDirectory(_temporaryDirectory);
+            File.WriteAllText(
+                _service.GetSaveFilePath(1),
+                new string('x', SaveFileService.MaximumSaveFileBytes + 1));
+
+            SaveGameData loaded;
+            SaveOperationResult result = _service.TryLoad(1, out loaded);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("size limit"));
+            Assert.That(loaded, Is.Null);
+        }
+
+        [Test]
+        public void Save_RejectsEmptyCargoInstanceGuid()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            data.inventory.placements.Add(new CargoPlacementSaveData
+            {
+                instanceId = "00000000000000000000000000000000",
+                itemId = "salvage.test"
+            });
+
+            SaveOperationResult result = _service.Save(1, data);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("cargo instance identifier"));
+        }
+
+        [Test]
+        public void Save_RejectsNonFiniteVesselPhysicsValues()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            data.vessel.isPresent = true;
+            data.vessel.position.x = float.PositiveInfinity;
+
+            SaveOperationResult result = _service.Save(1, data);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("physics coordinates"));
+            Assert.That(File.Exists(_service.GetSaveFilePath(1)), Is.False);
+        }
+
+        [Test]
+        public void Save_RejectsDuplicateCargoInstanceIdentifiers()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            const string duplicateId = "11111111111111111111111111111111";
+            data.inventory.placements.Add(new CargoPlacementSaveData
+            {
+                instanceId = duplicateId,
+                itemId = "salvage.test",
+                anchorX = 0,
+                anchorY = 0
+            });
+            data.inventory.placements.Add(new CargoPlacementSaveData
+            {
+                instanceId = duplicateId,
+                itemId = "salvage.test",
+                anchorX = 2,
+                anchorY = 0
+            });
+
+            SaveOperationResult result = _service.Save(1, data);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("cargo instance identifier"));
+        }
+
+        [Test]
+        public void Save_RejectsMalformedCargoInstanceIdentifiers()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            data.inventory.placements.Add(new CargoPlacementSaveData
+            {
+                instanceId = "not-a-guid",
+                itemId = "salvage.test"
+            });
+
+            SaveOperationResult result = _service.Save(1, data);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("cargo instance identifier"));
+        }
+
+        [Test]
+        public void Save_RejectsMalformedQuestCollectionEntries()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            data.progress.quests.Add(null);
+
+            SaveOperationResult result = _service.Save(1, data);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("malformed quest collection"));
+        }
+
+        [Test]
+        public void Save_RejectsOversizedCollectionsBeforeSerialization()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            for (int index = 0; index <= SaveGameDataMigration.MaximumCollectionEntries; index++)
+                data.world.heardAcousticEventIds.Add("event." + index);
+
+            SaveOperationResult result = _service.Save(1, data);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("oversized collection"));
+        }
+
+        [Test]
+        public void Restore_RollsBackEveryParticipantWhenALaterParticipantThrows()
+        {
+            SnapshotValueParticipant first = new SnapshotValueParticipant(false, 12);
+            SnapshotValueParticipant second = new SnapshotValueParticipant(true, 8);
+            second.ThrowWhenValueEquals = 99;
+
+            SaveGameData candidate = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            candidate.world.soundingPulseCount = 88;
+            candidate.world.dayNumber = 99;
+
+            string error;
+            bool restored = SaveRestoreTransaction.TryApply(
+                candidate,
+                new List<ISaveParticipant> { first, second },
+                out error);
+
+            Assert.That(restored, Is.False);
+            Assert.That(error, Does.Contain("previous gameplay state was restored"));
+            Assert.That(first.Value, Is.EqualTo(12));
+            Assert.That(second.Value, Is.EqualTo(8));
+        }
+
+        [Test]
+        public void Restore_RejectsAnUnsafeRollbackSnapshotBeforeMutatingParticipants()
+        {
+            SnapshotValueParticipant participant = new SnapshotValueParticipant(false, 12);
+            participant.RejectValidationValue = 12;
+
+            SaveGameData candidate = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            candidate.world.soundingPulseCount = 88;
+
+            string error;
+            bool restored = SaveRestoreTransaction.TryApply(
+                candidate,
+                new List<ISaveParticipant> { participant },
+                out error);
+
+            Assert.That(restored, Is.False);
+            Assert.That(error, Does.Contain("previous gameplay state could not be safely restored"));
+            Assert.That(participant.Value, Is.EqualTo(12));
+        }
+
+        [Test]
         public void Delete_RemovesPrimaryAndBackupFiles()
         {
             SaveGameData first = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
@@ -289,6 +446,55 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(saveResult.Success, Is.False);
             Assert.That(loadResult.Success, Is.False);
             Assert.That(loaded, Is.Null);
+        }
+
+        private sealed class SnapshotValueParticipant : ISaveParticipant, ISaveDataValidator
+        {
+            private readonly bool _usesDayNumber;
+
+            public int Value { get; private set; }
+            public int ThrowWhenValueEquals = int.MinValue;
+            public int RejectValidationValue = int.MinValue;
+
+            public SnapshotValueParticipant(bool usesDayNumber, int initialValue)
+            {
+                _usesDayNumber = usesDayNumber;
+                Value = initialValue;
+            }
+
+            public void CaptureSaveData(SaveGameData data)
+            {
+                if (_usesDayNumber)
+                    data.world.dayNumber = Value;
+                else
+                    data.world.soundingPulseCount = Value;
+            }
+
+            public void RestoreSaveData(SaveGameData data)
+            {
+                int incoming = _usesDayNumber
+                    ? data.world.dayNumber
+                    : data.world.soundingPulseCount;
+                if (incoming == ThrowWhenValueEquals)
+                    throw new InvalidOperationException("Intentional test restore failure.");
+
+                Value = incoming;
+            }
+
+            public bool TryValidateSaveData(SaveGameData data, out string error)
+            {
+                int incoming = _usesDayNumber
+                    ? data.world.dayNumber
+                    : data.world.soundingPulseCount;
+                if (incoming == RejectValidationValue)
+                {
+                    error = "Intentional test snapshot rejection.";
+                    return false;
+                }
+
+                error = null;
+                return true;
+            }
         }
     }
 }

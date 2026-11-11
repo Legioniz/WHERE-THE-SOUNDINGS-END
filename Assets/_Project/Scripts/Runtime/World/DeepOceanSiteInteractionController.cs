@@ -18,7 +18,9 @@ namespace WhereTheSoundingsEnd.World
         [SerializeField] private InputActionAsset controls;
         [SerializeField] private SeaStateDirector seaState;
         [SerializeField, Min(1f)] private float interactionDistance = 16f;
+        [SerializeField, Min(0.25f)] private float inspectionCooldownRealSeconds = 1.25f;
 
+        private float nextInspectionAllowedAt;
         private Rigidbody vesselBody;
         private InputAction interactAction;
         private DeepOceanPhenomenonSite[] sites = Array.Empty<DeepOceanPhenomenonSite>();
@@ -54,9 +56,15 @@ namespace WhereTheSoundingsEnd.World
 
         private void TryInspectNearestSite()
         {
-            if (Time.timeScale <= 0.0001f || (seaState != null && seaState.IsDialogueActive))
+            if (Time.timeScale <= 0.0001f ||
+                !DeepOceanInspectionPolicy.IsCooldownReady(Time.unscaledTime, nextInspectionAllowedAt))
                 return;
 
+            if (seaState != null && !seaState.TryClaimInteraction())
+                return;
+
+            nextInspectionAllowedAt = DeepOceanInspectionPolicy.GetNextAllowedTime(
+                Time.unscaledTime, inspectionCooldownRealSeconds);
             DeepOceanPhenomenonSite nearest = null;
             float bestDistance = interactionDistance * interactionDistance;
             Vector2 vesselPosition = new Vector2(vesselBody.position.x, vesselBody.position.z);
@@ -82,7 +90,9 @@ namespace WhereTheSoundingsEnd.World
             bool firstInspection = inspectedSiteIds.Add(nearest.SiteId);
             latestInspection = (firstInspection ? "FIELD NOTE RECORDED: " : "KNOWN SITE: ") +
                 nearest.DisplayName + " [" + nearest.EvidenceLabel + "]\n" + nearest.FirstSurveyNote;
-            if (seaState != null) seaState.AddDisturbance(firstInspection ? 0.008f : 0.002f);
+            // A site's disturbance is a one-time discovery consequence, never a repeat-interaction farm.
+            if (seaState != null && firstInspection)
+                seaState.AddDisturbance(DeepOceanInspectionPolicy.GetDisturbance(firstInspection));
         }
 
         public void CaptureSaveData(SaveGameData data)
@@ -114,6 +124,32 @@ namespace WhereTheSoundingsEnd.World
                 normal = { textColor = new Color(0.82f, 0.86f, 0.84f) }
             };
             GUI.Label(new Rect(20f, Screen.height - 210f, 520f, 54f), latestInspection, style);
+        }
+    }
+
+    public static class DeepOceanInspectionPolicy
+    {
+        public static bool IsCooldownReady(float currentUnscaledTime, float nextAllowedAt)
+        {
+            return !float.IsNaN(currentUnscaledTime) && !float.IsInfinity(currentUnscaledTime) &&
+                   !float.IsNaN(nextAllowedAt) && !float.IsInfinity(nextAllowedAt) &&
+                   currentUnscaledTime >= nextAllowedAt;
+        }
+
+        public static float GetNextAllowedTime(float currentUnscaledTime, float cooldownSeconds)
+        {
+            if (float.IsNaN(currentUnscaledTime) || float.IsInfinity(currentUnscaledTime))
+                return float.PositiveInfinity;
+
+            float safeCooldown = float.IsNaN(cooldownSeconds) || float.IsInfinity(cooldownSeconds)
+                ? 1.25f
+                : Mathf.Max(0.25f, cooldownSeconds);
+            return currentUnscaledTime + safeCooldown;
+        }
+
+        public static float GetDisturbance(bool firstInspection)
+        {
+            return firstInspection ? 0.008f : 0f;
         }
     }
 }

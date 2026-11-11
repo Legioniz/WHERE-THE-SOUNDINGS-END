@@ -95,7 +95,9 @@ namespace WhereTheSoundingsEnd.World
 
         private void TryPulse()
         {
-            if (Time.timeScale <= 0.0001f || (seaState != null && seaState.IsDialogueActive) || Time.unscaledTime < nextPulseAllowedAt)
+            if (Time.timeScale <= 0.0001f ||
+                (seaState != null && !seaState.TryClaimInteraction()) ||
+                Time.unscaledTime < nextPulseAllowedAt)
                 return;
 
             if (vesselBody == null)

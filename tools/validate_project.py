@@ -27,6 +27,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
+    "Assets/_Project/Scripts/Runtime/Persistence/SaveRestoreTransaction.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/AutosaveController.cs",
     "Assets/_Project/Scripts/Runtime/Inventory/CargoItemDefinition.cs",
     "Assets/_Project/Scripts/Runtime/Inventory/CargoGridGeometry.cs",
@@ -413,6 +414,80 @@ def main() -> int:
                 failures.append("Edit Mode test assembly must be restricted to the Editor platform.")
             if "TestAssemblies" not in test_assembly[1].get("optionalUnityReferences", []):
                 failures.append("Edit Mode test assembly must reference Unity Test Framework assemblies.")
+        save_file_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs").read_text(encoding="utf-8")
+        for required_text in ("MaximumSaveFileBytes", "stream.Length > MaximumSaveFileBytes", "new UTF8Encoding(false, true)"):
+            if required_text not in save_file_source:
+                failures.append(f"SaveFileService is missing bounded, strict save-file reading: {required_text}")
+
+        for required_text in (
+            "MaximumCollectionEntries", "IsValidVector", "IsValidCargoInstanceId",
+            "ValidateUniqueIds", "duplicate cargo instance",
+        ):
+            if required_text not in save_source:
+                failures.append(f"SaveGameData validation is missing: {required_text}")
+
+        transaction_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveRestoreTransaction.cs").read_text(encoding="utf-8")
+        for required_text in ("ISaveDataValidator", "CaptureSaveData(rollback)", "TryValidateSaveData(rollback", "RestoreSaveData(rollback)", "participants.Count - 1; index >= 0"):
+            if required_text not in transaction_source:
+                failures.append(f"SaveRestoreTransaction is missing atomic restore protection: {required_text}")
+
+        cargo_source = (ROOT / "Assets/_Project/Scripts/Runtime/Inventory/SpatialCargoHold.cs").read_text(encoding="utf-8")
+        for required_text in ("ISaveDataValidator", "TryValidateSaveData", "IsValidInstanceId", "HashSet<string> instanceIds"):
+            if required_text not in cargo_source:
+                failures.append(f"SpatialCargoHold is missing cargo identity validation: {required_text}")
+
+        salvage_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SalvageSite.cs").read_text(encoding="utf-8")
+        for required_text in ("TryReservePull", "CommitReservedPull", "ReleaseReservedPull", "reservations"):
+            if required_text not in salvage_source:
+                failures.append(f"SalvageSite is missing transactional pull handling: {required_text}")
+
+        for required_text in ("IsWithinInteractionRange", "TryReservePull", "CommitReservedPull", "ReleaseSalvageReservation"):
+            if required_text not in harvest_source:
+                failures.append(f"HarvestingMinigameController is missing salvage transaction guards: {required_text}")
+
+        for required_text in ("inspectionCooldownRealSeconds", "DeepOceanInspectionPolicy", "IsCooldownReady", "TryClaimInteraction"):
+            if required_text not in site_interaction:
+                failures.append(f"DeepOceanSiteInteractionController is missing rate-limit/action guards: {required_text}")
+
+        if "TryClaimInteraction" not in sea_source or "IsGameplayActionBusy" not in sea_source:
+            failures.append("SeaStateDirector must coordinate exclusive gameplay action claims.")
+
+        ui_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs").read_text(encoding="utf-8")
+        for required_text in ("TryClaimInteraction", "BeginDialogue", "_inventoryOpen"):
+            if required_text not in ui_source:
+                failures.append(f"GreyhavenRuntimeUI is missing exclusive dialogue/inventory guards: {required_text}")
+
+        save_tests = (ROOT / "Assets/_Project/Tests/EditMode/SaveFileServiceTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "Load_RejectsOversizedPrimaryFileBeforeDeserialization",
+            "Save_RejectsNonFiniteVesselPhysicsValues",
+            "Save_RejectsDuplicateCargoInstanceIdentifiers",
+            "Save_RejectsEmptyCargoInstanceGuid",
+            "Save_RejectsOversizedCollectionsBeforeSerialization",
+            "Save_RejectsMalformedQuestCollectionEntries",
+            "Restore_RollsBackEveryParticipantWhenALaterParticipantThrows",
+            "Restore_RejectsAnUnsafeRollbackSnapshotBeforeMutatingParticipants",
+        ):
+            if f"void {required_test}()" not in save_tests:
+                failures.append(f"SaveFileServiceTests is missing regression test: {required_test}")
+
+        for required_test in (
+            "SalvageReservation_DoesNotSpendStockUntilCommit",
+            "SalvageReservation_CannotReserveMorePullsThanDailyStock",
+            "InspectionDisturbancePolicy_OnlyFirstDiscoveryAddsDisturbance",
+            "InspectionRateLimit_RejectsRepeatedAttemptsUntilCooldownExpires",
+            "InteractionClaim_AllowsOnlyOneNewInteractionPerFrame",
+            "InteractionClaim_BlocksWhileHarvestOrSurveyIsActive",
+            "SalvageReservation_IsNotPersistedAsSpentBeforeCommit",
+            "CargoValidation_RejectsDuplicateInstanceIdsBeforeRestore",
+        ):
+            if f"void {required_test}()" not in impact_tests:
+                failures.append(f"SeaStateAndCargoDamageTests is missing regression test: {required_test}")
+
+        for required_text in ("journalEntries.Count", "randomStreams.Count", "worldFlags.ConvertAll", "eventCooldowns.ConvertAll"):
+            if required_text not in save_source:
+                failures.append(f"SaveGameData is missing malformed collection validation: {required_text}")
+
     except (ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         failures.append(str(error))
 
@@ -422,6 +497,10 @@ def main() -> int:
         for pattern in ("[Ll]ibrary/", "[Tt]emp/", "[Oo]bj/"):
             if pattern not in text:
                 failures.append(f".gitignore is missing {pattern}")
+
+
+
+
 
     if failures:
         for failure in failures:

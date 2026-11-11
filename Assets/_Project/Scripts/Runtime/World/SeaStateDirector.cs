@@ -48,6 +48,7 @@ namespace WhereTheSoundingsEnd.World
         private Material birdMaterial;
         private bool harvestingActive;
         private bool surveyingActive;
+        private int interactionClaimFrame = -1;
         private float hallucinationCooldown;
         private bool birdEventPending;
         private float birdEventCountdown;
@@ -67,7 +68,23 @@ namespace WhereTheSoundingsEnd.World
         public bool IsAdvancing { get; private set; }
         public float LastGameDeltaSeconds { get; private set; }
         public bool IsDialogueActive => dialogueRunner != null && dialogueRunner.IsDialogueRunning;
+        public bool IsHarvesting => harvestingActive;
+        public bool IsSurveying => surveyingActive;
+        public bool IsGameplayActionBusy => IsDialogueActive || harvestingActive || surveyingActive;
         public string LatestOmen => latestOmen;
+
+        /// <summary>
+        /// Allows only one new player interaction to begin during a rendered frame.
+        /// Active dialogue, harvesting and surveying actions remain exclusive until ended.
+        /// </summary>
+        public bool TryClaimInteraction()
+        {
+            if (IsGameplayActionBusy || interactionClaimFrame == Time.frameCount)
+                return false;
+
+            interactionClaimFrame = Time.frameCount;
+            return true;
+        }
 
         private void Awake()
         {

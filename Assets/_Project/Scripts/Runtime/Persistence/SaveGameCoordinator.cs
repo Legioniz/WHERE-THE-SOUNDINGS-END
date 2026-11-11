@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Persistence
 {
@@ -93,6 +94,13 @@ namespace WhereTheSoundingsEnd.Persistence
 
         private SaveOperationResult RestoreSnapshot(SaveGameData data)
         {
+            SeaStateDirector seaState = FindFirstObjectByType<SeaStateDirector>();
+            if (seaState != null && seaState.IsGameplayActionBusy)
+            {
+                return SaveOperationResult.Failed(
+                    "Finish the active dialogue, harvest or sounding action before loading a save.");
+            }
+
             string activeScene = SceneManager.GetActiveScene().name;
             if (!string.IsNullOrWhiteSpace(data.sceneId) &&
                 !string.Equals(data.sceneId, activeScene, StringComparison.Ordinal))
@@ -103,22 +111,14 @@ namespace WhereTheSoundingsEnd.Persistence
             }
 
             List<ISaveParticipant> participants = FindSaveParticipants();
-            for (int index = 0; index < participants.Count; index++)
+            string error;
+            if (!SaveRestoreTransaction.TryApply(data, participants, out error))
             {
-                try
-                {
-                    participants[index].RestoreSaveData(data);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception);
-                    return SaveOperationResult.Failed(
-                        "The save file was read, but a gameplay component could not restore its state: " +
-                        exception.Message);
-                }
+                Debug.LogError("Save restore transaction failed: " + error, this);
+                return SaveOperationResult.Failed(error);
             }
 
-            return SaveOperationResult.Succeeded("Save data restored.");
+            return SaveOperationResult.Succeeded("Save data restored atomically.");
         }
 
         private static List<ISaveParticipant> FindSaveParticipants()
@@ -142,5 +142,11 @@ namespace WhereTheSoundingsEnd.Persistence
     {
         void CaptureSaveData(SaveGameData data);
         void RestoreSaveData(SaveGameData data);
+    }
+
+    /// <summary>Optional runtime-aware validation performed before any save participant mutates state.</summary>
+    public interface ISaveDataValidator
+    {
+        bool TryValidateSaveData(SaveGameData data, out string error);
     }
 }

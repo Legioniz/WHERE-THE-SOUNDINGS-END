@@ -36,8 +36,10 @@ namespace WhereTheSoundingsEnd.World
         private Texture2D ringTexture;
         private Texture2D targetTexture;
         private SalvageSite activeSalvageSite;
+        private string activeSalvageReservationId;
 
         public bool IsActionActive => action != HarvestActionType.None;
+        public bool IsDredging => action == HarvestActionType.Dredging;
         public HarvestActionType ActiveAction => action;
 
         public void Configure(InputActionAsset input, SpatialCargoHold hold, SeaStateDirector director)
@@ -62,6 +64,11 @@ namespace WhereTheSoundingsEnd.World
             harvestBeatAction = controls.FindAction("HarvestBeat", false);
         }
 
+        private void OnDisable()
+        {
+            CancelAction("HARVEST CANCELLED. No salvage pull was spent.");
+        }
+
         private void OnDestroy()
         {
             if (ringTexture != null) Destroy(ringTexture);
@@ -79,6 +86,25 @@ namespace WhereTheSoundingsEnd.World
                 return;
             }
 
+            if (Time.timeScale <= 0.0001f)
+            {
+                CancelAction("HARVEST CANCELLED. No salvage pull was spent.");
+                return;
+            }
+
+            if (seaState != null && seaState.IsDialogueActive)
+            {
+                CancelAction("HARVEST CANCELLED. Finish the conversation before working.");
+                return;
+            }
+
+            if (action == HarvestActionType.Dredging &&
+                (activeSalvageSite == null || !activeSalvageSite.IsWithinInteractionRange(transform.position)))
+            {
+                CancelAction("DREDGING CANCELLED. The vessel left the wreck field; no pull was spent.");
+                return;
+            }
+
             beatTimer += Time.deltaTime;
             needlePhase = Mathf.Repeat(beatTimer / beatDuration, 1f);
             if (harvestBeatAction != null && harvestBeatAction.WasPressedThisFrame())
@@ -90,7 +116,9 @@ namespace WhereTheSoundingsEnd.World
 
         private void Begin(HarvestActionType type)
         {
-            if (Time.timeScale <= 0.0001f || (seaState != null && seaState.PanicLevel > 0.98f))
+            if (Time.timeScale <= 0.0001f ||
+                (seaState != null &&
+                 (seaState.PanicLevel > 0.98f || !seaState.TryClaimInteraction())))
                 return;
 
             Rigidbody vessel = GetComponent<Rigidbody>();
@@ -109,9 +137,11 @@ namespace WhereTheSoundingsEnd.World
                     status = "No wreck or debris field close enough to dredge.";
                     return;
                 }
-                if (seaState != null && !activeSalvageSite.TryConsumePull(seaState.DayNumber))
+                int currentDay = seaState != null ? seaState.DayNumber : 1;
+                if (!activeSalvageSite.TryReservePull(currentDay, out activeSalvageReservationId))
                 {
-                    status = "This debris field has been picked clean for today.";
+                    status = "This debris field has no unreserved pulls remaining today.";
+                    activeSalvageSite = null;
                     return;
                 }
             }
@@ -165,6 +195,7 @@ namespace WhereTheSoundingsEnd.World
                 : ResolveSalvage(quality);
 
             status = result;
+            ReleaseSalvageReservation();
             action = HarvestActionType.None;
             activeSalvageSite = null;
             if (seaState != null)
@@ -173,6 +204,23 @@ namespace WhereTheSoundingsEnd.World
                 seaState.AddDisturbance(completed == HarvestActionType.Fishing ? 0.035f : 0.065f);
                 seaState.AddPanic(completed == HarvestActionType.Fishing ? 0.004f : 0.012f);
             }
+        }
+
+        private void CancelAction(string message)
+        {
+            if (action == HarvestActionType.None) return;
+            ReleaseSalvageReservation();
+            action = HarvestActionType.None;
+            activeSalvageSite = null;
+            status = message;
+            if (seaState != null) seaState.SetHarvesting(false);
+        }
+
+        private void ReleaseSalvageReservation()
+        {
+            if (activeSalvageSite != null && !string.IsNullOrEmpty(activeSalvageReservationId))
+                activeSalvageSite.ReleaseReservedPull(activeSalvageReservationId);
+            activeSalvageReservationId = null;
         }
 
         private string ResolveCatch(float quality)
@@ -222,8 +270,18 @@ namespace WhereTheSoundingsEnd.World
             int quantity = quality >= 0.82f ? 2 : 1;
             string instanceId;
             if (!cargoHold.TryPlaceFirstFit(item.ItemId, quantity, quality, 1f, out instanceId))
-                return "The hold is full or damaged. Salvage lost to the water.";
+                return "The hold is full or damaged. The reserved pull has been returned.";
 
+            int currentDay = seaState != null ? seaState.DayNumber : 1;
+            if (activeSalvageSite == null ||
+                !activeSalvageSite.CommitReservedPull(activeSalvageReservationId, currentDay))
+            {
+                CargoPlacement removed;
+                cargoHold.TryRemove(instanceId, out removed);
+                return "The salvage reservation expired. The cargo was not awarded and the pull was returned.";
+            }
+
+            activeSalvageReservationId = null;
             return "SALVAGED: " + item.DisplayName + " ×" + quantity;
         }
 

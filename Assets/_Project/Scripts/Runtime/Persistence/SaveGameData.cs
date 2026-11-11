@@ -308,6 +308,9 @@ namespace WhereTheSoundingsEnd.Persistence
     /// </summary>
     public static class SaveGameDataMigration
     {
+        public const int MaximumCollectionEntries = 2048;
+        public const int MaximumStringLength = 4096;
+
         public static bool TryPrepare(SaveGameData data, out string error)
         {
             error = null;
@@ -376,6 +379,101 @@ namespace WhereTheSoundingsEnd.Persistence
 
             NormalizeDefaults(data);
 
+            if (!IsFinite(data.world.timeOfDaySeconds) ||
+                data.world.timeOfDaySeconds < 0.0 || data.world.timeOfDaySeconds >= 86400.0 ||
+                data.world.dayNumber < 1 ||
+                !IsFinite(data.world.seaDisturbance) ||
+                data.world.seaDisturbance < 0f || data.world.seaDisturbance > 1f)
+            {
+                error = "The save contains invalid world clock or disturbance values.";
+                return false;
+            }
+
+            if (!IsValidVector(data.vessel.position, 1000000f) ||
+                !IsValidVector(data.vessel.rotationEuler, 360000f) ||
+                !IsValidVector(data.vessel.linearVelocity, 100f) ||
+                !IsValidVector(data.vessel.angularVelocity, 50f) ||
+                !IsValidVector(data.player.position, 1000000f) ||
+                !IsValidVector(data.player.rotationEuler, 360000f) ||
+                !IsValidVector(data.world.lastAcousticPosition, 1000000f) ||
+                !IsValidVector(data.world.atmosphereFalseLightPosition, 1000000f))
+            {
+                error = "The save contains invalid or out-of-range player, vessel, or world physics coordinates.";
+                return false;
+            }
+
+            if (!IsFinite(data.vessel.hullIntegrity) || data.vessel.hullIntegrity < 0f || data.vessel.hullIntegrity > 100f ||
+                !IsFinite(data.vessel.fuel) || data.vessel.fuel < 0f || data.vessel.fuel > 100f ||
+                !IsFinite(data.vessel.engineCondition) || data.vessel.engineCondition < 0f || data.vessel.engineCondition > 100f)
+            {
+                error = "The save contains invalid vessel condition values.";
+                return false;
+            }
+
+            if (data.inventory.holdWidth > 128 || data.inventory.holdHeight > 128)
+            {
+                error = "The save contains hold dimensions outside the supported bounds.";
+                return false;
+            }
+
+            int[] collectionCounts =
+            {
+                data.world.salvageSites.Count,
+                data.world.discoveredPhenomenonSiteIds.Count,
+                data.world.evaluatedSurveyOpportunityIds.Count,
+                data.world.inspectedPhenomenonSiteIds.Count,
+                data.world.heardAcousticEventIds.Count,
+                data.inventory.cargo.Count,
+                data.inventory.equipment.Count,
+                data.inventory.placements.Count,
+                data.inventory.damagedCells.Count,
+                data.progress.discoveredEntryIds.Count,
+                data.progress.unlockedRegionIds.Count,
+                data.progress.quests.Count,
+                data.progress.journalEntries.Count,
+                data.progress.npcStates.Count,
+                data.progress.regionalStocks.Count,
+                data.progress.worldFlags.Count,
+                data.progress.eventCooldowns.Count,
+                data.progress.randomStreams.Count,
+                data.dialogue.floatVariables.Count,
+                data.dialogue.stringVariables.Count,
+                data.dialogue.boolVariables.Count,
+                data.dialogue.completedNodeIds.Count
+            };
+            for (int index = 0; index < collectionCounts.Length; index++)
+            {
+                if (collectionCounts[index] > MaximumCollectionEntries)
+                {
+                    error = "The save contains an oversized collection at index " + index + ".";
+                    return false;
+                }
+            }
+
+            string[] metadataStrings =
+            {
+                data.saveId, data.sceneId, data.savedAtUtc, data.gameVersion,
+                data.saveKind, data.saveReason, data.worldSeed,
+                data.world.activeRegionId, data.world.weatherId, data.world.tideStateId,
+                data.world.latestOmen, data.world.lastAcousticEventId,
+                data.world.lastAcousticRegionId, data.world.atmosphereCaption
+            };
+            for (int index = 0; index < metadataStrings.Length; index++)
+            {
+                if (metadataStrings[index] != null && metadataStrings[index].Length > MaximumStringLength)
+                {
+                    error = "The save contains an oversized metadata string at index " + index + ".";
+                    return false;
+                }
+            }
+
+            if (!IsFinite(data.player.health) || data.player.health < 0f || data.player.health > 100f ||
+                data.player.currency < 0)
+            {
+                error = "The save contains invalid player condition or currency values.";
+                return false;
+            }
+
             if (double.IsNaN(data.totalPlaytimeSeconds) ||
                 double.IsInfinity(data.totalPlaytimeSeconds) ||
                 data.totalPlaytimeSeconds < 0.0)
@@ -395,9 +493,23 @@ namespace WhereTheSoundingsEnd.Persistence
             for (int index = 0; index < data.inventory.cargo.Count; index++)
             {
                 InventoryStackSaveData stack = data.inventory.cargo[index];
-                if (stack == null || string.IsNullOrWhiteSpace(stack.itemId) || stack.quantity < 0)
+                if (stack == null || string.IsNullOrWhiteSpace(stack.itemId) || stack.quantity < 1 ||
+                    !IsFinite(stack.quality) || stack.quality < 0f || stack.quality > 1f ||
+                    !IsFinite(stack.freshness) || stack.freshness < 0f || stack.freshness > 1f)
                 {
                     error = "The save contains an invalid cargo entry at index " + index + ".";
+                    return false;
+                }
+            }
+
+            for (int index = 0; index < data.inventory.equipment.Count; index++)
+            {
+                EquipmentSaveData item = data.inventory.equipment[index];
+                if (item == null || string.IsNullOrWhiteSpace(item.slotId) ||
+                    string.IsNullOrWhiteSpace(item.itemId) || !IsFinite(item.condition) ||
+                    item.condition < 0f || item.condition > 1f)
+                {
+                    error = "The save contains an invalid equipment entry at index " + index + ".";
                     return false;
                 }
             }
@@ -453,6 +565,7 @@ namespace WhereTheSoundingsEnd.Persistence
                 }
             }
 
+            HashSet<string> cargoInstanceIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             for (int index = 0; index < data.inventory.placements.Count; index++)
             {
                 CargoPlacementSaveData placement = data.inventory.placements[index];
@@ -463,12 +576,12 @@ namespace WhereTheSoundingsEnd.Persistence
                     placement.anchorY < 0 ||
                     placement.rotationQuarterTurns < 0 ||
                     placement.rotationQuarterTurns > 3 ||
-                    float.IsNaN(placement.quality) ||
-                    float.IsInfinity(placement.quality) ||
-                    float.IsNaN(placement.freshness) ||
-                    float.IsInfinity(placement.freshness))
+                    !IsFinite(placement.quality) || placement.quality < 0f || placement.quality > 1f ||
+                    !IsFinite(placement.freshness) || placement.freshness < 0f || placement.freshness > 1f ||
+                    !IsValidCargoInstanceId(placement.instanceId) ||
+                    !cargoInstanceIds.Add(placement.instanceId))
                 {
-                    error = "The save contains an invalid spatial cargo placement at index " + index + ".";
+                    error = "The save contains a malformed or duplicate cargo instance identifier or invalid placement at index " + index + ".";
                     return false;
                 }
             }
@@ -477,13 +590,218 @@ namespace WhereTheSoundingsEnd.Persistence
             {
                 YarnFloatVariableSaveData variable = data.dialogue.floatVariables[index];
                 if (variable == null || string.IsNullOrWhiteSpace(variable.variableName) ||
-                    float.IsNaN(variable.value) || float.IsInfinity(variable.value))
+                    !IsFinite(variable.value) || variable.variableName.Length > MaximumStringLength)
                 {
                     error = "The save contains an invalid Yarn float variable at index " + index + ".";
                     return false;
                 }
             }
 
+            for (int index = 0; index < data.dialogue.stringVariables.Count; index++)
+            {
+                YarnStringVariableSaveData variable = data.dialogue.stringVariables[index];
+                if (variable == null || string.IsNullOrWhiteSpace(variable.variableName) ||
+                    variable.variableName.Length > MaximumStringLength ||
+                    (variable.value != null && variable.value.Length > MaximumStringLength))
+                {
+                    error = "The save contains an invalid or oversized Yarn string variable at index " + index + ".";
+                    return false;
+                }
+            }
+
+            HashSet<string> salvageSiteIds = new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0; index < data.world.salvageSites.Count; index++)
+            {
+                SalvageSiteSaveData site = data.world.salvageSites[index];
+                if (site == null || string.IsNullOrWhiteSpace(site.siteId) ||
+                    site.siteId.Length > 256 || site.remainingPulls < 0 ||
+                    site.lastRefillDay < 1 || !salvageSiteIds.Add(site.siteId))
+                {
+                    error = "The save contains a malformed or duplicate salvage-site record at index " + index + ".";
+                    return false;
+                }
+            }
+
+            if (!ValidateUniqueIds(data.world.discoveredPhenomenonSiteIds, "discovered site", out error) ||
+                !ValidateUniqueIds(data.world.evaluatedSurveyOpportunityIds, "survey opportunity", out error) ||
+                !ValidateUniqueIds(data.world.inspectedPhenomenonSiteIds, "inspected site", out error) ||
+                !ValidateUniqueIds(data.world.heardAcousticEventIds, "acoustic event", out error) ||
+                !ValidateUniqueIds(data.dialogue.completedNodeIds, "completed dialogue node", out error))
+                return false;
+
+            HashSet<string> questIds = new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0; index < data.progress.quests.Count; index++)
+            {
+                QuestProgressSaveData quest = data.progress.quests[index];
+                if (quest == null || string.IsNullOrWhiteSpace(quest.questId) ||
+                    !questIds.Add(quest.questId) ||
+                    quest.objectives == null || quest.objectives.Count > MaximumCollectionEntries)
+                {
+                    error = "The save contains a malformed quest collection at index " + index + ".";
+                    return false;
+                }
+
+                HashSet<string> objectiveIds = new HashSet<string>(StringComparer.Ordinal);
+                for (int objectiveIndex = 0; objectiveIndex < quest.objectives.Count; objectiveIndex++)
+                {
+                    ObjectiveProgressSaveData objective = quest.objectives[objectiveIndex];
+                    if (objective == null || string.IsNullOrWhiteSpace(objective.objectiveId) ||
+                        objective.currentAmount < 0 || !objectiveIds.Add(objective.objectiveId))
+                    {
+                        error = "The save contains a malformed or duplicate quest objective at index " + objectiveIndex + ".";
+                        return false;
+                    }
+                }
+            }
+
+            if (!ValidateUniqueIds(data.progress.discoveredEntryIds, "journal discovery", out error) ||
+                !ValidateUniqueIds(data.progress.unlockedRegionIds, "unlocked region", out error))
+                return false;
+
+            HashSet<string> journalIds = new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0; index < data.progress.journalEntries.Count; index++)
+            {
+                JournalEntrySaveData entry = data.progress.journalEntries[index];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.entryId) ||
+                    string.IsNullOrWhiteSpace(entry.interpretationId) ||
+                    !journalIds.Add(entry.entryId))
+                {
+                    error = "The save contains a malformed or duplicate journal entry at index " + index + ".";
+                    return false;
+                }
+            }
+
+            HashSet<string> randomStreamIds = new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0; index < data.progress.randomStreams.Count; index++)
+            {
+                RandomStreamSaveData stream = data.progress.randomStreams[index];
+                if (stream == null || string.IsNullOrWhiteSpace(stream.streamId) ||
+                    string.IsNullOrWhiteSpace(stream.state) || string.IsNullOrWhiteSpace(stream.increment) ||
+                    stream.streamId.Length > 256 || stream.state.Length > 32 || stream.increment.Length > 32 ||
+                    !randomStreamIds.Add(stream.streamId))
+                {
+                    error = "The save contains a malformed or duplicate random stream at index " + index + ".";
+                    return false;
+                }
+            }
+
+            HashSet<string> npcIds = new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0; index < data.progress.npcStates.Count; index++)
+            {
+                NpcStateSaveData npc = data.progress.npcStates[index];
+                if (npc == null || string.IsNullOrWhiteSpace(npc.npcId) || !npcIds.Add(npc.npcId))
+                {
+                    error = "The save contains a malformed or duplicate NPC state at index " + index + ".";
+                    return false;
+                }
+            }
+
+            HashSet<string> regionalStockIds = new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0; index < data.progress.regionalStocks.Count; index++)
+            {
+                RegionalStockSaveData stock = data.progress.regionalStocks[index];
+                string key = stock == null ? string.Empty : stock.regionId + ":" + stock.speciesId;
+                if (stock == null || string.IsNullOrWhiteSpace(stock.regionId) ||
+                    string.IsNullOrWhiteSpace(stock.speciesId) || stock.population < 0 ||
+                    !IsFinite(stock.lastSimulatedGameSeconds) || stock.lastSimulatedGameSeconds < 0.0 ||
+                    !regionalStockIds.Add(key))
+                {
+                    error = "The save contains a malformed or duplicate regional stock record at index " + index + ".";
+                    return false;
+                }
+            }
+
+            if (!ValidateUniqueIds(data.progress.worldFlags.ConvertAll(item => item == null ? null : item.flagId),
+                    "world flag", out error) ||
+                !ValidateUniqueIds(data.progress.eventCooldowns.ConvertAll(item => item == null ? null : item.eventId),
+                    "event cooldown", out error))
+                return false;
+
+            for (int index = 0; index < data.progress.worldFlags.Count; index++)
+            {
+                WorldFlagSaveData flag = data.progress.worldFlags[index];
+                if (flag == null || (flag.stringValue != null && flag.stringValue.Length > MaximumStringLength))
+                {
+                    error = "The save contains an invalid world flag at index " + index + ".";
+                    return false;
+                }
+            }
+
+            for (int index = 0; index < data.progress.eventCooldowns.Count; index++)
+            {
+                EventCooldownSaveData cooldown = data.progress.eventCooldowns[index];
+                if (cooldown == null || !IsFinite(cooldown.readyAtGameSeconds) || cooldown.readyAtGameSeconds < 0.0)
+                {
+                    error = "The save contains an invalid event cooldown at index " + index + ".";
+                    return false;
+                }
+            }
+
+            if (!ValidateUniqueIds(data.dialogue.floatVariables.ConvertAll(item => item == null ? null : item.variableName),
+                    "Yarn float variable", out error) ||
+                !ValidateUniqueIds(data.dialogue.stringVariables.ConvertAll(item => item == null ? null : item.variableName),
+                    "Yarn string variable", out error) ||
+                !ValidateUniqueIds(data.dialogue.boolVariables.ConvertAll(item => item == null ? null : item.variableName),
+                    "Yarn bool variable", out error))
+                return false;
+
+            for (int index = 0; index < data.dialogue.boolVariables.Count; index++)
+            {
+                YarnBoolVariableSaveData variable = data.dialogue.boolVariables[index];
+                if (variable == null || string.IsNullOrWhiteSpace(variable.variableName) ||
+                    variable.variableName.Length > MaximumStringLength)
+                {
+                    error = "The save contains an invalid Yarn bool variable at index " + index + ".";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
+
+        private static bool IsFinite(double value)
+        {
+            return !double.IsNaN(value) && !double.IsInfinity(value);
+        }
+
+        private static bool IsValidVector(Vector3SaveData value, float maximumAbsoluteComponent)
+        {
+            return value != null &&
+                   IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z) &&
+                   Math.Abs(value.x) <= maximumAbsoluteComponent &&
+                   Math.Abs(value.y) <= maximumAbsoluteComponent &&
+                   Math.Abs(value.z) <= maximumAbsoluteComponent;
+        }
+
+        private static bool IsValidCargoInstanceId(string instanceId)
+        {
+            if (string.IsNullOrWhiteSpace(instanceId) || !string.Equals(instanceId, instanceId.Trim(), StringComparison.Ordinal))
+                return false;
+
+            Guid parsed;
+            bool valid = Guid.TryParseExact(instanceId, "N", out parsed) ||
+                         Guid.TryParseExact(instanceId, "D", out parsed);
+            return valid && parsed != Guid.Empty;
+        }
+
+        private static bool ValidateUniqueIds(List<string> values, string label, out string error)
+        {
+            error = null;
+            HashSet<string> ids = new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0; index < values.Count; index++)
+            {
+                string value = values[index];
+                if (string.IsNullOrWhiteSpace(value) || value.Length > 256 || !ids.Add(value))
+                {
+                    error = "The save contains an invalid or duplicate " + label + " identifier at index " + index + ".";
+                    return false;
+                }
+            }
             return true;
         }
 

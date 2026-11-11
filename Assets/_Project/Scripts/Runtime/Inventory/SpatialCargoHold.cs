@@ -22,7 +22,7 @@ namespace WhereTheSoundingsEnd.Inventory
     /// Data-first spatial hold. UI can query the same placement rules without owning inventory state.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class SpatialCargoHold : MonoBehaviour, ISaveParticipant
+    public sealed class SpatialCargoHold : MonoBehaviour, ISaveParticipant, ISaveDataValidator
     {
         [Header("Hold dimensions")]
         [SerializeField, Min(1)] private int width = 7;
@@ -307,10 +307,14 @@ namespace WhereTheSoundingsEnd.Inventory
             for (int cellIndex = 0; blockedCells != null && cellIndex < blockedCells.Length; cellIndex++)
                 data.inventory.damagedCells.Add(new GridCellSaveData { x = blockedCells[cellIndex].x, y = blockedCells[cellIndex].y });
 
+            HashSet<string> instanceIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             for (int i = 0; i < placements.Count; i++)
             {
                 CargoPlacement item = placements[i];
-                if (item == null) continue;
+                if (item == null ||
+                    !IsValidInstanceId(item.instanceId) ||
+                    !instanceIds.Add(item.instanceId))
+                    throw new InvalidOperationException("The live cargo hold contains a malformed or duplicate instance ID.");
 
                 data.inventory.placements.Add(new CargoPlacementSaveData
                 {
@@ -326,65 +330,132 @@ namespace WhereTheSoundingsEnd.Inventory
             }
         }
 
-        public void RestoreSaveData(SaveGameData data)
+        public bool TryValidateSaveData(SaveGameData data, out string error)
         {
-            if (data == null || data.inventory == null) return;
-
-            // Hold upgrades are authored progression. Never resize the live hold from untrusted save data.
-            placements.Clear();
-            List<Vector2Int> restoredDamage = new List<Vector2Int>();
-            if (data.inventory.damagedCells != null)
+            error = null;
+            if (data == null || data.inventory == null ||
+                data.inventory.placements == null || data.inventory.damagedCells == null)
             {
-                for (int cellIndex = 0; cellIndex < data.inventory.damagedCells.Count; cellIndex++)
-                {
-                    GridCellSaveData cell = data.inventory.damagedCells[cellIndex];
-                    if (cell != null && cell.x >= 0 && cell.y >= 0 && cell.x < width && cell.y < height)
-                        restoredDamage.Add(new Vector2Int(cell.x, cell.y));
-                }
+                error = "The save does not contain a complete cargo-hold record.";
+                return false;
             }
-            blockedCells = restoredDamage.ToArray();
-            if (data.inventory.placements == null) return;
+
+            List<Vector2Int> restoredDamage = new List<Vector2Int>();
+            HashSet<long> damagedKeys = new HashSet<long>();
+            for (int i = 0; i < data.inventory.damagedCells.Count; i++)
+            {
+                GridCellSaveData cell = data.inventory.damagedCells[i];
+                if (cell == null || cell.x < 0 || cell.y < 0 || cell.x >= width || cell.y >= height)
+                {
+                    error = "The save contains a damaged-cell coordinate outside the authored hold.";
+                    return false;
+                }
+
+                long key = ((long)cell.x << 32) | (uint)cell.y;
+                if (!damagedKeys.Add(key))
+                {
+                    error = "The save contains a duplicate damaged-cell coordinate.";
+                    return false;
+                }
+                restoredDamage.Add(new Vector2Int(cell.x, cell.y));
+            }
+
+            Vector2Int[] damageArray = restoredDamage.ToArray();
+            bool[,] blocked = CargoGridGeometry.BuildBlockedGrid(width, height, damageArray);
+            bool[,] occupied = new bool[width, height];
+            HashSet<string> instanceIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             for (int i = 0; i < data.inventory.placements.Count; i++)
             {
                 CargoPlacementSaveData saved = data.inventory.placements[i];
-                if (saved == null || string.IsNullOrWhiteSpace(saved.itemId) || saved.quantity < 1)
-                    continue;
+                if (saved == null || !IsValidInstanceId(saved.instanceId) ||
+                    !instanceIds.Add(saved.instanceId) ||
+                    string.IsNullOrWhiteSpace(saved.itemId) || saved.quantity < 1 ||
+                    saved.rotationQuarterTurns < 0 || saved.rotationQuarterTurns > 3 ||
+                    !IsNormalized(saved.quality) || !IsNormalized(saved.freshness))
+                {
+                    error = "The save contains a malformed or duplicate cargo instance at index " + i + ".";
+                    return false;
+                }
 
                 CargoItemDefinition definition = FindDefinition(saved.itemId);
                 if (definition == null)
                 {
-                    Debug.LogWarning("Skipped unknown saved cargo item '" + saved.itemId + "'.", this);
-                    continue;
+                    error = "The save refers to an unknown cargo definition '" + saved.itemId + "'.";
+                    return false;
                 }
 
-                bool[,] occupied = BuildOccupiedGrid(null);
-                bool[,] blocked = CargoGridGeometry.BuildBlockedGrid(width, height, blockedCells);
                 Vector2Int[] shape = CargoGridGeometry.RotateAndNormalize(
                     definition.OccupiedCells, saved.rotationQuarterTurns);
-
-                if (!CargoGridGeometry.CanPlace(
-                    width, height, occupied, blocked, shape,
-                    new Vector2Int(saved.anchorX, saved.anchorY)))
+                Vector2Int anchor = new Vector2Int(saved.anchorX, saved.anchorY);
+                if (!CargoGridGeometry.CanPlace(width, height, occupied, blocked, shape, anchor))
                 {
-                    Debug.LogWarning("Skipped cargo placement that no longer fits: " + saved.itemId, this);
-                    continue;
+                    error = "The saved cargo placement does not fit the current hold: " + saved.itemId;
+                    return false;
                 }
 
-                placements.Add(new CargoPlacement
+                for (int cellIndex = 0; cellIndex < shape.Length; cellIndex++)
                 {
-                    instanceId = string.IsNullOrWhiteSpace(saved.instanceId)
-                        ? Guid.NewGuid().ToString("N")
-                        : saved.instanceId,
+                    Vector2Int cell = anchor + shape[cellIndex];
+                    occupied[cell.x, cell.y] = true;
+                }
+            }
+
+            return true;
+        }
+
+        public void RestoreSaveData(SaveGameData data)
+        {
+            if (data == null || data.inventory == null) return;
+
+            string error;
+            if (!TryValidateSaveData(data, out error))
+                throw new InvalidOperationException(error);
+
+            // Build replacement collections first. A failed validation can never clear live cargo.
+            List<Vector2Int> restoredDamage = new List<Vector2Int>();
+            for (int i = 0; i < data.inventory.damagedCells.Count; i++)
+            {
+                GridCellSaveData cell = data.inventory.damagedCells[i];
+                restoredDamage.Add(new Vector2Int(cell.x, cell.y));
+            }
+
+            List<CargoPlacement> restoredPlacements = new List<CargoPlacement>(data.inventory.placements.Count);
+            for (int i = 0; i < data.inventory.placements.Count; i++)
+            {
+                CargoPlacementSaveData saved = data.inventory.placements[i];
+                restoredPlacements.Add(new CargoPlacement
+                {
+                    instanceId = saved.instanceId,
                     itemId = saved.itemId,
                     anchorX = saved.anchorX,
                     anchorY = saved.anchorY,
-                    rotationQuarterTurns = ((saved.rotationQuarterTurns % 4) + 4) % 4,
+                    rotationQuarterTurns = saved.rotationQuarterTurns,
                     quantity = saved.quantity,
-                    quality = Mathf.Clamp01(saved.quality),
-                    freshness = Mathf.Clamp01(saved.freshness)
+                    quality = saved.quality,
+                    freshness = saved.freshness
                 });
             }
+
+            blockedCells = restoredDamage.ToArray();
+            placements = restoredPlacements;
+        }
+
+        private static bool IsValidInstanceId(string instanceId)
+        {
+            if (string.IsNullOrWhiteSpace(instanceId) ||
+                !string.Equals(instanceId, instanceId.Trim(), StringComparison.Ordinal))
+                return false;
+
+            Guid parsed;
+            bool valid = Guid.TryParseExact(instanceId, "N", out parsed) ||
+                         Guid.TryParseExact(instanceId, "D", out parsed);
+            return valid && parsed != Guid.Empty;
+        }
+
+        private static bool IsNormalized(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value) && value >= 0f && value <= 1f;
         }
 
         private bool[,] BuildOccupiedGrid(string ignoredInstanceId)

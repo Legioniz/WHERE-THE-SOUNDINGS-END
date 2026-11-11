@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using WhereTheSoundingsEnd.Boat;
 using Yarn.Unity;
+using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Narrative
 {
@@ -23,6 +24,7 @@ namespace WhereTheSoundingsEnd.Narrative
         private readonly HashSet<Collider> _vesselColliders = new HashSet<Collider>();
         private InputAction _interactAction;
         private bool _ownsInteractAction;
+        private SeaStateDirector _seaState;
 
         public DialogueRunner Runner { get => dialogueRunner; set => dialogueRunner = value; }
         public GreyhavenRuntimeUI Interface { get => runtimeUI; set => runtimeUI = value; }
@@ -34,6 +36,7 @@ namespace WhereTheSoundingsEnd.Narrative
         {
             SphereCollider trigger = GetComponent<SphereCollider>();
             trigger.isTrigger = true;
+            _seaState = FindFirstObjectByType<SeaStateDirector>();
         }
 
         private void Start()
@@ -76,7 +79,8 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
 
             if (runtimeUI.IsInventoryOpen ||
-                (dialogueRunner != null && dialogueRunner.IsDialogueRunning))
+                (dialogueRunner != null && dialogueRunner.IsDialogueRunning) ||
+                (_seaState != null && (_seaState.IsHarvesting || _seaState.IsSurveying)))
             {
                 runtimeUI.SetInteractionPrompt(string.Empty);
                 return;

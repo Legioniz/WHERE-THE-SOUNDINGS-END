@@ -60,6 +60,7 @@ namespace WhereTheSoundingsEnd.Persistence
     {
         public const int MinimumSlot = 1;
         public const int MaximumSlot = 5;
+        public const int MaximumSaveFileBytes = 1024 * 1024;
 
         private readonly string _saveDirectory;
         private readonly object _syncRoot = new object();
@@ -145,6 +146,11 @@ namespace WhereTheSoundingsEnd.Persistence
 
                     Directory.CreateDirectory(_saveDirectory);
                     byte[] bytes = new UTF8Encoding(false).GetBytes(json);
+                    if (bytes.Length > MaximumSaveFileBytes)
+                    {
+                        return SaveOperationResult.Failed(
+                            "The " + label + " exceeds the " + (MaximumSaveFileBytes / 1024) + " KiB save-file limit.");
+                    }
 
                     using (FileStream stream = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
@@ -326,7 +332,21 @@ namespace WhereTheSoundingsEnd.Persistence
 
             try
             {
-                string json = File.ReadAllText(path, Encoding.UTF8);
+                string json;
+                using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    if (stream.Length > MaximumSaveFileBytes)
+                    {
+                        error = "The save file exceeds the " + (MaximumSaveFileBytes / 1024) + " KiB size limit.";
+                        return false;
+                    }
+
+                    using (StreamReader reader = new StreamReader(stream, new UTF8Encoding(false, true), true))
+                    {
+                        json = reader.ReadToEnd();
+                    }
+                }
+
                 SaveGameData candidate = JsonUtility.FromJson<SaveGameData>(json);
 
                 if (!SaveGameDataMigration.TryPrepare(candidate, out error))

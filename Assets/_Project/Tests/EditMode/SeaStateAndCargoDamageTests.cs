@@ -111,6 +111,122 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void SalvageReservation_DoesNotSpendStockUntilCommit()
+        {
+            SalvageSite site = root.AddComponent<SalvageSite>();
+            int initialPulls = site.RemainingPulls;
+
+            string reservation;
+            Assert.IsTrue(site.TryReservePull(1, out reservation));
+            Assert.AreEqual(initialPulls, site.RemainingPulls);
+
+            site.ReleaseReservedPull(reservation);
+            Assert.AreEqual(initialPulls, site.RemainingPulls);
+
+            string committedReservation;
+            Assert.IsTrue(site.TryReservePull(1, out committedReservation));
+            Assert.IsTrue(site.CommitReservedPull(committedReservation, 1));
+            Assert.AreEqual(initialPulls - 1, site.RemainingPulls);
+        }
+
+        [Test]
+        public void SalvageReservation_CannotReserveMorePullsThanDailyStock()
+        {
+            SalvageSite site = root.AddComponent<SalvageSite>();
+            var reservations = new System.Collections.Generic.List<string>();
+            int available = site.RemainingPulls;
+            for (int i = 0; i < available; i++)
+            {
+                string reservation;
+                Assert.IsTrue(site.TryReservePull(1, out reservation));
+                reservations.Add(reservation);
+            }
+
+            string unavailable;
+            Assert.IsFalse(site.TryReservePull(1, out unavailable));
+            site.ReleaseReservedPull(reservations[0]);
+            Assert.IsTrue(site.TryReservePull(1, out unavailable));
+        }
+
+        [Test]
+        public void SalvageReservation_IsNotPersistedAsSpentBeforeCommit()
+        {
+            SalvageSite site = root.AddComponent<SalvageSite>();
+            int initialPulls = site.RemainingPulls;
+            string reservation;
+            Assert.IsTrue(site.TryReservePull(1, out reservation));
+
+            SaveGameData snapshot = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            site.CaptureSaveData(snapshot);
+
+            Assert.AreEqual(initialPulls, snapshot.world.salvageSites[0].remainingPulls);
+            site.ReleaseReservedPull(reservation);
+        }
+
+        [Test]
+        public void InspectionRateLimit_RejectsRepeatedAttemptsUntilCooldownExpires()
+        {
+            float nextAllowed = DeepOceanInspectionPolicy.GetNextAllowedTime(10f, 1.25f);
+            Assert.IsFalse(DeepOceanInspectionPolicy.IsCooldownReady(10.5f, nextAllowed));
+            Assert.IsTrue(DeepOceanInspectionPolicy.IsCooldownReady(11.25f, nextAllowed));
+        }
+
+        [Test]
+        public void InteractionClaim_AllowsOnlyOneNewInteractionPerFrame()
+        {
+            SeaStateDirector sea = root.AddComponent<SeaStateDirector>();
+            Assert.IsTrue(sea.TryClaimInteraction());
+            Assert.IsFalse(sea.TryClaimInteraction());
+        }
+
+        [Test]
+        public void InteractionClaim_BlocksWhileHarvestOrSurveyIsActive()
+        {
+            SeaStateDirector sea = root.AddComponent<SeaStateDirector>();
+            sea.SetHarvesting(true);
+            Assert.IsFalse(sea.TryClaimInteraction());
+            sea.SetHarvesting(false);
+            sea.SetSurveying(true);
+            Assert.IsFalse(sea.TryClaimInteraction());
+        }
+
+        [Test]
+        public void InspectionDisturbancePolicy_OnlyFirstDiscoveryAddsDisturbance()
+        {
+            Assert.AreEqual(0.008f, DeepOceanInspectionPolicy.GetDisturbance(true), 0.0001f);
+            Assert.AreEqual(0f, DeepOceanInspectionPolicy.GetDisturbance(false), 0.0001f);
+        }
+
+        [Test]
+        public void CargoValidation_RejectsDuplicateInstanceIdsBeforeRestore()
+        {
+            SpatialCargoHold hold = root.AddComponent<SpatialCargoHold>();
+            hold.SetItemDefinitions(new[] { cargoDefinition });
+
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            const string duplicateId = "22222222222222222222222222222222";
+            data.inventory.placements.Add(new CargoPlacementSaveData
+            {
+                instanceId = duplicateId,
+                itemId = "TEST-FISH",
+                anchorX = 0,
+                anchorY = 0
+            });
+            data.inventory.placements.Add(new CargoPlacementSaveData
+            {
+                instanceId = duplicateId,
+                itemId = "TEST-FISH",
+                anchorX = 3,
+                anchorY = 0
+            });
+
+            string error;
+            Assert.IsFalse(hold.TryValidateSaveData(data, out error));
+            Assert.That(error, Does.Contain("duplicate cargo instance"));
+            Assert.AreEqual(0, hold.Placements.Count);
+        }
+
+        [Test]
         public void RepairCell_RestoresTheDamagedSlot()
         {
             SpatialCargoHold hold = root.AddComponent<SpatialCargoHold>();

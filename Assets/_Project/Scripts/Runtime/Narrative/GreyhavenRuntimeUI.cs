@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 using Yarn.Unity;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Narrative
 {
@@ -42,6 +43,7 @@ namespace WhereTheSoundingsEnd.Narrative
         private bool _lineWaiting;
         private bool _pauseOwned;
         private float _timeScaleBeforeUi;
+        private SeaStateDirector _seaState;
         private string _selectedInstanceId;
         private int _selectedRotation;
         private readonly List<Action> _optionActions = new List<Action>();
@@ -55,6 +57,7 @@ namespace WhereTheSoundingsEnd.Narrative
 
         private void Start()
         {
+            _seaState = FindFirstObjectByType<SeaStateDirector>();
             InitializeUi();
             BindInventoryInput();
         }
@@ -583,7 +586,9 @@ namespace WhereTheSoundingsEnd.Narrative
 
         private void ToggleInventory()
         {
-            if (dialogueRunner != null && dialogueRunner.IsDialogueRunning) return;
+            if ((dialogueRunner != null && dialogueRunner.IsDialogueRunning) ||
+                (_seaState != null && !_seaState.TryClaimInteraction()))
+                return;
             SetInventoryVisible(!_inventoryOpen);
         }
 
@@ -643,7 +648,12 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
             }
 
-            if (dialogueRunner.IsDialogueRunning) return;
+            if (_inventoryOpen || Time.timeScale <= 0.0001f || dialogueRunner.IsDialogueRunning)
+                return;
+
+            if (_seaState != null && !_seaState.TryClaimInteraction())
+                return;
+
             dialogueRunner.StartDialogue(string.IsNullOrWhiteSpace(nodeName)
                 ? "Greyhaven_Harbourmaster"
                 : nodeName);

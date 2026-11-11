@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Edit Mode test coverage added; Unity execution pending  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-10
+> Version: 0.4  
+> Last reviewed: 2026-11-12
 
 ## Automated Edit Mode tests
 
@@ -22,6 +22,23 @@ Test file: Assets/_Project/Tests/EditMode/SaveFileServiceTests.cs
 | Save_RejectsInvalidSpatialCargoPlacementRecords | Invalid spatial placements fail validation |
 | Delete_RemovesPrimaryAndBackupFiles | Deleting a slot removes its primary, backup and temporary files |
 | Operations_RejectSlotNumbersOutsideConfiguredRange | Slot values outside 1–5 are rejected |
+| Load_RejectsOversizedPrimaryFileBeforeDeserialization | Files larger than 1 MiB are rejected before JSON parsing |
+| Save_RejectsNonFiniteVesselPhysicsValues | Non-finite or out-of-range saved physics coordinates and velocities are rejected |
+| Save_RejectsDuplicateCargoInstanceIdentifiers | Duplicate cargo instance GUIDs are rejected |
+| Save_RejectsMalformedCargoInstanceIdentifiers | Cargo instance IDs must be valid GUIDs |
+| Save_RejectsEmptyCargoInstanceGuid | The empty GUID is rejected as a non-identity value |
+| Save_RejectsOversizedCollectionsBeforeSerialization | Save collections cannot exceed the configured entry cap |
+| Save_RejectsMalformedQuestCollectionEntries | Null/malformed quest records are rejected rather than skipped |
+| Restore_RollsBackEveryParticipantWhenALaterParticipantThrows | A participant failure restores the captured pre-load state |
+| Restore_RejectsAnUnsafeRollbackSnapshotBeforeMutatingParticipants | Loading is refused when the pre-load state cannot be safely restored |
+| SalvageReservation_DoesNotSpendStockUntilCommit | An interrupted reservation does not reduce committed daily stock |
+| SalvageReservation_CannotReserveMorePullsThanDailyStock | Concurrent reservations cannot exceed the daily pull quota |
+| InspectionRateLimit_RejectsRepeatedAttemptsUntilCooldownExpires | Repeated inspections are rejected until the unscaled-time cooldown expires |
+| InteractionClaim_AllowsOnlyOneNewInteractionPerFrame | Only one new player interaction can claim a frame |
+| InteractionClaim_BlocksWhileHarvestOrSurveyIsActive | Active harvest and survey actions block new interactions |
+| SalvageReservation_IsNotPersistedAsSpentBeforeCommit | An in-flight reservation is not serialized as consumed daily stock |
+| InspectionDisturbancePolicy_OnlyFirstDiscoveryAddsDisturbance | Repeat inspections add no disturbance |
+| CargoValidation_RejectsDuplicateInstanceIdsBeforeRestore | Runtime cargo validation rejects duplicate identifiers before mutation |
 | Autosave_UsesDedicatedFile_AndDoesNotOverwriteManualSlots | Autosave has its own file and cannot overwrite a manual slot |
 | Autosave_LoadRecoversPreviousAutosaveWhenPrimaryIsCorrupted | A corrupted autosave primary recovers from its previous backup |
 | DeleteAutosave_DoesNotDeleteManualSlots | Removing autosave leaves manual saves untouched |
@@ -47,6 +64,14 @@ Run with Unity Editor 6000.3.28f1:
 13. Place multiple cargo items, save and reload. Verify instance IDs, coordinates, rotations, quantities, quality and freshness are restored.
 14. Configure a Yarn Project and Dialogue Runner, change float/string/bool variables through a branching conversation, save and reload. Verify all stored variables are restored and choices reflect the restored state.
 
+15. Start dredging, save mid-action, then cancel, disable the controller, leave the wreck radius or allow the action to cross into a new day. Verify the reservation is refunded and no salvage is awarded.
+16. Complete dredging with a free cargo slot and verify exactly one item reward and one committed pull. Repeat with a full hold and verify the reserved pull is returned.
+17. Rapidly inspect the same site. Verify the interaction cooldown is respected and only the first inspection raises disturbance.
+18. Trigger dialogue, fishing/dredging, sounding, inspection and inventory on the same frame. Verify only one interaction begins.
+19. Corrupt a save with NaN/Infinity physics, duplicate cargo GUIDs and oversized collections. Verify load is rejected before live state is mutated.
+20. Simulate a participant restore exception and verify the pre-load participant snapshot is restored.
+21. Attempt to load a save during dialogue, sounding or dredging. Verify the coordinator rejects the load without changing the active snapshot.
+
 ## Acceptance criteria
 
 - A slot cannot overwrite a different slot.
@@ -54,6 +79,9 @@ Run with Unity Editor 6000.3.28f1:
 - A backup is retained when overwriting an existing valid primary save.
 - Invalid primary data does not prevent a valid backup from loading.
 - Newer schema versions are never rewritten by an older build.
+- The full save and every runtime-aware participant are validated before any live participant is mutated.
+- If a participant fails during restoration, the prior live snapshot is restored; rollback failures are fatal and require a scene reload.
+- Oversized files, malformed collections, non-finite physics values and duplicate cargo identities are rejected.
 - Restored state is applied only after the required scene is active.
 - Tests use temporary storage and leave the user's real save directory untouched.
 
