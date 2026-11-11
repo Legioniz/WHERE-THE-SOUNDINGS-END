@@ -97,7 +97,7 @@ The Greyhaven Editor builder places the residents at the following service locat
 
 | Resident | Daytime location | Off-duty anchor |
 |---|---|---|
-| Harbourmaster | Inner main pier quay-watch point (-1.6, 12) | Harbour Office front (-21? no — 21, -28.5) |
+| Harbourmaster | Inner main pier quay-watch point (-1.6, 12) | Harbour Office front (21, -28.5) |
 | Mara Venn | Fish Market front (-27, -28.5) | Market-side anchor (-23, -29) |
 | Tomas Vale | Boat Repair Shed front (1, -40) | Repair-side anchor (5, -38) |
 | Inez Sarmiento | Net Mender Shed front (-48, -46) | Net-shed-side anchor (-44, -46) |
@@ -161,7 +161,8 @@ Not yet implemented:
 
 ## Acceptance checks
 
-1. Rebuild Greyhaven and confirm four resident agents exist with unique stable IDs.\n2. Confirm Harbourmaster quay-watch and office anchors, Mara's market frontage, Tomas's repair frontage and Inez's net-mender frontage match the generated chart legend.
+1. Rebuild Greyhaven and confirm four resident agents exist with unique stable IDs.
+2. Confirm Harbourmaster quay-watch and office anchors, Mara's market frontage, Tomas's repair frontage and Inez's net-mender frontage match the generated chart legend.
 3. Confirm all four interaction triggers display the correct resident name and start the correct Yarn node.
 4. Confirm schedule windows resolve at their exact start and end boundaries, including overnight windows.
 5. Confirm residents move only while the sea clock advances and remain stationary during dialogue, inventory and stopped-boat states.
