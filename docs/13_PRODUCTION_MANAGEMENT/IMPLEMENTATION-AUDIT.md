@@ -123,3 +123,9 @@ The authoritative work sequence and acceptance criteria are in [Task Backlog](..
 - [Testing Strategy](TESTING-STRATEGY.md)
 - [C# Compile-Risk Audit](CSHARP-COMPILE-RISK-AUDIT.md)
 - [Repository Safeguards](REPOSITORY-SAFEGUARDS.md)
+
+## Area-streaming implementation update — 2026-11-12
+
+A source-level additive area-streaming foundation has been added for Greyhaven. The generated blockout now separates static terrain, harbour, village, west/east estuary, and lighthouse scenery into six additive scenes. The persistent scene retains the vessel, water simulation, camera, dynamic sites, NPCs and anchors, dialogue, world clock, and save participants. A distance-based preloader uses asynchronous additive scene loads, startup preloading for the three central areas, a larger unload radius, unload grace, and a one-load-at-a-time default. Area roots are serialized inactive and validated for stable ID/revision, root count, static-only contents, mesh/material/shader integrity, and submesh material coverage before activation. Generated terrain and basalt outcrop meshes are saved as reusable Unity assets. Atmosphere caches refresh when area roots activate or unload.
+
+The feature currently exists as source and generated-scene authoring logic, not as committed generated Unity scene outputs. Existing generated Greyhaven scenes require explicit confirmation before rebuilding; declining keeps the current blockout. The clean-checkout path generates the new area scenes through Initialize Project Foundation. Unity Editor compilation, Edit Mode tests, Play Mode travel/boundary/save/NPC tests, and Windows profiling/build remain unperformed. Do not present source-level CI as evidence of zero hitches or a completed runtime integration.

@@ -32,7 +32,18 @@ namespace WhereTheSoundingsEnd.Editor
 
             InputActionAsset controls = LoadControls();
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
+            {
                 GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
+            }
+            else if (!GreyhavenEnvironmentBuilder.HasGeneratedAreaScenes() &&
+                     EditorUtility.DisplayDialog(
+                         "Install Greyhaven area streaming?",
+                         "The generated Greyhaven scene predates area streaming. Rebuilding it will replace the generated blockout scene and create its additive area scenes. Manual edits to Greyhaven_Blockout will be lost.",
+                         "Rebuild generated Greyhaven",
+                         "Keep current scene"))
+            {
+                GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
+            }
 
             RegisterBuildScene();
             AssetDatabase.SaveAssets();

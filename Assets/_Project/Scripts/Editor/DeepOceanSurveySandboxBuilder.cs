@@ -267,6 +267,12 @@ namespace WhereTheSoundingsEnd.Editor
             string[] required =
             {
                 "Assets/_Project/Scenes/Greyhaven_Blockout.unity",
+                SceneFolder + "/Greyhaven_Terrain.unity",
+                SceneFolder + "/Greyhaven_Harbour.unity",
+                SceneFolder + "/Greyhaven_Village.unity",
+                SceneFolder + "/Greyhaven_Estuary_West.unity",
+                SceneFolder + "/Greyhaven_Estuary_East.unity",
+                SceneFolder + "/Greyhaven_Lighthouse.unity",
                 SceneFolder + "/OuterShoals_SurveySandbox.unity",
                 SceneFolder + "/HollowTrench_SurveySandbox.unity"
             };

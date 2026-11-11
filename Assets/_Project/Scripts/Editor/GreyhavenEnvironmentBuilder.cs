@@ -15,6 +15,7 @@ using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Narrative;
 using WhereTheSoundingsEnd.NPC;
 using WhereTheSoundingsEnd.World;
+using WhereTheSoundingsEnd.Streaming;
 
 namespace WhereTheSoundingsEnd.Editor
 {
@@ -25,6 +26,26 @@ namespace WhereTheSoundingsEnd.Editor
     public static class GreyhavenEnvironmentBuilder
     {
         private const string MaterialsPath = "Assets/_Project/Art/Materials";
+        private const string MeshesPath = "Assets/_Project/Art/Meshes";
+        private const string StreamedSceneFolder = "Assets/_Project/Scenes";
+        private const string StreamedAreaRevision = "1";
+        private static readonly string[] StreamedAreaScenePaths =
+        {
+            StreamedSceneFolder + "/Greyhaven_Terrain.unity",
+            StreamedSceneFolder + "/Greyhaven_Harbour.unity",
+            StreamedSceneFolder + "/Greyhaven_Village.unity",
+            StreamedSceneFolder + "/Greyhaven_Estuary_West.unity",
+            StreamedSceneFolder + "/Greyhaven_Estuary_East.unity",
+            StreamedSceneFolder + "/Greyhaven_Lighthouse.unity"
+        };
+
+        public static bool HasGeneratedAreaScenes()
+        {
+            for (int i = 0; i < StreamedAreaScenePaths.Length; i++)
+                if (AssetDatabase.LoadAssetAtPath<SceneAsset>(StreamedAreaScenePaths[i]) == null)
+                    return false;
+            return true;
+        }
         private const string CargoDefinitionsPath = "Assets/_Project/Data/Inventory";
         private const string DialogueProjectPath = "Assets/_Project/Dialogue/Greyhaven.yarnproject";
         private const string PanelSettingsPath = "Assets/_Project/Settings/UI/GreyhavenPanelSettings.asset";
@@ -101,6 +122,9 @@ namespace WhereTheSoundingsEnd.Editor
                 new Vector3(-44f, HeightAt(-44f, -46f), -46f), wood, concrete,
                 dialogueRunner, runtimeUI, controls, npcClock, 7f, 17f, "net_mending");
 
+            BuildAreaStreaming(world.transform, player.Find("Player_Boat_Blockout"),
+                terrain, harbor, village, estuary, landmarks, scene);
+
             RenderSettings.ambientMode = AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(0.30f, 0.35f, 0.37f);
             RenderSettings.ambientEquatorColor = new Color(0.18f, 0.23f, 0.24f);
@@ -110,9 +134,127 @@ namespace WhereTheSoundingsEnd.Editor
             RenderSettings.fogColor = new Color(0.15f, 0.20f, 0.21f);
             RenderSettings.fogDensity = 0.0018f;
 
+            SceneManager.SetActiveScene(scene);
             EditorSceneManager.SaveScene(scene, scenePath);
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(scenePath, true) };
+            List<EditorBuildSettingsScene> buildScenes = new List<EditorBuildSettingsScene>
+            {
+                new EditorBuildSettingsScene(scenePath, true)
+            };
+            for (int i = 0; i < StreamedAreaScenePaths.Length; i++)
+                buildScenes.Add(new EditorBuildSettingsScene(StreamedAreaScenePaths[i], true));
+            EditorBuildSettings.scenes = buildScenes.ToArray();
         }
+
+
+        private static void BuildAreaStreaming(
+            Transform world, Transform boat, Transform terrain, Transform harbour,
+            Transform village, Transform estuary, Transform landmarks, Scene persistentScene)
+        {
+            EnsureFolder(StreamedSceneFolder);
+            BuildAreaSceneFromChildren(terrain, "greyhaven.terrain", StreamedAreaScenePaths[0], null, persistentScene);
+            BuildAreaSceneFromChildren(harbour, "greyhaven.harbour", StreamedAreaScenePaths[1], null, persistentScene);
+            BuildAreaSceneFromChildren(village, "greyhaven.village", StreamedAreaScenePaths[2],
+                candidate => !candidate.name.EndsWith("_Anchor", StringComparison.Ordinal), persistentScene);
+            BuildAreaSceneFromChildren(estuary, "greyhaven.estuary.west", StreamedAreaScenePaths[3],
+                candidate => candidate.transform.position.x < 0f, persistentScene);
+            BuildAreaSceneFromChildren(estuary, "greyhaven.estuary.east", StreamedAreaScenePaths[4],
+                candidate => candidate.transform.position.x >= 0f, persistentScene);
+            BuildAreaSceneFromChildren(landmarks, "greyhaven.lighthouse", StreamedAreaScenePaths[5],
+                candidate => candidate.name.IndexOf("Lighthouse", StringComparison.OrdinalIgnoreCase) >= 0,
+                persistentScene);
+
+            AreaStreamingDirector director = world.gameObject.AddComponent<AreaStreamingDirector>();
+            director.Configure(boat, new List<StreamedAreaDefinition>
+            {
+                new StreamedAreaDefinition("greyhaven.terrain", StreamedAreaScenePaths[0], StreamedAreaRevision,
+                    new Vector3(0f, 0f, -58f), 132f, 185f, 4f, true),
+                new StreamedAreaDefinition("greyhaven.harbour", StreamedAreaScenePaths[1], StreamedAreaRevision,
+                    new Vector3(0f, 0f, 18f), 112f, 155f, 3f, true),
+                new StreamedAreaDefinition("greyhaven.village", StreamedAreaScenePaths[2], StreamedAreaRevision,
+                    new Vector3(0f, 0f, -54f), 96f, 138f, 4f, true),
+                new StreamedAreaDefinition("greyhaven.estuary.west", StreamedAreaScenePaths[3], StreamedAreaRevision,
+                    new Vector3(-80f, 0f, -36f), 62f, 88f, 4f, false),
+                new StreamedAreaDefinition("greyhaven.estuary.east", StreamedAreaScenePaths[4], StreamedAreaRevision,
+                    new Vector3(78f, 0f, -36f), 62f, 88f, 4f, false),
+                new StreamedAreaDefinition("greyhaven.lighthouse", StreamedAreaScenePaths[5], StreamedAreaRevision,
+                    new Vector3(-86f, 0f, -22f), 68f, 96f, 4f, false)
+            });
+            EditorUtility.SetDirty(director);
+        }
+
+        private static void BuildAreaSceneFromChildren(
+            Transform source, string areaId, string scenePath,
+            Func<GameObject, bool> filter, Scene persistentScene)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            List<GameObject> candidates = new List<GameObject>();
+            for (int i = 0; i < source.childCount; i++)
+            {
+                GameObject candidate = source.GetChild(i).gameObject;
+                if (candidate == null || (filter != null && !filter(candidate)) ||
+                    !IsStaticStreamableHierarchy(candidate)) continue;
+                candidates.Add(candidate);
+            }
+            if (candidates.Count == 0)
+                throw new InvalidOperationException("No static geometry was found for streamed area '" + areaId + "'.");
+
+            AssetDatabase.DeleteAsset(scenePath);
+            Scene areaScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+            try
+            {
+                GameObject areaObject = new GameObject("STREAMED_AREA — " + areaId);
+                SceneManager.MoveGameObjectToScene(areaObject, areaScene);
+                StreamedAreaSceneRoot areaRoot = areaObject.AddComponent<StreamedAreaSceneRoot>();
+                areaRoot.Configure(areaId, StreamedAreaRevision);
+                EditorUtility.SetDirty(areaRoot);
+                areaObject.SetActive(false);
+
+                for (int i = 0; i < candidates.Count; i++)
+                {
+                    GameObject candidate = candidates[i];
+                    if (candidate == null) continue;
+                    candidate.transform.SetParent(null, true);
+                    SceneManager.MoveGameObjectToScene(candidate, areaScene);
+                    candidate.transform.SetParent(areaObject.transform, true);
+                }
+                SceneManager.SetActiveScene(areaScene);
+                EditorSceneManager.SaveScene(areaScene, scenePath);
+            }
+            finally
+            {
+                if (persistentScene.IsValid() && persistentScene.isLoaded)
+                    SceneManager.SetActiveScene(persistentScene);
+                if (areaScene.IsValid() && areaScene.isLoaded)
+                    EditorSceneManager.CloseScene(areaScene, true);
+            }
+        }
+
+        private static bool IsStaticStreamableHierarchy(GameObject candidate)
+        {
+            if (candidate == null) return false;
+            if (candidate.GetComponentsInChildren<MonoBehaviour>(true).Length > 0) return false;
+            return candidate.GetComponentsInChildren<Rigidbody>(true).Length == 0;
+        }
+
+        private static Mesh SaveGeneratedMeshAsset(string fileName, Mesh mesh)
+        {
+            if (mesh == null) throw new ArgumentNullException(nameof(mesh));
+            EnsureFolder("Assets/_Project/Art");
+            EnsureFolder(MeshesPath);
+            string path = MeshesPath + "/" + fileName;
+            Mesh existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            if (existing != null)
+            {
+                EditorUtility.CopySerialized(mesh, existing);
+                UnityEngine.Object.DestroyImmediate(mesh);
+                EditorUtility.SetDirty(existing);
+                return existing;
+            }
+            AssetDatabase.CreateAsset(mesh, path);
+            return mesh;
+        }
+
+
 
 
         private static List<CargoItemDefinition> BuildCargoCatalog()
@@ -497,6 +639,7 @@ namespace WhereTheSoundingsEnd.Editor
                 mesh.SetTriangles(surfaceTriangles[surface], surface, true);
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
+            mesh = SaveGeneratedMeshAsset("Greyhaven_Procedural_Terrain.asset", mesh);
 
             GameObject land = new GameObject("Irregular_Volcanic_Island_Terrain");
             land.transform.SetParent(parent, false);
@@ -510,6 +653,7 @@ namespace WhereTheSoundingsEnd.Editor
                 float x = -104f + i * 9f;
                 float z = -88f + (float)rng.NextDouble() * 17f;
                 Mesh rockMesh = CreateFacetedRockMesh("Greyhaven_Basalt_Outcrop_" + i.ToString("00"), rng);
+                rockMesh = SaveGeneratedMeshAsset("Greyhaven_Basalt_Outcrop_" + i.ToString("00") + ".asset", rockMesh);
 
                 GameObject mound = new GameObject("Inland_Basalt_Outcrop_" + i.ToString("00"));
                 mound.transform.SetParent(parent, false);

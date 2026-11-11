@@ -34,6 +34,11 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Inventory/CargoGridGeometry.cs",
     "Assets/_Project/Scripts/Runtime/Inventory/SpatialCargoHold.cs",
     "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs",
+    "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingDirector.cs",
+    "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingPolicy.cs",
+    "Assets/_Project/Scripts/Runtime/Streaming/StreamedAreaSceneRoot.cs",
+    "Assets/_Project/Tests/EditMode/AreaStreamingPolicyTests.cs",
+    "docs/08_TECHNICAL_DESIGN/AREA-STREAMING-AND-ASSET-RESIDENCY.md",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyMath.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyRegion.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonSite.cs",
@@ -174,6 +179,58 @@ def main() -> int:
         for required_region in ("greyhaven", "the_outer_shoals", "the_hollow_trench"):
             if required_region not in region_source:
                 failures.append(f"DeepOceanSurveyRegion is missing regional profile: {required_region}")
+
+        streaming_source = (ROOT / "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingDirector.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "LoadSceneAsync(scenePath, LoadSceneMode.Additive)",
+            "Application.CanStreamedLevelBeLoaded",
+            "AreaStreamingPolicy.ShouldPreload",
+            "AreaStreamingPolicy.ShouldUnload",
+            "UnloadGraceSeconds",
+            "StreamedAreaSceneRoot",
+            "RefreshSceneTargets",
+            "roots.Length != 1",
+        ):
+            if required_text not in streaming_source:
+                failures.append(f"AreaStreamingDirector is missing streaming safeguard: {required_text}")
+
+        area_root_source = (ROOT / "Assets/_Project/Scripts/Runtime/Streaming/StreamedAreaSceneRoot.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "contentRevision", "TryValidate", "GetComponentsInChildren<Renderer>",
+            "sharedMesh == null", "material.shader == null", "shader.isSupported",
+            "subMeshCount", "Rigidbody",
+        ):
+            if required_text not in area_root_source:
+                failures.append(f"StreamedAreaSceneRoot is missing asset integrity check: {required_text}")
+
+        area_policy_tests = (ROOT / "Assets/_Project/Tests/EditMode/AreaStreamingPolicyTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "ValidRadii_RequireUnloadRadiusBeyondPreloadRadius",
+            "ShouldPreload_UsesInclusiveInnerBoundary",
+            "ShouldUnload_UsesOuterBoundaryAndPreservesHysteresisBand",
+            "DistanceRules_RejectNonFiniteValues",
+        ):
+            if f"void {required_test}()" not in area_policy_tests:
+                failures.append(f"AreaStreamingPolicyTests is missing regression: {required_test}")
+
+        greyhaven_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "BuildAreaStreaming(world.transform",
+            "Greyhaven_Terrain.unity", "Greyhaven_Harbour.unity",
+            "Greyhaven_Village.unity", "Greyhaven_Estuary_West.unity",
+            "Greyhaven_Estuary_East.unity", "Greyhaven_Lighthouse.unity",
+            "IsStaticStreamableHierarchy", "SaveGeneratedMeshAsset",
+        ):
+            if required_text not in greyhaven_builder:
+                failures.append(f"Greyhaven area builder is missing: {required_text}")
+
+        setup_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
+        if "Install Greyhaven area streaming?" not in setup_source:
+            failures.append("Existing generated Greyhaven scenes must require explicit confirmation before destructive streaming rebuild.")
+
+        area_scene_builder = (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8")
+        if "Greyhaven_Lighthouse.unity" not in area_scene_builder:
+            failures.append("Deep-ocean build-list refresh must preserve all additive Greyhaven area scenes.")
 
         sea_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs").read_text(encoding="utf-8")
         for required_text in (

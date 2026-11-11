@@ -88,15 +88,7 @@ namespace WhereTheSoundingsEnd.World
 
         private void Awake()
         {
-            sceneLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-            soundscapeSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
-            sourceBasePitch = new float[soundscapeSources.Length];
-            sourceBaseVolume = new float[soundscapeSources.Length];
-            for (int i = 0; i < soundscapeSources.Length; i++)
-            {
-                sourceBasePitch[i] = soundscapeSources[i] != null ? soundscapeSources[i].pitch : 1f;
-                sourceBaseVolume[i] = soundscapeSources[i] != null ? soundscapeSources[i].volume : 1f;
-            }
+            RefreshSceneTargets();
             if (timeOfDaySeconds <= 0.0)
                 timeOfDaySeconds = startingHour * 3600.0;
             weatherShiftCooldown = Random.Range(900f, 1500f);
@@ -108,6 +100,20 @@ namespace WhereTheSoundingsEnd.World
             dialogueRunner = runner;
             harvesting = harvest;
             cargoHold = hold;
+        }
+
+        /// <summary>Refreshes ambience targets after an additive area activates or unloads.</summary>
+        public void RefreshSceneTargets()
+        {
+            sceneLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+            soundscapeSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+            sourceBasePitch = new float[soundscapeSources.Length];
+            sourceBaseVolume = new float[soundscapeSources.Length];
+            for (int i = 0; i < soundscapeSources.Length; i++)
+            {
+                sourceBasePitch[i] = soundscapeSources[i] != null ? soundscapeSources[i].pitch : 1f;
+                sourceBaseVolume[i] = soundscapeSources[i] != null ? soundscapeSources[i].volume : 1f;
+            }
         }
 
         public void SetHarvesting(bool active)
