@@ -31,6 +31,9 @@ namespace WhereTheSoundingsEnd.Narrative
             document = uiDocument; controls = input; saves = coordinator;
             if (document == null || document.rootVisualElement == null) return;
             root = document.rootVisualElement;
+            Screen.fullScreen = PlayerPrefs.GetInt("wse.fullscreen", Screen.fullScreen ? 1 : 0) == 1;
+            AudioListener.volume = PlayerPrefs.GetFloat("wse.masterVolume", 1f);
+            root.style.scale = new Scale(Vector2.one * PlayerPrefs.GetFloat("wse.uiScale", 1f));
             BuildShell();
             InputActionMap map = controls != null ? controls.FindActionMap("Boat", false) : null;
             pauseAction = map != null ? map.FindAction("Pause", false) : null;
@@ -198,7 +201,7 @@ namespace WhereTheSoundingsEnd.Narrative
         {
             feedback.text=result.Success?success+" "+result.Message:"ACTION FAILED: "+result.Message;
             if(result.Success&&result.RecoveredFromBackup)feedback.text+=" Recovery backup was used.";
-            if(result.Success&&page=="saves")OpenSaves();
+            if(result.Success&&page=="saves"){OpenSaves();feedback.text=success+" "+result.Message+(result.RecoveredFromBackup?" Recovery backup was used.":"");}
         }
 
         private void Back(){if(page=="confirm")OpenSaves();else if(firstLaunch)OpenTitle();else OpenPause();}
