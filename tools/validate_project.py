@@ -46,6 +46,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/World/PanicBirdSwarmVisual.cs",
     "Assets/_Project/Tests/EditMode/SeaStateAndCargoDamageTests.cs",
     "Assets/_Project/Tests/EditMode/BoatPhysicsTests.cs",
+    "Assets/_Project/Tests/EditMode/MaritimeSurfaceMathTests.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/YarnDialogueSaveParticipant.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs",
@@ -206,6 +207,7 @@ def main() -> int:
         for required_text in (
             "TrySampleSurface", "AddForceAtPosition", "Physics.gravity",
             "CalculateBuoyancyForce", "buoyancyOffsets",
+            "ClampSubmersionDepth(depth, maximumSubmersion)",
         ):
             if required_text not in boat_hydro:
                 failures.append(f"BoatHydrodynamics is missing expected water-force behaviour: {required_text}")
@@ -223,9 +225,19 @@ def main() -> int:
             failures.append("Boat movement must apply forces/torques instead of setting velocity directly.")
 
         water_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/MaritimeSurfaceBehaviour.cs").read_text(encoding="utf-8")
-        for required_text in ("TrySampleSurface", "EvaluateWaveHeight", "SampleSurface", "worldSurfaceVelocity"):
+        for required_text in (
+            "TrySampleSurface", "EvaluateWaveHeight", "SampleSurface", "worldSurfaceVelocity",
+            "previousAmplitudeBlend", "previousWaveDirection", "AdvancePhase",
+            "BlendDirection", "EstimateVerticalVelocity", "ApplyWaveMesh();",
+        ):
             if required_text not in water_source:
-                failures.append(f"MaritimeSurfaceBehaviour is missing shared wave sampling: {required_text}")
+                failures.append(f"MaritimeSurfaceBehaviour is missing coherent shared-wave behaviour: {required_text}")
+        if "Time.time * waveSpeed" in water_source:
+            failures.append("MaritimeSurfaceBehaviour must not reset wave phase when an incident changes direction.")
+
+        camera_source = (ROOT / "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs").read_text(encoding="utf-8")
+        if "TrySampleSurface(" not in camera_source or "waveBobInfluence" in camera_source:
+            failures.append("Camera must sample the active wave surface without adding a second wave-height bob.")
 
         greyhaven_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
         if "hydrodynamics.Configure(seaSurface)" not in greyhaven_builder or "body.useGravity = true;" not in greyhaven_builder:
@@ -234,6 +246,11 @@ def main() -> int:
         deep_builder = (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8")
         if "hydrodynamics.Configure(waterSurface)" not in deep_builder or "body.useGravity = true;" not in deep_builder:
             failures.append("Deep-ocean survey boats must use the same Rigidbody buoyancy model.")
+        if "follow.SeaSurface = waterSurface;" not in deep_builder:
+            failures.append("Deep-ocean survey cameras must sample the same water surface as buoyancy.")
+
+        if "vesselCondition = GetComponent<VesselConditionController>();" not in boat_source:
+            failures.append("BoatPrototypeController must resolve VesselConditionController after generated-scene component wiring.")
 
         atmosphere_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishermanAtmosphereDirector.cs").read_text(encoding="utf-8")
         if "seaState.LastGameDeltaSeconds" not in atmosphere_source or "realDelta * 72f" in atmosphere_source:

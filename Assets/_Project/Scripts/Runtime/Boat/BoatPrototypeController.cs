@@ -101,6 +101,11 @@ namespace WhereTheSoundingsEnd.Boat
         {
             if (body == null) return;
 
+            // Generated-scene builders may attach vessel condition after this controller.
+            // Resolve lazily so damage still affects thrust in every generated scene.
+            if (vesselCondition == null)
+                vesselCondition = GetComponent<VesselConditionController>();
+
             float throttle = Mathf.Clamp(moveInput.y, -1f, 1f);
             float steering = Mathf.Clamp(moveInput.x, -1f, 1f);
             Vector3 forward = transform.forward;

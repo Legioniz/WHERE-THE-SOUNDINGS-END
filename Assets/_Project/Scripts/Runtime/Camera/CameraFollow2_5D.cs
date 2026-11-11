@@ -30,8 +30,7 @@ namespace WhereTheSoundingsEnd.CameraSystem
         [SerializeField, Range(0.0f, 6.0f)] private float maximumTurnBank = 2.5f;
 
         [Header("Sea response")]
-        [SerializeField, Range(0.0f, 1.0f)] private float waveBobInfluence = 0.45f;
-        [SerializeField, Range(0.0f, 1.0f)] private float waveTiltInfluence = 0.40f;
+        [SerializeField, Range(0.0f, 1.0f)] private float waveTiltInfluence = 0.25f;
         [SerializeField, Range(0.0f, 5.0f)] private float maximumWaveTilt = 1.5f;
         [SerializeField, Min(0.01f)] private float rotationSmoothTime = 0.34f;
 
@@ -82,18 +81,17 @@ namespace WhereTheSoundingsEnd.CameraSystem
                 lookAheadSeconds,
                 maximumLookAheadDistance);
 
-            float waveHeight = 0.0f;
             Vector3 waveNormal = Vector3.up;
+            bool sampledWave = seaSurface != null &&
+                seaSurface.TrySampleSurface(
+                    target.position,
+                    out _,
+                    out waveNormal,
+                    out _);
 
-            if (seaSurface != null)
-            {
-                Vector3 sampledSurfacePosition;
-                seaSurface.SampleSurface(target.position, out sampledSurfacePosition, out waveNormal);
-                waveHeight = sampledSurfacePosition.y - seaSurface.transform.position.y;
-            }
-
+            // The hull already heaves through buoyancy. Do not add a second camera wave-height
+            // offset; follow the physical vessel motion and use only a restrained surface tilt.
             Vector3 desiredPosition = target.position + offset + movementLead;
-            desiredPosition.y += waveHeight * waveBobInfluence;
             transform.position = Vector3.SmoothDamp(
                 transform.position,
                 desiredPosition,
@@ -109,7 +107,7 @@ namespace WhereTheSoundingsEnd.CameraSystem
 
             float wavePitch = 0.0f;
             float waveRoll = 0.0f;
-            if (seaSurface != null)
+            if (sampledWave)
             {
                 wavePitch = Mathf.Atan2(-waveNormal.z, waveNormal.y) * Mathf.Rad2Deg * waveTiltInfluence;
                 waveRoll = Mathf.Atan2(waveNormal.x, waveNormal.y) * Mathf.Rad2Deg * waveTiltInfluence;

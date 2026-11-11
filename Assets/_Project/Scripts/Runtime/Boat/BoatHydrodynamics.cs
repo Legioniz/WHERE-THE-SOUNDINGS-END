@@ -84,6 +84,7 @@ namespace WhereTheSoundingsEnd.Boat
                     continue;
 
                 float depth = Vector3.Dot(surfacePoint - point, surfaceNormal);
+                depth = BoatHydrodynamicsMath.ClampSubmersionDepth(depth, maximumSubmersion);
                 if (depth <= 0f) continue;
 
                 Vector3 pointVelocity = body.GetPointVelocity(point);
@@ -116,6 +117,15 @@ namespace WhereTheSoundingsEnd.Boat
 
     public static class BoatHydrodynamicsMath
     {
+        public static float ClampSubmersionDepth(float depth, float maximumSubmersion)
+        {
+            if (float.IsNaN(depth) || float.IsInfinity(depth) ||
+                float.IsNaN(maximumSubmersion) || float.IsInfinity(maximumSubmersion))
+                return 0f;
+
+            return Mathf.Clamp(depth, 0f, Mathf.Max(0f, maximumSubmersion));
+        }
+
         public static float CalculateBuoyancyForce(
             float depth, float relativeNormalVelocity,
             float springStrength, float springDamping, float maximumPointForce)

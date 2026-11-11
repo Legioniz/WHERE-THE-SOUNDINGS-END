@@ -140,7 +140,7 @@ namespace WhereTheSoundingsEnd.Editor
                 boat.AddComponent<DeepOceanSiteInteractionController>();
             interactions.Configure(controls, seaState);
 
-            BuildCameraAndLight(world.transform, boat.transform, trench);
+            BuildCameraAndLight(world.transform, boat.transform, trench, waterSurface);
             RenderSettings.ambientLight = trench
                 ? new Color(0.035f, 0.055f, 0.075f)
                 : new Color(0.11f, 0.16f, 0.18f);
@@ -212,7 +212,11 @@ namespace WhereTheSoundingsEnd.Editor
             }
         }
 
-        private static void BuildCameraAndLight(Transform parent, Transform boat, bool trench)
+        private static void BuildCameraAndLight(
+            Transform parent,
+            Transform boat,
+            bool trench,
+            MaritimeSurfaceBehaviour waterSurface)
         {
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.transform.SetParent(parent, false);
@@ -233,6 +237,7 @@ namespace WhereTheSoundingsEnd.Editor
             follow.Offset = new Vector3(0f, 72f, -55f);
             follow.CameraEulerAngles = new Vector3(55f, 0f, 0f);
             follow.SmoothTime = 0.3f;
+            follow.SeaSurface = waterSurface;
 
             GameObject lightObject = new GameObject("Deep_Water_Directional_Light");
             lightObject.transform.SetParent(parent, false);
