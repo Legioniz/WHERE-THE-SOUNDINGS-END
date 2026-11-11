@@ -102,6 +102,23 @@ Wrong-way swell does not reset phase from absolute application time. Its travel 
 
 The water surface currently covers a bounded plane. Outside its local sample bounds, the buoyancy component applies no water support. Future streamed regions must provide their own water-surface component or a shared world water service.
 
+### Hull collision and impact damage
+
+The boat uses one root-level BoxCollider as its simplified waterline collision hull. Greyhaven's hull and raised-bow meshes are visual-only; their primitive colliders are removed so overlapping child boxes cannot create duplicate contacts or seams. The deep-water survey boats also use one root hull proxy. Static island terrain, breakwater rocks, pier decks, piles and wreck pieces retain their authored colliders. The ocean mesh itself remains non-colliding.
+
+Unity's Rigidbody solver owns physical separation and momentum. `VesselConditionController` does not multiply or overwrite post-impact Rigidbody velocity. It aggregates the strongest contact-normal impact reported during a physics step and processes one damage event on the next fixed step.
+
+Damage uses only the component of relative velocity along the contact normal. Tangential scraping therefore does not count as a full-speed collision. The initial gameplay rule is:
+
+- Damage threshold: 4.2 m/s normal impact speed.
+- Hull damage: `clamp((normalImpactSpeed - threshold) × 2.2, 2, 28)` integrity points per accepted impact.
+- Engine damage: 18% of the hull damage amount.
+- Cargo: the contacted local hull position maps to the corresponding 7×9 hold cell. An occupied non-protected item can be destroyed; quest-critical cargo remains protected by the existing hold rule.
+- Invalid vectors, zero contact normals, NaN and infinite values produce no impact damage.
+- Every accepted damaging strike publishes one `HullImpact` acoustic event with region identity, contact position, scaled loudness/radius and the current action-driven game timestamp. This feeds the existing acoustic listener; it does not add another audio/perception system.
+
+The values are prototype tuning, not measured ship-damage physics. They must be validated and adjusted in Play Mode.
+
 ## Initial prototype tuning
 
 | Parameter | Initial value |
@@ -145,6 +162,11 @@ Play Mode tests are still required in Unity:
 - the same buoyancy response is observed with render caps at 30, 60 and 120 FPS while the fixed timestep remains unchanged;
 - the rendered wave mesh interpolates smoothly without changing the physics sampling cadence;
 - the sea-time clock follows the actual vessel Rigidbody velocity;
+- hard bow and side impacts separate the vessel cleanly from piers, rocks, terrain and wrecks;
+- fast tangential scraping does not cause the same damage as an equally fast head-on impact;
+- multiple contacts in one physics step produce one strongest-impact damage event;
+- quest-critical cargo is never destroyed by impact damage, while ordinary occupied cargo can be lost;
+- an accepted hard impact publishes one acoustic HullImpact event and produces a readable damage report;
 - the save/load system restores position and linear/angular velocity without an impulse spike.
 
 ## Known limits and future work

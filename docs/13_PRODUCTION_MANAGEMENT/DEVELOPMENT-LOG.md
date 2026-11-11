@@ -4,7 +4,30 @@
 > Status: Active working log  
 > Owner: Project lead  
 > Version: 0.1  
-> Last reviewed: 2026-11-11
+> Last reviewed: 2026-11-12
+
+## 2026-11-12 — Vessel collision and impact response
+
+**Commit:** Pending CI verification.
+
+### Implemented
+- Replaced total relative-speed damage with contact-normal impact speed, so tangential scraping does not count as a full-speed collision.
+- Coalesced the strongest collision contact during a physics step and processed one damage event, reducing duplicate damage from multiple contact reports.
+- Removed manual post-impact linear/angular velocity multipliers; Unity's Rigidbody solver now owns physical collision response.
+- Added NaN/infinity guards, a deterministic capped hull-damage curve, proportional engine damage and existing local cargo-cell damage.
+- Published accepted damaging impacts through the existing acoustic event bus as `HullImpact` signals with region and game-time context.
+- Replaced Greyhaven's overlapping visual-mesh colliders with one root-level hull BoxCollider. Deep-water survey boats retain one root collider.
+- Added deterministic Edit Mode regression tests, static validator checks and Play Mode acceptance criteria.
+
+### Verification
+- Current source and generated-scene collider setup were inspected before editing.
+- GitHub Actions static project, C# syntax and repository safeguard checks will run after push.
+- Unity 6000.3.28f1 semantic compilation, Edit Mode execution, Play Mode collision feel/contact geometry, acoustic propagation and Windows build remain unverified.
+
+### Compatibility and risk
+- No save schema, persisted ID, input action name or package version changed.
+- Existing vessel hull/engine persistence and protected quest-cargo behavior remain the owning data contracts.
+- The simple box hull and damage curve are gameplay approximations. Validate pier approach, rocks, side scrapes, hard head-on impacts and cargo loss in Play Mode.
 
 ## 2026-11-11 — Boat, buoyancy, waves and camera integration
 

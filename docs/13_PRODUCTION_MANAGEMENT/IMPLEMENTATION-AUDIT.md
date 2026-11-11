@@ -72,6 +72,7 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 | AUD-10 | P1 | The water mesh updates 4,225 vertices and recalculates normals/bounds each frame. | Profile on target hardware before adding more water surfaces or dense simulation. Optimize only from measured results. | Open |
 | AUD-11 | P1 | Two Dependabot pull requests are open for major GitHub Actions updates. | Review workflow compatibility and both PR checks before merging. Keep action references pinned to full commit SHAs. | Open |
 | AUD-12 | P0 | Wave state advanced in render-frame `Update`, while buoyancy sampled it in `FixedUpdate`; vertical water velocity was divided by render-frame delta rather than the physics interval. | Advance and snapshot wave state in an early-order `FixedUpdate` using `Time.fixedDeltaTime`; interpolate only the visible mesh in `LateUpdate`; add deterministic interpolation tests and static cadence guards. | Source corrected in this review; Unity acceptance open |
+| AUD-13 | P0 | Collision damage used total relative speed and manually damped Rigidbody velocity after the solver response; Greyhaven visual colliders could report overlapping contacts. | Use contact-normal impact speed, aggregate same-step contacts, preserve solver-owned velocity, consolidate Greyhaven to one root collision hull, publish accepted impacts to the acoustic bus and add regression coverage. | Source corrected in this review; Unity acceptance open |
 
 ### CI evidence
 
@@ -86,6 +87,12 @@ The current source review confirmed that the bounded water mesh is intentionally
 The actual integration issue was temporal: render-frame wave updates were being sampled by fixed-step Rigidbody buoyancy. This review moves wave-state advancement to an early-order fixed step, computes vertical surface velocity over `Time.fixedDeltaTime`, and interpolates only the water mesh between physics snapshots. Deterministic tests and the repository validator now cover this contract.
 
 The code-level fix does not close M0-06. Unity compilation, Edit Mode execution, Play Mode checks at 30/60/120 FPS, a complete Greyhaven expedition, and a Windows build are still outstanding. Static CI success must not be presented as gameplay verification.
+
+## Collision review update — 2026-11-12
+
+The collision pass extends the existing `VesselConditionController`. Damage now uses contact-normal speed, so a fast tangential scrape is not treated like a head-on strike. Contact reports are coalesced per physics step, and the component no longer applies arbitrary post-collision velocity multipliers. Accepted damaging impacts publish the existing acoustic `HullImpact` signal. Greyhaven now uses one root-level hull BoxCollider while visible hull/bow meshes are non-colliding.
+
+Deterministic Edit Mode cases and static repository guards have been added. This is source-level verification only. Unity compilation, Test Runner execution, physical separation/contact behavior, acoustic propagation, cargo-loss balance and Windows build remain open.
 
 ## 5. M0 exit criteria
 

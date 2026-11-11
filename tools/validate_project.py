@@ -259,6 +259,36 @@ def main() -> int:
         if "GetInterpolatedWaveState" not in mesh_update:
             failures.append("The visible water mesh must interpolate between fixed wave snapshots.")
 
+        vessel_condition = (ROOT / "Assets/_Project/Scripts/Runtime/World/VesselConditionController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "VesselImpactMath.CalculateNormalImpactSpeed", "pendingImpactSpeed",
+            "private void FixedUpdate()", "AcousticEventKind.HullImpact",
+            "AcousticEventBus.Publish", "ApplyImpact(impactSpeed, contactPoint)",
+        ):
+            if required_text not in vessel_condition:
+                failures.append(f"VesselConditionController is missing collision integration: {required_text}")
+        if "body.linearVelocity *=" in vessel_condition or "body.angularVelocity *=" in vessel_condition:
+            failures.append("VesselConditionController must not override Rigidbody collision-solver velocity.")
+
+        impact_tests = (ROOT / "Assets/_Project/Tests/EditMode/SeaStateAndCargoDamageTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "CollisionImpact_UsesContactNormalAndIgnoresTangentialScraping",
+            "CollisionImpact_RejectsInvalidContactNormalsAndVelocities",
+            "CollisionDamage_UsesThresholdAndCapsImpactDamage",
+            "CollisionDamage_RejectsInvalidSpeedsAndKeepsEngineDamageProportional",
+        ):
+            if f"void {required_test}" not in impact_tests:
+                failures.append(f"SeaStateAndCargoDamageTests is missing regression test: {required_test}")
+
+        greyhaven_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "BoxCollider collisionHull = boat.AddComponent<BoxCollider>();",
+            "DestroyImmediate(hullMesh.GetComponent<Collider>())",
+            "DestroyImmediate(bow.GetComponent<Collider>())",
+        ):
+            if required_text not in greyhaven_builder:
+                failures.append(f"Greyhaven must use one non-overlapping root hull collider: {required_text}")
+
         camera_source = (ROOT / "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs").read_text(encoding="utf-8")
         if "TrySampleSurface(" not in camera_source or "waveBobInfluence" in camera_source:
             failures.append("Camera must sample the active wave surface without adding a second wave-height bob.")

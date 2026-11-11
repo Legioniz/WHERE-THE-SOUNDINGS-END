@@ -82,7 +82,7 @@ Keep deterministic math in Edit Mode; use Play Mode only where Unity scene/runti
 
 ### M0-06 — Boat/ocean/camera acceptance pass
 
-**Source-level integration update:** the source now provides continuous incident wave transitions, amplitude-aware surface velocity, a configured probe-depth cap, single-source camera heave, and shared-surface camera wiring in Greyhaven plus the two survey sandboxes. The controller resolves vessel condition after generated-scene wiring. This review also moves wave-state advancement to an early-order `FixedUpdate` with `Time.fixedDeltaTime`, then interpolates the mesh in `LateUpdate` without affecting physics samples. This does not close M0-06; all handling observations and Play Mode acceptance remain open until run in Unity.
+**Source-level integration update:** the source now provides continuous incident wave transitions, amplitude-aware surface velocity, a configured probe-depth cap, single-source camera heave, and shared-surface camera wiring in Greyhaven plus the two survey sandboxes. The controller resolves vessel condition after generated-scene wiring. This review also moves wave-state advancement to an early-order `FixedUpdate` with `Time.fixedDeltaTime`, then interpolates the mesh in `LateUpdate` without affecting physics samples. The collision pass now uses contact-normal damage, per-step contact aggregation, a root-level Greyhaven hull collision proxy, unchanged solver-owned collision velocities and acoustic HullImpact publication. This does not close M0-06; all handling observations and Play Mode acceptance remain open until run in Unity.
 
 Record repeatable observations for:
 - stable draft with no sinking or launching;
@@ -92,6 +92,9 @@ Record repeatable observations for:
 - camera readability while accelerating, drifting, reversing and turning;
 - actual vessel velocity driving sea-time progression;
 - no major visual/physics mismatch between water mesh and buoyancy probes;
+- hard impacts separate the hull from piers, breakwater rocks, terrain and wrecks without visual-collider seams;
+- damage follows contact-normal speed, one strongest impact is applied per physics step, and glancing scrapes are not treated as head-on impacts;
+- accepted impacts emit one acoustic HullImpact signal and preserve quest-critical cargo;
 - stable buoyancy response with render caps at 30, 60 and 120 FPS while the fixed timestep remains unchanged;
 - smooth rendered wave interpolation with no render-frame delta feeding the physics water-velocity sample.
 

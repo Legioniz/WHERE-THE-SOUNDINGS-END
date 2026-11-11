@@ -107,7 +107,9 @@ namespace WhereTheSoundingsEnd.Editor
             body.linearDamping = 0.04f;
             body.angularDamping = 0.18f;
             body.centerOfMass = new Vector3(0f, -0.10f, -0.12f);
+            // One root collision hull owns contact; the rendered cube below is visual only.
             BoxCollider hull = boat.AddComponent<BoxCollider>();
+            hull.center = new Vector3(0f, 0.04f, 0f);
             hull.size = new Vector3(2.2f, 0.8f, 6f);
 
             GameObject hullVisual = GameObject.CreatePrimitive(PrimitiveType.Cube);

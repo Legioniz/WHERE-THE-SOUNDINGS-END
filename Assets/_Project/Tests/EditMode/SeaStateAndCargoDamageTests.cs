@@ -48,6 +48,51 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void CollisionImpact_UsesContactNormalAndIgnoresTangentialScraping()
+        {
+            float glancing = VesselImpactMath.CalculateNormalImpactSpeed(
+                new Vector3(8f, 0f, 1f), Vector3.forward);
+            float direct = VesselImpactMath.CalculateNormalImpactSpeed(
+                new Vector3(0f, 0f, 8f), Vector3.forward);
+
+            Assert.AreEqual(1f, glancing, 0.0001f);
+            Assert.AreEqual(8f, direct, 0.0001f);
+        }
+
+        [Test]
+        public void CollisionImpact_RejectsInvalidContactNormalsAndVelocities()
+        {
+            Assert.AreEqual(0f, VesselImpactMath.CalculateNormalImpactSpeed(
+                new Vector3(4f, 0f, 0f), Vector3.zero));
+            Assert.AreEqual(0f, VesselImpactMath.CalculateNormalImpactSpeed(
+                new Vector3(float.NaN, 0f, 0f), Vector3.forward));
+            Assert.AreEqual(0f, VesselImpactMath.CalculateNormalImpactSpeed(
+                Vector3.forward, new Vector3(0f, float.PositiveInfinity, 0f)));
+        }
+
+        [TestCase(4.19f, 0f)]
+        [TestCase(5.2f, 2.2f)]
+        [TestCase(100f, 28f)]
+        public void CollisionDamage_UsesThresholdAndCapsImpactDamage(float impactSpeed, float expected)
+        {
+            float damage = VesselImpactMath.CalculateHullDamage(
+                impactSpeed, 4.2f, 2.2f, 2f, 28f);
+
+            Assert.AreEqual(expected, damage, 0.0001f);
+        }
+
+        [Test]
+        public void CollisionDamage_RejectsInvalidSpeedsAndKeepsEngineDamageProportional()
+        {
+            Assert.AreEqual(0f, VesselImpactMath.CalculateHullDamage(
+                float.NaN, 4.2f, 2.2f));
+            Assert.AreEqual(0f, VesselImpactMath.CalculateHullDamage(
+                8f, 4.2f, float.PositiveInfinity));
+            Assert.AreEqual(0.396f,
+                VesselImpactMath.CalculateEngineDamage(2.2f, 0.18f), 0.0001f);
+        }
+
+        [Test]
         public void DamageCell_DestroysOccupyingCargoAndBlocksSlot()
         {
             SpatialCargoHold hold = root.AddComponent<SpatialCargoHold>();

@@ -787,11 +787,17 @@ namespace WhereTheSoundingsEnd.Editor
             body.angularDamping = 0.18f;
             body.centerOfMass = new Vector3(0f, -0.10f, -0.12f);
 
+            // One stable waterline hull proxy owns collision; visible meshes are decorative.
+            BoxCollider collisionHull = boat.AddComponent<BoxCollider>();
+            collisionHull.center = new Vector3(0f, 0.04f, 0f);
+            collisionHull.size = new Vector3(2.1f, 0.8f, 5.6f);
+
             GameObject hullMesh = GameObject.CreatePrimitive(PrimitiveType.Cube);
             hullMesh.name = "Hull";
             hullMesh.transform.SetParent(boat.transform, false);
             hullMesh.transform.localScale = new Vector3(2.1f, 0.62f, 5.6f);
             hullMesh.GetComponent<Renderer>().sharedMaterial = hull;
+            UnityEngine.Object.DestroyImmediate(hullMesh.GetComponent<Collider>());
 
             GameObject bow = GameObject.CreatePrimitive(PrimitiveType.Cube);
             bow.name = "Raised_Bow";
@@ -799,6 +805,7 @@ namespace WhereTheSoundingsEnd.Editor
             bow.transform.localPosition = new Vector3(0f, 0.25f, 2f);
             bow.transform.localScale = new Vector3(1.55f, 0.5f, 1.25f);
             bow.GetComponent<Renderer>().sharedMaterial = hull;
+            UnityEngine.Object.DestroyImmediate(bow.GetComponent<Collider>());
 
             GameObject cabin = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cabin.name = "Small_Wheelhouse";

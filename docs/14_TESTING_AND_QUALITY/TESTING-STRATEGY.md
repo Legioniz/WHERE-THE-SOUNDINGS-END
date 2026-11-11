@@ -19,6 +19,7 @@
 
 ### Play Mode
 - Boat handling, speed gating and Sounding Rig input.
+- Hull contact against piers, breakwater rocks, terrain and wrecks; root-hull-only collision ownership; no visual collider seams; normal-impact damage; per-physics-step contact aggregation; collision acoustic event propagation.
 - Rigidbody buoyancy, wave following, heave/pitch/roll stability, forward/reverse thrust, opposing-throttle braking, speed taper, rudder flow, and lateral water resistance.
 - Water-wave simulation advances on the fixed physics timestep before buoyancy; rendered wave interpolation remains smooth and does not alter physics sampling at 30, 60 and 120 FPS.
 - Survey action advances the sea clock for its configured duration.
@@ -70,6 +71,7 @@ The Edit Mode test source includes eight suites, including deterministic maritim
 - Site signal confidence from authored signal strength and acoustic attenuation.
 - NPC day/overnight schedule boundaries and missing-window behaviour.
 - NPC stable-ID relationship persistence.
+- Contact-normal impact speed, glancing-impact rejection, threshold/capped hull damage, invalid collision inputs and proportional engine damage.
 - Four-point buoyancy force and damping response, forward/reverse acceleration, braking behaviour, engine/hull condition effects, and flow-dependent rudder authority.
 - Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
 - Fixed-step surface-velocity estimation and normalized interpolation between previous/current wave snapshots.
