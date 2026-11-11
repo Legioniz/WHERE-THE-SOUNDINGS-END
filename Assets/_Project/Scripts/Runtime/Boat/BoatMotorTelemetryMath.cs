@@ -30,6 +30,7 @@ namespace WhereTheSoundingsEnd.Boat
             float throttle, float forwardSpeed, float maximumForwardSpeed, float maximumReverseSpeed)
         {
             if (!IsFinite(throttle) ||
+                !IsFinite(forwardSpeed) ||
                 !IsFinite(maximumForwardSpeed) ||
                 !IsFinite(maximumReverseSpeed) ||
                 maximumForwardSpeed <= 0f ||
@@ -48,7 +49,13 @@ namespace WhereTheSoundingsEnd.Boat
         public static float CalculateEngineRpmNormalized(
             float throttle, float forwardSpeed, float maximumForwardSpeed, float maximumReverseSpeed)
         {
-            if (!IsFinite(throttle)) return IdleRpmNormalized;
+            if (!IsFinite(throttle) ||
+                !IsFinite(forwardSpeed) ||
+                !IsFinite(maximumForwardSpeed) ||
+                !IsFinite(maximumReverseSpeed) ||
+                maximumForwardSpeed <= 0f ||
+                maximumReverseSpeed <= 0f)
+                return IdleRpmNormalized;
 
             float throttleDemand = Mathf.Clamp01(Mathf.Abs(throttle));
             float speedRatio = CalculateSpeedRatio(
