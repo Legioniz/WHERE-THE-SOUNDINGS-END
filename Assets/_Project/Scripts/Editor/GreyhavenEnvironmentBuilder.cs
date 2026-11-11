@@ -251,8 +251,7 @@ namespace WhereTheSoundingsEnd.Editor
             runtimeUI.Runner = runner;
             runtimeUI.CargoHold = cargoHold;
             runtimeUI.Controls = controls;
-            GreyhavenFrontEndUI frontEnd = dialogueRoot.AddComponent<GreyhavenFrontEndUI>();
-            frontEnd.Initialize(document, controls, FindFirstObjectByType<SaveGameCoordinator>());
+            dialogueRoot.AddComponent<GreyhavenFrontEndUI>();
             runner.DialoguePresenters = new List<DialoguePresenterBase> { runtimeUI };
             runner.AddCommandHandler("checkpoint", new Action<string>(runtimeUI.RequestCheckpointAutosave));
 

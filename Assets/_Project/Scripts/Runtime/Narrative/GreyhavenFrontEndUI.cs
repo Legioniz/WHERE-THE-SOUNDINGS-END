@@ -167,7 +167,7 @@ namespace WhereTheSoundingsEnd.Narrative
             }
             SaveOperationResult result = newest!=null ? saves.LoadSlot(newest.SlotNumber) : saves.LoadAutosave();
             if(result.Success){feedback.text=result.Message;firstLaunch=false;Resume();}
-            else if(newest==null){feedback.text="No previous voyage found. Starting a new voyage.";}
+            else if(newest==null){feedback.text="No previous voyage found. Starting a new voyage.";firstLaunch=false;Resume();}
             else feedback.text="LOAD FAILED: "+result.Message;
         }
 
