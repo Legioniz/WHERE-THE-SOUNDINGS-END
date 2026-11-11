@@ -46,7 +46,7 @@ namespace WhereTheSoundingsEnd.World
             if (!IsFinite(x) || !IsFinite(z)) return 0.26f;
 
             float inlandDistance = Mathf.Max(0f, InlandDistance(x, z));
-            float coastalBlend = Mathf.SmoothStep(0f, 22f, inlandDistance);
+            float coastalBlend = Mathf.SmoothStep(0f, 1f, inlandDistance / 22f);
 
             float westHeadland = 15.5f * Gaussian(x, -72f, 29f, z, -62f, 43f);
             float eastRidge = 12f * Gaussian(x, 70f, 32f, z, -71f, 47f);
