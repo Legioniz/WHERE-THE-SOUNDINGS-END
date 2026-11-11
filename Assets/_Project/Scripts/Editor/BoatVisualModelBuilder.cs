@@ -389,12 +389,17 @@ namespace WhereTheSoundingsEnd.Editor
                 new Vector3(0.29f, 0.07f, 0.025f), Quaternion.identity, accent);
             AddCylinderBetween(root, "Outboard_Leg", new Vector3(0f, -0.24f, -2.91f),
                 new Vector3(0f, -0.65f, -2.91f), 0.075f, metal);
-            AddCylinderBetween(root, "Outboard_Propeller_Hub", new Vector3(0f, -0.63f, -2.91f),
-                new Vector3(0f, -0.75f, -2.91f), 0.065f, metal);
-            AddBox(root, "Outboard_Propeller_Blade_A", new Vector3(0f, -0.76f, -2.91f),
-                new Vector3(0.34f, 0.055f, 0.07f), Quaternion.identity, metal);
-            AddBox(root, "Outboard_Propeller_Blade_B", new Vector3(0f, -0.76f, -2.91f),
-                new Vector3(0.07f, 0.055f, 0.34f), Quaternion.identity, metal);
+            AddCylinderBetween(root, "Outboard_Propeller_Hub", new Vector3(0f, -0.76f, -3.27f),
+                new Vector3(0f, -0.76f, -3.10f), 0.065f, metal);
+
+            // The rotor's XY blade plane faces aft; the motor-effects component spins this pivot.
+            GameObject rotor = new GameObject("Outboard_Propeller_Rotor");
+            rotor.transform.SetParent(root, false);
+            rotor.transform.localPosition = new Vector3(0f, -0.76f, -3.27f);
+            AddBox(rotor.transform, "Outboard_Propeller_Blade_A", Vector3.zero,
+                new Vector3(0.34f, 0.055f, 0.055f), Quaternion.identity, metal);
+            AddBox(rotor.transform, "Outboard_Propeller_Blade_B", Vector3.zero,
+                new Vector3(0.055f, 0.34f, 0.055f), Quaternion.identity, metal);
         }
 
         private static void BuildBowFittings(Transform root, Material metal, Material rope, Material trim)
