@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Working baseline — procedural greybox; geography and final art remain provisional  
 > Owner: Project lead  
-> Version: 0.3  
-> Last reviewed: 2026-11-10
+> Version: 0.4  
+> Last reviewed: 2026-11-12
 
 ## 1. Purpose
 
@@ -96,9 +96,11 @@ These values are first-pass prototype tuning, not final balance. The current sou
 
 ## 7. Visual and atmosphere targets
 
-The first pass uses primitive geometry with restrained coastal colours: dark blue-green water; weathered timber and metal; muted basalt and concrete; sand and mud at the shoreline; subdued vegetation; overcast, low-contrast lighting with moderate coastal fog.
+The visual target is restrained, weathered and maritime: dark blue-green water, muted basalt and soil, subdued grass, narrow sand shelves, weathered timber and concrete, and overcast coastal lighting with moderate fog. The environment should read as a lived-in fishing island under a heavy maritime sky, not a bright tropical resort.
 
-The desired read is a lived-in fishing harbor under a heavy maritime sky—not a bright tropical resort. Production models, surface textures, decals, erosion, shoreline foam, water movement, particles, and audio are separate work.
+The generated island now uses a deterministic multi-scale heightfield with irregular shoreline sampling, distinct west/east headlands, an inland ridge, a rear terrace and smaller ridged surface variation. Its higher-resolution land mesh is split into soil, sand, grass and basalt submeshes using elevation, slope and shoreline distance. The sand band conforms to the mesh edge rather than using disconnected rectangular beach pieces. Static basalt outcrops use faceted, deterministic rock geometry.
+
+These are improved procedural greybox forms, not final production models or texture work. The existing material palette is reused; authored texture sets, erosion decals, shoreline foam, vegetation variety, animated water, particles and final environment assets remain separate work. See [Greyhaven Procedural Island Terrain](../08_TECHNICAL_DESIGN/GREYHAVEN-TERRAIN.md) for the terrain profile and validation requirements.
 
 ## 7. Scene generation and controls
 
@@ -117,7 +119,7 @@ Before the greybox is promoted beyond working baseline, verify in Unity:
 
 - [ ] The setup menu completes without compile or import errors.
 - [ ] The scene opens with the URP pipeline and no missing materials.
-- [ ] The water surface, terrain mesh, and shoreline render without visible gaps.
+- [ ] The water surface, terrain mesh, shoreline, and terrain material-submesh boundaries render without visible gaps.\n- [ ] The west headland, east ridge, inland spine, and low coastal shelf read as distinct landforms from the gameplay camera.\n- [ ] Sand, soil, grass, and basalt surfaces remain legible under the overcast lighting and fog.\n- [ ] Buildings, roads, NPC anchors, the lighthouse, and breakwater props remain seated on the regenerated heightfield.\n- [ ] The single terrain MeshCollider and faceted outcrop colliders do not create boat-catching seams or unstable contacts.
 - [ ] The boat moves, reverses, and steers in the open channel.
 - [ ] The boat does not collide with the dock at spawn.
 - [ ] Piers, breakwater rocks, and terrain have appropriate collision.
@@ -138,6 +140,6 @@ No Editor rendering, Play Mode, physics, or Windows build result is claimed by r
 
 ## 9. Implementation boundary
 
-Implemented by this pass: procedural terrain mesh and shoreline, visual-only procedural swell surface, blockout district geometry, piers, breakwater, navigation markers, lighthouse silhouette, village service and residential placeholders, mangrove/estuary props, starter boat, configurable 2.5D camera framing, a 7×9 spatial cargo hold with runtime interface, the first four Greyhaven NPC blockouts with schedules and separate Yarn dialogue nodes, a shallow regional survey profile, a Sounding Rig pulse loop, and a discoverable outer-channel wreck marker.
+Implemented by this pass: deterministic 144 × 96 multi-scale island heightfield, irregular mesh-conforming shoreline and sand band, slope/elevation-based soil/sand/grass/basalt submeshes, faceted basalt outcrops, visual-only procedural swell surface, blockout district geometry, piers, breakwater, navigation markers, lighthouse silhouette, village service and residential placeholders, mangrove/estuary props, starter boat, configurable 2.5D camera framing, a 7×9 spatial cargo hold with runtime interface, the first four Greyhaven NPC blockouts with schedules and separate Yarn dialogue nodes, a shallow regional survey profile, a Sounding Rig pulse loop, and a discoverable outer-channel wreck marker.
 
 Not implemented: final environment art, optimized production meshes, animated or physically simulated water/tide/current/weather/waves, walkable character controller, interiors, advanced NPC pathfinding, interiors, shops and sale transactions, full quest objective/journal logic, fishing and real catch intake, fish populations, ordinary wildlife, creature AI, hostile threat logic, acoustic navigation, streaming, or region transitions. Cargo UI prototype intake controls are not a substitute for fishing.
