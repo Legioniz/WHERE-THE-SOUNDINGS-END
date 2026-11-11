@@ -43,7 +43,9 @@ Movement currently uses direct waypoint movement between authored Transform anch
 
 The existing `HarbourmasterInteraction` trigger is configurable for each Greyhaven resident and passes that resident's `NpcAgent` into the dialogue presenter. The player still approaches by boat because the on-foot controller is not implemented. Yarn owns authored lines and branching; C# owns the authoritative score, event ledger, trust thresholds and relationship variables.
 
-The dialogue UI shows the active resident's name, tier and 0–100 meter. The scene builder registers the Yarn command `<<relationship "stable.event.id" delta>>`; it can only modify the active resident. A memory ID is consumed once per resident, and deltas are limited to -20 through +20.
+The dialogue UI shows the active resident's name, tier and 0–100 meter. The scene builder registers the typed Yarn command `<<relationship "stable.event.id" delta>>`; it can only modify the active resident. A memory ID is consumed once per resident, and deltas are limited to -20 through +20.
+
+Every resident's node now has a different greeting at each of the seven trust tiers, plus everyday questions, useful local facts, practical work advice and an in-character saying. Familiar residents unlock additional routine or personal topics; trusted residents share more considered observations; allies receive the most personal responses without learning the entire central mystery. Conditional options are filtered by Yarn when the player's relationship does not meet the threshold.
 
 ### Relationship tiers and consequences
 
@@ -110,7 +112,7 @@ Do not change the stable IDs, Yarn dialogue nodes or schedule boundaries when mo
 
 ## Dialogue memory and relationship design
 
-Yarn's `$npc_relationship`, `$npc_can_talk`, `$npc_can_trade` and `$npc_buy_price_multiplier` variables are seeded from the active C# resident before each conversation and refreshed after a relationship command. Each resident node includes distinct positive and negative choices, guarded greetings and trust-tier responses. Existing character-specific trust flags remain for save compatibility.
+Yarn's `$npc_relationship`, `$npc_can_talk`, `$npc_can_trade` and `$npc_buy_price_multiplier` variables are seeded from the active C# resident before each conversation and refreshed after a relationship command. The UI only starts an NPC conversation when a valid `NpcAgent` is assigned; a missing agent is reported instead of silently falling back to neutral dialogue. Each resident node includes seven-tier greetings, distinct positive and negative choices, conditional personal topics, everyday subjects and a character-specific quote. Existing character-specific flags remain for save compatibility.
 
 The C# buy policy is implemented, but the sale transaction is not. Future shop, repair, quest-reward and service systems must use the active NPC agent rather than inventing separate reputation values.
 
@@ -138,6 +140,7 @@ Implemented:
 - Individual trust tiers, visible dialogue meter, conversation refusal threshold and trade willingness/price policy.
 - Idempotent relationship-event memory with save/load and validation.
 - Dialogue-driven positive and negative relationship changes for all four Greyhaven residents.
+- Seven-tier dialogue greetings, daily conversation, profession-specific facts, quotations and trust-gated personal topics for every Greyhaven resident.
 - Reusable NPC schedule data and resolver.
 - Overnight schedule windows.
 - Authoritative sea-clock gating.
@@ -170,7 +173,9 @@ Not yet implemented:
 6. Apply a positive and negative relationship event, repeat the same event ID, and confirm it changes the score only once.
 7. Confirm score, relationship tier and event-memory IDs survive save/load; load a schema-5 fixture and confirm its unused zero baseline migrates to neutral 50.
 8. Confirm scores below 15 refuse conversation, scores below 30 refuse trade, and required story information remains recoverable.
-9. Confirm the visible meter updates after a Yarn relationship command and matches the agent's authoritative score.
-10. Confirm no NPC interaction can start a second conversation while another dialogue is active.
+9. For each resident, verify all seven greetings, daily topics, profession-specific facts, personal topics at 60/75/90, and the resident's saying.
+10. Confirm the visible meter updates after a Yarn relationship command and matches the agent's authoritative score.
+11. Confirm a missing NpcAgent produces a visible configuration error and cannot start neutral fallback dialogue.
+12. Confirm no NPC interaction can start a second conversation while another dialogue is active.
 
 Unity scene generation, Yarn compilation, runtime movement and save/load behaviour still require verification in Unity 6000.3.28f1. Static repository checks do not establish those runtime results.

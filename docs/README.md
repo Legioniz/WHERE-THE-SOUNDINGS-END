@@ -91,6 +91,7 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 - [Story Consequences](03_STORY_AND_NARRATIVE/STORY-CONSEQUENCES.md) — persistent responses and save requirements.
 - [Protagonist](04_CHARACTERS_AND_ENTITIES/PROTAGONIST.md) — The Sounder, the Orison incident and character arc.
 - [Character Bible](04_CHARACTERS_AND_ENTITIES/CHARACTER-BIBLE.md) — Nell, the Orison Captain and Greyhaven cast.
+- [NPC Relationships](04_CHARACTERS_AND_ENTITIES/NPC-RELATIONSHIPS.md) — per-resident trust tiers, dialogue availability, relationship memory and service policy.
 - [Maritime myths and motifs catalogue](02_LORE_AND_WORLD/MARITIME-MYTHS-CATALOG.md)
 - [Maritime research notes and source-quality cautions](02_LORE_AND_WORLD/MARITIME-LORE-RESEARCH-NOTES.md)
 - [Ocean legends and sea monsters — expanded research](02_LORE_AND_WORLD/OCEAN-LEGENDS-AND-SEA-MONSTERS.md)

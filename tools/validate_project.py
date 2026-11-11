@@ -389,6 +389,8 @@ def main() -> int:
             for required_text in (
                 "title: Greyhaven_Harbourmaster",
                 "Ask about the missing boats.",
+                "Ask what a normal harbour day looks like.",
+                "Ask for one of his harbour sayings.",
                 "Ask for work.",
                 '<<checkpoint "greyhaven.sounding_buoy_accepted">>',
             ):
@@ -403,17 +405,51 @@ def main() -> int:
                 "mara.misrepresented_unusual_catch",
                 "tomas.dismissed_repair_advice",
                 "inez.dismissed_net_evidence",
+                "A clean table is cheaper than a spoiled catch.",
+                "An engine tells you its troubles twice",
+                "A net is only as strong as the knot nobody checks.",
+                "Ask what she does after closing.",
+                "Ask why he marks repaired bolts with chalk.",
+                "Ask about her mother's knots.",
             ):
                 if required_relationship_text not in yarn_text:
                     failures.append(f"Greyhaven Yarn relationship content is missing: {required_relationship_text}")
 
-            for npc_node in (
-                "title: Greyhaven_Fishmonger",
-                "title: Greyhaven_Mechanic",
-                "title: Greyhaven_NetMender",
-            ):
-                if npc_node not in yarn_text:
+            npc_nodes = (
+                "Greyhaven_Harbourmaster",
+                "Greyhaven_Fishmonger",
+                "Greyhaven_Mechanic",
+                "Greyhaven_NetMender",
+            )
+            ally_topics = {
+                "Greyhaven_Harbourmaster": "-> Ask what he has written in the log about you.",
+                "Greyhaven_Fishmonger": "-> Ask to see the notes she keeps about strange catches.",
+                "Greyhaven_Mechanic": "-> Ask what repair he refuses to hurry.",
+                "Greyhaven_NetMender": "-> Ask what she would teach someone who wants to earn her trust.",
+            }
+            for npc_node in npc_nodes:
+                marker = f"title: {npc_node}"
+                if marker not in yarn_text:
                     failures.append(f"Greyhaven Yarn source is missing resident dialogue node: {npc_node}")
+                    continue
+
+                start = yarn_text.index(marker)
+                end = yarn_text.find(chr(10) + "===", start)
+                node_text = yarn_text[start:] if end < 0 else yarn_text[start:end]
+                for tier_condition in (
+                    "$npc_relationship < 15",
+                    "$npc_relationship < 30",
+                    "$npc_relationship < 45",
+                    "$npc_relationship < 60",
+                    "$npc_relationship < 75",
+                    "$npc_relationship < 90",
+                ):
+                    if tier_condition not in node_text:
+                        failures.append(f"{npc_node} is missing relationship-specific dialogue for tier boundary {tier_condition}.")
+                if "-> Ask for one of" not in node_text:
+                    failures.append(f"{npc_node} is missing a character-specific quote option.")
+                if ally_topics[npc_node] not in node_text:
+                    failures.append(f"{npc_node} is missing its Ally-only personal topic.")
 
         npc_source = (ROOT / "Assets/_Project/Scripts/Runtime/NPC/NpcAgent.cs").read_text(encoding="utf-8")
         for required_text in (
@@ -433,20 +469,29 @@ def main() -> int:
                 failures.append(f"Greyhaven scene builder is missing resident ID: {resident_id}")
         if "BuildVillageResident" not in npc_builder or "CreateNpcAnchor" not in npc_builder:
             failures.append("Greyhaven scene builder must generate scheduled resident NPCs and waypoint anchors.")
+        if npc_builder.count("interaction.Agent = agent;") < 2:
+            failures.append("Greyhaven scene builder must explicitly assign the generated resident NpcAgent to both interaction construction paths.")
 
         interaction_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs").read_text(encoding="utf-8")
         if "public string DialogueNode" not in interaction_source or "public string DisplayName" not in interaction_source:
             failures.append("Resident interaction must support per-NPC dialogue nodes and display names.")
         if "npcAgent.CanTalk" not in interaction_source or "runtimeUI.BeginDialogue(dialogueNode, npcAgent)" not in interaction_source:
             failures.append("Resident interaction must enforce per-NPC conversation trust and pass the active agent.")
+        if "npcAgent = GetComponent<NpcAgent>()" not in interaction_source or "NPC DATA UNAVAILABLE" not in interaction_source:
+            failures.append("Resident interaction must resolve or visibly reject a missing NpcAgent instead of starting neutral fallback dialogue.")
 
         ui_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs").read_text(encoding="utf-8")
         for required_text in ("ApplyRelationshipCommand", "SyncRelationshipVariables", "RefreshRelationshipMeter", "_activeNpc"):
             if required_text not in ui_source:
                 failures.append(f"GreyhavenRuntimeUI is missing relationship dialogue integration: {required_text}")
 
-        if 'runner.AddCommandHandler("relationship"' not in npc_builder:
-            failures.append("Greyhaven scene builder must register the Yarn relationship command.")
+        dialogue_start_index = ui_source.find("dialogueRunner.StartDialogue(")
+        relationship_sync_index = ui_source.rfind("SyncRelationshipVariables();", 0, dialogue_start_index)
+        if dialogue_start_index < 0 or relationship_sync_index < 0:
+            failures.append("GreyhavenRuntimeUI must seed the active NPC relationship before Yarn starts the dialogue.")
+
+        if 'runner.AddCommandHandler<string, int>("relationship", runtimeUI.ApplyRelationshipCommand)' not in npc_builder:
+            failures.append("Greyhaven scene builder must register the correctly typed Yarn relationship command.")
 
         input_map = maps.get("Boat")
         if input_map is not None:

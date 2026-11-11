@@ -258,7 +258,7 @@ namespace WhereTheSoundingsEnd.Editor
             dialogueRoot.AddComponent<GreyhavenFrontEndUI>();
             runner.DialoguePresenters = new List<DialoguePresenterBase> { runtimeUI };
             runner.AddCommandHandler("checkpoint", new Action<string>(runtimeUI.RequestCheckpointAutosave));
-            runner.AddCommandHandler("relationship", new Action<string, int>(runtimeUI.ApplyRelationshipCommand));
+            runner.AddCommandHandler<string, int>("relationship", runtimeUI.ApplyRelationshipCommand);
 
             return runner;
         }
@@ -1448,7 +1448,6 @@ namespace WhereTheSoundingsEnd.Editor
 
             BoatPrototypeController controller = boat.AddComponent<BoatPrototypeController>();
             controller.InputActions = controls;
-            boat.AddComponent<BoatMotorEffects>();
             BoatHydrodynamics hydrodynamics = boat.GetComponent<BoatHydrodynamics>();
             hydrodynamics.Configure(seaSurface);
             SpatialCargoHold cargoHold = boat.AddComponent<SpatialCargoHold>();

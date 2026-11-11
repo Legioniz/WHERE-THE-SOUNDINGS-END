@@ -6,6 +6,30 @@
 > Version: 0.1  
 > Last reviewed: 2026-11-12
 
+## 2026-11-12 — Relationship-reactive Greyhaven dialogue expansion
+
+**Commit:** Pending repository validation.
+
+### Implemented
+- Audited the full relationship call path: each generated interaction receives its own resident's `NpcAgent`, the UI seeds Yarn relationship variables before `StartDialogue`, the Yarn command updates only the active resident, and the meter/variables refresh after accepted events.
+- Added a safe `NpcAgent` auto-resolution fallback for hand-placed interactions. If no agent can be resolved, the interaction prompt reports missing NPC data and dialogue is not started with a misleading neutral default.
+- Registered the relationship command with Yarn Spinner's explicitly typed `AddCommandHandler<string, int>` signature.
+- Expanded all four resident conversations with seven relationship-specific greetings, everyday topics, occupation-specific facts, personal sayings and optional subjects at Familiar, Trusted and Ally thresholds.
+- Kept story knowledge separated: the Harbourmaster remains procedural, Mara remains focused on the market and catch quality, Tomas on mechanical evidence, and Inez on physical net/line evidence.
+- Extended the repository validator to check relationship-tier branches, quote options and representative daily topics in each resident node.
+
+### Verification
+- Audited the Yarn flow-control structure for balanced `if/endif` blocks and conditional-option syntax against the official Yarn Spinner language reference.
+- Verified in source that the active NPC relationship is synchronized before Yarn starts and that relationship events refresh the meter and Yarn values.
+- GitHub Actions will validate project contracts and C# syntax after this change is pushed.
+- Yarn compilation in Unity, line/option presentation, relationship-tier Play Mode testing and Edit Mode execution remain unverified in Unity 6000.3.28f1.
+
+### Compatibility and risk
+- No save schema, NPC stable ID, dialogue node ID, input action or package version changed.
+- Existing Yarn flags and relationship event IDs are retained. The expanded content adds dialogue branches without resetting saved campaign dialogue state.
+- Trade multipliers remain policy-only until a sale transaction exists.
+- Before full campaign release, add non-conversation recovery actions for NPCs who refuse service at hostile trust levels.
+
 ## 2026-11-12 — Greyhaven settlement buildings and dock chart
 
 **Commit:** Pending repository validation.

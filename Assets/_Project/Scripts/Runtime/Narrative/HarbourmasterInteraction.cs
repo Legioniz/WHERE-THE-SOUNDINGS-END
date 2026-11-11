@@ -44,6 +44,14 @@ namespace WhereTheSoundingsEnd.Narrative
 
         private void Start()
         {
+            // The generated builder assigns this explicitly. Resolve a local component as a
+            // fallback for hand-placed residents, before a prompt can offer interaction.
+            if (npcAgent == null)
+                npcAgent = GetComponent<NpcAgent>();
+
+            if (npcAgent == null)
+                Debug.LogError("HarbourmasterInteraction requires an NpcAgent. Dialogue is disabled until one is assigned.", this);
+
             if (controls == null) return;
             InputActionMap map = controls.FindActionMap("Boat", false);
             _interactAction = map?.FindAction("Interact", false);
@@ -90,8 +98,7 @@ namespace WhereTheSoundingsEnd.Narrative
             }
 
             UpdatePrompt();
-            if (dialogueRunner == null || _interactAction == null ||
-                (npcAgent != null && !npcAgent.CanTalk))
+            if (dialogueRunner == null || _interactAction == null || npcAgent == null || !npcAgent.CanTalk)
                 return;
 
             if (_interactAction.WasPressedThisFrame())
@@ -107,9 +114,12 @@ namespace WhereTheSoundingsEnd.Narrative
             string prompt = string.Empty;
             if (_vesselColliders.Count > 0)
             {
-                prompt = npcAgent != null && !npcAgent.CanTalk
-                    ? displayName.ToUpperInvariant() + "  /  REFUSES TO SPEAK"
-                    : "E  /  SPEAK WITH " + displayName.ToUpperInvariant();
+                if (npcAgent == null)
+                    prompt = displayName.ToUpperInvariant() + "  /  NPC DATA UNAVAILABLE";
+                else if (!npcAgent.CanTalk)
+                    prompt = displayName.ToUpperInvariant() + "  /  REFUSES TO SPEAK";
+                else
+                    prompt = "E  /  SPEAK WITH " + displayName.ToUpperInvariant();
             }
             runtimeUI.SetInteractionPrompt(prompt);
         }

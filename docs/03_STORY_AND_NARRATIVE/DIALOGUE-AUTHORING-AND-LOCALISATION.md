@@ -1,10 +1,10 @@
 # Dialogue Authoring and Localisation
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Yarn Spinner integrated; scene wiring pending  
+> Status: Yarn Spinner and generated Greyhaven dialogue wiring implemented; authoring expanded, localisation pending  
 > Owner: Project lead  
-> Version: 0.1  
-> Last reviewed: 2026-11-10
+> Version: 0.2  
+> Last reviewed: 2026-11-12
 
 ## Tool choice
 
@@ -27,18 +27,27 @@ Official documentation:
 - Smart variables are derived and should not be persisted.
 - Saving stores variables and progression flags, not the current character-by-character presentation cursor. Resumable dialogue must use an explicit stable node/checkpoint ID.
 
-## Initial Greyhaven content
+## Greyhaven resident content
 
-`Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn` establishes a first branching harbourmaster conversation. It introduces missing boats, the silent lighthouse bell, the sounding buoy job and channel navigation warnings.
+`Assets/_Project/Dialogue/Source/Greyhaven_Harbourmaster.yarn` contains four resident nodes: the Harbourmaster, Mara Venn, Tomas Vale and Inez Sarmiento. Each node includes seven relationship-based greetings, everyday conversation, profession-specific facts, memorable sayings and additional optional subjects unlocked at Familiar (60), Trusted (75) and Ally (90).
 
-## Unity setup required
+The Yarn variables `$npc_relationship`, `$npc_can_talk`, `$npc_can_trade` and `$npc_buy_price_multiplier` are written from the active resident's C# `NpcAgent` before `StartDialogue`. The UI refreshes those variables after each relationship command. C# remains the authority for trust and the once-only event-memory ledger.
 
-1. Resolve Yarn Spinner package in Package Manager.
-2. Create a Yarn Project asset.
-3. Add the source Yarn file to that project.
-4. Place a Dialogue Runner in the Greyhaven scene and assign the Yarn Project.
-5. Assign that Dialogue Runner to YarnDialogueSaveParticipant on Save_Game_Coordinator.
-6. Wire the harbourmaster interaction to start the named node.
+Relationship changes use `<<relationship "stable.event.id" delta>>`. The event ID is unique for each resident/action and cannot be farmed by reopening the same topic. The typed command is registered with `DialogueRunner.AddCommandHandler<string, int>`.
+
+## Unity setup and verification
+
+The generated Greyhaven builder imports the Yarn Project, creates the Dialogue Runner, registers the `checkpoint` and typed `relationship` commands, and attaches the custom dialogue presenter. It assigns each generated interaction the corresponding resident's `NpcAgent`. Hand-placed interactions auto-resolve a local agent; a missing agent is reported and the conversation prompt is disabled rather than using a neutral fallback.
+
+After pulling changes, run **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment**. Then open the generated scene and verify:
+1. The four resident triggers open their intended Yarn nodes.
+2. Their relationship meter shows that resident's live score.
+3. A test score change is reflected in the greeting and subsequent answer branches.
+4. Conditional personal topics only appear at their intended score thresholds.
+5. Relationship event commands change the meter once and do not repeat on reopening the same topic.
+6. A missing NPC agent cannot start a conversation.
+
+Yarn compilation and Play Mode interaction still require verification in Unity `6000.3.28f1`.
 
 Unity-generated project/scene assets must be authored in the Editor rather than guessing serialized asset GUIDs.
 
