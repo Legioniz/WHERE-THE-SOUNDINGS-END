@@ -263,7 +263,7 @@ def main() -> int:
             "CurrentEngineLoad", "CurrentSpeedRatio", "NormalizedEngineRpm",
             "Outboard_Propeller_Rotor", "Outboard_Engine_Cowl",
             "maximumPropWashRate", "maximumSurfaceSprayRate",
-            "ParticleSystemSimulationSpace.World", "StopEmittingAndClear",
+            "ParticleSystemSimulationSpace.World", "StopEmittingAndClear", "main.cullingMode",
         ):
             if required_text not in motor_effects_source:
                 failures.append(f"BoatMotorEffects is missing physics-driven visual feedback: {required_text}")
