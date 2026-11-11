@@ -25,6 +25,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Core/ActionDrivenClockPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Core/Pcg32Random.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs",
+    "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveRestoreTransaction.cs",

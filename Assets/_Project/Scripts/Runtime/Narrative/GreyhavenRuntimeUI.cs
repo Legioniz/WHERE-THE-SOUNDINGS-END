@@ -60,6 +60,9 @@ namespace WhereTheSoundingsEnd.Narrative
             _seaState = FindFirstObjectByType<SeaStateDirector>();
             InitializeUi();
             BindInventoryInput();
+            GreyhavenFrontEndUI frontEnd = GetComponent<GreyhavenFrontEndUI>();
+            if (frontEnd != null)
+                frontEnd.Initialize(document, controls, FindFirstObjectByType<SaveGameCoordinator>());
         }
 
         private void OnDestroy()
