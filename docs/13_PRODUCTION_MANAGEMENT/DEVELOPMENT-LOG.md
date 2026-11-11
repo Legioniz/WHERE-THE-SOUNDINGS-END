@@ -6,6 +6,30 @@
 > Version: 0.1  
 > Last reviewed: 2026-11-12
 
+## 2026-11-12 — Greyhaven island topography and graphic model
+
+**Commit:** Pending repository validation.
+
+### Implemented
+- Added a shared deterministic Greyhaven terrain profile with a varied bay shoreline, west headland, east ridge, inland spine, rear terrace, multi-scale surface relief and bounded height samples.
+- Increased the generated terrain grid to 144 × 96 quads and added world-space UVs for future tiled materials.
+- Replaced floating rectangular sand segments with a shoreline-conforming sand submesh.
+- Split the continuous terrain mesh into soil, sand, grass and basalt submeshes using elevation, slope and shoreline distance while retaining one shared terrain MeshCollider.
+- Replaced smooth stretched-sphere inland outcrops with deterministic faceted basalt meshes and static mesh colliders.
+- Added Edit Mode regression tests for deterministic shoreline shape, landmark elevations, finite/bounded terrain samples, material classification and invalid-input handling.
+- Updated Greyhaven, technical structure, testing and documentation index references. No world-region IDs, save contracts, player controls, sea-time rules or water simulation ownership changed.
+
+### Verification
+- Repository source, Greyhaven generator, art direction and terrain acceptance requirements were inspected before editing.
+- The new Edit Mode test source is authored but has not been run in Unity.
+- GitHub static project, C# syntax and safeguard checks are pending CI results.
+- Unity `6000.3.28f1` semantic compilation, generated-scene rebuild, Editor rendering, Play Mode boat/rock collision, performance profiling and Windows build remain unverified.
+
+### Compatibility and risk
+- Generated scene output is not changed by the source edits alone. Rebuild Greyhaven through the documented Editor menu after pulling this branch.
+- The island geometry remains a prototype landform; six-region geography, final terrain art, textures, erosion, shoreline foam and vegetation production assets remain out of scope.
+- Terrain resolution and mesh-collider cost require review in the pinned Unity Editor on representative hardware.
+
 ## 2026-11-12 — Vessel collision and impact response
 
 **Commit:** Pending CI verification.
