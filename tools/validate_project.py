@@ -307,11 +307,12 @@ def main() -> int:
         greyhaven_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
         for required_text in (
             "BoxCollider collisionHull = boat.AddComponent<BoxCollider>();",
-            "DestroyImmediate(hullMesh.GetComponent<Collider>())",
-            "DestroyImmediate(bow.GetComponent<Collider>())",
+            "collisionHull.center = new Vector3(0f, 0.04f, 0f);",
+            "collisionHull.size = new Vector3(2.1f, 0.8f, 5.6f);",
+            "BoatVisualModelBuilder.Build(boat.transform)",
         ):
             if required_text not in greyhaven_builder:
-                failures.append(f"Greyhaven must use one non-overlapping root hull collider: {required_text}")
+                failures.append(f"Greyhaven must preserve one root collision proxy and use the shared visual boat model: {required_text}")
 
         camera_source = (ROOT / "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs").read_text(encoding="utf-8")
         if "TrySampleSurface(" not in camera_source or "waveBobInfluence" in camera_source:
