@@ -41,6 +41,15 @@ namespace WhereTheSoundingsEnd.Boat
         private HarvestingMinigameController harvestingController;
         private Vector2 moveInput;
 
+        // Read-only presentation telemetry. The Rigidbody and force model remain authoritative.
+        public float CurrentThrottle { get; private set; }
+        public float CurrentForwardSpeedMetersPerSecond { get; private set; }
+        public float CurrentSpeedMetersPerSecond { get; private set; }
+        public float CurrentSpeedRatio { get; private set; }
+        public float CurrentEngineLoad { get; private set; }
+        public float NormalizedEngineRpm { get; private set; } = 0.14f;
+        public float EngineConditionNormalized { get; private set; } = 1f;
+
         public InputActionAsset InputActions
         {
             get => inputActions;
@@ -120,6 +129,24 @@ namespace WhereTheSoundingsEnd.Boat
             float forwardSpeed = Vector3.Dot(body.linearVelocity, forward);
             float engineCondition = vesselCondition != null ? vesselCondition.EngineCondition : 100f;
             float hullIntegrity = vesselCondition != null ? vesselCondition.HullIntegrity : 100f;
+
+            // Presentation telemetry uses horizontal, boat-relative motion. It is deliberately
+            // separate from forwardSpeed below so the existing force and steering model is untouched.
+            Vector3 motorForward = Vector3.ProjectOnPlane(forward, Vector3.up);
+            if (motorForward.sqrMagnitude > 0.0001f) motorForward.Normalize();
+            else motorForward = Vector3.forward;
+            Vector3 motorVelocity = Vector3.ProjectOnPlane(body.linearVelocity, Vector3.up);
+            float motorForwardSpeed = Vector3.Dot(motorVelocity, motorForward);
+            CurrentThrottle = throttle;
+            CurrentForwardSpeedMetersPerSecond = motorForwardSpeed;
+            CurrentSpeedMetersPerSecond = motorVelocity.magnitude;
+            CurrentSpeedRatio = BoatMotorTelemetryMath.CalculateSpeedRatio(
+                motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
+            EngineConditionNormalized = Mathf.Clamp01(engineCondition / 100f);
+            CurrentEngineLoad = BoatMotorTelemetryMath.CalculateEngineLoad(
+                throttle, motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
+            NormalizedEngineRpm = BoatMotorTelemetryMath.CalculateEngineRpmNormalized(
+                throttle, motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
 
             float propulsion = BoatMovementMath.CalculatePropulsionAcceleration(
                 throttle, forwardSpeed, engineCondition, hullIntegrity,
