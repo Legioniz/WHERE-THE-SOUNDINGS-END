@@ -60,6 +60,8 @@ REQUIRED_FILES = [
     "Assets/_Project/Tests/EditMode/CargoGridGeometryTests.cs",
     "docs/06_GAMEPLAY_SYSTEMS/ACTION-DRIVEN-SEA-STATE.md",
     "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs",
+    "Assets/_Project/Scripts/Runtime/Boat/BoatMotorTelemetryMath.cs",
+    "Assets/_Project/Scripts/Runtime/Boat/BoatMotorEffects.cs",
     "Assets/_Project/Scripts/Runtime/Boat/BoatHydrodynamics.cs",
     "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs",
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
@@ -68,6 +70,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs",
     "Assets/_Project/Scripts/Editor/BoatVisualModelBuilder.cs",
     "Assets/_Project/Tests/EditMode/BoatVisualModelTests.cs",
+    "Assets/_Project/Tests/EditMode/BoatMotorTelemetryTests.cs",
     "Assets/_Project/Tests/EditMode/WhereTheSoundingsEnd.Tests.EditMode.asmdef",
     "Assets/_Project/Tests/EditMode/CoreFoundationTests.cs",
     "Assets/_Project/Tests/EditMode/SaveFileServiceTests.cs",
@@ -246,6 +249,35 @@ def main() -> int:
         fixed_update = boat_source.split("private void FixedUpdate()", 1)[1].split("public void CaptureSaveData", 1)[0]
         if "body.linearVelocity =" in fixed_update or "body.angularVelocity =" in fixed_update:
             failures.append("Boat movement must apply forces/torques instead of setting velocity directly.")
+
+        motor_math_source = (ROOT / "Assets/_Project/Scripts/Runtime/Boat/BoatMotorTelemetryMath.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "CalculateSpeedRatio", "CalculateEngineLoad", "CalculateEngineRpmNormalized",
+            "MinimumLoadAtLowSpeed", "float.IsNaN", "float.IsInfinity",
+        ):
+            if required_text not in motor_math_source:
+                failures.append(f"BoatMotorTelemetryMath is missing bounded telemetry logic: {required_text}")
+
+        motor_effects_source = (ROOT / "Assets/_Project/Scripts/Runtime/Boat/BoatMotorEffects.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "CurrentEngineLoad", "CurrentSpeedRatio", "NormalizedEngineRpm",
+            "Outboard_Propeller_Rotor", "Outboard_Engine_Cowl",
+            "maximumPropWashRate", "maximumSurfaceSprayRate",
+            "ParticleSystemSimulationSpace.World", "StopEmittingAndClear",
+        ):
+            if required_text not in motor_effects_source:
+                failures.append(f"BoatMotorEffects is missing physics-driven visual feedback: {required_text}")
+        if "AddForce(" in motor_effects_source or "AddTorque(" in motor_effects_source or "linearVelocity =" in motor_effects_source:
+            failures.append("BoatMotorEffects must remain presentation-only and must not modify vessel physics.")
+
+        for builder_name in ("GreyhavenEnvironmentBuilder.cs", "DeepOceanSurveySandboxBuilder.cs"):
+            builder_source = (ROOT / "Assets/_Project/Scripts/Editor" / builder_name).read_text(encoding="utf-8")
+            if "boat.AddComponent<BoatMotorEffects>()" not in builder_source:
+                failures.append(f"{builder_name} must attach BoatMotorEffects to its generated vessel.")
+
+        visual_model_tests = (ROOT / "Assets/_Project/Tests/EditMode/BoatVisualModelTests.cs").read_text(encoding="utf-8")
+        if 'Assert.IsNotNull(visual.Find("Outboard_Propeller_Rotor"))' not in visual_model_tests:
+            failures.append("BoatVisualModelTests must verify the animated outboard propeller pivot.")
 
         water_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/MaritimeSurfaceBehaviour.cs").read_text(encoding="utf-8")
         for required_text in (
@@ -528,6 +560,18 @@ def main() -> int:
         ):
             if f"void {required_test}()" not in impact_tests:
                 failures.append(f"SeaStateAndCargoDamageTests is missing regression test: {required_test}")
+
+        motor_tests = (ROOT / "Assets/_Project/Tests/EditMode/BoatMotorTelemetryTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "EngineLoad_IsZeroWhenThrottleIsReleasedEvenAtHighSpeed",
+            "EngineLoad_IncreasesAsTheBoatBuildsSpeedUnderThrottle",
+            "EngineLoad_ScalesWithThrottleDemand",
+            "ReverseSpeed_UsesTheLowerReverseSpeedLimit",
+            "EngineRpmProxy_RetainsIdleAndReachesMaximumAtFullThrottle",
+            "EngineTelemetry_RejectsInvalidInputsAndRemainsBounded",
+        ):
+            if f"void {required_test}()" not in motor_tests:
+                failures.append(f"BoatMotorTelemetryTests is missing: {required_test}")
 
         for required_text in ("journalEntries.Count", "randomStreams.Count", "worldFlags.ConvertAll", "eventCooldowns.ConvertAll"):
             if required_text not in save_source:
