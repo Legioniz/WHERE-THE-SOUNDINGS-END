@@ -140,8 +140,8 @@ namespace WhereTheSoundingsEnd.Boat
             CurrentThrottle = throttle;
             CurrentForwardSpeedMetersPerSecond = motorForwardSpeed;
             CurrentSpeedMetersPerSecond = motorVelocity.magnitude;
-            CurrentSpeedRatio = BoatMotorTelemetryMath.CalculateSpeedRatio(
-                motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
+            float speedLimit = motorForwardSpeed < 0f ? maximumReverseSpeed : maximumForwardSpeed;
+            CurrentSpeedRatio = Mathf.Clamp01(CurrentSpeedMetersPerSecond / Mathf.Max(0.1f, speedLimit));
             EngineConditionNormalized = Mathf.Clamp01(engineCondition / 100f);
             CurrentEngineLoad = BoatMotorTelemetryMath.CalculateEngineLoad(
                 throttle, motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
