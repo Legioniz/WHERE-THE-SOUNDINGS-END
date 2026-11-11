@@ -212,7 +212,7 @@ namespace WhereTheSoundingsEnd.Boat
             particleRenderer.sharedMaterial = particleMaterial;
             particleRenderer.sortingFudge = -0.1f;
 
-            system.cullingMode = ParticleSystemCullingMode.PauseAndCatchup;
+            main.cullingMode = ParticleSystemCullingMode.PauseAndCatchup;
             system.Play(true);
             return system;
         }
