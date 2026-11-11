@@ -94,7 +94,7 @@ namespace WhereTheSoundingsEnd.Editor
                 dialogueRunner, runtimeUI, controls, npcClock, 6f, 18f, "repair_shift");
             BuildVillageResident(village, "Inez_Sarmiento_NPC", "Inez Sarmiento", "greyhaven.inez_sarmiento",
                 "net_mender", "Greyhaven_NetMender", new Vector3(-48f, HeightAt(-48f, -46f), -46f),
-                new Vector3(-44f, HeightAt(-44f, -46f), -46f), wood, trim,
+                new Vector3(-44f, HeightAt(-44f, -46f), -46f), wood, concrete,
                 dialogueRunner, runtimeUI, controls, npcClock, 7f, 17f, "net_mending");
 
             RenderSettings.ambientMode = AmbientMode.Trilight;
