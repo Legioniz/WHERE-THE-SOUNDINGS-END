@@ -92,7 +92,9 @@ The forces are applied at the hull sample positions, so wave height differences 
 
 ### Shared visual/physics water surface
 
-`MaritimeSurfaceBehaviour.TrySampleSurface` evaluates the exact same analytic wave function used to deform the rendered water mesh. It estimates the surface normal with finite differences and surface velocity with a centered time difference. Physics therefore does not float against a separate flat plane while the visuals move independently.
+`MaritimeSurfaceBehaviour.TrySampleSurface` evaluates the same analytic wave function used to deform the rendered water mesh. Surface height and normal are sampled from the current state. Vertical surface velocity is estimated from the previous and current complete wave states, so it includes phase progression, direction blending and amplitude ramps during dead-calm / wrong-way-swell incidents. The first mesh is generated from the same initial wave state before the first frame is rendered.
+
+Wrong-way swell does not reset phase from absolute application time. Its travel direction blends toward the incident direction and its phase rate eases through reversal. This prevents the water pattern from jumping when an incident begins or ends. The solver still models only vertical surface velocity; horizontal orbital water velocity and currents are not implemented.
 
 The water surface currently covers a bounded plane. Outside its local sample bounds, the buoyancy component applies no water support. Future streamed regions must provide their own water-surface component or a shared world water service.
 
@@ -102,6 +104,7 @@ The water surface currently covers a bounded plane. Outside its local sample bou
 |---|---:|
 | Rigidbody mass | 1,200 kg (gameplay scale) |
 | Target draft at buoyancy probes | 0.18 m |
+| Maximum probe submersion used by the spring solver | 0.65 m |
 | Buoyancy points | 4 |
 | Forward acceleration | 2.8 m/s² |
 | Reverse acceleration | 0.95 m/s² |
@@ -119,13 +122,15 @@ These are gameplay tuning values, not measured properties of a real vessel. Vali
 Edit Mode tests cover:
 - buoyancy is zero above the water surface;
 - deeper submersion produces greater upward force;
+- probe depth is clamped to the configured maximum submersion;
 - damping reduces upward force while the hull rises and increases it while sinking;
 - buoyancy force respects the per-point cap;
 - forward thrust is stronger than reverse;
 - opposing throttle brakes before reverse acceleration;
 - speed taper approaches zero propulsion at the speed limit;
 - damaged engine/hull reduce propulsion;
-- rudder authority increases with flow and prop wash creates a low-speed response.
+- rudder authority increases with flow and prop wash creates a low-speed response;
+- wave phase remains continuous through reversal, direction transitions blend gradually, and vertical surface velocity includes amplitude changes.
 
 Play Mode tests are still required in Unity:
 - vessel settles to a stable draft without sinking or launching out of the water;
@@ -139,7 +144,8 @@ Play Mode tests are still required in Unity:
 ## Known limits and future work
 
 - No full hull-volume sampling, buoyancy mesh, fluid displacement, wave-current simulation, wind force, or propeller cavitation.
-- Surface velocity currently models vertical wave motion; horizontal orbital water velocity and currents are not implemented.
+- Surface velocity models vertical wave motion, including incident amplitude/direction ramps; horizontal orbital water velocity and currents are not implemented.
+- Water-direction and phase transitions are smoothed, but the surface is still an authored analytic swell approximation rather than a physically solved ocean.
 - No wake or bow-wave visual response yet.
 - There is no separate collision hull/waterline model; the visible water has no collider and provides force samples only.
 - The 2.5D camera remains fixed-angle orthographic. Vessel pitch/roll is physically present but intentionally damped for readability.

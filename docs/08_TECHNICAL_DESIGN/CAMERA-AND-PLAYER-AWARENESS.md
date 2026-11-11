@@ -56,15 +56,15 @@ Turning response is a small camera roll derived from Rigidbody yaw angular veloc
 
 The camera samples MaritimeSurfaceBehaviour, the same component that drives the Greyhaven water mesh and the dead-calm / wrong-way-swell incidents.
 
-- Camera vertical motion follows a damped fraction of the sampled wave height.
-- Camera pitch and roll follow a damped, clamped fraction of the sampled surface normal.
+- The camera follows the boat's actual vertical heave from the Rigidbody buoyancy simulation; it does not add a second wave-height offset.
+- Camera pitch and roll follow a restrained, damped, clamped fraction of the sampled surface normal (default influence 0.25; maximum wave tilt 1.5 degrees).
 - Dead calm naturally reduces wave response as the surface amplitude settles.
 - Wrong-way swell changes the surface pattern that the camera samples; the camera does not invent a second wave model.
 - The surface sampler transforms normals correctly for scaled water planes.
 
-This is a **presentation cue**, not buoyancy simulation. The starter boat Rigidbody remains constrained to its existing movement plane; the camera moving with a swell does not claim that the hull is physically floating or that waves apply force to the vessel.
+The hull responds to the same sampled surface through four-point Rigidbody buoyancy. Camera heave therefore comes from the physical vessel transform; adding another vertical wave offset would double-count the swell and exaggerate motion. The remaining camera tilt is presentation-only and never feeds back into boat physics.
 
-The ocean surface is explicitly created by the Greyhaven Editor builder and passed to the camera. FishermanAtmosphereDirector continues to own incident timing and calls the existing surface triggers. The camera does not own or schedule maritime incidents.
+The ocean surface is explicitly created by the Greyhaven Editor builder and passed to the Greyhaven camera. The deep-ocean survey builder now also passes its scene water surface to the survey camera. FishermanAtmosphereDirector continues to own incident timing and calls the existing surface triggers. The camera does not own or schedule maritime incidents.
 
 ## 5. Player awareness rules
 
@@ -111,9 +111,11 @@ Camera motion remains intentionally restrained. Keep wave tilt and turn banking 
 - Camera framing does not hide a hazard within unavoidable collision range.
 - Camera smoothly leads in the actual travel direction during acceleration, reverse, and drift.
 - Camera banking remains subtle during tight turns and settles when the boat stops turning.
-- Camera wave motion uses the same sampled surface height and normal as the generated water mesh.
-- Dead calm visibly settles the water and camera; wrong-way swell changes the wave response without camera snapping.
+- Camera follows the boat's buoyancy-driven vertical heave without adding an independent wave-height offset.
+- Camera tilt uses the same sampled surface normal as the generated water mesh in Greyhaven and both survey sandboxes.
+- Dead calm visibly settles the water and reduces camera tilt; wrong-way swell reverses direction/rate continuously without a surface or camera snap.
 - Camera does not auto-lock onto or reveal a hidden source.
+- When the boat leaves the bounded water mesh, the camera stops sampling wave tilt rather than reacting to an extrapolated surface.
 - Confirm boat and hazard readability at the harbour, breakwater, wreck field, open-water edge, and under fog.
 - Test reduced-motion needs before final accessibility sign-off.
 

@@ -56,7 +56,7 @@
 
 ## Current automated coverage
 
-The Edit Mode test source includes:
+The Edit Mode test source includes eight suites, including deterministic maritime-surface transition coverage:
 - action-driven clock policy;
 - cargo damage / repair / quest-cargo protection;
 - save migration to schema v4;
@@ -70,6 +70,7 @@ The Edit Mode test source includes:
 - NPC day/overnight schedule boundaries and missing-window behaviour.
 - NPC stable-ID relationship persistence.
 - Four-point buoyancy force and damping response, forward/reverse acceleration, braking behaviour, engine/hull condition effects, and flow-dependent rudder authority.
+- Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
 
 The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v5, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 

@@ -82,6 +82,8 @@ Keep deterministic math in Edit Mode; use Play Mode only where Unity scene/runti
 
 ### M0-06 — Boat/ocean/camera acceptance pass
 
+**Source-level integration update:** commit `1c58d63` now provides continuous incident wave transitions, amplitude-aware surface velocity, a configured probe-depth cap, single-source camera heave, and shared-surface camera wiring in Greyhaven plus the two survey sandboxes. The controller also resolves vessel condition after generated-scene wiring. This does not close M0-06; all handling observations and Play Mode acceptance remain open until run in Unity.
+
 Record repeatable observations for:
 - stable draft with no sinking or launching;
 - small wave heave/pitch/roll without runaway rotation;

@@ -6,6 +6,31 @@
 > Version: 0.1  
 > Last reviewed: 2026-11-11
 
+## 2026-11-11 — Boat, buoyancy, waves and camera integration
+
+**Commit:** [`1c58d63`](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/commit/1c58d63aa8bbe3d4ddb99588f2ae27768c18ce53)
+
+### Implemented
+- Replaced absolute-time wave phase calculation with a continuous phase accumulator. Wrong-way swell eases the phase rate through reversal and blends the travel direction instead of instantly switching the wave pattern.
+- Changed water vertical-velocity sampling to compare the previous and current complete wave states. Buoyancy damping now sees height changes caused by phase, direction and amplitude transitions.
+- Initialized the generated mesh from the exact same initial wave state used by surface sampling, avoiding a flat first-frame mesh/query mismatch.
+- Applied the configured 0.65 m maximum-submersion limit to each buoyancy probe.
+- Removed the camera's independent wave-height bob. The camera now follows the vessel's actual buoyancy-driven heave and adds only a restrained surface-normal tilt, avoiding double-counted motion.
+- Passed the active water-surface reference to the Outer Shoals and Hollow Trench survey cameras as well as Greyhaven.
+- Made BoatPrototypeController resolve VesselConditionController lazily because the generated-scene builders attach the condition component after the controller's Awake method.
+- Added seven deterministic Edit Mode tests for continuous wave phase, blended direction, amplitude-aware surface velocity, invalid time input and buoyancy depth clamping.
+- Extended the static project validator and updated the boat/camera specifications.
+
+### Verification
+- Source changes and generated-scene wiring were inspected in GitHub.
+- The repository integrity workflow will validate required files and C# syntax on this push.
+- Unity 6000.3.28f1 semantic compilation, Edit Mode execution, Play Mode handling/feel, profiling and Windows build remain unverified. The new Edit Mode tests are authored but have not been run in Unity.
+
+### Compatibility and risk
+- No save schema, persisted ID, input action name or package version changed.
+- Boat and camera remain separate owners: boat Rigidbody owns movement; the surface owns wave state; camera owns presentation only.
+- Final handling values still require Play Mode observation. Do not tune by visual intuition alone.
+
 ## 2026-11-11 — M0 implementation audit and Greyhaven compile-risk correction
 
 **Commit scope:** Audit the current repository foundation, correct a confirmed source-level compile blocker, and establish the ordered vertical-slice backlog.

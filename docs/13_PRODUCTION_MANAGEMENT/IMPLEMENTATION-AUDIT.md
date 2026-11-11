@@ -13,7 +13,7 @@ The repository is a **connected Unity gameplay prototype**, not a directly playa
 
 The most important M0 result is a confirmed source-level C# compilation defect in the Greyhaven scene builder. The builder passed an undeclared `trim` identifier when creating Inez Sarmiento. It has been corrected to use the existing `concrete` material in commit [`06a7004`](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/commit/06a700406bad809e6671af26163e147dbd309811). This is a source correction, **not proof of Unity compilation**. The next gate is a clean import and compile in Unity `6000.3.28f1`.
 
-M0 is not complete. The repository's latest verified CI baseline was green for repository/configuration checks and C# syntax parsing, but those checks do not resolve C# symbols against Unity and package assemblies, run Edit Mode tests, execute Play Mode, or build Windows.
+M0 is not complete. The repository's latest verified CI baseline was green for repository/configuration checks and C# syntax parsing. The boat/wave/camera source integration has since been updated in commit `1c58d63`; the resulting CI run and the new test-file inventory must be checked separately. These checks do not resolve C# symbols against Unity and package assemblies, run Edit Mode tests, execute Play Mode, or build Windows.
 
 ## 2. Repository snapshot
 
@@ -28,7 +28,7 @@ The audited Git tree contained 337 entries (292 blobs and 45 trees). The current
 | Dialogue | Yarn Spinner Unity 3.2.8 |
 | Test framework | Unity Test Framework 1.4.6 |
 | Runtime/editor structure | Separate runtime and Editor assembly definitions |
-| Automated tests | Seven Edit Mode test source files |
+| Automated tests | Eight Edit Mode test source files (seven existing suites plus new wave-integration math coverage) |
 | CI | Repository/configuration validator, C# syntax parser, repository safeguard validator |
 | Initial target | Windows 64-bit, single-player |
 
@@ -63,9 +63,9 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 | AUD-01 | P0 | Greyhaven builder referenced an undeclared `trim` variable in Inez's resident setup. | Would fail semantic C# compilation despite passing syntax parsing. Replaced the argument with the declared `concrete` material. Confirm with Unity compiler. | Source corrected; Unity verification pending |
 | AUD-02 | P0 | A clean repository checkout has no committed generated scenes, build-scene list, `.meta` files or package lock. | First import must prove the Editor bootstrap works and the project resolves reproducibly. Generate/commit stable Unity metadata and the resolved package lock; decide whether generated scenes are committed or regenerated as a documented build step. | Open |
 | AUD-03 | P0 | CI does not compile Unity assemblies or execute Unity tests. | Keep static checks, but require a target-editor import/compile, Edit Mode run, Play Mode/integration run and Windows build before M0 exit. Do not label a passing syntax job as a successful Unity build. | Open |
-| AUD-04 | P0 | Edit Mode tests are authored but have not been executed in the target editor. | Seven test files contain 59 `[Test]` attributes and four `[TestCase]` attributes. Run the suite in Unity `6000.3.28f1` and record results. | Open |
+| AUD-04 | P0 | Edit Mode tests are authored but have not been executed in the target editor. | Eight Edit Mode test files now contain the previous 59 `[Test]` attributes plus seven new wave/physics `[Test]` cases, and four `[TestCase]` attributes. Run the suite in Unity `6000.3.28f1` and record results. | Open |
 | AUD-05 | P0 | No Play Mode test scripts or Play Mode test assembly are tracked. | Add a small integration suite for boat/water/camera, input, action-driven time, harvesting, NPC/dialogue pause behavior and save lifecycle. | Open |
-| AUD-06 | P0 | Boat, water and camera are connected in source but have no observed runtime acceptance evidence. | Validate stable draft, wave response, stopping distance, turning/reverse behavior, camera framing, drift look-ahead and the sea-clock interaction in Greyhaven. | Open |
+| AUD-06 | P0 | Boat, water and camera are connected in source but have no observed runtime acceptance evidence. | Source integration updated in commit `1c58d63`: continuous wave incident transitions, amplitude-aware velocity, capped probe depth, single-source camera heave, and camera water wiring in all generated survey scenes. Still validate stable draft, wave response, stopping distance, turning/reverse behavior, camera framing, drift look-ahead and sea-clock interaction in Unity. | Source pass committed; Unity acceptance open |
 | AUD-07 | P0 | Save participants are discovered without a declared restore ordering contract. | Exercise full capture/restore with boat, world clock, cargo, vessel condition, NPC and Yarn data. If any participant depends on another, introduce explicit restore phases/order and regression tests. | Open |
 | AUD-08 | P1 | The repository is private and the GitHub rulesets endpoint reports that rulesets require GitHub Pro or a public repository. | Required review/status-check enforcement is not established by the committed files alone. Preserve PR discipline and decide separately whether to change plan or visibility; do not change repository visibility automatically. | Blocked by account/repository plan choice |
 | AUD-09 | P1 | Fishing resolves from a catalogue rather than regional availability. | For the slice, constrain catches to Greyhaven's authored species/conditions; later connect habitat, time, disturbance and population rules through the existing design contracts. | Open |
@@ -76,7 +76,7 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 
 The latest completed `main` run inspected during this audit was [run 42875678428](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/actions/runs/42875678428) on baseline SHA `88e9c03`. Both jobs passed: **Validate Unity project and C# syntax** and **Repository safeguards**. The earlier safeguard-only failure on `cb89f31` was followed by the validator correction and a successful run.
 
-These jobs run repository/configuration validation, Tree-sitter C# syntax parsing and the repository safeguard self-test. They do not perform Unity semantic compilation, execute the NUnit tests, open generated scenes, run Play Mode, profile performance, or create a Windows player.
+These jobs run repository/configuration validation, Tree-sitter C# syntax parsing and the repository safeguard self-test. The new `MaritimeSurfaceMathTests` suite adds deterministic coverage but remains unexecuted until Unity Test Runner is used. They do not perform Unity semantic compilation, execute the NUnit tests, open generated scenes, run Play Mode, profile performance, or create a Windows player.
 
 ## 5. M0 exit criteria
 
