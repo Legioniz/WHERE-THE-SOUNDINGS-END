@@ -115,6 +115,7 @@ namespace WhereTheSoundingsEnd.Editor
 
             BoatPrototypeController boatController = boat.AddComponent<BoatPrototypeController>();
             boatController.InputActions = controls;
+            boat.AddComponent<BoatMotorEffects>();
             BoatHydrodynamics hydrodynamics = boat.GetComponent<BoatHydrodynamics>();
             hydrodynamics.Configure(waterSurface);
             SpatialCargoHold cargoHold = boat.AddComponent<SpatialCargoHold>();
