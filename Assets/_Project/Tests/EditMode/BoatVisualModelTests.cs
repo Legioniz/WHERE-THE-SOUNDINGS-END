@@ -29,6 +29,9 @@ namespace WhereTheSoundingsEnd.Tests
                 Assert.IsNotNull(cabin.GetComponent<MeshRenderer>());
                 Assert.IsNotNull(visual.Find("Forward_Windscreen"));
                 Assert.IsNotNull(visual.Find("Outboard_Engine_Cowl"));
+                Assert.IsNotNull(visual.Find("Outboard_Propeller_Rotor"));
+                Assert.IsNotNull(visual.Find("Outboard_Propeller_Rotor/Outboard_Propeller_Blade_A"));
+                Assert.IsNotNull(visual.Find("Outboard_Propeller_Rotor/Outboard_Propeller_Blade_B"));
             }
             finally
             {
