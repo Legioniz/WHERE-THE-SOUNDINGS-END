@@ -56,6 +56,26 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 
 - [Boat Movement and Hydrodynamics](06_GAMEPLAY_SYSTEMS/BOAT-MOVEMENT.md)
 
+## Creature roster, fishing, and trade
+
+- [Catchable seafood and market species catalog](04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)
+- [Fish species index](04_CHARACTERS_AND_ENTITIES/FISH-SPECIES.md)
+- [Mutated and unnatural catchable specimens](04_CHARACTERS_AND_ENTITIES/MUTATED-AND-UNNATURAL-CATCHES.md)
+- [Creature Bible](04_CHARACTERS_AND_ENTITIES/CREATURE-BIBLE.md)
+- [Creature behaviour source map](04_CHARACTERS_AND_ENTITIES/CREATURE-BEHAVIORS.md)
+- [Anomalous species and site-specific entities](04_CHARACTERS_AND_ENTITIES/ANOMALOUS-SPECIES.md)
+- [Creature life cycles and ecological behaviour](12_AI_AND_SIMULATION/CREATURE-LIFE-CYCLES-AND-ECOLOGY.md)
+- [Fish population model](07_GAME_RULES_AND_BALANCING/FISH-POPULATION-MODEL.md)
+- [Seafood selling price schedule](07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md)
+- [Economy mathematics](07_GAME_RULES_AND_BALANCING/ECONOMY-MATHEMATICS.md)
+- [AI coordination and hunting logic](12_AI_AND_SIMULATION/AI-COORDINATION-AND-HUNTING-LOGIC.md)
+- [Threat Director and encounter scheduling](12_AI_AND_SIMULATION/THREAT-DIRECTOR.md)
+- [World event scheduler](12_AI_AND_SIMULATION/WORLD-SIMULATION.md)
+- [Entity perception and encounter mathematics](07_GAME_RULES_AND_BALANCING/ENTITY-PERCEPTION-AND-ENCOUNTER-MATH.md)
+- [Threat audio logic](10_AUDIO_AND_SOUND_DESIGN/THREAT-AUDIO-LOGIC.md)
+- [Unity implementation blueprint](08_TECHNICAL_DESIGN/AI-IMPLEMENTATION-BLUEPRINT.md)
+- [Camera FOV and player awareness](08_TECHNICAL_DESIGN/CAMERA-AND-PLAYER-AWARENESS.md)
+
 ## Narrative and maritime lore
 
 - [Main Story](03_STORY_AND_NARRATIVE/MAIN-STORY.md) — proposed four-act campaign, the Choir and Orison mystery.
