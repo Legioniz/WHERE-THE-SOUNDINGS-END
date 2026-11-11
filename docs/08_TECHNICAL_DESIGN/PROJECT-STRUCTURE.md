@@ -3,7 +3,7 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Connected Unity prototype with cargo, dialogue, atmospheric horror, and deep-ocean survey sandboxes  
 > Owner: Project lead  
-> Version: 0.5  
+> Version: 0.6  
 > Last reviewed: 2026-11-12
 
 ## Repository root
@@ -81,7 +81,7 @@ Run Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation on first set
 
 Use Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment after changing the environment generator. The command warns before replacing the generated scene. Generated Unity assets and their corresponding .meta files should be committed after successful Editor initialization.
 
-Greyhaven is a working technical greybox. Its coordinates and dimensions are prototype scale values; final terrain, water, architecture, collision, camera framing, UI layout and interaction feel require in-Editor testing. The first cargo-hold interface and Harbourmaster dialogue loop are generated with the scene.
+Greyhaven is a working technical greybox. Its coordinates and dimensions are prototype scale values; final terrain, water, architecture, collision, camera framing, UI layout and interaction feel require in-Editor testing. The builder creates differentiated service fronts, residential porches, a chart table on the east T-pier, and workplace markers for the four initial residents. The chart is static and schematic; it is not a live minimap or calibrated navigation chart. The first cargo-hold interface and Harbourmaster dialogue loop are generated with the scene.
 
 ## Rules
 
