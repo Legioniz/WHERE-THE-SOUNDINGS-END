@@ -254,7 +254,6 @@ def main() -> int:
             "TryClaimInteraction",
             "Time.timeScale = 0f",
             "RequestCheckpointAutosave",
-            "Greyhaven_Harbourmaster",
             "BuildCatchInspection",
             "BuildVesselInspection",
         ):
@@ -278,7 +277,7 @@ def main() -> int:
             "Dockside_Interaction_Hub",
             "Main Dock", "Harbour Office", "Fish Market",
             "Boat Repair Shed", "Net Mender Shed", "Harbour Inn",
-            "Western Lighthouse",
+            "Western Lighthouse", "Greyhaven_Harbourmaster",
             "ExternallyManagedByDocksideHub = true",
         ):
             if required_text not in dockside_builder:
