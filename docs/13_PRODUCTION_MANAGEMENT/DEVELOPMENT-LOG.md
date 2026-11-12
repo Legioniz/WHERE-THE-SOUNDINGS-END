@@ -8,7 +8,7 @@
 
 ## 2026-11-13 — Greyhaven boat-operated dockside interaction hub
 
-**Commit:** Pending repository validation and pull-request integration.
+**Commit:** `c95478b25b8ed9ba55acf30ce8804a1e5bfdd27e` (PR #8 squash merge).
 
 ### Implemented
 - Added a persistent dockside hub UI with seven location menus: Main Dock, Harbour Office, Fish Market, Boat Repair Shed, Net Mender Shed, Harbour Inn and Western Lighthouse.
@@ -20,7 +20,7 @@
 ### Verification boundary
 - Source and generated-scene builder ownership were inspected against the current main branch before editing.
 - Edit Mode tests are authored but have not been executed in Unity 6000.3.28f1.
-- Repository integrity, C# syntax and safeguard checks will run through GitHub Actions after the PR is opened.
+- GitHub Actions run #274 passed repository integrity, C# syntax and safeguard checks.
 - The generated Greyhaven scene must be rebuilt in Unity. UI rendering, sorting order, input behaviour, resident dialogue handoff, checkpoint writes, Play Mode and Windows build remain unverified.
 
 ### Compatibility and risk
