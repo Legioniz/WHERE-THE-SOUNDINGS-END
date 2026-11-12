@@ -18,6 +18,10 @@
 - NPC schedule resolution, overnight schedule boundaries, and NPC relationship save/restore.
 
 ### Play Mode
+- Load the generated Greyhaven persistent scene and verify the three startup areas become resident without replacing the gameplay scene.
+- Move the vessel into the lighthouse preload radius, confirm the lighthouse area activates, return to the harbour, and confirm it unloads after the configured grace period while the persistent scene remains loaded.
+- Repeat area transitions and check that queued requests are cancelled when out of range, re-entry during unload is safely re-queued, and no area is left in a failed/loading/unloading state.
+- Confirm no visible one-frame gap, missing collision surface, duplicate static geometry, or player freeze occurs during repeated transitions.
 - Boat handling, speed gating and Sounding Rig input.
 - Hull contact against piers, breakwater rocks, terrain and wrecks; root-hull-only collision ownership; no visual collider seams; normal-impact damage; per-physics-step contact aggregation; collision acoustic event propagation.
 - Rigidbody buoyancy, wave following, heave/pitch/roll stability, forward/reverse thrust, opposing-throttle braking, speed taper, rudder flow, and lateral water resistance.
@@ -52,6 +56,8 @@
 - Confirm Outer Shoals and Hollow Trench sandbox scenes contain valid regional profiles and authored site markers.
 
 ### Performance
+- Capture the `[AreaStreaming]` load/unload telemetry in a Windows Development Build. Record per-area load duration, referenced mesh/material/texture counts and estimated asset bytes, global allocated/reserved memory, managed memory and GC memory.
+- Profile cold and warm routes at least five times; report median and worst-case load duration and frame-time spikes on a named hardware configuration. Per-area asset estimates are reference-based and are not GPU VRAM measurements.
 - Profile water mesh, buoyancy sampling, Rigidbody forces, fog, local wildlife, acoustic listeners and physics at representative and worst-case loads.
 - Verify acoustic listeners are event-driven / throttled and do not poll all AudioSources.
 - Verify survey site lookup remains acceptable as site counts grow; replace linear scans with spatial indexing when needed.
