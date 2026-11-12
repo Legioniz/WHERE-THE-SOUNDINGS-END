@@ -94,7 +94,9 @@ namespace WhereTheSoundingsEnd.Editor
             BuildTerrain(terrain, soil, sand, grass, rock);
             BuildBreakwater(harbor, rock, concrete);
             BuildPiers(harbor, wood, metal, chartPaper, chartWater, chartLand, chartInk, chartAccent);
+            BuildHarbourmasterQuayFurniture(harbor, wood, metal, chartPaper, chartInk, chartAccent);
             BuildVillage(village, wood, roof, concrete, glass, metal);
+            BuildResidentFurniture(village, wood, concrete, metal, glass, chartPaper, chartInk, chartAccent);
             BuildEstuary(estuary, soil, wood, foliage, rock);
             BuildLighthouse(landmarks, concrete, roof, red, beacon);
             BuildBuoys(landmarks, red, green, metal);
@@ -825,6 +827,238 @@ namespace WhereTheSoundingsEnd.Editor
             StreetLamp(parent, new Vector3(-7f, HeightAt(-7f, -48f), -48f), metal);
             StreetLamp(parent, new Vector3(29f, HeightAt(29f, -46f), -46f), metal);
             StreetLamp(parent, new Vector3(-42f, HeightAt(-42f, -62f), -62f), metal);
+        }
+
+        // Static decorative workstations remain collider-free and safe for additive area extraction.
+        private static void BuildHarbourmasterQuayFurniture(
+            Transform parent, Material wood, Material metal, Material paper, Material ink, Material accent)
+        {
+            Transform station = Group("Harbourmaster_Quay_Log_Station", parent);
+            station.position = new Vector3(2.35f, 0.84f, 10.2f);
+            VisualCube(station, "Quay_Desk_Top", new Vector3(0f, 0.98f, 0f),
+                new Vector3(2.15f, 0.14f, 1.05f), wood);
+            for (int x = -1; x <= 1; x += 2)
+                for (int z = -1; z <= 1; z += 2)
+                    VisualCube(station, "Quay_Desk_Leg_" + x + "_" + z,
+                        new Vector3(x * 0.88f, 0.48f, z * 0.38f),
+                        new Vector3(0.13f, 0.96f, 0.13f), metal);
+            VisualCube(station, "Open_Tide_Logbook", new Vector3(-0.35f, 1.08f, 0.02f),
+                new Vector3(0.72f, 0.045f, 0.52f), paper);
+            VisualCube(station, "Logbook_Ink_Rule", new Vector3(-0.35f, 1.11f, 0.02f),
+                new Vector3(0.54f, 0.012f, 0.018f), ink);
+            VisualCube(station, "Brass_Chronometer_Case", new Vector3(0.55f, 1.19f, -0.12f),
+                new Vector3(0.42f, 0.32f, 0.38f), accent);
+            VisualCube(station, "Chronometer_Face", new Vector3(0.55f, 1.2f, 0.078f),
+                new Vector3(0.28f, 0.22f, 0.025f), paper);
+            VisualCube(station, "Tide_Chart_Roller", new Vector3(0f, 1.13f, 0.36f),
+                new Vector3(1.55f, 0.08f, 0.1f), metal);
+            VisualCube(station, "Quay_Notice_Board", new Vector3(0f, 1.82f, -0.62f),
+                new Vector3(1.8f, 1.25f, 0.12f), wood);
+            VisualCube(station, "Pinned_Channel_Chart", new Vector3(0f, 1.84f, -0.545f),
+                new Vector3(1.42f, 0.92f, 0.025f), paper);
+            VisualCube(station, "Chart_Red_Pencil_Mark", new Vector3(0.2f, 1.85f, -0.525f),
+                new Vector3(0.38f, 0.025f, 0.018f), accent);
+            VisualCube(station, "Quay_Stool_Seat", new Vector3(-1.65f, 0.72f, 0.35f),
+                new Vector3(0.72f, 0.14f, 0.72f), wood);
+            VisualCube(station, "Quay_Stool_Pedestal", new Vector3(-1.65f, 0.38f, 0.35f),
+                new Vector3(0.14f, 0.68f, 0.14f), metal);
+        }
+
+        private static void BuildResidentFurniture(
+            Transform parent, Material wood, Material concrete, Material metal,
+            Material glass, Material paper, Material ink, Material accent)
+        {
+            BuildHarbourOfficeRecordStation(parent, wood, metal, paper, ink, accent);
+            BuildMaraWorkstation(parent, wood, metal, glass, paper, ink, accent);
+            BuildTomasWorkshop(parent, wood, metal, concrete, glass, accent);
+            BuildInezMendingStation(parent, wood, metal, glass, paper, accent);
+            BuildInnCommonFurniture(parent, wood, metal, glass);
+        }
+
+        private static Transform FurnitureStation(Transform parent, string name, Vector3 position, float yaw = 0f)
+        {
+            Transform station = Group(name, parent);
+            station.position = new Vector3(position.x, HeightAt(position.x, position.z), position.z);
+            station.rotation = Quaternion.Euler(0f, yaw, 0f);
+            return station;
+        }
+
+        private static void BuildHarbourOfficeRecordStation(
+            Transform parent, Material wood, Material metal, Material paper, Material ink, Material accent)
+        {
+            Transform station = FurnitureStation(parent, "Harbourmaster_Off_Duty_Record_Corner",
+                new Vector3(26f, 0f, -28.6f));
+            VisualCube(station, "Record_Cabinet_Body", new Vector3(0f, 0.82f, 0f),
+                new Vector3(1.45f, 1.64f, 0.62f), wood);
+            VisualCube(station, "Cabinet_Top", new Vector3(0f, 1.68f, 0f),
+                new Vector3(1.58f, 0.12f, 0.72f), metal);
+            for (int shelf = 0; shelf < 3; shelf++)
+            {
+                float y = 0.38f + shelf * 0.42f;
+                VisualCube(station, "Tide_Register_Spine_" + shelf,
+                    new Vector3(-0.18f, y, -0.33f), new Vector3(0.22f, 0.32f, 0.08f), accent);
+                VisualCube(station, "Tide_Register_Pages_" + shelf,
+                    new Vector3(0.18f, y, -0.33f), new Vector3(0.48f, 0.3f, 0.12f), paper);
+            }
+            VisualCube(station, "Office_Weather_Board", new Vector3(1.35f, 1.45f, -0.15f),
+                new Vector3(0.12f, 1.55f, 1.2f), wood);
+            VisualCube(station, "Weather_Board_Chart", new Vector3(1.275f, 1.45f, -0.15f),
+                new Vector3(0.025f, 1.2f, 0.9f), paper);
+            VisualCube(station, "Weather_Board_Annotations", new Vector3(1.25f, 1.48f, -0.2f),
+                new Vector3(0.018f, 0.035f, 0.58f), ink);
+        }
+
+        private static void BuildMaraWorkstation(
+            Transform parent, Material wood, Material metal, Material glass, Material paper, Material ink, Material accent)
+        {
+            Transform station = FurnitureStation(parent, "Mara_Venn_Market_Workstation",
+                new Vector3(-21.8f, 0f, -29.7f));
+            VisualCube(station, "Catch_Sorting_Table", new Vector3(0f, 0.88f, 0f),
+                new Vector3(3f, 0.16f, 1.2f), wood);
+            for (int x = -1; x <= 1; x += 2)
+                for (int z = -1; z <= 1; z += 2)
+                    VisualCube(station, "Sorting_Table_Leg_" + x + "_" + z,
+                        new Vector3(x * 1.28f, 0.43f, z * 0.43f),
+                        new Vector3(0.14f, 0.86f, 0.14f), metal);
+            VisualCube(station, "Brass_Produce_Scale_Base", new Vector3(-0.82f, 1.04f, -0.08f),
+                new Vector3(0.72f, 0.16f, 0.62f), metal);
+            VisualCube(station, "Scale_Weighing_Pan", new Vector3(-0.82f, 1.18f, -0.08f),
+                new Vector3(0.56f, 0.06f, 0.48f), accent);
+            VisualCube(station, "Scale_Dial", new Vector3(-0.82f, 1.42f, -0.35f),
+                new Vector3(0.38f, 0.34f, 0.12f), paper);
+            VisualCube(station, "Catch_Tally_Board", new Vector3(0f, 1.8f, -0.78f),
+                new Vector3(1.65f, 1f, 0.12f), wood);
+            VisualCube(station, "Tally_Board_Paper", new Vector3(0f, 1.8f, -0.705f),
+                new Vector3(1.35f, 0.76f, 0.025f), paper);
+            for (int row = 0; row < 4; row++)
+                VisualCube(station, "Tally_Mark_" + row,
+                    new Vector3(-0.32f + row * 0.19f, 1.72f, -0.68f),
+                    new Vector3(0.025f, 0.34f, 0.018f), ink);
+            VisualCube(station, "Sea_Glass_Collection_Shelf", new Vector3(1.12f, 1.22f, -0.08f),
+                new Vector3(0.82f, 0.12f, 0.42f), metal);
+            for (int jar = 0; jar < 3; jar++)
+                VisualCube(station, "Sea_Glass_Sample_Jar_" + jar,
+                    new Vector3(0.82f + jar * 0.28f, 1.42f, -0.08f),
+                    new Vector3(0.18f, 0.34f, 0.18f), glass);
+            VisualCube(station, "Personal_Shell_Collection_Box", new Vector3(1.1f, 0.56f, 0.82f),
+                new Vector3(0.72f, 0.5f, 0.58f), accent);
+            VisualCube(station, "Market_Crate_Stool", new Vector3(-1.85f, 0.36f, 0.75f),
+                new Vector3(0.72f, 0.72f, 0.72f), wood);
+        }
+
+        private static void BuildTomasWorkshop(
+            Transform parent, Material wood, Material metal, Material concrete, Material glass, Material accent)
+        {
+            Transform station = FurnitureStation(parent, "Tomas_Vale_Repair_Workbench",
+                new Vector3(9f, 0f, -43f));
+            VisualCube(station, "Heavy_Repair_Bench_Top", new Vector3(0f, 1.02f, 0f),
+                new Vector3(3.7f, 0.2f, 1.25f), wood);
+            for (int x = -1; x <= 1; x += 2)
+                for (int z = -1; z <= 1; z += 2)
+                    VisualCube(station, "Repair_Bench_Leg_" + x + "_" + z,
+                        new Vector3(x * 1.62f, 0.5f, z * 0.48f),
+                        new Vector3(0.22f, 1f, 0.22f), metal);
+            VisualCube(station, "Engine_Block_Test_Housing", new Vector3(-0.62f, 1.35f, 0.02f),
+                new Vector3(0.92f, 0.72f, 0.76f), concrete);
+            VisualCube(station, "Engine_Cylinder_Head", new Vector3(-0.62f, 1.76f, 0.02f),
+                new Vector3(0.64f, 0.16f, 0.56f), metal);
+            VisualCube(station, "Engine_Carburettor_Cap", new Vector3(-0.62f, 1.92f, 0.02f),
+                new Vector3(0.28f, 0.16f, 0.28f), accent);
+            VisualCube(station, "Bench_Vice_Base", new Vector3(1.25f, 1.18f, -0.1f),
+                new Vector3(0.52f, 0.2f, 0.42f), metal);
+            VisualCube(station, "Bench_Vice_Jaws", new Vector3(1.25f, 1.38f, -0.1f),
+                new Vector3(0.62f, 0.16f, 0.18f), metal);
+            VisualCube(station, "Workshop_Pegboard", new Vector3(0f, 1.9f, -0.82f),
+                new Vector3(3.5f, 1.5f, 0.12f), wood);
+            for (int tool = 0; tool < 5; tool++)
+            {
+                float x = -1.25f + tool * 0.62f;
+                VisualCube(station, "Hanging_Tool_Handle_" + tool,
+                    new Vector3(x, 1.85f, -0.72f), new Vector3(0.07f, 0.62f, 0.07f), accent);
+                VisualCube(station, "Hanging_Tool_Head_" + tool,
+                    new Vector3(x, 2.2f, -0.72f), new Vector3(0.28f, 0.12f, 0.1f), metal);
+            }
+            VisualCube(station, "Radio_Experiment_Casing", new Vector3(1.18f, 1.42f, 0.24f),
+                new Vector3(0.62f, 0.48f, 0.5f), metal);
+            VisualCube(station, "Radio_Tuning_Window", new Vector3(1.18f, 1.46f, 0.5f),
+                new Vector3(0.38f, 0.18f, 0.025f), glass);
+            VisualCube(station, "Radio_Antenna", new Vector3(1.18f, 1.92f, 0.2f),
+                new Vector3(0.045f, 0.62f, 0.045f), accent);
+            VisualCube(station, "Spare_Propeller_Blades_Horizontal", new Vector3(-1.42f, 0.24f, 0.85f),
+                new Vector3(1.2f, 0.12f, 0.18f), metal);
+            VisualCube(station, "Spare_Propeller_Blades_Vertical", new Vector3(-1.42f, 0.24f, 0.85f),
+                new Vector3(0.18f, 0.12f, 1.2f), metal);
+        }
+
+        private static void BuildInezMendingStation(
+            Transform parent, Material wood, Material metal, Material glass, Material paper, Material accent)
+        {
+            Transform station = FurnitureStation(parent, "Inez_Sarmiento_Net_Mending_Workspace",
+                new Vector3(-41.8f, 0f, -46.8f), 12f);
+            VisualCube(station, "Net_Loom_Work_Table", new Vector3(0f, 0.9f, 0f),
+                new Vector3(3f, 0.16f, 1f), wood);
+            for (int x = -1; x <= 1; x += 2)
+                for (int z = -1; z <= 1; z += 2)
+                    VisualCube(station, "Loom_Table_Leg_" + x + "_" + z,
+                        new Vector3(x * 1.28f, 0.43f, z * 0.36f),
+                        new Vector3(0.14f, 0.86f, 0.14f), metal);
+            VisualCube(station, "Net_Mending_Frame_Top", new Vector3(0f, 2.12f, -0.68f),
+                new Vector3(2.7f, 0.16f, 0.16f), wood);
+            for (int side = -1; side <= 1; side += 2)
+                VisualCube(station, "Net_Mending_Frame_Post_" + side,
+                    new Vector3(side * 1.25f, 1.52f, -0.68f),
+                    new Vector3(0.14f, 1.35f, 0.14f), wood);
+            for (int strand = 0; strand < 7; strand++)
+                VisualCube(station, "Net_Loom_Vertical_Line_" + strand,
+                    new Vector3(-1.08f + strand * 0.36f, 1.52f, -0.57f),
+                    new Vector3(0.025f, 1.08f, 0.025f), glass);
+            for (int strand = 0; strand < 4; strand++)
+                VisualCube(station, "Net_Loom_Horizontal_Line_" + strand,
+                    new Vector3(0f, 1.08f + strand * 0.28f, -0.57f),
+                    new Vector3(2.2f, 0.025f, 0.025f), glass);
+            VisualCube(station, "Knot_Sample_Board", new Vector3(1.82f, 1.55f, -0.2f),
+                new Vector3(0.12f, 1.45f, 1.1f), wood);
+            for (int knot = 0; knot < 4; knot++)
+                VisualCube(station, "Pinned_Knot_Sample_" + knot,
+                    new Vector3(1.74f, 1.75f, -0.56f + knot * 0.24f),
+                    new Vector3(0.05f, 0.12f, 0.12f), accent);
+            VisualCube(station, "Line_Spool_Rack", new Vector3(-1.95f, 1.2f, 0f),
+                new Vector3(0.14f, 1.5f, 0.14f), metal);
+            for (int spool = 0; spool < 4; spool++)
+                VisualCube(station, "Thread_Spool_" + spool,
+                    new Vector3(-1.95f, 0.62f + spool * 0.34f, 0.22f),
+                    new Vector3(0.32f, 0.16f, 0.32f), spool % 2 == 0 ? paper : accent);
+            VisualCube(station, "Sea_Glass_Sorting_Tray", new Vector3(0.72f, 1.05f, 0.18f),
+                new Vector3(0.72f, 0.08f, 0.56f), glass);
+            VisualCube(station, "Mending_Stool_Seat", new Vector3(-1.65f, 0.68f, 0.92f),
+                new Vector3(0.68f, 0.14f, 0.68f), wood);
+            VisualCube(station, "Mending_Stool_Legs", new Vector3(-1.65f, 0.34f, 0.92f),
+                new Vector3(0.46f, 0.64f, 0.46f), metal);
+        }
+
+        private static void BuildInnCommonFurniture(Transform parent, Material wood, Material metal, Material glass)
+        {
+            Transform station = FurnitureStation(parent, "Harbour_Inn_Common_Area_Furniture",
+                new Vector3(45f, 0f, -49.5f), -8f);
+            VisualCube(station, "Common_Room_Table_Top", new Vector3(0f, 0.86f, 0f),
+                new Vector3(2.1f, 0.14f, 1.35f), wood);
+            for (int x = -1; x <= 1; x += 2)
+                for (int z = -1; z <= 1; z += 2)
+                    VisualCube(station, "Common_Room_Table_Leg_" + x + "_" + z,
+                        new Vector3(x * 0.88f, 0.42f, z * 0.52f),
+                        new Vector3(0.14f, 0.82f, 0.14f), metal);
+            for (int seat = 0; seat < 2; seat++)
+            {
+                float x = seat == 0 ? -1.75f : 1.75f;
+                VisualCube(station, "Inn_Bench_Seat_" + seat, new Vector3(x, 0.62f, 0f),
+                    new Vector3(0.72f, 0.14f, 1.2f), wood);
+                VisualCube(station, "Inn_Bench_Back_" + seat, new Vector3(x, 1.08f, -0.48f),
+                    new Vector3(0.72f, 0.82f, 0.14f), wood);
+            }
+            VisualCube(station, "Inn_Table_Lantern_Base", new Vector3(0f, 1.02f, 0f),
+                new Vector3(0.28f, 0.12f, 0.28f), metal);
+            VisualCube(station, "Inn_Table_Lantern_Glass", new Vector3(0f, 1.26f, 0f),
+                new Vector3(0.2f, 0.36f, 0.2f), glass);
         }
 
         private static void Building(

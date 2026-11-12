@@ -10,7 +10,7 @@
 
 Greyhaven is the first working harbor settlement. Its generated buildings should read as practical coastal architecture shaped by fishing, repair work, net making, local administration and hospitality. Distinct silhouettes and readable service fronts take priority over generic asset volume.
 
-This pass improves generated greybox architecture and navigation aids. It does not add interiors, a walkable player controller, shop transactions, repair interactions, resident pathfinding or final production art. The generated chart is a fixed local harbor chart, not a live GPS/minimap system.
+This pass improves generated greybox architecture, resident workspaces and navigation aids. It adds static, collider-free furniture and personal props at visible outdoor work areas; it does not add walkable interiors, a player controller, shop transactions, repair interactions, resident pathfinding or final production art. The generated chart is a fixed local harbor chart, not a live GPS/minimap system.
 
 ## 2. Settlement layout
 
@@ -76,16 +76,39 @@ The chart is built from first-party scene geometry and the same `GreyhavenTerrai
 
 The map uses a schematic top-down local projection for orientation. It is not a calibrated nautical chart, depth chart, GPS display, route planner or navigational safety instrument. It has no live player-position update and no interactable zoom/pan yet.
 
-## 5. Generation and compatibility
+## 5. Resident furniture and personality props
+
+The furniture pass uses the same deterministic Editor builder as the village structures. Every furnishing is static, collider-free visual geometry parented to the village or harbour area before those static roots are extracted into additive scenes. No new runtime component, save field, NPC identifier, schedule entry, dialogue node or interaction is introduced.
+
+| Resident / place | Furniture and personal details | Character read |
+|---|---|---|
+| Harbourmaster — quay watch | Compact log desk, open tide register, channel chart board, chronometer case, tide-chart roller and a single stool | Compulsive record keeping, precision, route safety and repeated checking of time and tide |
+| Harbourmaster — office-side record corner | Register cabinet, stacked tide books and weather annotation board | Keeps years of routine observations organised even off shift |
+| Mara Venn — market | Catch-sorting table, brass weighing scale, tally board, sample jars, sea-glass shelf, shell collection box and crate stool | Meticulous catch grading; quietly collects unusual beach finds and sorts them by colour/shape |
+| Tomas Vale — repair yard | Heavy workbench, engine test housing, vice, pegboard tools, spare propeller and a small radio experiment with tuning window and antenna | Tinkers with engines after hours and keeps experimenting with radio reception |
+| Inez Sarmiento — net yard | Mending table, upright net loom, visible mesh strands, pinned knot-sample board, thread-spool rack, sea-glass tray and low stool | Patient knotwork practice, preserves examples of line damage and sorts small found objects |
+| Harbour Inn — common area | Shared table, two backed benches and a lantern | A communal place for quiet conversation and a pause between shifts |
+
+These are authored visual cues, not claims that a furniture item is interactable or that the character has a new gameplay hobby system. The props are intentionally placed outside the opaque blockout building shells so they remain visible from the current elevated camera. They must not obstruct the NPC's short schedule routes, the market counter, the repair approach, the net-shed approach, the quay's central movement lane or boat mooring.
+
+The design language stays practical and restrained: weathered wood, dull metal, faded paper, muted glass and small accent details. Avoid bright collectible clutter or exaggerated workshop piles; each cluster should read as a work surface that is used and maintained.
+
+## 6. Generation and compatibility
 
 The generated scene remains owned by `GreyhavenEnvironmentBuilder`. Run **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment** in Unity `6000.3.28f1` after pulling these source changes.
 
 No save schema, stable NPC identifier, dialogue node, market relationship value, input action, sea-clock rule, terrain height profile, survey region or boat physics contract changes in this pass.
 
-## 6. Validation checklist
+## 7. Validation checklist
 
 In the pinned Unity Editor and Play Mode, verify:
 - [ ] Every service building has a distinct, readable front and service silhouette.
+- [ ] Harbourmaster's quay desk, tide log, chronometer and office record corner are visible and remain inside the pier/office service space.
+- [ ] Mara's scale, tally board, sample jars and collection box read as market tools rather than generic clutter.
+- [ ] Tomas's workbench, engine test housing, pegboard, spare propeller and radio experiment are legible from the camera.
+- [ ] Inez's loom, net strands, knot samples and thread spools read clearly without resembling collision barriers.
+- [ ] Inn furniture creates a small social resting area without blocking the road or veranda.
+- [ ] All new props remain collider-free and are extracted into the correct static streamed area scenes.
 - [ ] Pitched roof panels and gable caps render with outward-facing normals.
 - [ ] Signs are legible from the current orthographic gameplay camera.
 - [ ] Door steps, veranda decks, canopies, hoist pieces and net lines do not create unwanted collision blockers.
