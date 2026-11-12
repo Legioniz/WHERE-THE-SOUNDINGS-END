@@ -169,6 +169,7 @@ namespace WhereTheSoundingsEnd.Interaction
         private bool ownsInteractAction;
         private bool menuOpen;
         private bool pauseOwned;
+        private bool promptOwned;
         private float previousTimeScale = 1f;
         private DocksideLocationDefinition selectedLocation;
 
@@ -254,18 +255,19 @@ namespace WhereTheSoundingsEnd.Interaction
                 (dialogueUI.Runner != null && dialogueUI.Runner.IsDialogueRunning) ||
                 (seaState != null && seaState.IsGameplayActionBusy))
             {
-                dialogueUI?.SetInteractionPrompt(string.Empty);
+                ClearOwnedPrompt();
                 return;
             }
 
             DocksideLocationDefinition nearest = FindAccessibleLocation();
             if (nearest == null)
             {
-                dialogueUI.SetInteractionPrompt(string.Empty);
+                ClearOwnedPrompt();
                 return;
             }
 
             dialogueUI.SetInteractionPrompt("E  /  OPEN " + nearest.DisplayName.ToUpperInvariant());
+            promptOwned = true;
             if (interactAction != null && interactAction.WasPressedThisFrame())
                 OpenMenu(nearest);
         }
@@ -485,7 +487,7 @@ namespace WhereTheSoundingsEnd.Interaction
             menuOpen = true;
             selectedLocation = location;
             overlay.style.display = DisplayStyle.Flex;
-            dialogueUI.SetInteractionPrompt(string.Empty);
+            ClearOwnedPrompt();
             SelectLocation(location);
         }
 
@@ -496,14 +498,21 @@ namespace WhereTheSoundingsEnd.Interaction
             menuOpen = false;
             selectedLocation = null;
             RestoreTimeScale();
-            dialogueUI?.SetInteractionPrompt(string.Empty);
+            ClearOwnedPrompt();
         }
 
         private void RestoreTimeScale()
         {
             if (!pauseOwned) return;
-            Time.timeScale = previousTimeScale > 0f ? previousTimeScale : 1f;
+            Time.timeScale = previousTimeScale;
             pauseOwned = false;
+        }
+
+        private void ClearOwnedPrompt()
+        {
+            if (!promptOwned) return;
+            dialogueUI?.SetInteractionPrompt(string.Empty);
+            promptOwned = false;
         }
 
         private void SelectLocation(DocksideLocationDefinition location)
