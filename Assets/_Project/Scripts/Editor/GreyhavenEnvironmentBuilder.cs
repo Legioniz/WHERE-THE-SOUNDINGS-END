@@ -16,6 +16,7 @@ using WhereTheSoundingsEnd.Narrative;
 using WhereTheSoundingsEnd.NPC;
 using WhereTheSoundingsEnd.World;
 using WhereTheSoundingsEnd.Streaming;
+using WhereTheSoundingsEnd.Interaction;
 
 namespace WhereTheSoundingsEnd.Editor
 {
@@ -123,6 +124,9 @@ namespace WhereTheSoundingsEnd.Editor
                 "net_mender", "Greyhaven_NetMender", new Vector3(-48f, HeightAt(-48f, -46f), -46f),
                 new Vector3(-44f, HeightAt(-44f, -46f), -46f), wood, concrete,
                 dialogueRunner, runtimeUI, controls, npcClock, 7f, 17f, "net_mending");
+
+            BuildDocksideHub(world.transform, player.Find("Player_Boat_Blockout"), controls,
+                dialogueRunner, runtimeUI, npcClock);
 
             BuildAreaStreaming(world.transform, player.Find("Player_Boat_Blockout"),
                 terrain, harbor, village, estuary, landmarks, scene);
@@ -472,6 +476,7 @@ namespace WhereTheSoundingsEnd.Editor
             interaction.Runner = runner;
             interaction.Interface = runtimeUI;
             interaction.Controls = controls;
+            interaction.ExternallyManagedByDocksideHub = true;
 
             Transform officeAnchor = CreateNpcAnchor(parent, "Harbourmaster_Office_Anchor",
                 new Vector3(21f, HeightAt(21f, -28.5f), -28.5f));
@@ -540,6 +545,7 @@ namespace WhereTheSoundingsEnd.Editor
             interaction.Controls = controls;
             interaction.DialogueNode = dialogueNode;
             interaction.DisplayName = displayName;
+            interaction.ExternallyManagedByDocksideHub = true;
 
             Transform secondaryAnchor = CreateNpcAnchor(parent, objectName + "_Secondary_Anchor", secondaryPosition);
             NpcAgent agent = npc.AddComponent<NpcAgent>();
@@ -555,6 +561,132 @@ namespace WhereTheSoundingsEnd.Editor
                     new NpcScheduleEntry { startHour = dayEnd, endHour = dayStart, activityId = "off_duty", destination = secondaryAnchor }
                 });
             interaction.Agent = agent;
+        }
+
+        private static void BuildDocksideHub(
+            Transform world,
+            Transform boat,
+            InputActionAsset controls,
+            DialogueRunner dialogueRunner,
+            GreyhavenRuntimeUI runtimeUI,
+            SeaStateDirector seaState)
+        {
+            if (world == null || boat == null || dialogueRunner == null || runtimeUI == null || controls == null)
+                throw new InvalidOperationException("Greyhaven dockside hub is missing a required scene reference.");
+
+            PanelSettings panel = AssetDatabase.LoadAssetAtPath<PanelSettings>(PanelSettingsPath);
+            if (panel == null)
+                throw new InvalidOperationException("Greyhaven PanelSettings asset is missing.");
+
+            GameObject hubObject = new GameObject("Dockside_Interaction_Hub");
+            hubObject.transform.SetParent(world, false);
+            UIDocument document = hubObject.AddComponent<UIDocument>();
+            document.panelSettings = panel;
+            document.sortingOrder = 50;
+
+            NpcAgent harbourmaster = world.Find("04_Village_and_Services/Harbourmaster_NPC")?.GetComponent<NpcAgent>();
+            NpcAgent mara = world.Find("04_Village_and_Services/Mara_Venn_NPC")?.GetComponent<NpcAgent>();
+            NpcAgent tomas = world.Find("04_Village_and_Services/Tomas_Vale_NPC")?.GetComponent<NpcAgent>();
+            NpcAgent inez = world.Find("04_Village_and_Services/Inez_Sarmiento_NPC")?.GetComponent<NpcAgent>();
+
+            List<DocksideLocationDefinition> locations = new List<DocksideLocationDefinition>
+            {
+                new DocksideLocationDefinition(
+                    "greyhaven.dock", "Main Dock", "Mooring and harbour approach",
+                    "The familiar working end of Greyhaven: damp timber, mooring lines, tide marks and the fixed harbour chart. The vessel remains your point of access; no disembarking is required.",
+                    new Vector3(0f, 0f, 12f), 26f, string.Empty, null,
+                    new List<DocksideFurnitureOption>
+                    {
+                        new DocksideFurnitureOption("dock.tide-register", "Tide Register",
+                            "Read the latest action-clock time, day, sea disturbance and recorded omen.", DocksideFurnitureAction.ReadTideLog),
+                        new DocksideFurnitureOption("dock.harbour-chart", "Harbour Chart",
+                            "Review the fixed settlement bearings and named service locations.", DocksideFurnitureAction.ReadHarbourChart),
+                        new DocksideFurnitureOption("dock.cargo-hatch", "Cargo Hatch",
+                            "Inspect the catch and salvage currently carried aboard.", DocksideFurnitureAction.InspectCatch)
+                    }),
+                new DocksideLocationDefinition(
+                    "greyhaven.harbour-office", "Harbour Office", "Records, notices and the Harbourmaster",
+                    "A compact office with a tide-log desk, chronometer, channel chart and record cabinets. Paperwork is stacked by date and bearing; the room feels maintained rather than decorated.",
+                    new Vector3(21f, 0f, -28.5f), 24f, "Greyhaven_Harbourmaster", harbourmaster,
+                    new List<DocksideFurnitureOption>
+                    {
+                        new DocksideFurnitureOption("office.tide-desk", "Tide-Log Desk",
+                            "The Harbourmaster's daily register records harbour conditions and the latest unusual report.", DocksideFurnitureAction.ReadTideLog),
+                        new DocksideFurnitureOption("office.channel-chart", "Channel Chart",
+                            "Read the local harbour chart and the resident workplace key.", DocksideFurnitureAction.ReadHarbourChart),
+                        new DocksideFurnitureOption("office.noticeboard", "Noticeboard",
+                            "Read current harbour notices and practical warnings.", DocksideFurnitureAction.ReadNoticeboard)
+                    }),
+                new DocksideLocationDefinition(
+                    "greyhaven.fish-market", "Fish Market", "Catch inspection and Mara Venn",
+                    "A cool, salt-stained market hall. The weighing scale sits beside a sorting counter, tally board and sample jars. Mara keeps the catch grades neat and notices details other people overlook.",
+                    new Vector3(-27f, 0f, -28.5f), 24f, "Greyhaven_Fishmonger", mara,
+                    new List<DocksideFurnitureOption>
+                    {
+                        new DocksideFurnitureOption("market.weighing-scale", "Weighing Scale",
+                            "Inspect each cargo placement, quantity, freshness and unusual specimen flags without unloading it.", DocksideFurnitureAction.InspectCatch),
+                        new DocksideFurnitureOption("market.tally-board", "Catch Tally",
+                            "Review the current cargo manifest and catch condition.", DocksideFurnitureAction.InspectCatch),
+                        new DocksideFurnitureOption("market.sample-jars", "Sample Jars",
+                            "Read Mara's notes on grading, freshness and keeping strange specimens separate.", DocksideFurnitureAction.ReadCatchNotes)
+                    }),
+                new DocksideLocationDefinition(
+                    "greyhaven.boat-repair", "Boat Repair Shed", "Vessel diagnostics and Tomas Vale",
+                    "A broad work bay with an engine bench, vice, tool wall and spare propeller. Grease-darkened notes are pinned beside the bench; every tool has a place.",
+                    new Vector3(1f, 0f, -40f), 24f, "Greyhaven_Mechanic", tomas,
+                    new List<DocksideFurnitureOption>
+                    {
+                        new DocksideFurnitureOption("repair.engine-bench", "Engine Workbench",
+                            "Read the vessel's live hull and engine condition and its latest damage report.", DocksideFurnitureAction.InspectVessel),
+                        new DocksideFurnitureOption("repair.tool-wall", "Tool Wall",
+                            "Review the current vessel diagnosis before deciding whether to continue an expedition.", DocksideFurnitureAction.InspectVessel),
+                        new DocksideFurnitureOption("repair.propeller", "Spare Propeller",
+                            "Read Tomas's engine-load and propeller inspection notes.", DocksideFurnitureAction.ReadEngineNotes)
+                    }),
+                new DocksideLocationDefinition(
+                    "greyhaven.net-mender", "Net Mender Shed", "Network and Inez Sarmiento",
+                    "A narrow workroom built around a net loom, knot board, thread spools and a low mending stool. The space is orderly, with repaired mesh hanging where the light can reach it.",
+                    new Vector3(-48f, 0f, -46f), 25f, "Greyhaven_NetMender", inez,
+                    new List<DocksideFurnitureOption>
+                    {
+                        new DocksideFurnitureOption("net.loom", "Net Loom",
+                            "Read Inez's practical notes on mesh inspection and line wear.", DocksideFurnitureAction.ReadNetNotes),
+                        new DocksideFurnitureOption("net.knot-board", "Knot Board",
+                            "Review the basic knot and line-care guide.", DocksideFurnitureAction.ReadKnotGuide),
+                        new DocksideFurnitureOption("net.thread-spools", "Thread Spools",
+                            "Inspect the displayed work supplies. No net-material inventory is consumed or granted.", DocksideFurnitureAction.InspectNetSupplies)
+                    }),
+                new DocksideLocationDefinition(
+                    "greyhaven.harbour-inn", "Harbour Inn", "Guest ledger and local rumours",
+                    "A warm room with a shared table, worn benches, a guest ledger and a lantern kept ready for the evening watch. It is the village's social centre, not a luxury hotel.",
+                    new Vector3(39f, 0f, -55f), 25f, string.Empty, null,
+                    new List<DocksideFurnitureOption>
+                    {
+                        new DocksideFurnitureOption("inn.guest-ledger", "Guest Ledger",
+                            "Write a safe harbour checkpoint to the existing autosave system.", DocksideFurnitureAction.SaveHarbourLog),
+                        new DocksideFurnitureOption("inn.shared-table", "Shared Table",
+                            "Read the small rumours and remarks that circulate around the harbour.", DocksideFurnitureAction.ReadRumours),
+                        new DocksideFurnitureOption("inn.lantern", "Watch Lantern",
+                            "Inspect the current watch conditions and night status.", DocksideFurnitureAction.ReadNightWatch)
+                    }),
+                new DocksideLocationDefinition(
+                    "greyhaven.lighthouse", "Western Lighthouse", "Beacon and keeper's records",
+                    "The lighthouse stands on the western headland above the outer approach. Its beacon mechanism and keeper's log can be inspected from the vessel; the tower is not a walkable interior.",
+                    new Vector3(-86f, 0f, -22f), 27f, string.Empty, null,
+                    new List<DocksideFurnitureOption>
+                    {
+                        new DocksideFurnitureOption("lighthouse.beacon", "Beacon Mechanism",
+                            "Inspect the lighthouse's current presentation-only beacon status.", DocksideFurnitureAction.InspectBeacon),
+                        new DocksideFurnitureOption("lighthouse.logbook", "Keeper's Log",
+                            "Read a short local navigation note from the lighthouse log.", DocksideFurnitureAction.ReadLighthouseLog)
+                    })
+            };
+
+            DocksideHubController hub = hubObject.AddComponent<DocksideHubController>();
+            hub.Configure(document, runtimeUI, boat.GetComponent<Rigidbody>(), controls,
+                boat.GetComponent<SpatialCargoHold>(), boat.GetComponent<VesselConditionController>(),
+                seaState, world.GetComponentInChildren<SaveGameCoordinator>(true), locations);
+            EditorUtility.SetDirty(hub);
         }
 
         private static Transform CreateNpcAnchor(Transform parent, string anchorName, Vector3 position)

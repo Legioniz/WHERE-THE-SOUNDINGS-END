@@ -6,9 +6,30 @@
 > Version: 0.1  
 > Last reviewed: 2026-11-13
 
+## 2026-11-13 — Greyhaven boat-operated dockside interaction hub
+
+**Commit:** Pending repository validation and pull-request integration.
+
+### Implemented
+- Added a persistent dockside hub UI with seven location menus: Main Dock, Harbour Office, Fish Market, Boat Repair Shed, Net Mender Shed, Harbour Inn and Western Lighthouse.
+- Added shore-approach access checks requiring the vessel to be within the authored horizontal radius and moving at no more than 0.85 m/s. Opening the menu claims the existing interaction gate and pauses simulation; closing restores the prior time scale.
+- Added menu-based room presentations and furniture actions for tide records, harbour chart/notices, catch appraisal, vessel diagnosis, net-care notes, guest-ledger checkpoint, rumours, watch status and lighthouse records.
+- Routed the four existing residents through their existing Yarn nodes and NpcAgent relationship gates. Disabled duplicate E-key resident trigger handling for generated Greyhaven NPCs while retaining the component for hand-authored scenes.
+- Added deterministic Edit Mode coverage for dockside access policy and documented that trade, paid repair, net crafting, sleep/time-skip, residential visits and walkable 3D interiors remain unimplemented.
+
+### Verification boundary
+- Source and generated-scene builder ownership were inspected against the current main branch before editing.
+- Edit Mode tests are authored but have not been executed in Unity 6000.3.28f1.
+- Repository integrity, C# syntax and safeguard checks will run through GitHub Actions after the PR is opened.
+- The generated Greyhaven scene must be rebuilt in Unity. UI rendering, sorting order, input behaviour, resident dialogue handoff, checkpoint writes, Play Mode and Windows build remain unverified.
+
+### Compatibility and risk
+- No save schema, stable NPC ID, dialogue node, relationship state, input action, package version, boat physics or streamed-area-root contract changed.
+- The dockside menu is a functional UI greybox, not final interior art. Its read-only market/repair/net interactions do not fabricate missing economy or equipment systems.
+
 ## 2026-11-13 — Greyhaven streaming transition verification and profiling
 
-**Commit:** Pending CI and Unity execution.
+**Commit:** `3b02d0ce205b828869deb30ff4a32f72c3f8e64d` (PR #7 squash merge).
 
 ### Implemented
 - Added a re-entry safeguard: an area requested while its unload is in progress is queued for reload after unload completes, and the queue rechecks current player distance before starting.
@@ -18,7 +39,7 @@
 - Extended static repository validation and the streaming/test documentation.
 
 ### Verification boundary
-- Repository static validation, C# syntax validation and safeguards run through GitHub Actions after the PR is opened.
+- GitHub Actions run #272 passed `Validate Unity project and C# syntax` and `Repository safeguards`.
 - The Play Mode test is authored but must be executed in Unity 6000.3.28f1. No claim is made that the transition test has run.
 - Runtime profiling telemetry is implemented, but no real Windows hardware measurements, frame-time captures, GPU VRAM measurements or memory budgets have been collected.
 

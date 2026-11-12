@@ -16,6 +16,7 @@
 - Stable opportunity identity and idempotent event evaluation.
 - Acoustic signal construction, range/loudness/sensitivity/noise scoring, event deduplication and listener persistence.
 - NPC schedule resolution, overnight schedule boundaries, and NPC relationship save/restore.
+- Dockside access policy: stationary-speed threshold, horizontal approach radius, invalid numeric input and vertical-separation independence.
 
 ### Play Mode
 - Load the generated Greyhaven persistent scene and verify the three startup areas become resident without replacing the gameplay scene.
@@ -23,6 +24,8 @@
 - Repeat area transitions and check that queued requests are cancelled when out of range, re-entry during unload is safely re-queued, and no area is left in a failed/loading/unloading state.
 - Confirm no visible one-frame gap, missing collision surface, duplicate static geometry, or player freeze occurs during repeated transitions.
 - Boat handling, speed gating and Sounding Rig input.
+- Dockside hub: access only inside a shore-approach radius at or below 0.85 m/s, no duplicate NPC trigger prompt, menu pause/restore, Escape close, correct resident Yarn handoff, cargo appraisal read-only behaviour, vessel diagnostics and guest-ledger autosave checkpoint.
+- Verify all seven location menus and furniture actions at supported resolutions; confirm no menu opens while fishing, dredging, sounding, dialogue or inventory is active.
 - Hull contact against piers, breakwater rocks, terrain and wrecks; root-hull-only collision ownership; no visual collider seams; normal-impact damage; per-physics-step contact aggregation; collision acoustic event propagation.
 - Rigidbody buoyancy, wave following, heave/pitch/roll stability, forward/reverse thrust, opposing-throttle braking, speed taper, rudder flow, and lateral water resistance.
 - Water-wave simulation advances on the fixed physics timestep before buoyancy; rendered wave interpolation remains smooth and does not alter physics sampling at 30, 60 and 120 FPS.

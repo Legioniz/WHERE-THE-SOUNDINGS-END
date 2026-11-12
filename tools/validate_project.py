@@ -21,6 +21,7 @@ REQUIRED_FILES = [
     "Packages/manifest.json",
     "Assets/_Project/Settings/Input/PlayerControls.inputactions",
     "Assets/_Project/Scripts/Runtime/WhereTheSoundingsEnd.Runtime.asmdef",
+    "Assets/_Project/Scripts/Runtime/Interaction/DocksideHubController.cs",
     "Assets/_Project/Scripts/Runtime/Core/WorldClock.cs",
     "Assets/_Project/Scripts/Runtime/Core/ActionDrivenClockPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Core/Pcg32Random.cs",
@@ -38,9 +39,11 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/StreamedAreaSceneRoot.cs",
     "Assets/_Project/Tests/EditMode/AreaStreamingPolicyTests.cs",
+    "Assets/_Project/Tests/EditMode/DocksideAccessPolicyTests.cs",
     "Assets/_Project/Tests/PlayMode/WhereTheSoundingsEnd.Tests.PlayMode.asmdef",
     "Assets/_Project/Tests/PlayMode/GreyhavenAreaStreamingPlayModeTests.cs",
     "docs/08_TECHNICAL_DESIGN/AREA-STREAMING-AND-ASSET-RESIDENCY.md",
+    "docs/08_TECHNICAL_DESIGN/GREYHAVEN-DOCKSIDE-INTERACTION-HUB.md",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyMath.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyRegion.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonSite.cs",
@@ -243,6 +246,46 @@ def main() -> int:
         ):
             if required_text not in greyhaven_builder:
                 failures.append(f"Greyhaven area builder is missing: {required_text}")
+
+        dockside_source = (ROOT / "Assets/_Project/Scripts/Runtime/Interaction/DocksideHubController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "DocksideAccessPolicy.IsAccessible",
+            "MaximumDockingSpeed = 0.85f",
+            "TryClaimInteraction",
+            "Time.timeScale = 0f",
+            "RequestCheckpointAutosave",
+            "BuildCatchInspection",
+            "BuildVesselInspection",
+        ):
+            if required_text not in dockside_source:
+                failures.append(f"DocksideHubController is missing expected interaction feature: {required_text}")
+
+        dockside_tests = (ROOT / "Assets/_Project/Tests/EditMode/DocksideAccessPolicyTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "StationaryVesselInsideShoreApproachCanOpenLocation",
+            "VesselOutsideHorizontalApproachCannotOpenLocation",
+            "MovingVesselCannotOpenLocationEvenWhenNearby",
+            "VerticalSeparationDoesNotChangeShoreApproachDistance",
+            "InvalidOrNonFiniteInputsAreRejected",
+        ):
+            if f"void {required_test}()" not in dockside_tests:
+                failures.append(f"DocksideAccessPolicyTests is missing regression: {required_test}")
+
+        dockside_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "BuildDocksideHub(world.transform",
+            "Dockside_Interaction_Hub",
+            "Main Dock", "Harbour Office", "Fish Market",
+            "Boat Repair Shed", "Net Mender Shed", "Harbour Inn",
+            "Western Lighthouse", "Greyhaven_Harbourmaster",
+            "ExternallyManagedByDocksideHub = true",
+        ):
+            if required_text not in dockside_builder:
+                failures.append(f"Greyhaven builder is missing dockside integration: {required_text}")
+
+        resident_interaction = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs").read_text(encoding="utf-8")
+        if "externallyManagedByDocksideHub" not in resident_interaction:
+            failures.append("HarbourmasterInteraction must support external dockside hub ownership.")
 
         setup_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
         if "Install Greyhaven area streaming?" not in setup_source:

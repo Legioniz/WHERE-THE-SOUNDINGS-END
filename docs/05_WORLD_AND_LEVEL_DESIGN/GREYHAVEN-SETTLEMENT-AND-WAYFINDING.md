@@ -10,7 +10,7 @@
 
 Greyhaven is the first working harbor settlement. Its generated buildings should read as practical coastal architecture shaped by fishing, repair work, net making, local administration and hospitality. Distinct silhouettes and readable service fronts take priority over generic asset volume.
 
-This pass improves generated greybox architecture, resident workspaces and navigation aids. It adds static, collider-free furniture and personal props at visible outdoor work areas; it does not add walkable interiors, a player controller, shop transactions, repair interactions, resident pathfinding or final production art. The generated chart is a fixed local harbor chart, not a live GPS/minimap system.
+This pass improves generated greybox architecture, resident workspaces and navigation aids. It adds static, collider-free furniture and personal props plus a boat-operated dockside menu that presents location interiors and routes furniture inspections/resident dialogue. It does not add walkable interiors, an on-foot player controller, shop transactions, paid repairs, net crafting, resident pathfinding or final production art. The generated chart is a fixed local harbor chart, not a live GPS/minimap system.
 
 ## 2. Settlement layout
 
@@ -78,7 +78,7 @@ The map uses a schematic top-down local projection for orientation. It is not a 
 
 ## 5. Resident furniture and personality props
 
-The furniture pass uses the same deterministic Editor builder as the village structures. Every furnishing is static, collider-free visual geometry parented to the village or harbour area before those static roots are extracted into additive scenes. No new runtime component, save field, NPC identifier, schedule entry, dialogue node or interaction is introduced.
+The visible furniture pass uses the same deterministic Editor builder as the village structures. Every furnishing is static, collider-free visual geometry parented to the village or harbour area before those static roots are extracted into additive scenes. The separate persistent DocksideHubController maps named furniture options to menu actions; it does not attach scripts or rigidbodies to streamed static roots. No save field, NPC identifier, schedule entry or dialogue node is introduced.
 
 | Resident / place | Furniture and personal details | Character read |
 |---|---|---|
@@ -121,3 +121,17 @@ In the pinned Unity Editor and Play Mode, verify:
 - [ ] The boat can approach, tie alongside and depart without catching on dock/table geometry.
 
 Static project and C# syntax checks do not verify Unity semantic compilation, font availability, scene generation, mesh rendering, NPC movement, collision or camera legibility. Those remain Editor/Play Mode checks.
+
+
+## 6. Boat-operated location and furniture menu
+
+The persistent Dockside Interaction Hub presents seven locations from a stationary vessel: Main Dock, Harbour Office, Fish Market, Boat Repair Shed, Net Mender Shed, Harbour Inn and Western Lighthouse. The player approaches a location's shore reference and presses Interact (E) while horizontal vessel speed is no greater than 0.85 m/s. The menu then pauses simulation and presents the selected location's room description, furniture list, object inspection text and any assigned resident conversation.
+
+The menu is an authored interior presentation, not a walkable 3D room. It reuses existing sources of truth:
+- Harbourmaster, Mara, Tomas and Inez dialogue uses their existing Yarn nodes and NpcAgent relationship gates.
+- Catch inspection reads SpatialCargoHold placements and freshness without removing items.
+- Repair inspection reads VesselConditionController without changing condition.
+- Guest Ledger requests a checkpoint from the existing AutosaveController.
+- Tide and watch displays read SeaStateDirector.
+
+No market sale, paid repair, net crafting, sleep/time-skip, lighthouse controls or residential visit is implied. See [Greyhaven Dockside Interaction Hub](../08_TECHNICAL_DESIGN/GREYHAVEN-DOCKSIDE-INTERACTION-HUB.md) for runtime ownership and verification.

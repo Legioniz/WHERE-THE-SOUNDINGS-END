@@ -22,6 +22,7 @@ namespace WhereTheSoundingsEnd.Narrative
         [SerializeField] private string dialogueNode = "Greyhaven_Harbourmaster";
         [SerializeField] private string displayName = "Harbourmaster";
         [SerializeField] private NpcAgent npcAgent;
+        [SerializeField] private bool externallyManagedByDocksideHub;
 
         private readonly HashSet<Collider> _vesselColliders = new HashSet<Collider>();
         private InputAction _interactAction;
@@ -34,6 +35,7 @@ namespace WhereTheSoundingsEnd.Narrative
         public string DialogueNode { get => dialogueNode; set => dialogueNode = value; }
         public string DisplayName { get => displayName; set => displayName = value; }
         public NpcAgent Agent { get => npcAgent; set => npcAgent = value; }
+        public bool ExternallyManagedByDocksideHub { get => externallyManagedByDocksideHub; set => externallyManagedByDocksideHub = value; }
 
         private void Awake()
         {
@@ -74,18 +76,19 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
 
             _vesselColliders.Add(other);
-            UpdatePrompt();
+            if (!externallyManagedByDocksideHub) UpdatePrompt();
         }
 
         private void OnTriggerExit(Collider other)
         {
             if (other == null) return;
             _vesselColliders.Remove(other);
-            UpdatePrompt();
+            if (!externallyManagedByDocksideHub) UpdatePrompt();
         }
 
         private void Update()
         {
+            if (externallyManagedByDocksideHub) return;
             if (_vesselColliders.Count == 0 || runtimeUI == null)
                 return;
 
