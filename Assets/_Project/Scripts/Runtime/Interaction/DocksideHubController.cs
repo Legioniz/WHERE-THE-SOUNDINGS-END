@@ -168,6 +168,7 @@ namespace WhereTheSoundingsEnd.Interaction
         private InputAction interactAction;
         private bool ownsInteractAction;
         private bool menuOpen;
+        private bool pauseOwned;
         private float previousTimeScale = 1f;
         private DocksideLocationDefinition selectedLocation;
 
@@ -479,6 +480,7 @@ namespace WhereTheSoundingsEnd.Interaction
             if (seaState != null && !seaState.TryClaimInteraction()) return;
 
             previousTimeScale = Time.timeScale;
+            pauseOwned = true;
             Time.timeScale = 0f;
             menuOpen = true;
             selectedLocation = location;
@@ -499,8 +501,9 @@ namespace WhereTheSoundingsEnd.Interaction
 
         private void RestoreTimeScale()
         {
-            if (menuOpen || Time.timeScale != 0f) return;
+            if (!pauseOwned) return;
             Time.timeScale = previousTimeScale > 0f ? previousTimeScale : 1f;
+            pauseOwned = false;
         }
 
         private void SelectLocation(DocksideLocationDefinition location)
