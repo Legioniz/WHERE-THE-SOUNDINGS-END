@@ -6,6 +6,24 @@
 > Version: 0.1  
 > Last reviewed: 2026-11-12
 
+## 2026-11-13 — Greyhaven resident furniture and personality pass
+
+**Commit:** Pending CI verification.
+
+### Implemented
+- Added a Harbourmaster quay-watch log desk with a tide register, channel chart board, chronometer, chart roller and stool, plus an office-side cabinet of tide books and a weather annotation board.
+- Added Mara Venn's catch-sorting station with weighing scale, tally board, sample jars, sea-glass shelf and a small shell collection box.
+- Added Tomas Vale's repair workbench with engine test housing, vice, pegboard tools, spare propeller and a compact radio-tuning experiment.
+- Added Inez Sarmiento's net-mending table and loom, mesh strands, pinned knot samples, thread spools, sorting tray and stool.
+- Added a modest shared table, benches and lantern to the Harbour Inn common area.
+- Kept every furnishing as static collider-free generated geometry, owned by the existing harbour/village builder roots so area-streaming extraction keeps each prop with its correct area.
+- Preserved NPC IDs, schedule anchors, dialogue nodes, relationship/save contracts, boat systems and streaming definitions.
+
+### Verification boundary
+- Repository static validation and C# syntax CI are pending for this branch.
+- Unity `6000.3.28f1` semantic compilation, Editor scene regeneration, camera-scale visual review, Play Mode NPC route clearance, streamed-area transitions and Windows profiling remain unverified.
+- The furniture is visual set dressing only; no new furniture interaction, usable interior, inventory item, hobby progression or save data is claimed.
+
 ## 2026-11-12 — Relationship-reactive Greyhaven dialogue expansion
 
 **Commit:** Pending repository validation.
