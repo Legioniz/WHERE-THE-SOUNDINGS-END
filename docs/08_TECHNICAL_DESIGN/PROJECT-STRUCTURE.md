@@ -31,6 +31,7 @@ Assets/_Project is the game's first-party content boundary.
 | Scripts/Runtime/Inventory/ | Spatial cargo definitions, grid geometry, hold placement and persistence |
 | Scripts/Runtime/World/ | Action-driven sea state, regional survey profiles, Sounding Rig, acoustic event contract, world incidents and site discovery |
 | Scripts/Runtime/Narrative/ | Yarn Spinner dialogue state, runtime UI Toolkit presenter, Harbourmaster interaction and narrative persistence |
+| Scripts/Runtime/Interaction/ | Persistent boat-operated location hub, dockside access policy and furniture action presentation |
 | Dialogue/ | Yarn project and authored dialogue source |
 | Settings/UI/ | Runtime UI Toolkit PanelSettings assets |
 | Dialogue/Source/ | Authored Yarn Spinner dialogue scripts |
@@ -65,7 +66,8 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Inventory/SpatialCargoHold.cs: placement/move/remove runtime model and save participant.
 - Narrative/YarnDialogueSaveParticipant.cs: typed Yarn variable persistence inside the campaign save.
 - Narrative/GreyhavenRuntimeUI.cs: combined cargo-hold UI Toolkit screen and Yarn dialogue presenter.
-- Narrative/HarbourmasterInteraction.cs: boat-proximity trigger and E-key dialogue start.
+- Narrative/HarbourmasterInteraction.cs: boat-proximity trigger and E-key dialogue start for hand-authored scenes; generated Greyhaven residents are routed through the dockside hub.
+- Interaction/DocksideHubController.cs: stationary-vessel access checks, seven location menus, furniture inspections, resident dialogue handoff and checkpoint action routing.
 - Dialogue/Greyhaven.yarnproject: Yarn Spinner 3.x project definition.
 - Dialogue/Source/Greyhaven_Harbourmaster.yarn: branching first conversation with the Harbourmaster.
 - Boat/BoatPrototypeController.cs: force-driven forward/reverse propulsion, opposing-throttle braking, speed-dependent rudder and vessel-condition response.
@@ -82,7 +84,7 @@ Run Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation on first set
 
 Use Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment after changing the environment generator. The command warns before replacing the generated scene. Generated Unity assets and their corresponding .meta files should be committed after successful Editor initialization.
 
-Greyhaven is a working technical greybox. Its coordinates and dimensions are prototype scale values; final terrain, water, architecture, collision, camera framing, UI layout and interaction feel require in-Editor testing. The builder creates differentiated service fronts, residential porches, a chart table on the east T-pier, and workplace markers for the four initial residents. The chart is static and schematic; it is not a live minimap or calibrated navigation chart. The first cargo-hold interface and Harbourmaster dialogue loop are generated with the scene.
+Greyhaven is a working technical greybox. Its coordinates and dimensions are prototype scale values; final terrain, water, architecture, collision, camera framing, UI layout and interaction feel require in-Editor testing. The builder creates differentiated service fronts, residential porches, a chart table on the east T-pier, and workplace markers for the four initial residents. The chart is static and schematic; it is not a live minimap or calibrated navigation chart. The first cargo-hold interface, Harbourmaster dialogue loop and persistent dockside hub are generated with the scene. The hub provides menu-based interior presentations and furniture interactions without walkable interiors or on-foot movement.
 
 ## Rules
 
