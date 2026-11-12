@@ -220,6 +220,10 @@ def main() -> int:
             "Greyhaven_Village.unity", "Greyhaven_Estuary_West.unity",
             "Greyhaven_Estuary_East.unity", "Greyhaven_Lighthouse.unity",
             "IsStaticStreamableHierarchy", "SaveGeneratedMeshAsset",
+            "BuildHarbourmasterQuayFurniture", "BuildResidentFurniture",
+            "Mara_Venn_Market_Workstation", "Tomas_Vale_Repair_Workbench",
+            "Inez_Sarmiento_Net_Mending_Workspace", "Harbourmaster_Quay_Log_Station",
+            "Sea_Glass_Collection_Shelf", "Radio_Experiment_Casing", "Knot_Sample_Board",
         ):
             if required_text not in greyhaven_builder:
                 failures.append(f"Greyhaven area builder is missing: {required_text}")
