@@ -6,6 +6,26 @@
 > Version: 0.1  
 > Last reviewed: 2026-11-13
 
+## 2026-11-13 — Greyhaven streaming transition verification and profiling
+
+**Commit:** Pending CI and Unity execution.
+
+### Implemented
+- Added a re-entry safeguard: an area requested while its unload is in progress is queued for reload after unload completes, and the queue rechecks current player distance before starting.
+- Added a final distance guard immediately before the streamed root is deactivated for unload.
+- Added Development Build / Editor telemetry for additive load duration, per-area unique mesh/material/texture references and estimated asset bytes, global allocated/reserved memory, managed heap use and GC memory.
+- Added a Play Mode test that loads Greyhaven, verifies startup areas, teleports the test vessel to the lighthouse to exercise additive preload, returns to the harbour, and checks the lighthouse unload while the persistent gameplay scene remains loaded.
+- Extended static repository validation and the streaming/test documentation.
+
+### Verification boundary
+- Repository static validation, C# syntax validation and safeguards run through GitHub Actions after the PR is opened.
+- The Play Mode test is authored but must be executed in Unity 6000.3.28f1. No claim is made that the transition test has run.
+- Runtime profiling telemetry is implemented, but no real Windows hardware measurements, frame-time captures, GPU VRAM measurements or memory budgets have been collected.
+
+### Remaining scope
+- Proper walkable interiors and usable furniture interactions are not included in this increment. The current prototype has a boat-only player controller; building out an accessible interior requires an on-foot movement/camera/input mode and a persistent interaction ownership path that remains safe while static village scenes stream.
+- No save schema, NPC identity/schedule/dialogue contract, boat physics, or static area-scene ownership changed.
+
 ## 2026-11-13 — Greyhaven resident furniture and personality pass
 
 **Commit:** [`82cecc7`](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/commit/82cecc7844e983881c5febd400ee24d9e29c46ab) — merged through [PR #5](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/pull/5).

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Profiling;
 using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Streaming
@@ -92,11 +93,33 @@ namespace WhereTheSoundingsEnd.Streaming
             public bool PendingLoad;
             public bool Failed;
             public float OutsideSince = -1f;
+            public double LoadStartedAt;
+            public long AllocatedMemoryBeforeLoad;
         }
 
         private readonly List<AreaState> states = new List<AreaState>();
         private float nextDistanceCheck;
         private int activeLoadCount;
+
+        public int FailedAreaCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < states.Count; i++)
+                    if (states[i].Failed) count++;
+                return count;
+            }
+        }
+
+        public bool IsAreaLoaded(string areaId)
+        {
+            if (string.IsNullOrWhiteSpace(areaId)) return false;
+            for (int i = 0; i < states.Count; i++)
+                if (string.Equals(states[i].Definition.AreaId, areaId, StringComparison.Ordinal))
+                    return states[i].IsLoaded && !states[i].IsUnloading;
+            return false;
+        }
 
         public int LoadedAreaCount
         {
@@ -190,7 +213,10 @@ namespace WhereTheSoundingsEnd.Streaming
                 if (AreaStreamingPolicy.ShouldPreload(distance, definition.PreloadRadius))
                 {
                     state.OutsideSince = -1f;
-                    RequestLoad(state);
+                    if (state.IsUnloading)
+                        state.PendingLoad = true;
+                    else
+                        RequestLoad(state);
                     continue;
                 }
 
@@ -238,6 +264,16 @@ namespace WhereTheSoundingsEnd.Streaming
                     if (states[i].PendingLoad && !states[i].IsLoading &&
                         !states[i].IsLoaded && !states[i].IsUnloading && !states[i].Failed)
                     {
+                        float distance = trackedPlayer != null
+                            ? HorizontalDistance(trackedPlayer.position, states[i].Definition.Center)
+                            : float.PositiveInfinity;
+                        if (!states[i].Definition.LoadAtStartup &&
+                            !AreaStreamingPolicy.ShouldPreload(distance, states[i].Definition.PreloadRadius))
+                        {
+                            states[i].PendingLoad = false;
+                            continue;
+                        }
+
                         next = states[i];
                         break;
                     }
@@ -254,6 +290,8 @@ namespace WhereTheSoundingsEnd.Streaming
         private IEnumerator LoadAreaRoutine(AreaState state)
         {
             string scenePath = state.Definition.ScenePath;
+            state.LoadStartedAt = Time.realtimeSinceStartupAsDouble;
+            state.AllocatedMemoryBeforeLoad = Profiler.GetTotalAllocatedMemoryLong();
             if (!Application.CanStreamedLevelBeLoaded(scenePath))
             {
                 FailLoad(state, "Scene '" + scenePath + "' is not included in Build Settings.");
@@ -322,6 +360,7 @@ namespace WhereTheSoundingsEnd.Streaming
             state.IsLoaded = true;
             state.OutsideSince = -1f;
             RefreshWorldSystems();
+            LogAreaLoadMetrics(state);
 
             if (trackedPlayer != null &&
                 HorizontalDistance(trackedPlayer.position, state.Definition.Center) >
@@ -351,7 +390,18 @@ namespace WhereTheSoundingsEnd.Streaming
             if (state == null || !state.IsLoaded || state.IsUnloading)
                 yield break;
 
+            float currentDistance = trackedPlayer != null
+                ? HorizontalDistance(trackedPlayer.position, state.Definition.Center)
+                : float.PositiveInfinity;
+            if (!AreaStreamingPolicy.ShouldUnload(currentDistance, state.Definition.UnloadRadius))
+            {
+                state.OutsideSince = -1f;
+                yield break;
+            }
+
             state.IsUnloading = true;
+            double unloadStartedAt = Time.realtimeSinceStartupAsDouble;
+            LogAreaUnloadStartMetrics(state);
             if (state.Root != null)
                 state.Root.gameObject.SetActive(false);
 
@@ -371,6 +421,111 @@ namespace WhereTheSoundingsEnd.Streaming
             state.IsLoaded = false;
             state.IsUnloading = false;
             state.OutsideSince = -1f;
+            LogAreaUnloadCompleteMetrics(state, Time.realtimeSinceStartupAsDouble - unloadStartedAt);
+        }
+
+        private void LogAreaLoadMetrics(AreaState state)
+        {
+            if (!Application.isEditor && !Debug.isDebugBuild) return;
+            AreaAssetResidency residency = CaptureAreaAssetResidency(state.Root);
+            double elapsed = Math.Max(0d, Time.realtimeSinceStartupAsDouble - state.LoadStartedAt);
+            long allocated = Profiler.GetTotalAllocatedMemoryLong();
+            Debug.Log(
+                "[AreaStreaming] LOAD area=" + state.Definition.AreaId +
+                " durationMs=" + (elapsed * 1000d).ToString("F1") +
+                " sceneAssets=" + residency.AssetCount +
+                " mesh=" + residency.MeshCount +
+                " material=" + residency.MaterialCount +
+                " texture=" + residency.TextureCount +
+                " sceneAssetBytes=" + residency.Bytes +
+                " allocatedDeltaBytes=" + (allocated - state.AllocatedMemoryBeforeLoad) +
+                " totalAllocatedBytes=" + allocated +
+                " totalReservedBytes=" + Profiler.GetTotalReservedMemoryLong() +
+                " monoUsedBytes=" + Profiler.GetMonoUsedSizeLong() +
+                " gcUsedBytes=" + GC.GetTotalMemory(false),
+                this);
+        }
+
+        private void LogAreaUnloadStartMetrics(AreaState state)
+        {
+            if (!Application.isEditor && !Debug.isDebugBuild) return;
+            AreaAssetResidency residency = CaptureAreaAssetResidency(state.Root);
+            Debug.Log(
+                "[AreaStreaming] UNLOAD_START area=" + state.Definition.AreaId +
+                " sceneAssets=" + residency.AssetCount +
+                " sceneAssetBytes=" + residency.Bytes +
+                " totalAllocatedBytes=" + Profiler.GetTotalAllocatedMemoryLong() +
+                " totalReservedBytes=" + Profiler.GetTotalReservedMemoryLong(),
+                this);
+        }
+
+        private void LogAreaUnloadCompleteMetrics(AreaState state, double durationSeconds)
+        {
+            if (!Application.isEditor && !Debug.isDebugBuild) return;
+            Debug.Log(
+                "[AreaStreaming] UNLOAD_COMPLETE area=" + state.Definition.AreaId +
+                " durationMs=" + (Math.Max(0d, durationSeconds) * 1000d).ToString("F1") +
+                " totalAllocatedBytes=" + Profiler.GetTotalAllocatedMemoryLong() +
+                " totalReservedBytes=" + Profiler.GetTotalReservedMemoryLong() +
+                " monoUsedBytes=" + Profiler.GetMonoUsedSizeLong() +
+                " gcUsedBytes=" + GC.GetTotalMemory(false),
+                this);
+        }
+
+        private sealed class AreaAssetResidency
+        {
+            public int AssetCount;
+            public int MeshCount;
+            public int MaterialCount;
+            public int TextureCount;
+            public long Bytes;
+        }
+
+        private static AreaAssetResidency CaptureAreaAssetResidency(StreamedAreaSceneRoot root)
+        {
+            AreaAssetResidency result = new AreaAssetResidency();
+            if (root == null) return result;
+
+            HashSet<int> meshIds = new HashSet<int>();
+            HashSet<int> materialIds = new HashSet<int>();
+            HashSet<int> textureIds = new HashSet<int>();
+
+            MeshFilter[] filters = root.GetComponentsInChildren<MeshFilter>(true);
+            for (int i = 0; i < filters.Length; i++)
+                AddResidentAsset(filters[i] != null ? filters[i].sharedMesh : null, meshIds, result);
+
+            SkinnedMeshRenderer[] skinned = root.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            for (int i = 0; i < skinned.Length; i++)
+                AddResidentAsset(skinned[i] != null ? skinned[i].sharedMesh : null, meshIds, result);
+
+            Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                if (renderers[i] == null) continue;
+                Material[] materials = renderers[i].sharedMaterials;
+                for (int materialIndex = 0; materialIndex < materials.Length; materialIndex++)
+                {
+                    Material material = materials[materialIndex];
+                    if (material == null) continue;
+                    AddResidentAsset(material, materialIds, result);
+                    string[] textureProperties = material.GetTexturePropertyNames();
+                    for (int textureIndex = 0; textureIndex < textureProperties.Length; textureIndex++)
+                        AddResidentAsset(material.GetTexture(textureProperties[textureIndex]), textureIds, result);
+                }
+            }
+
+            result.MeshCount = meshIds.Count;
+            result.MaterialCount = materialIds.Count;
+            result.TextureCount = textureIds.Count;
+            result.AssetCount = result.MeshCount + result.MaterialCount + result.TextureCount;
+            return result;
+        }
+
+        private static void AddResidentAsset(
+            UnityEngine.Object asset, HashSet<int> seen, AreaAssetResidency residency)
+        {
+            if (asset == null || !seen.Add(asset.GetInstanceID())) return;
+            residency.Bytes += Profiler.GetRuntimeMemorySizeLong(asset);
         }
 
         private void RefreshWorldSystems()

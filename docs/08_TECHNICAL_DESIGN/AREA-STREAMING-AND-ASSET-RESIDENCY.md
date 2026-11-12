@@ -1,9 +1,9 @@
 # Area Streaming and Asset Residency
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime and editor source implemented; Unity validation pending  
-> Version: 1.0  
-> Last reviewed: 2026-11-12
+> Status: Runtime telemetry and Play Mode transition test authored; Unity execution pending  
+> Version: 1.1  
+> Last reviewed: 2026-11-13
 
 ## 1. Design intent
 
@@ -53,6 +53,8 @@ AreaStreamingDirector performs horizontal X/Z distance checks using unscaled tim
 - Unload grace: the vessel must remain outside the unload radius continuously before unloading starts.
 - Concurrency: one scene load by default. It can be raised to at most three after profiling.
 - Retry: a missing or invalid scene is marked failed for the current director lifetime. This prevents per-frame load loops and repeated IO/log spam.
+- Re-entry: if the vessel returns while an area is already unloading, the director queues a fresh load request. The load queue rechecks the current distance before starting so a stale request cannot load an area the vessel has already left.
+- Unload guard: the unload coroutine rechecks the vessel distance immediately before deactivating the area root.
 
 Areas marked loadAtStartup are terrain, harbour, and village. The estuaries and lighthouse are loaded on approach. The initial radii are conservative starting values and should be tuned from measured vessel speed, scene load duration, and target-device hardware.
 
@@ -94,12 +96,30 @@ A request that is still queued is cancelled when the vessel leaves the preload b
 - Do not call Resources.UnloadUnusedAssets after every transition; global sweeps can introduce the very frame-time spikes this system is intended to avoid. Consider an explicit quiet-window cleanup only after memory profiling proves it is required.
 - No Addressables package, remote download, paid storage, paid API, or runtime account is required for this implementation.
 
-## 7. Future expansion
+## 7. Runtime profiling and telemetry
+
+In the Editor and Development Builds, each completed area load emits one `[AreaStreaming] LOAD` record and each unload emits `UNLOAD_START` / `UNLOAD_COMPLETE` records. The load record includes:
+
+- additive load duration measured from request start through validated root activation;
+- unique mesh, material and texture counts referenced by the area's renderers;
+- estimated memory size of those unique referenced assets using Unity's runtime memory-size API;
+- global Unity allocated/reserved memory, managed heap use and GC-reported managed memory;
+- allocated-memory delta across the load operation.
+
+The unload record captures the area's referenced asset estimate before deactivation and global memory counters after unload. Logs are emitted only in the Editor or Development Builds; release builds do not emit per-transition profiling logs.
+
+**Interpretation limits:** per-area asset bytes are an estimate of assets referenced by that area's renderers, not a measurement of physical GPU VRAM or guaranteed exclusive residency. Shared assets may appear in multiple area's estimates. Global allocated/reserved counters include the rest of the running game and Unity runtime. A scene unload does not guarantee that Unity immediately releases every shared asset. Do not trigger `Resources.UnloadUnusedAssets` on every transition.
+
+For a useful hardware profile, repeat the same route at least five times in a Windows Development Build with the Unity Profiler attached. Record median and worst-case load duration, frame-time spikes, total allocated/reserved memory, managed memory, per-area asset estimates, and the number of simultaneously loaded areas. Capture a cold-start route and a warm repeat route separately. Record the target PC CPU, GPU, RAM, resolution, graphics quality and build configuration with the results.
+
+No performance threshold is claimed until a representative Windows baseline is measured.
+
+## 8. Future expansion
 
 For future islands or larger maritime regions, author additional area definitions and matching additive scenes with unique stable IDs and content revisions. Do not make each island a separate persistent gameplay root until save data, active player ownership, NPC/world clock ownership, lighting/render settings, and cross-region travel have explicit transfer semantics.
 
-## 8. Verification status
+## 9. Verification status
 
-The source includes deterministic tests for distance boundaries, non-finite inputs, and preload/unload hysteresis. Static CI validation checks the scene loader, root integrity contract, editor scene generation, and build-scene list preservation.
+The source includes deterministic Edit Mode tests for distance boundaries, non-finite inputs, and preload/unload hysteresis. A new Play Mode test loads Greyhaven, waits for its startup areas, moves the vessel to the lighthouse to trigger additive preload, returns to its original position, and waits for the lighthouse area to unload while asserting the persistent gameplay scene remains loaded. Static CI validation checks the scene loader, root integrity contract, editor scene generation, build-scene list preservation, telemetry instrumentation and presence of the Play Mode test.
 
-Unity semantic compilation, Edit Mode test execution, Play Mode travel tests, frame-time profiling, and Windows player build remain mandatory before treating the feature as production-verified.
+Unity semantic compilation, Edit Mode test execution, Play Mode travel test execution, frame-time profiling, and Windows player build remain mandatory before treating the feature as production-verified. The telemetry is implemented but no real hardware measurements have been collected in this environment.

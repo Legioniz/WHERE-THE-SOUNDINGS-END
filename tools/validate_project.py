@@ -38,6 +38,8 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/StreamedAreaSceneRoot.cs",
     "Assets/_Project/Tests/EditMode/AreaStreamingPolicyTests.cs",
+    "Assets/_Project/Tests/PlayMode/WhereTheSoundingsEnd.Tests.PlayMode.asmdef",
+    "Assets/_Project/Tests/PlayMode/GreyhavenAreaStreamingPlayModeTests.cs",
     "docs/08_TECHNICAL_DESIGN/AREA-STREAMING-AND-ASSET-RESIDENCY.md",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyMath.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyRegion.cs",
@@ -190,6 +192,11 @@ def main() -> int:
             "StreamedAreaSceneRoot",
             "RefreshSceneTargets",
             "roots.Length != 1",
+            "Profiler.GetTotalAllocatedMemoryLong",
+            "Profiler.GetTotalReservedMemoryLong",
+            "Profiler.GetRuntimeMemorySizeLong",
+            "LogAreaLoadMetrics", "LogAreaUnloadCompleteMetrics",
+            "state.PendingLoad = true",
         ):
             if required_text not in streaming_source:
                 failures.append(f"AreaStreamingDirector is missing streaming safeguard: {required_text}")
@@ -212,6 +219,15 @@ def main() -> int:
         ):
             if f"void {required_test}()" not in area_policy_tests:
                 failures.append(f"AreaStreamingPolicyTests is missing regression: {required_test}")
+
+        streaming_playmode = (ROOT / "Assets/_Project/Tests/PlayMode/GreyhavenAreaStreamingPlayModeTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "AdditiveAreasPreloadAndRetireWhilePersistentGameplaySceneStaysLoaded",
+            "IsAreaLoaded(\"greyhaven.lighthouse\")",
+            "FailedAreaCount",
+        ):
+            if required_test not in streaming_playmode:
+                failures.append(f"GreyhavenAreaStreamingPlayModeTests is missing transition check: {required_test}")
 
         greyhaven_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
         for required_text in (
