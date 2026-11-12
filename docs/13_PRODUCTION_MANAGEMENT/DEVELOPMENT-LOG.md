@@ -4,11 +4,11 @@
 > Status: Active working log  
 > Owner: Project lead  
 > Version: 0.1  
-> Last reviewed: 2026-11-12
+> Last reviewed: 2026-11-13
 
 ## 2026-11-13 — Greyhaven resident furniture and personality pass
 
-**Commit:** Pending CI verification.
+**Commit:** [`82cecc7`](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/commit/82cecc7844e983881c5febd400ee24d9e29c46ab) — merged through [PR #5](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/pull/5).
 
 ### Implemented
 - Added a Harbourmaster quay-watch log desk with a tide register, channel chart board, chronometer, chart roller and stool, plus an office-side cabinet of tide books and a weather annotation board.
@@ -20,7 +20,7 @@
 - Preserved NPC IDs, schedule anchors, dialogue nodes, relationship/save contracts, boat systems and streaming definitions.
 
 ### Verification boundary
-- Repository static validation and C# syntax CI are pending for this branch.
+- GitHub Actions [run #268](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/actions/runs/43271865246) passed both the Unity project/C# syntax validation job and the repository safeguards job.
 - Unity `6000.3.28f1` semantic compilation, Editor scene regeneration, camera-scale visual review, Play Mode NPC route clearance, streamed-area transitions and Windows profiling remain unverified.
 - The furniture is visual set dressing only; no new furniture interaction, usable interior, inventory item, hobby progression or save data is claimed.
 
