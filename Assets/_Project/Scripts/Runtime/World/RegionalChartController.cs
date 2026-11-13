@@ -89,8 +89,11 @@ namespace WhereTheSoundingsEnd.World
                 }
             }
 
-            if (nearest == currentRegion) return;
-            currentRegion = nearest;
+            if (nearest != currentRegion)
+                currentRegion = nearest;
+
+            // Re-check even when the active region reference is unchanged. A transactional
+            // save restore may replace the visit ledger while leaving this scene component alive.
             if (currentRegion != null &&
                 RegionalChartPolicy.TryRecordVisit(visitedRegionIds, unlockedRegionIds, currentRegion.RegionId))
             {
@@ -148,6 +151,7 @@ namespace WhereTheSoundingsEnd.World
         public void RestoreSaveData(SaveGameData data)
         {
             if (data == null || data.world == null || data.progress == null) return;
+            currentRegion = null;
             visitedRegionIds.Clear();
             unlockedRegionIds.Clear();
             if (data.world.visitedRegionIds != null)
