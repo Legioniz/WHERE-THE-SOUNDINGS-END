@@ -162,14 +162,15 @@ namespace WhereTheSoundingsEnd.World
                                    Lines[lineIndex].castMultiplier * TechniqueCastMultiplier(technique);
             Vector3 castPoint = transform.position + transform.forward * selectedCastDistance;
             activeHabitat = DetermineHabitat(castPoint);
-            estimatedDepth = EstimateDepth(activeHabitat);
+            estimatedDepth = EstimateDepth(activeHabitat) * TechniqueDepthMultiplier(technique);
             hookedFish = null;
             tension = 0.35f;
             fatigue = 0f;
             fightProgress = 0f;
             fightBeats = 0;
             successfulBeats = 0;
-            waitTimer = UnityEngine.Random.Range(biteWaitMinimum, Mathf.Max(biteWaitMinimum, biteWaitMaximum));
+            waitTimer = UnityEngine.Random.Range(biteWaitMinimum, Mathf.Max(biteWaitMinimum, biteWaitMaximum)) *
+                        TechniqueBiteWaitMultiplier(technique);
             phase = FishingEncounterPhase.WaitingForBite;
             status = "LINE DEPLOYED — " + technique + " · " + activeHabitat + " · " +
                      Mathf.RoundToInt(selectedCastDistance) + " m cast. Watch for a bite.";
@@ -231,7 +232,8 @@ namespace WhereTheSoundingsEnd.World
             if (hookedFish == null)
             {
                 status = "NO BITE — the water is quiet here. Try another ground or technique.";
-                waitTimer = UnityEngine.Random.Range(biteWaitMinimum * 0.7f, biteWaitMaximum * 1.1f);
+                waitTimer = UnityEngine.Random.Range(biteWaitMinimum * 0.7f, biteWaitMaximum * 1.1f) *
+                            TechniqueBiteWaitMultiplier(technique);
                 return;
             }
 
@@ -321,7 +323,8 @@ namespace WhereTheSoundingsEnd.World
         {
             phase = FishingEncounterPhase.WaitingForBite;
             hookedFish = null;
-            waitTimer = UnityEngine.Random.Range(biteWaitMinimum * 0.8f, biteWaitMaximum);
+            waitTimer = UnityEngine.Random.Range(biteWaitMinimum * 0.8f, biteWaitMaximum) *
+                        TechniqueBiteWaitMultiplier(technique);
             status = "THE BITE WAS MISSED — the bait is still out. Wait for another chance.";
         }
 
@@ -427,6 +430,33 @@ namespace WhereTheSoundingsEnd.World
                 case FishHabitat.OpenWater: return 48f;
                 case FishHabitat.DeepWater: return 125f;
                 default: return 8f;
+            }
+        }
+
+        private static float TechniqueDepthMultiplier(FishingTechnique value)
+        {
+            switch (value)
+            {
+                case FishingTechnique.BottomFishing: return 1.45f;
+                case FishingTechnique.FloatFishing: return 0.35f;
+                case FishingTechnique.Jigging: return 0.85f;
+                case FishingTechnique.Trolling: return 0.7f;
+                case FishingTechnique.Handlining: return 0.8f;
+                default: return 1f;
+            }
+        }
+
+        private static float TechniqueBiteWaitMultiplier(FishingTechnique value)
+        {
+            switch (value)
+            {
+                case FishingTechnique.Jigging: return 0.75f;
+                case FishingTechnique.Trolling: return 0.85f;
+                case FishingTechnique.Drifting: return 0.9f;
+                case FishingTechnique.BottomFishing: return 1.15f;
+                case FishingTechnique.FloatFishing: return 1.1f;
+                case FishingTechnique.Handlining: return 1.2f;
+                default: return 1f;
             }
         }
 

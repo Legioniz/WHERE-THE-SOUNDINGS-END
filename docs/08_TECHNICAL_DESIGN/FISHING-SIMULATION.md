@@ -29,7 +29,7 @@ Fish-only CargoItemDefinition fields include habitat flags, preferred technique/
 
 ## Habitat and ecology approximation
 
-The current Greyhaven habitat resolver classifies the cast point as estuary, nearshore, kelp, open water or deep water from local coordinates/distance. It maps each habitat to a fixed estimated depth. This is deliberately a prototype heuristic because the current ocean surface and survey bathymetry systems do not expose a shared fishing-depth query. Do not use these estimates as nautical depth data.
+The current Greyhaven habitat resolver classifies the cast point as estuary, nearshore, kelp, open water or deep water from local coordinates/distance. It maps each habitat to a fixed estimated depth, then applies technique-specific depth multipliers (bottom deeper, float shallower, with intermediate values for jigging/trolling/handlining). Bite wait timing is also method-adjusted. This is deliberately a prototype heuristic because the current ocean surface and survey bathymetry systems do not expose a shared fishing-depth query. Do not use these estimates as nautical depth data.
 
 Population is aggregate integer stock keyed by species and habitat. Each landed fish removes one stock unit. Recovery is applied in elapsed in-game-day increments and capped at twice initial stock. Every six in-game hours, a bounded fraction migrates to the next habitat in the authored habitat order that the species can inhabit. Migration is a simplified cyclic transfer, not a biologically validated route. All stock and timing values use existing save collections under namespaced IDs.
 

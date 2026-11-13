@@ -37,7 +37,7 @@ The starter tackle is available immediately. The second tier unlocks after five 
 
 ## Techniques
 
-The current Greyhaven prototype supports still fishing, bottom fishing, float fishing, jigging, trolling, drifting and handlining. Trolling requires vessel movement. Still, bottom, float, jigging and handlining require a slow/stationary vessel; drifting permits movement. Technique/species preferences affect candidate weighting rather than making every non-preferred method impossible.
+The current Greyhaven prototype supports still fishing, bottom fishing, float fishing, jigging, trolling, drifting and handlining. Trolling requires vessel movement. Still, bottom, float, jigging and handlining require a slow/stationary vessel; drifting permits movement. Techniques also alter effective fishing depth and bite timing: bottom fishing targets deeper layers, float fishing targets shallower layers, jigging/trolling shorten the expected wait, and handlining trades patience for direct control. Technique/species preferences affect candidate weighting rather than making every non-preferred method impossible.
 
 ## Species and habitats
 
