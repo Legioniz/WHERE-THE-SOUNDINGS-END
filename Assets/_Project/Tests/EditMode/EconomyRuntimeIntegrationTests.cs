@@ -57,6 +57,18 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void RefuellingRestoresEmergencyReserve()
+        {
+            VesselFuelController fuel = owner.AddComponent<VesselFuelController>();
+            SetPrivateField(fuel, "fuelUnits", 0f);
+            SetPrivateField(fuel, "emergencyFuelUnits", 0f);
+
+            fuel.AddFuel(1f);
+
+            Assert.AreEqual(2f, fuel.EmergencyFuelUnits, 0.0001f);
+        }
+
+        [Test]
         public void BaitStackConsumesOneUnitWithoutRemovingRemainingStack()
         {
             string instanceId;
