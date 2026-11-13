@@ -59,7 +59,13 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
             }
 
-            if (page != "game" || !DocksideModalPolicy.CanOpenPauseMenu(
+            if (page != "game")
+            {
+                OpenPause();
+                return;
+            }
+
+            if (!DocksideModalPolicy.CanOpenPauseMenu(
                 GameplayUI != null && GameplayUI.DocksideHub != null && GameplayUI.DocksideHub.IsMenuOpen,
                 GameplayUI != null && GameplayUI.IsInventoryOpen,
                 GameplayUI != null && GameplayUI.IsDialogueOpen))
