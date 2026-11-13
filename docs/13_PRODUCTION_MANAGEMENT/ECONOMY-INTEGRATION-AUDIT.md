@@ -6,7 +6,7 @@
 
 ## Executive result
 
-The economy is implemented as a connected vessel-owned system rather than isolated vendor menus. The generated Greyhaven vessel is the shared owner for cargo, wallet, fuel, equipment, fishing, research, market, vendor services, chart state, and expedition telemetry. The dockside hub resolves those same vessel components and exposes their actions.
+The economy is implemented as a connected vessel-owned system rather than isolated vendor menus. The generated Greyhaven vessel is the shared owner for cargo, wallet, fuel, equipment, fishing, research, market, vendor services, chart state, and expedition telemetry. Fishing is attached by `HarvestingMinigameController.Configure` (and defensively by its `Awake`) to the same vessel object; the Fish action is forwarded to that director. The dockside hub resolves the same vessel-owned economy components and exposes their actions.
 
 The audit found one cross-system reliability defect: wallet and fuel events used one exception boundary around a multicast delegate. A failing observer could therefore prevent later observers from receiving an already-committed transaction or fuel-consumption event. The hardening change now isolates each subscriber and preserves delivery to later listeners. Regression tests cover both event streams and duplicate wallet transaction rejection.
 
