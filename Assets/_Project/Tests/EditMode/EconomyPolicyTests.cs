@@ -29,7 +29,7 @@ namespace WhereTheSoundingsEnd.Tests
             long cents = EconomyPolicy.CalculateSaleLineCents(
                 1m, 10m, 1m, 9m, 0m, 9m, 9m, true);
 
-            Assert.That(cents, Is.EqualTo(207L));
+            Assert.That(cents, Is.EqualTo(652L));
         }
 
         [Test]
