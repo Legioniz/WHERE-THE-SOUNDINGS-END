@@ -92,7 +92,7 @@ The response coefficient is a tuning parameter owned by the market profile, not 
 
 Market factors are destination-based. Catch origin does not grant the destination premium. A player may inspect posted prices before travelling, but selling is only possible at a buyer physically present in the current destination.
 
-## 6. NPC relationship and trade behavior
+## 7. NPC relationship and trade behavior
 
 Use existing stable NPC IDs and `NpcAgent.RelationshipScore`, `CanTrade` and relationship memory events. Do not create a second trust score.
 
@@ -107,7 +107,7 @@ Use existing stable NPC IDs and `NpcAgent.RelationshipScore`, `CanTrade` and rel
 
 Keep relationship effects asymmetric where character identity warrants it. Mara may value consistent, well-handled landings; Tomas may reward responsible maintenance and reliable payment; Inez may value returning reusable net materials. The Harbourmaster's evidence and contract decisions remain separate from commodity pricing.
 
-## 7. Purchasing, stock and cargo
+## 8. Purchasing, stock and cargo
 
 Purchases must validate, in order: vendor open, vendor accepts/sells item, relationship gate, available vendor stock, valid quantity, wallet balance, destination hold/equipment capacity, and final price. Only then commit money and inventory atomically.
 
@@ -118,7 +118,7 @@ Purchases must validate, in order: vendor open, vendor accepts/sells item, relat
 - Cargo hold space remains a physical constraint. No purchased item may appear in the hold if it cannot fit.
 - Vendor stock is persistent and refreshes only by the documented stock simulation; scene reloads and save reloads must not restock it.
 
-## 8. Repairs and vessel services
+## 9. Repairs and vessel services
 
 Use existing `VesselConditionController` hull/engine integrity and `SpatialCargoHold` damaged-cell state. The economy is a payer and transaction coordinator; it does not own vessel physics or cargo geometry.
 
@@ -130,7 +130,7 @@ Repair quote components:
 
 Show a quote before confirmation. Repairs restore only the selected component and never exceed 100%. A failed or unaffordable repair changes nothing. Do not charge a fixed fee when no repair is required.
 
-## 9. Fuel and operating costs
+## 10. Fuel and operating costs
 
 Fuel is a voyage resource and is stored on the vessel. Consumption must be tied to actual propulsion/engine load rather than wall-clock time while docked or paused. The player should be able to see current fuel, estimated remaining range and the estimated cost to refill before departure.
 
@@ -143,7 +143,7 @@ Fuel is a voyage resource and is stored on the vessel. Consumption must be tied 
 
 The exact consumption and service price coefficients remain tuning values and must be measured during the vertical slice. Do not copy *DREDGE* fuel rates or assume a particular real-world vessel's litres-per-kilometre figure.
 
-## 10. Salvage, materials and discoveries
+## 11. Salvage, materials and discoveries
 
 Salvage has three possible uses, resolved by item definition and contract:
 1. Sell as commodity to an accepting buyer.
@@ -152,7 +152,7 @@ Salvage has three possible uses, resolved by item definition and contract:
 
 Do not let a material be sold and simultaneously count toward a repair recipe or quest. One cargo instance has one owner/state at a time. Unique research payouts are claimed once per stable specimen/evidence ID and persisted. A discovery's narrative value may exceed its commodity price; not every artifact should be sellable.
 
-## 11. Transaction integrity and persistence
+## 12. Transaction integrity and persistence
 
 All transaction methods must be atomic: validate first, then mutate wallet, cargo, vendor stock, vessel condition or relationship state. If any step fails, roll back or do not commit. Use stable item/vendor/event IDs, invariant numeric validation, bounded collections and duplicate-transaction protection.
 
@@ -167,7 +167,7 @@ Persist:
 
 Use the existing save coordinator and ordered schema migrations. Never store mutable market stock in a ScriptableObject asset; assets define starting stock, base prices and tuning only. Runtime market state belongs in the save DTO.
 
-## 12. UI and feedback
+## 13. UI and feedback
 
 The dockside hub keeps exclusive modal ownership. Add service actions to existing locations instead of opening competing overlays:
 - Fish Market: inventory selection, offer breakdown, buyer stock/demand, confirm sale.
@@ -177,7 +177,7 @@ The dockside hub keeps exclusive modal ownership. Add service actions to existin
 
 Every transaction displays item, quantity/unit, base price, destination factor, quality/freshness, demand, relationship modifier, total and post-transaction wallet. Purchases display stock and hold fit. Repairs display current/target condition and line-item cost. Errors must explain the failed condition. Keyboard and gamepad focus must be preserved.
 
-## 13. Implementation sequence and acceptance gates
+## 14. Implementation sequence and acceptance gates
 
 ### Runtime foundation update — 2026-11-14
 
@@ -223,7 +223,7 @@ Current boundary: this is a callable runtime transaction service, not yet a play
 - Tune only after the 45–90 minute Greyhaven slice is playable.
 - Do not mark the economy complete until Unity tests and actual player tests demonstrate the loop.
 
-## 14. Research references
+## 15. Research references
 
 - Black Salt Games developer interview, *Trawling in the deep: How Black Salt Games made spooky fishing RPG DREDGE*, Game Developer: https://www.gamedeveloper.com/design/trawling-in-the-deep-how-black-salt-games-made-spooky-fishing-rpg-i-dredge-i-
 - Joel Mason, *Deep Dive: The surprising depth of spatial inventories in DREDGE*, Game Developer: https://www.gamedeveloper.com/design/deep-dive-the-surprising-depth-of-spatial-inventories-in-dredge
