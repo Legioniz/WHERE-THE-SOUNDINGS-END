@@ -30,6 +30,7 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private List<SlotState> slots = new List<SlotState>();
         [SerializeField, Min(0f)] private float engineWearPerSecond = 0.000025f;
         [SerializeField, Min(0f)] private float rodWearPerCatch = 0.0025f;
+        [SerializeField, Min(0f)] private float lanternWearPerNightSecond = 0.000015f;
         [SerializeField] private Light lanternLight;
 
         public string EngineItemId => GetItemId(EngineSlot);
@@ -42,6 +43,8 @@ namespace WhereTheSoundingsEnd.Economy
         public bool HasLantern => !string.IsNullOrEmpty(LanternItemId);
         public float FuelUseMultiplier => HasEngine
             ? Mathf.Lerp(1.20f, 0.82f, EngineCondition) : 1.25f;
+        public float EnginePowerMultiplier => HasEngine
+            ? Mathf.Lerp(0.78f, 1.12f, EngineCondition) : 0.72f;
         public float RodCastMultiplier => HasRod
             ? Mathf.Lerp(0.72f, 1.18f, RodCondition) : 0.72f;
         public float RodControlMultiplier => HasRod
@@ -58,6 +61,12 @@ namespace WhereTheSoundingsEnd.Economy
 
         private void Update()
         {
+            if (HasLantern && LanternCondition > 0.01f)
+            {
+                SeaStateDirector clock = FindFirstObjectByType<SeaStateDirector>();
+                if (clock != null && clock.IsNight)
+                    DamageSlot(LanternSlot, lanternWearPerNightSecond * Time.deltaTime);
+            }
             ApplyLantern();
         }
 
