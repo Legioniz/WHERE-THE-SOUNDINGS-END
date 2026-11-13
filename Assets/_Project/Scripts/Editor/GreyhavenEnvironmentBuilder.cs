@@ -2183,17 +2183,28 @@ namespace WhereTheSoundingsEnd.Editor
         private static GameObject ArtifactCylinder(
             Transform parent, string name, Vector3 position, Vector3 scale, Material material, Quaternion rotation)
         {
-            GameObject go = Cylinder(name, parent, position, scale, material);
-            go.transform.rotation = rotation;
-            Collider collider = go.GetComponent<Collider>();
-            if (collider != null) UnityEngine.Object.DestroyImmediate(collider);
+            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            go.name = name;
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = position;
+            go.transform.localScale = scale;
+            go.transform.localRotation = rotation;
+            go.GetComponent<Renderer>().sharedMaterial = material;
+            UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
             return go;
         }
 
         private static GameObject ArtifactSphere(
             Transform parent, string name, Vector3 position, Vector3 scale, Material material)
         {
-            return Sphere(name, parent, position, scale, material, false);
+            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            go.name = name;
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = position;
+            go.transform.localScale = scale;
+            go.GetComponent<Renderer>().sharedMaterial = material;
+            UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
+            return go;
         }
 
         private static void BuildBoat(Transform parent, InputActionAsset controls, List<CargoItemDefinition> cargoCatalog, MaritimeSurfaceBehaviour seaSurface)
