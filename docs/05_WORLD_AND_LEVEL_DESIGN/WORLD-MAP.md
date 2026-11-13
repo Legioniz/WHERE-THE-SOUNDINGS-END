@@ -12,7 +12,7 @@ The six-region structure is a planning scaffold, not final geometry. Greyhaven i
 
 The player does not begin with an omniscient map. A region remains unknown until the vessel physically enters its authored survey bounds. On first entry, the region is added to the visited-region log and its chart entry is unlocked. Until then, its name, map position, marks, route and compass guidance are withheld.
 
-The runtime chart is a local survey plot rather than a complete world atlas. It displays the vessel position within the active region and only phenomenon sites already discovered by the Sounding Rig. Unknown sites are not represented by question marks or hidden markers. No compass rose, GPS coordinate, heading arrow or route guidance is drawn for unknown water.
+The runtime chart can be opened in uncharted water, where it displays only a blank field with no location identity, marks or bearings. In a visited region it becomes a local survey plot rather than a complete world atlas. It displays the vessel position within the active region and only phenomenon sites already discovered by the Sounding Rig. Unknown sites are not represented by question marks or hidden markers. No compass rose, GPS coordinate, heading arrow or route guidance is drawn for unknown water.
 
 The fixed chart table at Greyhaven is a separate settlement wayfinding prop showing the dock, workplaces and nearby local landmarks. It is not a live map and does not reveal offshore regions.
 
