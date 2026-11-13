@@ -139,3 +139,15 @@ The authoritative work sequence and acceptance criteria are in [Task Backlog](..
 A source-level additive area-streaming foundation has been added for Greyhaven. The generated blockout now separates static terrain, harbour, village, west/east estuary, and lighthouse scenery into six additive scenes. The persistent scene retains the vessel, water simulation, camera, dynamic sites, NPCs and anchors, dialogue, world clock, and save participants. A distance-based preloader uses asynchronous additive scene loads, startup preloading for the three central areas, a larger unload radius, unload grace, and a one-load-at-a-time default. Area roots are serialized inactive and validated for stable ID/revision, root count, static-only contents, mesh/material/shader integrity, and submesh material coverage before activation. Generated terrain and basalt outcrop meshes are saved as reusable Unity assets. Atmosphere caches refresh when area roots activate or unload.
 
 The feature currently exists as source and generated-scene authoring logic, not as committed generated Unity scene outputs. Existing generated Greyhaven scenes require explicit confirmation before rebuilding; declining keeps the current blockout. The clean-checkout path generates the new area scenes through Initialize Project Foundation. Unity Editor compilation, Edit Mode tests, Play Mode travel/boundary/save/NPC tests, and Windows profiling/build remain unperformed. Do not present source-level CI as evidence of zero hitches or a completed runtime integration.
+
+## 2026-11-13 addendum — regional chart discovery source update
+
+The original audit above records its historical baseline at c1ff1975. Since that snapshot, the source has gained a local fog-of-war regional chart:
+
+- RegionalChartController records physically visited regions and adds first visits to the existing unlockedRegionIds progression collection.
+- GreyhavenRuntimeUI now has a Chart [M] overlay. It shows the vessel in the active region and only Sounding Rig-discovered phenomenon sites.
+- Unknown region names and unknown site marks are omitted; the chart supplies no compass, GPS, route line or fabricated bearing.
+- Save schema v7 adds WorldSaveData.visitedRegionIds and a v6-to-v7 migration that starts legacy saves with no invented visits.
+- RegionalChartPolicyTests and RegionalChartSaveTests cover unknown suppression, idempotent visits, discovered-only site marks and save migration/preservation.
+
+**Current status:** source implemented; Unity verification pending. This is a local survey plot, not a world-scale map or inter-region travel system. The Outer Shoals and Hollow Trench remain isolated test scenes. Run the generated-scene rebuild and verify UI, region detection, modal transitions and save/load in Unity 6000.3.28f1 before treating the feature as runtime-accepted.
