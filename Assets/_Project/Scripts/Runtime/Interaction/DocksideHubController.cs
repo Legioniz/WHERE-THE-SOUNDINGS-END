@@ -132,6 +132,41 @@ namespace WhereTheSoundingsEnd.Interaction
         }
     }
 
+    public static class DocksideModalPolicy
+    {
+        public static bool CanOpenDocksideMenu(
+            bool inventoryOpen,
+            bool dialogueOpen,
+            bool gameplayActionBusy,
+            bool frontEndOverlayOpen,
+            float timeScale)
+        {
+            return !inventoryOpen && !dialogueOpen && !gameplayActionBusy &&
+                   !frontEndOverlayOpen && IsFinite(timeScale) && timeScale > 0.0001f;
+        }
+
+        public static bool CanOpenInventory(
+            bool docksideMenuOpen,
+            bool frontEndOverlayOpen,
+            bool dialogueOpen)
+        {
+            return !docksideMenuOpen && !frontEndOverlayOpen && !dialogueOpen;
+        }
+
+        public static bool CanOpenPauseMenu(
+            bool docksideMenuOpen,
+            bool inventoryOpen,
+            bool dialogueOpen)
+        {
+            return !docksideMenuOpen && !inventoryOpen && !dialogueOpen;
+        }
+
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
+    }
+
     /// <summary>
     /// Boat-only location hub. It presents authored interior/furniture menus while keeping
     /// streamed buildings static and all gameplay ownership in persistent runtime systems.
@@ -166,6 +201,7 @@ namespace WhereTheSoundingsEnd.Interaction
         private Label statusLabel;
         private Button residentButton;
         private InputAction interactAction;
+        private InputAction pauseAction;
         private bool ownsInteractAction;
         private bool menuOpen;
         private bool pauseOwned;
@@ -198,6 +234,8 @@ namespace WhereTheSoundingsEnd.Interaction
             locations = definitions == null
                 ? new List<DocksideLocationDefinition>()
                 : new List<DocksideLocationDefinition>(definitions);
+            if (dialogueUI != null)
+                dialogueUI.DocksideHub = this;
         }
 
         private void Start()
@@ -223,6 +261,7 @@ namespace WhereTheSoundingsEnd.Interaction
 
             InputActionMap map = controls.FindActionMap("Boat", false);
             interactAction = map != null ? map.FindAction("Interact", false) : null;
+            pauseAction = map != null ? map.FindAction("Pause", false) : null;
             if (interactAction != null && !interactAction.enabled)
             {
                 interactAction.Enable();
@@ -236,7 +275,20 @@ namespace WhereTheSoundingsEnd.Interaction
         {
             if (ownsInteractAction && interactAction != null)
                 interactAction.Disable();
+            if (dialogueUI != null && dialogueUI.DocksideHub == this)
+                dialogueUI.DocksideHub = null;
             RestoreTimeScale();
+        }
+
+        private void OnDisable()
+        {
+            if (menuOpen)
+                CloseMenu();
+            else
+            {
+                RestoreTimeScale();
+                ClearOwnedPrompt();
+            }
         }
 
         private void Update()
@@ -246,14 +298,19 @@ namespace WhereTheSoundingsEnd.Interaction
             if (menuOpen)
             {
                 Keyboard keyboard = Keyboard.current;
-                if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
+                bool keyboardClose = keyboard != null && keyboard.escapeKey.wasPressedThisFrame;
+                bool gamepadClose = pauseAction != null && pauseAction.WasPressedThisFrame();
+                if (keyboardClose || gamepadClose)
                     CloseMenu();
                 return;
             }
 
-            if (dialogueUI == null || dialogueUI.IsInventoryOpen ||
-                (dialogueUI.Runner != null && dialogueUI.Runner.IsDialogueRunning) ||
-                (seaState != null && seaState.IsGameplayActionBusy))
+            if (dialogueUI == null || !DocksideModalPolicy.CanOpenDocksideMenu(
+                dialogueUI.IsInventoryOpen,
+                dialogueUI.IsDialogueOpen,
+                seaState != null && seaState.IsGameplayActionBusy,
+                dialogueUI.FrontEnd != null && dialogueUI.FrontEnd.IsOverlayOpen,
+                Time.timeScale))
             {
                 ClearOwnedPrompt();
                 return;
@@ -478,7 +535,13 @@ namespace WhereTheSoundingsEnd.Interaction
 
         private void OpenMenu(DocksideLocationDefinition location)
         {
-            if (location == null || menuOpen) return;
+            if (location == null || menuOpen || dialogueUI == null ||
+                !DocksideModalPolicy.CanOpenDocksideMenu(
+                    dialogueUI.IsInventoryOpen,
+                    dialogueUI.IsDialogueOpen,
+                    seaState != null && seaState.IsGameplayActionBusy,
+                    dialogueUI.FrontEnd != null && dialogueUI.FrontEnd.IsOverlayOpen,
+                    Time.timeScale)) return;
             if (seaState != null && !seaState.TryClaimInteraction()) return;
 
             previousTimeScale = Time.timeScale;

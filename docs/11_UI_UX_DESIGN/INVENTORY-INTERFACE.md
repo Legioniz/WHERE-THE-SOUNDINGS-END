@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Runtime UI Toolkit hold interface connected to harvesting and vessel damage; controller/accessibility pass pending  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-10
+> Version: 0.3  
+> Last reviewed: 2026-11-13
 
 ## Purpose
 
@@ -41,7 +41,7 @@ The catalogue panel remains explicitly labelled as prototype test intake. The re
 
 ## Pause and input
 
-Opening the hold pauses scaled gameplay time so the boat and action-driven clock stop while cargo is arranged. Dialogue also freezes sea time. Outside these pause states, the world clock advances only while the boat is moving or a harvest action is active.
+Opening the hold pauses scaled gameplay time so the boat and action-driven clock stop while cargo is arranged. Dialogue also freezes sea time. The hold cannot open over the dockside hub, front-end overlays or dialogue; the pause overlay cannot open while the hold is active. Outside these pause states, the world clock advances only while the boat is moving or a harvest/survey action is active.
 
 ## Current limitations
 

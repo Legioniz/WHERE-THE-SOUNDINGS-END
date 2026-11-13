@@ -4,7 +4,7 @@
 > Status: Runtime schema v6 implemented  
 > Owner: Project lead  
 > Version: 0.3  
-> Last reviewed: 2026-11-12
+> Last reviewed: 2026-11-13
 
 ## Storage layout
 
@@ -70,7 +70,7 @@ Do not repurpose an existing field with a new meaning. Add a new field, migrate,
 
 ## NPC relationship persistence
 
-Save schema v6 extends each NPC state record with `relationshipMemoryIds`, a per-resident list capped at 128 stable event IDs. Validation rejects null/oversized ledgers, duplicate or malformed IDs, and more than 4096 remembered events across the save.
+Save schema v6 is the current save contract and extends each NPC state record with `relationshipMemoryIds`, a per-resident list capped at 128 stable event IDs. Validation rejects null/oversized ledgers, duplicate or malformed IDs, and more than 4096 remembered events across the save.
 
 Schema 5 NPC relationship scores were not modified by gameplay and used zero as their original default. The v5-to-v6 migration maps an empty or zero legacy score to neutral 50, initializes each memory list, and preserves any non-zero score. Later saves store the score and event ledger together.
 
@@ -98,3 +98,5 @@ The coordinator calls ISaveParticipant.CaptureSaveData and ISaveParticipant.Rest
 The DTO is a transport/storage representation only. ScriptableObjects remain authored definitions; they are referenced by stable IDs. Runtime state belongs to systems and participants, not to the save service. Never place MonoBehaviour, GameObject, Transform, Rigidbody, delegates, input actions, or open file handles inside the DTO.
 
 The present prototype wires only the starter boat. Player, clock, inventory, quest, regional simulation, and creature systems must register their own save participants as those systems are implemented.
+
+The Greyhaven dockside hub does not add a separate save DTO or schema field. Its Harbour Inn Guest Ledger calls the existing `AutosaveController.RequestCheckpointAutosave` path; cargo, vessel condition, sea state, NPC relationships and Yarn state remain owned by their existing save participants.

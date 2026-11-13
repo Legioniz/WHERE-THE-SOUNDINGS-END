@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Working priority baseline  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-11
+> Version: 0.3  
+> Last reviewed: 2026-11-13
 
 Priorities are relative to the commercial roadmap. A priority does not imply that the feature is unimplemented; inspect the repository and owning documents before creating work.
 
@@ -14,11 +14,11 @@ P0 work blocks reliable progress or the first complete playable slice.
 
 1. Audit the current repository and classify real implementation status.
 2. Preserve the Unity 6.3 LTS project baseline, assembly boundaries, generated-scene workflow, and existing code conventions.
-3. Close critical boat, camera, action-driven time, scene bootstrap, and interaction integration defects.
-4. Complete and verify the first NPC foundation increment using the existing `NpcAgent`, `NpcScheduleResolver`, Yarn dialogue, interaction, and save contracts. Immediate focus: schedule/interaction correctness, stable IDs, dialogue integration, relationship persistence, tests, and clearly scoped next steps for pathfinding and quest state.
+3. Close critical boat, camera, action-driven time, scene bootstrap, streaming transition, and UI modal-ownership defects. The Greyhaven dockside hub and six static area-scene definitions now exist in source; Unity verification remains P0.
+4. Verify the existing NPC foundation and dockside resident handoff using NpcAgent, NpcScheduleResolver, Yarn dialogue, DocksideHubController and save contracts. Stable IDs, schedules, relationship persistence and four resident dialogue nodes exist; Unity integration, obstacle-aware pathfinding and quest state remain open.
 5. Verify save/load/autosave and backup recovery; preserve migration compatibility before adding new persisted systems.
 6. Establish the first complete expedition loop and the acceptance criteria for the vertical slice.
-7. Maintain repository static checks, C# syntax checks, Edit Mode tests, and Unity verification instructions.
+7. Maintain repository static checks, C# syntax checks, Edit Mode tests, Play Mode streaming/modal integration coverage, and Unity verification instructions.
 
 **Do not** replace working systems merely to make them look more abstract or generalized. Make the smallest coherent change that closes an evidenced gap.
 

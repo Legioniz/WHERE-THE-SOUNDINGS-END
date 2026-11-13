@@ -256,6 +256,9 @@ def main() -> int:
             "RequestCheckpointAutosave",
             "BuildCatchInspection",
             "BuildVesselInspection",
+            "DocksideModalPolicy.CanOpenDocksideMenu",
+            "pauseAction.WasPressedThisFrame()",
+            "private void OnDisable()",
         ):
             if required_text not in dockside_source:
                 failures.append(f"DocksideHubController is missing expected interaction feature: {required_text}")
@@ -267,6 +270,9 @@ def main() -> int:
             "MovingVesselCannotOpenLocationEvenWhenNearby",
             "VerticalSeparationDoesNotChangeShoreApproachDistance",
             "InvalidOrNonFiniteInputsAreRejected",
+            "DocksideMenuCannotOpenOverInventoryDialogueGameplayActionOrFrontEnd",
+            "InventoryCannotOpenOverDocksideOrFrontEndOrDialogue",
+            "PauseMenuCannotOpenOverDocksideInventoryOrDialogue",
         ):
             if f"void {required_test}()" not in dockside_tests:
                 failures.append(f"DocksideAccessPolicyTests is missing regression: {required_test}")
@@ -286,6 +292,30 @@ def main() -> int:
         resident_interaction = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs").read_text(encoding="utf-8")
         if "externallyManagedByDocksideHub" not in resident_interaction:
             failures.append("HarbourmasterInteraction must support external dockside hub ownership.")
+
+        runtime_ui_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "DocksideModalPolicy.CanOpenInventory",
+            "docksideHub.IsMenuOpen",
+            "frontEnd.IsOverlayOpen",
+            "public bool IsDialogueOpen",
+        ):
+            if required_text not in runtime_ui_source:
+                failures.append(f"GreyhavenRuntimeUI is missing modal exclusion: {required_text}")
+
+        front_end_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "DocksideModalPolicy.CanOpenPauseMenu",
+            "GameplayUI.IsInventoryOpen",
+            "GameplayUI.IsDialogueOpen",
+            "public bool IsOverlayOpen",
+        ):
+            if required_text not in front_end_source:
+                failures.append(f"GreyhavenFrontEndUI is missing modal exclusion: {required_text}")
+
+        resident_interaction = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs").read_text(encoding="utf-8")
+        if "if (externallyManagedByDocksideHub || controls == null) return;" not in resident_interaction:
+            failures.append("Externally managed NPC triggers must not compete for the shared Interact action.")
 
         setup_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
         if "Install Greyhaven area streaming?" not in setup_source:

@@ -3,8 +3,9 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Working production baseline — estimate, not a release commitment  
 > Owner: Project lead  
-> Version: 0.2  
+> Version: 0.3  
 > Baseline date: 2026-11-11  
+> Last reviewed: 2026-11-13  
 > Planned review: weekly; reforecast at each milestone
 
 ## 1. Production target
@@ -71,7 +72,8 @@ The dates below are approximate planning windows counted from 11 November 2026. 
 - Identify implemented, partial, planned, duplicate, and unverified systems. Create a prioritized gap list without rewriting stable systems.
 - Confirm the supported Unity editor version and document local setup and repeatable verification steps.
 - Close critical integration gaps in boat handling, camera, sea clock, save/load, scene bootstrap, and generated blockouts.
-- Advance the existing Greyhaven NPC foundation: stable IDs, schedules, scene interactions, Yarn dialogue, relationship persistence, test coverage, and a clear path for later navigation and quest integration.
+- Advance the existing Greyhaven NPC foundation: stable IDs, schedules, dockside-menu resident handoff, Yarn dialogue, relationship persistence, test coverage, and a clear path for later navigation and quest integration.
+- Verify the generated Greyhaven dockside hub, exclusive UI modal ownership and six-scene static-area streaming in Unity; these source foundations now exist but have not passed Unity runtime acceptance.
 - Establish a first end-to-end expedition skeleton and a two-week sprint/review rhythm.
 
 ### Phase 2 — Complete core gameplay loop and vertical slice

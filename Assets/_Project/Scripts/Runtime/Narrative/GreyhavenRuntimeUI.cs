@@ -8,6 +8,7 @@ using Yarn.Unity;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.NPC;
+using WhereTheSoundingsEnd.Interaction;
 using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Narrative
@@ -49,6 +50,8 @@ namespace WhereTheSoundingsEnd.Narrative
         private bool _pauseOwned;
         private float _timeScaleBeforeUi;
         private SeaStateDirector _seaState;
+        private GreyhavenFrontEndUI frontEnd;
+        private DocksideHubController docksideHub;
         private string _selectedInstanceId;
         private int _selectedRotation;
         private readonly List<Action> _optionActions = new List<Action>();
@@ -59,15 +62,21 @@ namespace WhereTheSoundingsEnd.Narrative
         public SpatialCargoHold CargoHold { get => cargoHold; set => cargoHold = value; }
         public InputActionAsset Controls { get => controls; set => controls = value; }
         public bool IsInventoryOpen => _inventoryOpen;
+        public bool IsDialogueOpen => dialogueRunner != null && dialogueRunner.IsDialogueRunning;
+        public GreyhavenFrontEndUI FrontEnd => frontEnd;
+        public DocksideHubController DocksideHub { get => docksideHub; set => docksideHub = value; }
 
         private void Start()
         {
             _seaState = FindFirstObjectByType<SeaStateDirector>();
             InitializeUi();
             BindInventoryInput();
-            GreyhavenFrontEndUI frontEnd = GetComponent<GreyhavenFrontEndUI>();
+            frontEnd = GetComponent<GreyhavenFrontEndUI>();
             if (frontEnd != null)
+            {
+                frontEnd.GameplayUI = this;
                 frontEnd.Initialize(document, controls, FindFirstObjectByType<SaveGameCoordinator>());
+            }
         }
 
         private void OnDestroy()
@@ -632,7 +641,10 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
             }
 
-            if ((dialogueRunner != null && dialogueRunner.IsDialogueRunning) ||
+            if (!DocksideModalPolicy.CanOpenInventory(
+                    docksideHub != null && docksideHub.IsMenuOpen,
+                    frontEnd != null && frontEnd.IsOverlayOpen,
+                    IsDialogueOpen) ||
                 (_seaState != null && !_seaState.TryClaimInteraction()))
                 return;
 
@@ -700,7 +712,9 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
             }
 
-            if (_inventoryOpen || Time.timeScale <= 0.0001f || dialogueRunner.IsDialogueRunning)
+            if (_inventoryOpen || (docksideHub != null && docksideHub.IsMenuOpen) ||
+                (frontEnd != null && frontEnd.IsOverlayOpen) ||
+                Time.timeScale <= 0.0001f || dialogueRunner.IsDialogueRunning)
                 return;
 
             if (npc != null && !npc.CanTalk)

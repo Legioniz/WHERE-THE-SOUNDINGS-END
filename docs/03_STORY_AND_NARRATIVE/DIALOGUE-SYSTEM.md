@@ -1,10 +1,10 @@
 # Dialogue System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Four relationship-reactive Greyhaven resident conversations expanded across seven trust tiers; runtime verification pending  
+> Status: Four relationship-reactive resident conversations and dockside hub handoff implemented; Unity/Yarn runtime verification pending  
 > Owner: Project lead  
-> Version: 0.4  
-> Last reviewed: 2026-11-12
+> Version: 0.5  
+> Last reviewed: 2026-11-13
 
 ## Runtime stack
 
@@ -14,19 +14,19 @@ The Greyhaven scene generator imports the Yarn project, creates a `DialogueRunne
 
 ## First interaction loop
 
-1. The boat enters the Harbourmaster's trigger radius near the Greyhaven quay.
-2. The HUD displays an E prompt.
-3. Press **E** to start node `Greyhaven_Harbourmaster`.
+1. Bring the vessel to a named shore approach and reduce horizontal speed to 0.85 m/s or below.
+2. The HUD displays an E prompt for the nearest accessible dockside location.
+3. Press **E** to open the dockside hub, select Harbour Office, then choose SPEAK WITH HARBOURMASTER to start node `Greyhaven_Harbourmaster`.
 4. The dialogue panel displays the speaker and line. Press **Space**, **Enter**, or CONTINUE to advance.
 5. When Yarn offers choices, they appear as buttons. Click a choice or press **1–5**.
 6. Yarn evaluates the selected branch, updates persistent variables, and continues until the node ends.
 7. The dialogue panel closes and scaled gameplay time resumes.
 
-The starter NPC is a primitive blockout representation. Interaction is from the boat because the project does not yet have a walkable on-foot character controller.
+The player remains aboard the vessel. The hub presents authored location interiors and furniture actions as a menu; it does not create walkable rooms or an on-foot character controller. The menu closes before dialogue begins so the Yarn presenter can own the dialogue pause and relationship state.
 
 ## Implemented Greyhaven resident dialogue
 
-The generated scene now exposes four boat-proximity interactions:
+The generated scene exposes four resident conversations through the persistent seven-location dockside hub. The generated NPC trigger components remain available for hand-authored scenes but are marked as externally managed in Greyhaven, preventing duplicate E prompts and competing ownership of the shared Interact action:
 
 - Harbourmaster — missing boats, the silent lighthouse bell, channel markers, watchkeeping, weather signs and the sounding-buoy recovery job.
 - Mara Venn — fish species, catch quality, freshness, market routines, unusual catches, missing crews and honest sale assessment.
@@ -68,12 +68,14 @@ The Yarn project declares English as its base language and uses Yarn's line IDs/
 
 - Individual trust tiers, a visible 0–100 meter, relationship-event commands, once-only event memory and per-resident conversation/trade gates are implemented for all four Greyhaven residents.
 - The future market can read `CanTrade` and `BuyPriceMultiplier`; sale transactions, price application, repairs, quest rewards and global community reputation remain unimplemented.
-- NPC movement uses short direct waypoints, not NavMesh pathfinding. On-foot interaction, interiors, animation, voice-over, facial animation and localization packages are not connected.
+- NPC movement uses short direct waypoints, not NavMesh pathfinding. Walkable on-foot interaction and physical 3D interiors, animation, voice-over, facial animation and translated localization packages are not connected. Menu-based interior descriptions and furniture actions are implemented by DocksideHubController.
 - Dialogue choices update Yarn variables; broader quest state and world changes must be connected through explicit commands/functions and authoritative gameplay systems.
 - Repository checks can verify that all four node sources contain the seven relationship tier boundaries, a character quote option and representative daily topics. These checks do not parse or compile Yarn.
 - Yarn compilation, line presentation, conditional-option filtering, command dispatch and all seven trust tiers must still be verified in Unity 6000.3.28f1 after package import. Static GitHub C# syntax checks do not compile Yarn or resolve Unity symbols.
 
 ## Related systems
+
+- `docs/08_TECHNICAL_DESIGN/GREYHAVEN-DOCKSIDE-INTERACTION-HUB.md`
 
 - `docs/06_GAMEPLAY_SYSTEMS/SAVE-AND-LOAD.md`
 - `docs/08_TECHNICAL_DESIGN/SAVE-DATA-STRUCTURE.md`

@@ -1,10 +1,10 @@
 # Project Structure
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Connected Unity prototype with cargo, dialogue, atmospheric horror, and deep-ocean survey sandboxes  
+> Status: Connected Unity prototype with boat physics, cargo, NPC dialogue, dockside hub, additive Greyhaven streaming and survey sandboxes  
 > Owner: Project lead  
-> Version: 0.6  
-> Last reviewed: 2026-11-12
+> Version: 0.7  
+> Last reviewed: 2026-11-13
 
 ## Repository root
 
@@ -30,7 +30,7 @@ Assets/_Project is the game's first-party content boundary.
 | Scripts/Runtime/Persistence/ | Versioned save DTOs, manual/autosave file storage, autosave scheduling, and scene save coordination |
 | Scripts/Runtime/Inventory/ | Spatial cargo definitions, grid geometry, hold placement and persistence |
 | Scripts/Runtime/World/ | Action-driven sea state, regional survey profiles, Sounding Rig, acoustic event contract, world incidents and site discovery |
-| Scripts/Runtime/Narrative/ | Yarn Spinner dialogue state, runtime UI Toolkit presenter, Harbourmaster interaction and narrative persistence |
+| Scripts/Runtime/Narrative/ | Yarn Spinner dialogue state, runtime UI Toolkit presenter, front-end title/pause/save/settings UI, modal coordination, legacy resident interaction and narrative persistence |
 | Scripts/Runtime/Interaction/ | Persistent boat-operated location hub, dockside access policy and furniture action presentation |
 | Dialogue/ | Yarn project and authored dialogue source |
 | Settings/UI/ | Runtime UI Toolkit PanelSettings assets |
@@ -65,9 +65,11 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Inventory/CargoGridGeometry.cs: rotation, normalization, blocked-cell and collision validation.
 - Inventory/SpatialCargoHold.cs: placement/move/remove runtime model and save participant.
 - Narrative/YarnDialogueSaveParticipant.cs: typed Yarn variable persistence inside the campaign save.
-- Narrative/GreyhavenRuntimeUI.cs: combined cargo-hold UI Toolkit screen and Yarn dialogue presenter.
+- Narrative/GreyhavenRuntimeUI.cs: cargo-hold UI Toolkit screen, Yarn dialogue presenter, and modal exclusion between inventory, dialogue, front-end overlays and dockside hub.
+- Narrative/GreyhavenFrontEndUI.cs: title, pause, manual save/load, settings and modal pause ownership.
 - Narrative/HarbourmasterInteraction.cs: boat-proximity trigger and E-key dialogue start for hand-authored scenes; generated Greyhaven residents are routed through the dockside hub.
-- Interaction/DocksideHubController.cs: stationary-vessel access checks, seven location menus, furniture inspections, resident dialogue handoff and checkpoint action routing.
+- Interaction/DocksideHubController.cs: stationary-vessel access checks, seven location menus, furniture inspections, resident dialogue handoff, gamepad/keyboard close, and exclusive modal pause ownership.
+- Interaction/DocksideHubController.cs (DocksideModalPolicy): shared deterministic rules preventing dockside, inventory, dialogue and pause overlays from opening over one another.
 - Dialogue/Greyhaven.yarnproject: Yarn Spinner 3.x project definition.
 - Dialogue/Source/Greyhaven_Harbourmaster.yarn: branching first conversation with the Harbourmaster.
 - Boat/BoatPrototypeController.cs: force-driven forward/reverse propulsion, opposing-throttle braking, speed-dependent rudder and vessel-condition response.
@@ -75,7 +77,7 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - World/MaritimeSurfaceBehaviour.cs: shared analytic wave height/normal/velocity samples used by both the rendered sea mesh and buoyancy forces.
 - Camera/CameraFollow2_5D.cs: fixed-angle orthographic follow camera with configurable framing.
 - Editor/ProjectFoundationSetup.cs: creates URP assets, project settings, Greyhaven, and any missing deep-ocean survey scenes.
-- Editor/GreyhavenEnvironmentBuilder.cs: builds the Greyhaven harbour scene, starter boat, cargo catalogue, Yarn dialogue, save/autosave coordinator, shallow survey profile, and Harbourmaster interaction.
+- Editor/GreyhavenEnvironmentBuilder.cs: builds Greyhaven, the starter boat, cargo catalogue, Yarn dialogue, save/autosave coordinator, four NPCs, persistent dockside hub, six static additive area scenes, and area streaming definitions.
 - World/GreyhavenTerrainProfile.cs: deterministic multi-scale Greyhaven shoreline/elevation profile and terrain surface classification shared by the Editor builder and Edit Mode tests. Editor/DeepOceanSurveySandboxBuilder.cs generates Outer Shoals and Hollow Trench survey scenes with regional profiles and authored evidence sites.
 
 ## Greyhaven environment generation
@@ -106,4 +108,4 @@ The region component contains baseline profiles for all six named regions. The O
 
 The survey subsystem publishes through AcousticEventBus. AcousticWorldListener is connected in generated scenes: it scores signals by range, loudness, sensitivity and background noise, deduplicates event IDs, applies small sea disturbance, and exposes a SignalHeard event for future species-specific perception. No predator, fish or creature state machine subscribes yet; those listeners must be added to existing AI state machines rather than creating a parallel threat spawner.
 
-Save schema v5 includes survey state, weather/horror timers, inspected site IDs, acoustic history and temporary atmosphere state. See [Deep-Ocean Survey Implementation](DEEP-OCEAN-SURVEY-IMPLEMENTATION.md) for the file-by-file dependency map, runtime flow, tuning assumptions and remaining integration work.
+Save schema v6 includes all schema-v5 survey/weather/horror/acoustic/atmosphere state plus per-NPC relationship-event memory IDs. The dockside hub adds no save fields; its guest ledger requests an existing autosave checkpoint. See [Deep-Ocean Survey Implementation](DEEP-OCEAN-SURVEY-IMPLEMENTATION.md) for the file-by-file dependency map, runtime flow, tuning assumptions and remaining integration work.

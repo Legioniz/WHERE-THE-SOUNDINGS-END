@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Runtime foundation hardened; Unity verification pending  
 > Owner: Project lead  
-> Version: 0.6  
-> Last reviewed: 2026-11-12
+> Version: 0.7  
+> Last reviewed: 2026-11-13
 
 ## Player-facing behaviour
 
@@ -99,7 +99,7 @@ Implemented now:
 - Hull/engine condition and wreck-site daily depletion.
 - Greyhaven NPC stable IDs, last activity IDs, region IDs, individual relationship scores and bounded relationship-event memory IDs through NpcAgent (schema v6).
 - Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).
-- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs in schema v5.
+- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs introduced in schema v5 and retained in current schema v6.
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
 
@@ -110,10 +110,10 @@ Not yet connected because the corresponding gameplay systems do not exist in the
 - Full quest, journal evidence and discovery progression; NPC dialogue now changes individual relationship scores and persists a bounded event-memory ledger, while structured world-action memories remain future work.
 - Regional fish stocks, creature states, threat state, encounter cooldowns and random stream ownership.
 - Persistent physical state for deep-ocean sites (brine-pool disturbance, vent/seep condition, hydrate stability, whale-fall succession); current site markers record discovery only.
-- A player-facing save/load menu, save confirmation prompt, and UI feedback for autosave status. Autosaving itself is implemented.
+- A dedicated save confirmation prompt and clear player-facing autosave status indicator. The title/pause front end now exposes five manual slots, a separate autosave load path, save/load/delete actions and operation feedback; autosave itself is implemented.
 - Loading into a different scene automatically. The coordinator currently requires the target scene to be active before restoring its participants.
 
-A field's presence in SaveGameData is a persistence contract, not proof that the related gameplay feature is implemented. The current cargo and dialogue adapters are runtime-ready but still need authored item definitions and a configured DialogueRunner in Unity. Add a focused ISaveParticipant when each system gains authoritative runtime state.
+A field's presence in SaveGameData is a persistence contract, not proof that the related gameplay feature is implemented. Greyhaven's Editor builder generates its starter cargo definitions and configured DialogueRunner; a clean Unity bootstrap and runtime save/restore pass are still required to verify those generated references. Add a focused ISaveParticipant when each new system gains authoritative runtime state.
 
 ## Related documents
 
@@ -123,7 +123,7 @@ A field's presence in SaveGameData is a persistence contract, not proof that the
 
 ## Deep-ocean survey persistence
 
-Save schema v5 adds three fields to WorldSaveData:
+Schema v5 introduced three survey fields to WorldSaveData; these fields remain part of the current schema v6:
 - soundingPulseCount: monotonic accepted-pulse sequence used in stable opportunity IDs;
 - discoveredPhenomenonSiteIds: stable site IDs already found by the player;
 - evaluatedSurveyOpportunityIds: recent opportunity IDs retained as a duplicate-evaluation guard.
@@ -141,6 +141,9 @@ Schema v5 also records:
 - acoustic pressure, latest heard event/region/position/timestamp, and a bounded 128-event duplicate guard;
 - maritime incident countdown, caption/hush durations, hush blend, and active false-navigation-light position/remaining duration.
 
-Schema 4 saves migrate with weather defaults derived from their old weather label, a safe weather-shift delay, no pending bird event, and empty acoustic/inspection history. Existing schema 0–3 migrations remain ordered and preserved.
+Schema 4 saves migrate with weather defaults derived from their old weather label, a safe weather-shift delay, no pending bird event, and empty acoustic/inspection history. Existing schema 0–3 migrations remain ordered and preserved. The current v5-to-v6 migration separately initializes NPC relationship-memory ledgers and maps legacy zero relationship values to neutral 50.
 
 Generated scenes include an AcousticWorldListener. It subscribes to AcousticEventBus, scores audibility by range/loudness/sensitivity/background noise, deduplicates heard IDs, applies a small disturbance response, and exposes a scored SignalHeard event for future creature or navigation listeners. It does not poll AudioSources.
+
+
+The Harbour Inn Guest Ledger uses the existing `AutosaveController.RequestCheckpointAutosave` method and does not introduce a new save kind, file, DTO or schema migration. The dockside UI is modal-exclusive with the inventory, dialogue and front-end pause/save/settings screens; it pauses simulation while open and restores the previous time scale on close.

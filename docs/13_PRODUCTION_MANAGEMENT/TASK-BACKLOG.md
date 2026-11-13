@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Active M0 and first vertical-slice backlog  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-12
+> Version: 0.3  
+> Last reviewed: 2026-11-13
 
 This is the authoritative implementation backlog. The [Implementation Audit](IMPLEMENTATION-AUDIT.md) records what exists and what is still unverified. The [Development Roadmap](DEVELOPMENT-ROADMAP.md) owns the release forecast; this file owns work order, dependencies and acceptance criteria.
 
@@ -25,11 +25,12 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 | M0-01 | P0 | Resolve known Greyhaven builder semantic compile defect | S | None | Source corrected in `06a7004`; Unity compiler confirmation pending |
 | M0-02 | P0 | Perform clean Unity import and lock project metadata | M | M0-01 | Open |
 | M0-03 | P0 | Verify generated scenes and Build Settings bootstrap | M | M0-02 | Open |
-| M0-04 | P0 | Run the full existing Edit Mode suite | M | M0-02 | Open |
-| M0-05 | P0 | Add and run focused Play Mode integration tests | L | M0-03, M0-04 | Open |
+| M0-04 | P0 | Run all 13 current Edit Mode test source files in Unity | M | M0-02 | Authored; Unity execution open |
+| M0-05 | P0 | Expand and run focused Play Mode integration tests | L | M0-03, M0-04 | Greyhaven streaming test authored; Unity execution and broader coverage open |
 | M0-06 | P0 | Validate boat, water and camera behavior together | L | M0-03, M0-05 | Source integration/cadence corrected; Unity acceptance open |
-| M0-07 | P0 | Verify save/load, autosave, backups and participant restore | M | M0-03, M0-05 | Open |
+| M0-07 | P0 | Verify save/load, autosave, backups and participant restore | M | M0-03, M0-05 | Front-end save UI and schema v6 source present; Unity integration open |
 | M0-08 | P0 | Produce and smoke-test a clean Windows 64-bit development build | M | M0-03 through M0-07 | Open |
+| M0-10 | P0 | Verify dockside hub, modal exclusivity and Greyhaven additive streaming in Unity | M | M0-03, M0-04, M0-05 | Source/tests authored; Unity verification open |
 | M0-09 | P1 | Decide how to enforce main-branch review/check requirements | S | Owner plan/visibility decision | Blocked by private-repository plan limitation |
 
 ### M0-01 — Resolve the known semantic compile defect
@@ -75,7 +76,7 @@ Add a Play Mode test assembly and tests for:
 - camera movement lead, bank and wave response without feedback into physics;
 - sea-time advance/hold behavior during movement, harvesting, dialogue and inventory;
 - fishing/dredging completion, cargo capacity and salvage depletion;
-- NPC schedules, interaction, dialogue pause/resume and relationship persistence;
+- NPC schedules, dockside resident handoff, modal exclusivity, dialogue pause/resume and relationship persistence;
 - save, load, autosave lifecycle and recovery.
 
 Keep deterministic math in Edit Mode; use Play Mode only where Unity scene/runtime integration matters.
@@ -115,6 +116,10 @@ Verify:
 ### M0-08 — Windows build smoke test
 
 Build from the verified Unity editor and generated Build Settings. Launch on a clean Windows environment, start Greyhaven, exercise boat movement and one harvesting/survey action, save, quit and relaunch. Record build configuration, machine, results and any known limitations.
+
+### M0-10 — Dockside and streaming Unity acceptance
+
+Run the generated Greyhaven scene in Unity 6000.3.28f1. Rebuild the six additive area scenes, execute the streaming Play Mode test, run all dockside Edit Mode tests, verify all seven location menus, test Escape/gamepad Start close, prove inventory/dialogue/pause mutual exclusion, and verify the Inn checkpoint uses the existing autosave. Record editor version, hardware, pass/fail and any transition hitch observations.
 
 ### M0-09 — Remote repository protection decision
 

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.Interaction;
 
 namespace WhereTheSoundingsEnd.Narrative
 {
@@ -14,6 +15,8 @@ namespace WhereTheSoundingsEnd.Narrative
         private UIDocument document;
         private InputActionAsset controls;
         private SaveGameCoordinator saves;
+        public GreyhavenRuntimeUI GameplayUI { get; set; }
+        public bool IsOverlayOpen => page != "game";
         private VisualElement overlay, content, root;
         private Label feedback;
         private InputAction pauseAction;
@@ -50,8 +53,25 @@ namespace WhereTheSoundingsEnd.Narrative
         private void OnPause(InputAction.CallbackContext context)
         {
             if (page == "title") return;
-            if (page == "pause") Resume();
-            else OpenPause();
+            if (page == "pause")
+            {
+                Resume();
+                return;
+            }
+
+            if (page != "game")
+            {
+                OpenPause();
+                return;
+            }
+
+            if (!DocksideModalPolicy.CanOpenPauseMenu(
+                GameplayUI != null && GameplayUI.DocksideHub != null && GameplayUI.DocksideHub.IsMenuOpen,
+                GameplayUI != null && GameplayUI.IsInventoryOpen,
+                GameplayUI != null && GameplayUI.IsDialogueOpen))
+                return;
+
+            OpenPause();
         }
 
         private void BuildShell()

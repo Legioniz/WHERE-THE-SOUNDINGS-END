@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Sounding Rig and three survey scenes generated; physical site simulation remains in progress  
 > Owner: Project lead  
-> Version: 0.1  
-> Last reviewed: 2026-11-10
+> Version: 0.2  
+> Last reviewed: 2026-11-13
 
 ## 1. Scope and implementation boundary
 
@@ -27,7 +27,7 @@ The project remains Unity 6 LTS / C# / URP. The Greyhaven environment generator 
 9. Nearby authored phenomenon-site markers may be discovered and add a short evidence note.
 10. The controller publishes an AcousticSignal. AcousticWorldListener evaluates hearing score, deduplicates the event, adds the small sea-disturbance response and exposes SignalHeard to future creature/navigation adapters.
 11. DeepOceanSiteInteractionController allows close-range field-note inspection and saves inspected site IDs.
-12. Survey, weather, horror cooldowns, acoustic history and temporary maritime atmosphere state are preserved in SaveGameData schema v5.
+12. Survey, weather, horror cooldowns, acoustic history and temporary maritime atmosphere state were introduced in SaveGameData schema v5 and remain preserved in current schema v6.
 
 A pulse takes approximately 1.25 real seconds and temporarily counts as an action for the action-driven sea clock. UI pause still prevents the world clock from advancing.
 
@@ -241,3 +241,8 @@ The subsystem is not complete until:
 - acoustic threat responses use the existing Threat Director and warning/escape rules;
 - Unity Edit Mode and Play Mode tests pass in the pinned editor;
 - representative scene performance has been profiled.
+
+
+## Current save-schema note — 2026-11-13
+
+The survey, weather, horror, acoustic-history and temporary-atmosphere fields described here were introduced in schema v5 and remain part of current schema v6. Schema v6 subsequently adds bounded per-NPC relationship-event memory; it does not change the survey field ownership or stable site/opportunity IDs. See SAVE-DATA-STRUCTURE.md for the current migration contract.

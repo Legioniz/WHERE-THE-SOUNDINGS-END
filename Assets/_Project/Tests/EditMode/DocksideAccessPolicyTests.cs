@@ -51,6 +51,36 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void DocksideMenuCannotOpenOverInventoryDialogueGameplayActionOrFrontEnd()
+        {
+            Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(true, false, false, false, 1f));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, true, false, false, 1f));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, true, false, 1f));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, false, true, 1f));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, false, false, 0f));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, false, false, float.NaN));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, false, false, float.PositiveInfinity));
+        }
+
+        [Test]
+        public void InventoryCannotOpenOverDocksideOrFrontEndOrDialogue()
+        {
+            Assert.IsFalse(DocksideModalPolicy.CanOpenInventory(true, false, false));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenInventory(false, true, false));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenInventory(false, false, true));
+            Assert.IsTrue(DocksideModalPolicy.CanOpenInventory(false, false, false));
+        }
+
+        [Test]
+        public void PauseMenuCannotOpenOverDocksideInventoryOrDialogue()
+        {
+            Assert.IsFalse(DocksideModalPolicy.CanOpenPauseMenu(true, false, false));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenPauseMenu(false, true, false));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenPauseMenu(false, false, true));
+            Assert.IsTrue(DocksideModalPolicy.CanOpenPauseMenu(false, false, false));
+        }
+
+        [Test]
         public void InvalidOrNonFiniteInputsAreRejected()
         {
             Assert.IsFalse(DocksideAccessPolicy.IsAccessible(
