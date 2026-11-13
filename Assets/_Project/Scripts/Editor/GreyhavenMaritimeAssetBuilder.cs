@@ -107,7 +107,7 @@ namespace WhereTheSoundingsEnd.Editor
         {
             Transform root = Group("Lighthouse_Headland_Maritime_Assets", parent);
             float ground = Ground(-86f, -75f);
-            BuildWeatherStation(root, "Keepers_Weather_Station", new Vector3(-86f, ground, -75f), timber, iron, rust);
+            BuildWeatherStation(root, "Keepers_Weather_Station", new Vector3(-86f, ground, -75f), timber, iron, rust, glass);
             BuildLantern(root, "Keepers_Storm_Lantern", new Vector3(-82.5f, ground + 0.12f, -72.2f), iron, rust, glass);
             BuildNetFloatLine(root, "Headland_Rope_And_Float_Remnants", new Vector3(-89f, ground + 0.08f, -69f), canvas, glass, rust);
             Log(root, "Headland_Wind_Felled_Branch", new Vector3(-91f, ground + 0.06f, -77f),
@@ -319,7 +319,7 @@ namespace WhereTheSoundingsEnd.Editor
             }
         }
 
-        private static void BuildWeatherStation(Transform p, string name, Vector3 pos, Material timber, Material iron, Material rust)
+        private static void BuildWeatherStation(Transform p, string name, Vector3 pos, Material timber, Material iron, Material rust, Material glass)
         {
             for (int i = 0; i < 3; i++)
             {
@@ -333,10 +333,9 @@ namespace WhereTheSoundingsEnd.Editor
             Between(p, name + "_Vane_Arrow", pos + new Vector3(-0.45f, 2.25f, 0f),
                 pos + new Vector3(0.45f, 2.25f, 0f), 0.045f, iron);
             Between(p, name + "_Rain_Gauge", pos + new Vector3(0.55f, 0.1f, 0.45f),
-                pos + new Vector3(0.55f, 1.1f, 0.45f), 0.08f, glassSafe(iron));
+                pos + new Vector3(0.55f, 1.1f, 0.45f), 0.08f, glass);
         }
 
-        private static Material glassSafe(Material fallback) { return fallback; }
 
         private static void BuildNetFloatLine(Transform p, string name, Vector3 pos, Material rope, Material floatMaterial, Material weight)
         {
