@@ -987,7 +987,7 @@ def main() -> int:
 
         telemetry_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/ExpeditionEconomyTelemetry.cs").read_text(encoding="utf-8")
         for required_text in (
-            "wallet.TransactionApplied", "fuel.FuelConsumed",
+            "subscribedWallet.TransactionApplied", "subscribedFuel.FuelConsumed",
             "ObservePropulsion", "OnTransactionApplied", "OnFuelConsumed",
             "subscribedWallet", "subscribedFuel",
             "if (subscribedWallet == wallet) return;", "if (subscribedFuel == fuel) return;",
