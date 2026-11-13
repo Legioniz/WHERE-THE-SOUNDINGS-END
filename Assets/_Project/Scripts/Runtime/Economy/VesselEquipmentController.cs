@@ -234,23 +234,30 @@ namespace WhereTheSoundingsEnd.Economy
         public bool TryRepairSlot(string slotId, EconomyWalletController wallet, string transactionId,
             out long chargedCents, out string error)
         {
+            return TryRepairSlot(slotId, wallet, transactionId, GetRepairQuoteCents(slotId),
+                out chargedCents, out error);
+        }
+
+        public bool TryRepairSlot(string slotId, EconomyWalletController wallet, string transactionId,
+            long quotedCents, out long chargedCents, out string error)
+        {
             chargedCents = 0L;
-            long quote = GetRepairQuoteCents(slotId);
-            if (wallet == null || quote <= 0L || string.IsNullOrWhiteSpace(transactionId) ||
-                transactionId.Length > 128 || transactionId != transactionId.Trim() ||
-                wallet.HasProcessedTransaction(transactionId))
+            long baseQuote = GetRepairQuoteCents(slotId);
+            if (wallet == null || quotedCents <= 0L || quotedCents > baseQuote ||
+                string.IsNullOrWhiteSpace(transactionId) || transactionId.Length > 128 ||
+                transactionId != transactionId.Trim() || wallet.HasProcessedTransaction(transactionId))
             {
                 error = "The equipment repair quote or transaction is invalid.";
                 return false;
             }
             SlotState slot = FindSlot(slotId);
-            if (slot == null || !wallet.TryApplyTransaction(transactionId, -quote))
+            if (slot == null || !wallet.TryApplyTransaction(transactionId, -quotedCents))
             {
                 error = "Insufficient funds. The equipment remains unchanged.";
                 return false;
             }
             slot.condition = 1f;
-            chargedCents = quote;
+            chargedCents = quotedCents;
             ApplyLantern();
             error = null;
             return true;
