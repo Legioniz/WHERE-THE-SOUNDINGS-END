@@ -107,7 +107,9 @@ namespace WhereTheSoundingsEnd.Economy
             if (!TomasAvailable) { error = "Tomas is not available to trade right now."; return false; }
             if (fuel == null || wallet == null) { error = "Fuel services are unavailable."; return false; }
             float amount = fuel.GetRefuelAmount(requestedUnits);
-            long quote = EconomyPolicy.CalculateFuelCostCents((decimal)amount, (decimal)fuelUsdPerUnit);
+            long quote = ApplyDiscount(
+                EconomyPolicy.CalculateFuelCostCents((decimal)amount, (decimal)fuelUsdPerUnit),
+                GetRelationshipDiscount(tomas != null ? tomas.RelationshipScore : 0));
             if (amount <= 0f || quote <= 0L) { error = "The tank is already full or the requested amount is invalid."; return false; }
             if (!IsValidTransactionId(transactionId) || wallet.HasProcessedTransaction(transactionId))
             { error = "The fuel transaction reference is invalid or already used."; return false; }
