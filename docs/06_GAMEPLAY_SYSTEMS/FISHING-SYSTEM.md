@@ -45,9 +45,19 @@ Fish metadata is authored on CargoItemDefinition: habitat flags, preferred techn
 
 The current habitat resolver is a Greyhaven prototype heuristic based on cast position and distance from the settlement. Depth is an authored habitat estimate, not live bathymetry. It must be replaced by a region-owned fishing-ground/depth data source before expanding beyond Greyhaven.
 
+## RNG and probability rules
+
+The bite timer is a variable wait duration, not a bite-success percentage. When it expires, the system attempts to select an eligible stocked species; if none is eligible, it waits and retries. This means a suitable stocked ground currently guarantees a candidate on a successful selection attempt rather than rolling a separate no-bite probability.
+
+Species selection uses weighted roulette: each eligible species receives a relative weight equal to local stock, multiplied by `0.35` for a technique mismatch, `0.28` for a bait mismatch, and `0.15` for an aberrant specimen after the aberration gate succeeds. These are weight multipliers, not independent displayed chances. For example, a species mismatching both technique and bait retains `0.35 × 0.28 = 0.098` (9.8%) of its original weight before normalization against every other candidate. Its final selection probability is its adjusted weight divided by the sum of all candidate weights.
+
+The aberration gate is rolled once per bite-selection attempt when at least one eligible aberrant species exists, not once per aberrant species. Its chance is `2.5% + 22% × panic + 8% × sea disturbance`, with both inputs normalized to `0–1`; the actual maximum is `32.5%`. Passing this gate only admits aberrant candidates into weighted selection; it does not guarantee an aberrant catch.
+
+Fish burst frequency is interpreted as a per-second event rate and converted to a frame-duration probability using `1 − exp(−rate × deltaTime)`. This preserves the same cumulative probability when frame duration changes. Migration uses stochastic rounding of `population × migrationRate` once per six in-game hours, with movement bounded to preserve most of the source stock. The chance of a fractional fish movement is the fractional part of the expected amount.
+
 ## Population model
 
-The runtime tracks aggregate per-species stocks per habitat, not individual fish GameObjects. A landed fish removes one unit from the local stock. Stocks recover by the authored daily recovery amount (bounded at twice the initial population). Every six in-game hours, a bounded share may migrate to the next eligible habitat in the prototype habitat cycle. Population values, simulation timestamps and migration clock are saved through existing ProgressSaveData.regionalStocks and fishing-prefixed worldFlags; no save schema bump is required.
+The runtime tracks aggregate per-species stocks per habitat, not individual fish GameObjects. A landed fish removes one unit from the local stock. Stocks recover by complete elapsed in-game days using the authored daily recovery amount (bounded at twice the initial population); fractional-day remainder is preserved. Every six in-game hours, a bounded share may migrate to the next eligible habitat in the prototype habitat cycle. Population values, simulation timestamps and migration clock are saved through existing ProgressSaveData.regionalStocks and fishing-prefixed worldFlags; no save schema bump is required.
 
 This is an intentionally lightweight simulation. It does not yet model spawning seasons, age cohorts, temperature/current fields, fishing mortality caps, food webs, catch quotas, or cross-region migration. Do not describe it as a complete marine ecosystem.
 
