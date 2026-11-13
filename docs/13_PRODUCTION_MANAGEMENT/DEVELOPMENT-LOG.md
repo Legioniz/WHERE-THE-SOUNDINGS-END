@@ -375,4 +375,4 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 - Added deterministic sale, demand, repair/fuel quote and overflow-safe wallet policies with Edit Mode test source.
 - Static validator now requires the policy and tests.
 
-**Boundary:** This is a cohesive data/policy foundation, not the completed economy. The runtime wallet owner, authored schedule values on assets, vendor transactions, market stock, purchases, fuel consumption, repairs, NPC trade gates and UI remain outstanding. Unity compile/Test Runner execution has not been performed in this environment.
+**Boundary:** This is a cohesive data/policy foundation, not the completed economy. Authored schedule values on assets, vendor transactions, market stock, purchases, fuel consumption, repairs, NPC trade gates and UI remain outstanding. Unity compile/Test Runner execution has not been performed in this environment.
