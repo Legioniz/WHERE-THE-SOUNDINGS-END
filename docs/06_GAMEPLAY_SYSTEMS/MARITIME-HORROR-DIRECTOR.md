@@ -2,8 +2,8 @@
 
 > Project: WHERE THE SOUNDINGS END  
 > Status: Greyhaven prototype implementation + production direction  
-> Version: 0.2  
-> Last reviewed: 2026-11-10
+> Version: 0.3  
+> Last reviewed: 2026-11-13
 
 ## Creative target
 
@@ -81,7 +81,7 @@ The Greyhaven water plane receives a runtime tessellated mesh through MaritimeSu
 - Events are rare rolls in the existing night / elevated-pressure incident schedule.
 - Dead calm lasts approximately 12–20 seconds; wrong-way swell lasts approximately 14–22 seconds.
 - Audio attenuation only affects AudioSources present when the atmosphere director initializes. There are not yet authored wind, wave, rigging or hull-ambience loops in the Greyhaven scene, so final silence-and-return mixing still depends on adding those recordings.
-- The surface is a visual prototype, not a hydrodynamic simulation. It does not currently alter vessel buoyancy, handling, fishing success, navigation or threat AI.
+- The shared analytic wave surface drives rendered swell and the vessel's lightweight four-point spring-buoyancy approximation; it is not a full fluid/current simulation. The dead-calm and wrong-way-swell horror incidents are presentation events only: those incident flags do not independently alter buoyancy, handling, fishing success, navigation or threat AI.
 - The event does not itself increase panic or cause damage.
 
 ### Future escalation ideas
