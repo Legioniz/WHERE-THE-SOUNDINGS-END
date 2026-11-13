@@ -19,6 +19,7 @@ The audit found one cross-system reliability defect: wallet and fuel events used
 | Cargo → Mara → wallet | Mara builds itemized offers from eligible cargo, calculates demand/quality/freshness pricing, and commits cargo removal with the wallet payment callback. |
 | Inez → cargo → wallet | Purchases place cargo before payment and remove the newly placed instance if payment fails. Supply stock is decremented only after payment succeeds. |
 | Tomas → vessel services | Hull/engine repair, fuel, hold-cell repair, and installed-equipment repair are routed through the vendor service controller and wallet. |
+| Harbourmaster contracts → salvage → wallet | The dockside hub attaches/resolves the contract controller, exposes accept/complete actions, and the controller commits one salvage placement with its wallet reward and persists active/completed state. |
 | Sounding discoveries → research → chart | Research requirements read confirmed Sounding Rig discoveries; evidence removal and stipend payment are committed together; successful submissions grant chart permits without marking a region visited. |
 | Wallet/fuel → expedition telemetry | Telemetry subscribes to committed wallet transactions and actual fuel-consumption events, starts on propulsion, and closes after a dockside service session. |
 | Runtime state → save | Wallet ledger, market stock, fuel reserve, equipment condition, research submission state, chart permits, and active/completed expedition accounting use existing schema-v8 save fields or namespaced progress flags. |
