@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Proposed  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-12
+> Version: 0.3  
+> Last reviewed: 2026-11-13
 
 ## 1. Narrative promise
 
@@ -153,3 +153,9 @@ Before implementation:
 - [Story Consequences](STORY-CONSEQUENCES.md)
 - [Quest Design](QUEST-DESIGN.md)
 - [World Bible](../02_LORE_AND_WORLD/WORLD-BIBLE.md)
+
+## Greyhaven evidence chain — Act I content expansion
+
+The four Greyhaven residents now contribute independent, occupation-bounded records to the opening investigation. The Harbourmaster can show the bell's last-confirmed-sounding history; Mara records cold-centred catches from separate boats; Tomas describes hull scoring that does not match a single rock impact; and Inez preserves an empty, untorn net with its knots still fastened. A comparison topic becomes available as these records are discovered.
+
+The synthesis is intentionally cautious: it identifies that several ordinary records remain unexplained, not that they prove a shared cause. Each resident retains their own voice and limits of knowledge. Core observations are not locked behind high trust; only more personal routines and hobbies use Familiar-or-higher relationship gates. This is source-authored Greyhaven dialogue, not a completed quest campaign or an approved final explanation of the Choir.
