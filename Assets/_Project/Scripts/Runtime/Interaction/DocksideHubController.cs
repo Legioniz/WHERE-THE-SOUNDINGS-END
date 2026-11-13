@@ -648,7 +648,8 @@ namespace WhereTheSoundingsEnd.Interaction
             if (location == null || location.Resident == null) return;
 
             string residentId = location.Resident.NpcId;
-            if (location.Resident.DisplayName.IndexOf("Harbourmaster", StringComparison.OrdinalIgnoreCase) >= 0)
+            string residentName = location.Resident.DisplayName ?? string.Empty;
+            if (residentName.IndexOf("Harbourmaster", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 RenderHarbourmasterContracts(location.Resident);
                 return;
