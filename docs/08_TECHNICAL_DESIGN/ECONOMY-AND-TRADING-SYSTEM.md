@@ -1,7 +1,7 @@
 # Economy and Trading System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Mara seafood market runtime implemented; purchasing, services and dockside transaction UI pending  
+> Status: Greyhaven seafood/salvage sales, bait/supply purchasing, fuel, repair and dockside service runtime partially implemented; full catalogue and playtest verification pending  
 > Owner: Project lead  
 > Version: 0.1  
 > Last reviewed: 2026-11-14  
