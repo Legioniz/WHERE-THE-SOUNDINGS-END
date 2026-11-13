@@ -16,7 +16,7 @@
 - Repository CI, C# syntax validation and Edit Mode test execution must be checked after the PR is opened.
 - Unity 6000.3.28f1 compilation, Greyhaven asset/scene rebuild, Play Mode encounter/input/cargo/save-load testing and Windows Development Build remain outstanding.
 - The habitat resolver and depths are temporary Greyhaven coordinate heuristics. Population migration is a simple cyclic transfer, not a validated marine ecology model.
-- The loadout/encounter UI is a temporary IMGUI prototype; market purchases, gear durability, per-catch length/weight records, seasonal ecology and full economy integration remain open.
+- The loadout/encounter UI is a temporary IMGUI prototype; market-to-loadout equipment integration, gear durability, per-catch length/weight records, seasonal ecology and full economy integration remain open.
 
 ### Compatibility
 - No save schema version bump or new save DTO is required; namespaced fishing flags and regional stock entries reuse existing fields.
