@@ -680,7 +680,11 @@ namespace WhereTheSoundingsEnd.World
                     hookIndex = NextUnlocked(Hooks, hookIndex, totalCatches);
                 if (GUI.Button(new Rect(panelX + 170, Screen.height - 86, 150, 22), "Reel: " + Reels[reelIndex].label + "  ‹"))
                     reelIndex = NextUnlocked(Reels, reelIndex, totalCatches);
-                if (GUI.Button(new Rect(panelX + 10, Screen.height - 60, 150, 22), "Bait: " + BaitLabels[baitIndex] + "  ‹"))
+                int selectedBait = Mathf.Clamp(baitIndex, 0, Baits.Length - 1);
+                int baitCount = cargoHold != null ? cargoHold.GetAvailableQuantity(BaitItemIds[selectedBait]) : 0;
+                string baitStatus = baitCount > 0 ? " x" + baitCount : "  /  EMPTY";
+                if (GUI.Button(new Rect(panelX + 10, Screen.height - 60, 190, 22),
+                    "Bait: " + BaitLabels[selectedBait] + baitStatus + "  ‹"))
                     baitIndex = (baitIndex + 1) % Baits.Length;
                 if (GUI.Button(new Rect(panelX + 170, Screen.height - 60, 150, 22), "Method: " + technique + "  ‹"))
                     technique = Techniques[(Array.IndexOf(Techniques, technique) + 1) % Techniques.Length];
