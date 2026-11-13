@@ -182,6 +182,42 @@ namespace WhereTheSoundingsEnd.Inventory
             return true;
         }
 
+        public int GetAvailableQuantity(string itemId)
+        {
+            int total = 0;
+            if (string.IsNullOrWhiteSpace(itemId)) return total;
+            for (int i = 0; i < placements.Count; i++)
+            {
+                CargoPlacement placement = placements[i];
+                if (placement == null || !string.Equals(placement.itemId, itemId, StringComparison.Ordinal)) continue;
+                if (int.MaxValue - total < placement.quantity) return int.MaxValue;
+                total += Mathf.Max(0, placement.quantity);
+            }
+            return total;
+        }
+
+        /// <summary>Consumes one unit from the first matching stack without disturbing other cargo.</summary>
+        public bool TryConsumeOne(string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return false;
+            for (int i = 0; i < placements.Count; i++)
+            {
+                CargoPlacement placement = placements[i];
+                if (placement == null || placement.itemId != itemId || placement.quantity < 1) continue;
+                if (placement.quantity == 1)
+                {
+                    placements.RemoveAt(i);
+                    return true;
+                }
+
+                float perUnitQuantity = placement.saleQuantity / placement.quantity;
+                placement.quantity--;
+                placement.saleQuantity = Mathf.Max(0.001f, placement.saleQuantity - perUnitQuantity);
+                return true;
+            }
+            return false;
+        }
+
         public bool TryRemove(string instanceId, out CargoPlacement removed)
         {
             int index = placements.FindIndex(item =>
