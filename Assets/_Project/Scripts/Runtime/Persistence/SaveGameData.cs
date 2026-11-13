@@ -141,6 +141,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public Vector3SaveData angularVelocity = new Vector3SaveData();
         public float hullIntegrity = 100.0f;
         public float fuel = 100.0f;
+        public float emergencyFuel = 2.0f;
         public float engineCondition = 100.0f;
     }
 
