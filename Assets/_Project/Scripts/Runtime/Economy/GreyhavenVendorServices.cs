@@ -124,6 +124,35 @@ namespace WhereTheSoundingsEnd.Economy
             return true;
         }
 
+        public long GetEquipmentRepairQuoteCents(string slotId)
+        {
+            if (!TomasAvailable) return 0L;
+            VesselEquipmentController equipment = GetComponent<VesselEquipmentController>();
+            if (equipment == null) return 0L;
+            long baseQuote = equipment.GetRepairQuoteCents(slotId);
+            return ApplyDiscount(baseQuote, GetRelationshipDiscount(tomas != null ? tomas.RelationshipScore : 0));
+        }
+
+        public bool TryRepairEquipmentSlot(string slotId, string transactionId,
+            out long chargedCents, out string error)
+        {
+            chargedCents = 0L;
+            if (!TomasAvailable || wallet == null)
+            {
+                error = "Tomas is not available to service equipment right now.";
+                return false;
+            }
+            VesselEquipmentController equipment = GetComponent<VesselEquipmentController>();
+            if (equipment == null)
+            {
+                error = "The vessel has no installed-equipment controller.";
+                return false;
+            }
+            long discountedQuote = GetEquipmentRepairQuoteCents(slotId);
+            return equipment.TryRepairSlot(slotId, wallet, transactionId, discountedQuote,
+                out chargedCents, out error);
+        }
+
         public long GetHoldRepairQuoteCents()
         {
             if (!TomasAvailable || cargo == null) return 0L;

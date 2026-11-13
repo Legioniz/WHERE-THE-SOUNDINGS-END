@@ -198,7 +198,9 @@ namespace WhereTheSoundingsEnd.Interaction
         private MaraFishMarketController maraMarket;
         private GreyhavenVendorServices vendorServices;
         private HarbourmasterContractController harbourmasterContracts;
+        private HarbourmasterResearchController harbourmasterResearch;
         private VesselFuelController fuelController;
+        private VesselEquipmentController equipmentController;
         private Label locationTitle;
         private Label locationSubtitle;
         private Label interiorDescription;
@@ -240,7 +242,13 @@ namespace WhereTheSoundingsEnd.Interaction
             harbourmasterContracts = boatBody != null ? boatBody.GetComponent<HarbourmasterContractController>() : null;
             if (boatBody != null && harbourmasterContracts == null)
                 harbourmasterContracts = boatBody.gameObject.AddComponent<HarbourmasterContractController>();
+            harbourmasterResearch = boatBody != null ? boatBody.GetComponent<HarbourmasterResearchController>() : null;
+            if (boatBody != null && harbourmasterResearch == null)
+                harbourmasterResearch = boatBody.gameObject.AddComponent<HarbourmasterResearchController>();
             fuelController = boatBody != null ? boatBody.GetComponent<VesselFuelController>() : null;
+            equipmentController = boatBody != null ? boatBody.GetComponent<VesselEquipmentController>() : null;
+            if (boatBody != null && equipmentController == null)
+                equipmentController = boatBody.gameObject.AddComponent<VesselEquipmentController>();
             seaState = clock;
             saveCoordinator = saves;
             locations = definitions == null
@@ -714,6 +722,28 @@ namespace WhereTheSoundingsEnd.Interaction
                 });
                 vendorActions.Add(accept);
             }
+
+            vendorActions.Add(new Label("RESEARCH AND CHART PERMITS"));
+            if (harbourmasterResearch == null)
+            {
+                vendorActions.Add(new Label("The research ledger is unavailable."));
+                return;
+            }
+            Label researchText = new Label(harbourmasterResearch.GetBoardText(harbourmaster));
+            researchText.style.whiteSpace = WhiteSpace.Normal;
+            researchText.style.color = new Color(0.78f, 0.82f, 0.75f);
+            vendorActions.Add(researchText);
+            Button submitResearch = MakeButton("SUBMIT RESEARCH EVIDENCE", () =>
+            {
+                string message;
+                harbourmasterResearch.TrySubmitNext(harbourmaster, out message);
+                statusLabel.text = message;
+                furnitureTitle.text = "HARBOURMASTER / RESEARCH DESK";
+                furnitureDetail.text = message;
+                RenderHarbourmasterContracts(harbourmaster);
+            });
+            submitResearch.SetEnabled(harbourmasterResearch.CanSubmitNext);
+            vendorActions.Add(submitResearch);
         }
 
         private void RenderMaraServices()
@@ -876,6 +906,32 @@ namespace WhereTheSoundingsEnd.Interaction
                     }
                 }
             }
+            if (equipmentController != null && vendorServices != null)
+            {
+                AddEquipmentRepairAction(VesselEquipmentController.EngineSlot, "ENGINE");
+                AddEquipmentRepairAction(VesselEquipmentController.RodSlot, "FISHING ROD");
+                AddEquipmentRepairAction(VesselEquipmentController.LanternSlot, "DECK LANTERN");
+            }
+        }
+
+        private void AddEquipmentRepairAction(string slotId, string label)
+        {
+            if (vendorActions == null || vendorServices == null || equipmentController == null) return;
+            long quote = vendorServices.GetEquipmentRepairQuoteCents(slotId);
+            if (quote <= 0L) return;
+            Button repair = MakeButton("SERVICE " + label + "  /  " + FormatMoney(quote) + " USD", () =>
+            {
+                long charged;
+                string error;
+                bool success = vendorServices.TryRepairEquipmentSlot(slotId,
+                    "dockside.tomas.equipment." + slotId + "." + Guid.NewGuid().ToString("N"),
+                    out charged, out error);
+                statusLabel.text = success ? label + " SERVICED  /  -" + FormatMoney(charged) + " USD." :
+                    "EQUIPMENT SERVICE DECLINED  /  " + error;
+                RenderTomasServices();
+            });
+            repair.SetEnabled(vendorServices.WalletCents >= quote);
+            vendorActions.Add(repair);
         }
 
         private void RenderInezServices()
@@ -978,7 +1034,7 @@ namespace WhereTheSoundingsEnd.Interaction
                     long charged;
                     string error;
                     bool success = vendorServices.TryPurchase(itemId, quantity,
-                        "dockside.inez.purchase." + Guid.NewGuid().ToString("N"),
+                        "dockside.inez.purchase." + itemId + "." + Guid.NewGuid().ToString("N"),
                         out charged, out error);
                     statusLabel.text = success
                         ? "PURCHASE COMPLETE  /  " + definition.DisplayName + " x" + quantity +
@@ -990,7 +1046,55 @@ namespace WhereTheSoundingsEnd.Interaction
                 });
                 purchase.SetEnabled(quote > 0L && vendorServices.WalletCents >= quote);
                 vendorActions.Add(purchase);
+
+                string slotId = VesselEquipmentController.GetSlotForItem(itemId);
+                if (!string.IsNullOrEmpty(slotId) && equipmentController != null)
+                {
+                    Button equip = MakeButton("INSTALL " + definition.DisplayName.ToUpperInvariant() +
+                        (itemId == equipmentController.EngineItemId || itemId == equipmentController.RodItemId ||
+                         itemId == equipmentController.LanternItemId ? "  /  CURRENTLY INSTALLED" : "  /  EQUIP"),
+                        () =>
+                        {
+                            string message;
+                            bool success = equipmentController.TryEquip(itemId, out message);
+                            statusLabel.text = message;
+                            furnitureTitle.text = "INEZ'S EQUIPMENT FITTING";
+                            furnitureDetail.text = message;
+                            RenderInezServices();
+                        });
+                    equip.SetEnabled(cargoHold != null && cargoHold.GetAvailableQuantity(itemId) > 0 &&
+                        itemId != equipmentController.EngineItemId &&
+                        itemId != equipmentController.RodItemId &&
+                        itemId != equipmentController.LanternItemId);
+                    vendorActions.Add(equip);
+                }
             }
+            if (equipmentController != null)
+            {
+                AddInstalledEquipmentAction(VesselEquipmentController.EngineSlot, "ENGINE");
+                AddInstalledEquipmentAction(VesselEquipmentController.RodSlot, "FISHING ROD");
+                AddInstalledEquipmentAction(VesselEquipmentController.LanternSlot, "DECK LANTERN");
+            }
+        }
+
+        private void AddInstalledEquipmentAction(string slotId, string label)
+        {
+            if (equipmentController == null || vendorActions == null) return;
+            string itemId = slotId == VesselEquipmentController.EngineSlot ? equipmentController.EngineItemId :
+                slotId == VesselEquipmentController.RodSlot ? equipmentController.RodItemId :
+                equipmentController.LanternItemId;
+            if (string.IsNullOrEmpty(itemId)) return;
+            float condition = slotId == VesselEquipmentController.EngineSlot ? equipmentController.EngineCondition :
+                slotId == VesselEquipmentController.RodSlot ? equipmentController.RodCondition :
+                equipmentController.LanternCondition;
+            Button unequip = MakeButton("STORE " + label + "  /  " + Mathf.RoundToInt(condition * 100f) + "% CONDITION", () =>
+            {
+                string message;
+                equipmentController.TryUnequip(slotId, out message);
+                statusLabel.text = message;
+                RenderInezServices();
+            });
+            vendorActions.Add(unequip);
         }
 
         private void AddWalletBalanceLabel()
@@ -1002,6 +1106,17 @@ namespace WhereTheSoundingsEnd.Interaction
             walletLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             walletLabel.style.marginBottom = 5;
             vendorActions.Add(walletLabel);
+            ExpeditionEconomyTelemetry telemetry = vesselBody != null
+                ? vesselBody.GetComponent<ExpeditionEconomyTelemetry>() : null;
+            if (telemetry != null)
+            {
+                Label expedition = new Label(telemetry.BuildSummary());
+                expedition.style.whiteSpace = WhiteSpace.Normal;
+                expedition.style.fontSize = 10;
+                expedition.style.color = new Color(0.72f, 0.78f, 0.73f);
+                expedition.style.marginBottom = 8;
+                vendorActions.Add(expedition);
+            }
         }
 
         private static string FormatMoney(long cents)
@@ -1032,7 +1147,7 @@ namespace WhereTheSoundingsEnd.Interaction
                                : seaState.LatestOmen);
 
                 case DocksideFurnitureAction.ReadHarbourChart:
-                    return "LOCAL BEARINGS\nD — Main dock\nH — Harbour Office / Harbourmaster\nM — Fish Market / Mara Venn\nT — Boat Repair / Tomas Vale\nI — Net Mender / Inez Sarmiento\nL — Western lighthouse\nW — Outer Channel Wreck Field\n\nThis is a schematic settlement reference, not a calibrated navigation chart.";
+                    return BuildHarbourChartSummary();
 
                 case DocksideFurnitureAction.ReadNoticeboard:
                     return "HARBOUR NOTICE\nKeep the inner quay clear during the morning catch. Report damaged channel markers to the Harbourmaster. Unusual sounds offshore should be logged with their time and bearing.";
@@ -1120,6 +1235,19 @@ namespace WhereTheSoundingsEnd.Interaction
             return builder.ToString();
         }
 
+        private string BuildHarbourChartSummary()
+        {
+            string summary = "LOCAL BEARINGS\nD — Main dock\nH — Harbour Office / Harbourmaster\nM — Fish Market / Mara Venn\nT — Boat Repair / Tomas Vale\nI — Net Mender / Inez Sarmiento\nL — Western lighthouse\nW — Outer Channel Wreck Field\n\nThis is a schematic settlement reference, not a calibrated navigation chart.";
+            RegionalChartController chart = vesselBody != null
+                ? vesselBody.GetComponent<RegionalChartController>() : null;
+            if (chart == null) return summary;
+            List<string> permits = chart.GetPermittedRegionNames();
+            summary += "\n\nCHART PERMITS  /  " +
+                (permits.Count == 0 ? "None recorded." : string.Join(", ", permits.ToArray()));
+            summary += "\nPermit names are recorded; unvisited waters remain unmarked and unlocated.";
+            return summary;
+        }
+
         private string BuildVesselInspection()
         {
             if (vesselCondition == null)
@@ -1135,11 +1263,24 @@ namespace WhereTheSoundingsEnd.Interaction
                          " UNITS  /  EMERGENCY RESERVE " + fuelController.EmergencyFuelUnits.ToString("0.0") +
                          "  /  FULL-LOAD ESTIMATE " + fuelController.EstimatedFullLoadMinutes.ToString("0") + " MIN"
                        : "UNAVAILABLE") +
+                   "\nINSTALLED EQUIPMENT  /  " + BuildEquipmentInspection() +
                    "\nLAST DAMAGE REPORT  /  " +
                    (string.IsNullOrWhiteSpace(vesselCondition.LastDamageReport)
                        ? "No recent damage report."
                        : vesselCondition.LastDamageReport) +
                    "\n\nUse Tomas's service counter for paid repairs and refuelling.";
+        }
+
+        private string BuildEquipmentInspection()
+        {
+            if (equipmentController == null) return "UNAVAILABLE";
+            string engine = string.IsNullOrEmpty(equipmentController.EngineItemId) ? "NONE" :
+                equipmentController.EngineItemId + " " + Mathf.RoundToInt(equipmentController.EngineCondition * 100f) + "%";
+            string rod = string.IsNullOrEmpty(equipmentController.RodItemId) ? "NONE" :
+                equipmentController.RodItemId + " " + Mathf.RoundToInt(equipmentController.RodCondition * 100f) + "%";
+            string lantern = string.IsNullOrEmpty(equipmentController.LanternItemId) ? "NONE" :
+                equipmentController.LanternItemId + " " + Mathf.RoundToInt(equipmentController.LanternCondition * 100f) + "%";
+            return "ENGINE " + engine + "  /  ROD " + rod + "  /  LANTERN " + lantern;
         }
 
         private string SaveHarbourLog()

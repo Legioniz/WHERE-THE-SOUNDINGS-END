@@ -178,3 +178,13 @@ Source preserves landed fish weight through cargo placement and save/load, adds 
 ### 2026-11-14 economy follow-up — Harbourmaster contracts
 
 The vessel's dockside hub now ensures a `HarbourmasterContractController` exists and renders its three-job salvage delivery board at the Harbourmaster's office. Contract progress and completion history reuse existing world flags; the save schema remains v8. Delivery uses `SpatialCargoHold.TryCommitRemoval` with the idempotent wallet reward as its commit callback, so a rejected reward leaves the selected cargo aboard. The new save tests and validator requirements are source-level only. Unity compilation, Edit Mode execution, dockside Play Mode interaction, save/load round-trip and generated Greyhaven scene review remain unverified. Active equipment-slot application, Harbourmaster research/permits and ECO-11 expedition balancing remain open.
+
+### 2026-11-14 economy implementation — equipment, research and telemetry
+
+The generated Greyhaven vessel now owns `VesselEquipmentController`, `HarbourmasterResearchController` and `ExpeditionEconomyTelemetry`. Engine, fishing rod and lantern items move from spatial cargo into dedicated persisted slots; condition is saved in the existing `InventorySaveData.equipment` collection. Engine condition modifies propulsion and fuel use, rod condition modifies cast range/control, and lantern condition modifies an actual deck point light. Tomas's dockside service panel repairs damaged installed equipment through the wallet ledger.
+
+The Harbourmaster research board consumes authored salvage and requires one, three, then five confirmed Sounding Rig site discoveries. Each one-time submission grants a finite stipend and a chart permit. Permit grants update the live regional chart's unlocked set but do not mark a region visited or reveal its location.
+
+Expedition telemetry starts on propulsion and completes after the dockside service session. It records wallet receipts/operating expenses, fuel actually consumed (including emergency reserve use), game-clock duration, trip net and net income/hour. Equipment purchases are classified as capital investment and excluded from recurring expedition operating costs. The telemetry provides measurement, not balance proof.
+
+Source-level Edit Mode tests now cover equipment installation, durability, repair, save/restore, research permit persistence and telemetry aggregation. GitHub static checks do not substitute for Unity 6000.3.28f1 compilation, Edit Mode execution, generated-scene rebuild, Play Mode interaction or actual economy playtests; those remain outstanding. Broader catalogue authoring, complete per-catch legality and destination-market route pricing remain open.

@@ -68,11 +68,40 @@ The current generated Greyhaven vessel owns the wallet, Mara market, fuel contro
 
 A new campaign receives a one-time $25.00 starter wallet balance. A zero-balance save with a transaction history is never topped up. The current salvage values are explicitly provisional and are defined in the seafood price schedule's supplemental salvage table.
 
-**Not yet implemented:** research submissions, permits, complete catch legality and protected-species rules, the full catalogue price authoring, active rod/reel/line equipment-slot application, destination-specific travel-market routes, detailed fuel range/net-profit analytics, and full Unity Play Mode balancing. The first three persistent Greyhaven salvage delivery contracts are now available through the Harbourmaster's dockside service panel; the board supports one active contract at a time, atomic cargo-for-wallet completion, and save persistence. The editor builder must be run in Unity to regenerate the Greyhaven scene with the new runtime components and authored cargo data.
+**Remaining:** broader authored seafood/invertebrate catalogue, per-catch size/closed-area/prohibited-gear legality, destination-specific trading routes, and actual starter/average/optimized expedition tuning. Telemetry is a measurement system, not evidence that balance is already correct. Unity compilation, Edit Mode execution, Play Mode testing, scene regeneration and economy playtests remain required.
 
 ## 5.1 Harbourmaster delivery contracts
 
-The Harbourmaster's dockside panel now exposes a compact three-contract salvage board. The player accepts one job, carries the requested salvage to Greyhaven, and submits it at the office. The initial jobs request Corroded Ship Fittings, Salt-Stiff Canvas, or Waterlogged Timber, with fixed prototype rewards of $8.50, $5.00, and $7.00 respectively. A completed contract is recorded once; its reward uses the existing idempotent wallet ledger, and the cargo placement is removed only when the wallet transaction commits. Active contract identity and the completion bitmask are stored in a namespaced existing world flag, so the save schema remains v8. These are introductory local deliveries, not yet a full research/permit progression system.
+The Harbourmaster's dockside panel now exposes a compact three-contract salvage board. The player accepts one job, carries the requested salvage to Greyhaven, and submits it at the office. The initial jobs request Corroded Ship Fittings, Salt-Stiff Canvas, or Waterlogged Timber, with fixed prototype rewards of $8.50, $5.00, and $7.00 respectively. A completed contract is recorded once; its reward uses the existing idempotent wallet ledger, and the cargo placement is removed only when the wallet transaction commits. Active contract identity and the completion bitmask are stored in a namespaced existing world flag, so the save schema remains v8. These are introductory local deliveries. The separate discovery-gated research and chart-permit progression is documented in section 5.3.
+
+## 5.2 Equipment progression and servicing
+
+The vessel has three physical equipment slots: `engine`, `fishing-rod`, and `lantern`. Installing an item removes its placement from the spatial hold; replacing or storing it returns the previous item to the hold and fails cleanly if the hold cannot accept it. The existing schema-v8 `InventorySaveData.equipment` list stores slot ID, stable item ID and normalized condition. No duplicate cargo copy is created.
+
+- **Outboard engine:** condition scales propulsion output and fuel-use efficiency. Engine wear follows actual throttle/load time.
+- **Handline rod:** condition scales cast range and fishing timing/control. Rod wear is applied after successful landings.
+- **Deck lantern:** creates a point light on the vessel; condition scales intensity and range. It wears during night operation.
+- **Service:** Tomas quotes repairs from missing condition and commits the wallet charge before restoring the slot to full condition. Stored equipment retains its condition.
+
+These are prototype modifiers and wear coefficients. They must be playtested against travel time, fuel cost and upgrade payback before final tuning.
+
+## 5.3 Harbourmaster research and chart permits
+
+The Harbourmaster's research ledger is a separate progression path from salvage delivery contracts. Each one-time submission requires a matching salvage placement and confirmed Sounding Rig site discoveries:
+
+| Submission | Evidence threshold | Salvage | Stipend | Permit |
+|---|---:|---|---:|---|
+| The Inner Water Record | 1 site | Corroded Ship Fittings | $15.00 | The Shallows |
+| Where the Brackish Current Turns | 3 sites | Salt-Stiff Canvas | $30.00 | Blackrock Reach |
+| A Sound Beneath the Soundings | 5 sites | Waterlogged Timber | $50.00 | The Outer Shoals |
+
+Submission consumes the selected salvage only when the idempotent wallet reward commits. The completion bitmask is saved in a namespaced progress world flag; permits are added to the existing unlocked-region collection and applied to the live chart. A permit does not mark the region visited, reveal its location, create a compass bearing, or imply inter-region travel. Stipends are prototype values pending economy playtests.
+
+## 5.4 Expedition economy telemetry
+
+A trip begins when the vessel applies propulsion. It closes after the player finishes a dockside service session, allowing return-market sales and service costs to be included. The telemetry records gross wallet receipts, operating expenses, actual fuel consumed (including emergency-reserve use), action-driven game-clock duration, net result and net income per hour. Equipment purchases are capital investment and are excluded from recurring operating expense; fuel, bait, repairs and service costs are included. Completed-trip aggregates and latest-trip metrics persist through a namespaced world flag without changing schema v8.
+
+The telemetry measures live player behavior; it does not automatically change prices or certify balance. Starter, average and optimized routes still require controlled Unity playtests and documented tuning.
 
 ## 6. Sale value and market demand
 
@@ -116,7 +145,7 @@ Keep relationship effects asymmetric where character identity warrants it. Mara 
 Purchases must validate, in order: vendor open, vendor accepts/sells item, relationship gate, available vendor stock, valid quantity, wallet balance, destination hold/equipment capacity, and final price. Only then commit money and inventory atomically.
 
 - Bait is consumed when a cast/technique actually uses it, not merely by opening a menu.
-- Tackle and equipment are durable inventory/equipment items; do not invent wear rates until the repair and equipment model is authored.
+- Engine, fishing rod and lantern use the authored prototype durability model: engine wear follows propulsion load, rod wear follows successful landings, and lantern wear follows in-game night operation. Condition and installed ownership persist; Tomas can repair each slot. Wear coefficients remain playtest tuning values.
 - A purchase cannot be resold to the same vendor for a profit. Buy and sell quotes must be separate and disclosed.
 - Equipment upgrades must identify the capability unlocked, additional operating cost, route/depth/method access and estimated payback trips.
 - Cargo hold space remains a physical constraint. No purchased item may appear in the hold if it cannot fit.
@@ -130,7 +159,7 @@ Repair quote components:
 - Hull: missing hull integrity × authored cost per integrity point.
 - Engine: missing engine condition × authored cost per integrity point.
 - Hold: number/type of repairable blocked cells × authored material/labour cost.
-- Equipment: only if a real equipment-condition field and repair contract exist.
+- Installed equipment: missing slot condition × item-specific repair rate (engine $18.00, rod $6.50, lantern $5.00 for full restoration before Tomas's relationship discount).
 
 Show a quote before confirmation. Repairs restore only the selected component and never exceed 100%. A failed or unaffordable repair changes nothing. Do not charge a fixed fee when no repair is required.
 
@@ -139,9 +168,9 @@ Show a quote before confirmation. Repairs restore only the selected component an
 Fuel is a voyage resource and is stored on the vessel. Consumption must be tied to actual propulsion/engine load rather than wall-clock time while docked or paused. The player should be able to see current fuel, estimated remaining range and the estimated cost to refill before departure.
 
 - Burn fuel only while the propulsion system is under load.
-- Scale consumption from throttle/engine load and engine condition using one tested formula.
+- Scale consumption from throttle/engine load and installed engine condition/efficiency using one tested formula; the displayed full-load endurance uses the same installed-engine multiplier.
 - No fuel drain while paused, in dialogue, docked with engine off, or idling with zero propulsion.
-- At zero fuel, propulsion is unavailable; the vessel can drift and the player retains a fair recovery option (e.g. a disclosed paid tow/rescue), rather than an unrecoverable softlock.
+- When the main tank is empty, a separately saved emergency reserve allows low-power return. After both main and emergency reserves are exhausted, the vessel can drift; a paid tow/rescue service is not yet implemented and remains a vertical-slice requirement.
 - Refuelling is a priced service with an explicit quantity and total. Do not require a repetitive manual refuel click after every trip.
 - Bait, ice and other consumables are charged only when purchased/consumed. Do not add a flat hidden expedition fee.
 

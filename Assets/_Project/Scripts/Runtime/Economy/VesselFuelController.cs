@@ -17,14 +17,29 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField, Min(0f)] private float emergencyFuelUnits = 2f;
         [SerializeField, Min(0f)] private float emergencyReserveCapacity = 2f;
         [SerializeField, Min(0f)] private float unitsPerSecondAtFullLoad = 0.0065f;
+        private VesselEquipmentController equipment;
 
+        public event Action<float> FuelConsumed;
         public float Capacity => capacity;
         public float FuelUnits => fuelUnits;
         public float FuelRatio => capacity > 0f ? Mathf.Clamp01(fuelUnits / capacity) : 0f;
         public float EmergencyFuelUnits => emergencyFuelUnits;
         public bool CanPropel => fuelUnits > 0.0001f || emergencyFuelUnits > 0.0001f;
-        public float EstimatedFullLoadMinutes => unitsPerSecondAtFullLoad > 0f
-            ? fuelUnits / unitsPerSecondAtFullLoad / 60f : float.PositiveInfinity;
+        public float EstimatedFullLoadMinutes
+        {
+            get
+            {
+                if (unitsPerSecondAtFullLoad <= 0f) return float.PositiveInfinity;
+                if (equipment == null) equipment = GetComponent<VesselEquipmentController>();
+                float efficiency = equipment != null ? equipment.FuelUseMultiplier : 1.25f;
+                return fuelUnits / (unitsPerSecondAtFullLoad * Mathf.Max(0.01f, efficiency)) / 60f;
+            }
+        }
+
+        private void Awake()
+        {
+            equipment = GetComponent<VesselEquipmentController>();
+        }
 
         private void OnValidate()
         {
@@ -46,11 +61,15 @@ namespace WhereTheSoundingsEnd.Economy
 
             float load = Mathf.Clamp01(engineLoad);
             if (load <= 0.01f) return 0f;
-            float requested = unitsPerSecondAtFullLoad * load * Mathf.Clamp01(Mathf.Abs(throttle)) * deltaTime;
+            if (equipment == null) equipment = GetComponent<VesselEquipmentController>();
+            float efficiency = equipment != null ? equipment.FuelUseMultiplier : 1.25f;
+            float requested = unitsPerSecondAtFullLoad * efficiency * load * Mathf.Clamp01(Mathf.Abs(throttle)) * deltaTime;
+            if (equipment != null) equipment.WearEngine(deltaTime * load * Mathf.Clamp01(Mathf.Abs(throttle)));
             if (fuelUnits > 0f)
             {
                 float consumed = Mathf.Min(fuelUnits, requested);
                 fuelUnits = Mathf.Max(0f, fuelUnits - consumed);
+                NotifyFuelConsumed(consumed);
                 return consumed;
             }
 
@@ -58,7 +77,17 @@ namespace WhereTheSoundingsEnd.Economy
             float emergencyRequested = requested * 0.25f;
             float emergencyConsumed = Mathf.Min(emergencyFuelUnits, emergencyRequested);
             emergencyFuelUnits = Mathf.Max(0f, emergencyFuelUnits - emergencyConsumed);
+            NotifyFuelConsumed(emergencyConsumed);
             return emergencyConsumed;
+        }
+
+        private void NotifyFuelConsumed(float amount)
+        {
+            if (amount <= 0f) return;
+            Action<float> handler = FuelConsumed;
+            if (handler == null) return;
+            try { handler(amount); }
+            catch (Exception exception) { Debug.LogException(exception, this); }
         }
 
         public float GetRefuelAmount(float requestedUnits)

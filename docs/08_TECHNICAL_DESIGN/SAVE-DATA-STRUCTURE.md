@@ -115,3 +115,12 @@ The Greyhaven dockside hub does not add a separate save DTO or schema field. Its
 Schema v8 adds `EconomySaveData` with a USD wallet stored as integer cents and a processed-transaction ID ledger. The v7-to-v8 migration converts the legacy `PlayerSaveData.currency` whole-dollar integer to cents at 100 cents per unit while retaining the legacy field for compatibility. New cargo placement records also preserve sale quantity; legacy placements receive a safe default quantity equal to their saved stack count until their item-specific unit is authored. `EconomyWalletController` owns the live wallet and idempotency ledger on the generated player vessel and participates in the existing save coordinator.
 
 The migration and wallet test source is authored but still requires Unity Edit Mode execution. No sale/purchase transaction flow is claimed complete by this schema change.
+
+
+## Schema v8 equipment, research and expedition records
+
+No save schema bump is required for the current equipment/research/telemetry pass. `VesselEquipmentController` owns the existing `InventorySaveData.equipment` list, storing one stable item ID and normalized condition per supported slot (`engine`, `fishing-rod`, `lantern`). Equipped items are absent from the spatial cargo placements until stored again. The controller validates slot-to-item compatibility, rejects duplicate slot/item records, and restores condition with the rest of inventory state.
+
+`HarbourmasterResearchController` stores its one-time submission bitmask in a namespaced `ProgressSaveData.worldFlags` entry and writes earned permit IDs into the existing `ProgressSaveData.unlockedRegionIds` collection. `RegionalChartController` restores those unlocked permits separately from `WorldSaveData.visitedRegionIds`; a permit is not a visit and does not reveal an unknown region.
+
+`ExpeditionEconomyTelemetry` stores completed-trip count, lifetime gross receipts, operating expenses, game-clock duration, fuel consumed and the latest trip metrics in a namespaced progress world flag. An in-progress expedition is not committed as a completed trip until the player finishes a dockside service session. The wallet and fuel controllers expose successful transaction/consumption events for accounting; listener exceptions are isolated from the underlying wallet/cargo commit. Unity save/load round-trip verification remains pending.
