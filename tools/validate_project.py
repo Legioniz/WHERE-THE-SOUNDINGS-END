@@ -172,6 +172,8 @@ def main() -> int:
             failures.append("SaveGameData is missing the schema 5 to 6 NPC relationship-memory migration.")
         if "case 6:" not in save_source or "data.schemaVersion = 7;" not in save_source or "visitedRegionIds" not in save_source:
             failures.append("SaveGameData is missing the schema 6 to 7 regional chart discovery migration.")
+        if "case 7:" not in save_source or "data.schemaVersion = 8;" not in save_source or "walletCents" not in save_source:
+            failures.append("SaveGameData is missing the schema 7 to 8 economy wallet migration.")
 
         for required_text in (
             "weatherRemainingGameSeconds", "weatherShiftCooldownGameSeconds",
