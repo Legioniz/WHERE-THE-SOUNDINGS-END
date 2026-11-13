@@ -13,7 +13,7 @@
 ### Implemented
 - Added a shared DocksideModalPolicy used by the dockside hub, inventory/dialogue presenter and front-end pause overlay. Dockside, inventory, dialogue and title/pause/save/settings panels cannot open over one another.
 - Added keyboard Esc and gamepad Start handling for closing the dockside menu without also opening the pause overlay. The hub also refuses to open while the front end is paused and releases its pause/prompt ownership if disabled.
-- Routed shared Interact ownership to DocksideHubController for generated Greyhaven residents; externally managed legacy resident triggers no longer enable or disable that shared action.
+- Routed generated resident interaction handling through DocksideHubController; externally managed legacy resident triggers no longer enable or disable the shared Interact action-map input.
 - Added Edit Mode policy regressions for dockside/inventory/pause modal exclusion and expanded repository validation to enforce runtime wiring.
 - Reconciled README, Greyhaven world/settlement, dialogue/NPC, save schema, technical architecture, streaming, testing, production and UI/UX documentation with the current source.
 
