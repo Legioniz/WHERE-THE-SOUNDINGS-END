@@ -1250,11 +1250,24 @@ namespace WhereTheSoundingsEnd.Interaction
                          " UNITS  /  EMERGENCY RESERVE " + fuelController.EmergencyFuelUnits.ToString("0.0") +
                          "  /  FULL-LOAD ESTIMATE " + fuelController.EstimatedFullLoadMinutes.ToString("0") + " MIN"
                        : "UNAVAILABLE") +
+                   "\nINSTALLED EQUIPMENT  /  " + BuildEquipmentInspection() +
                    "\nLAST DAMAGE REPORT  /  " +
                    (string.IsNullOrWhiteSpace(vesselCondition.LastDamageReport)
                        ? "No recent damage report."
                        : vesselCondition.LastDamageReport) +
                    "\n\nUse Tomas's service counter for paid repairs and refuelling.";
+        }
+
+        private string BuildEquipmentInspection()
+        {
+            if (equipmentController == null) return "UNAVAILABLE";
+            string engine = string.IsNullOrEmpty(equipmentController.EngineItemId) ? "NONE" :
+                equipmentController.EngineItemId + " " + Mathf.RoundToInt(equipmentController.EngineCondition * 100f) + "%";
+            string rod = string.IsNullOrEmpty(equipmentController.RodItemId) ? "NONE" :
+                equipmentController.RodItemId + " " + Mathf.RoundToInt(equipmentController.RodCondition * 100f) + "%";
+            string lantern = string.IsNullOrEmpty(equipmentController.LanternItemId) ? "NONE" :
+                equipmentController.LanternItemId + " " + Mathf.RoundToInt(equipmentController.LanternCondition * 100f) + "%";
+            return "ENGINE " + engine + "  /  ROD " + rod + "  /  LANTERN " + lantern;
         }
 
         private string SaveHarbourLog()
