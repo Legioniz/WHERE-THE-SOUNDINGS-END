@@ -10,6 +10,7 @@ namespace WhereTheSoundingsEnd.Tests
     {
         private GameObject owner;
         private HarbourmasterContractController contracts;
+        private GameObject restoredOwner;
 
         [SetUp]
         public void SetUp()
@@ -22,6 +23,7 @@ namespace WhereTheSoundingsEnd.Tests
         public void TearDown()
         {
             if (owner != null) Object.DestroyImmediate(owner);
+            if (restoredOwner != null) Object.DestroyImmediate(restoredOwner);
         }
 
         [Test]
@@ -33,7 +35,8 @@ namespace WhereTheSoundingsEnd.Tests
             SaveGameData data = SaveGameData.CreateNew(1, "greyhaven");
             contracts.CaptureSaveData(data);
 
-            HarbourmasterContractController restored = owner.AddComponent<HarbourmasterContractController>();
+            restoredOwner = new GameObject("Restored Harbourmaster contract save test");
+            HarbourmasterContractController restored = restoredOwner.AddComponent<HarbourmasterContractController>();
             restored.RestoreSaveData(data);
 
             Assert.IsTrue(restored.HasActiveContract);
