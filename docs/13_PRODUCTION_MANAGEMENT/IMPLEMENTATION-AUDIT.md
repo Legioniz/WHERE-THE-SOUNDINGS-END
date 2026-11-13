@@ -17,7 +17,7 @@ M0 is not complete. The repository's latest verified CI baseline was green for r
 
 ## 2. Repository snapshot
 
-The audited Git tree contained 337 entries (292 blobs and 45 trees). The current technical baseline is:
+The audited main snapshot contains 315 tracked files at base SHA a215eb72. The current technical baseline is:
 
 | Area | Observed baseline |
 |---|---|
@@ -50,7 +50,7 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 | Cargo and vessel condition | Partial prototype; unverified | Spatial cargo placement, blocked/damaged cells, impact damage, and hull/engine condition exist. A complete service/economy loop is absent. |
 | Sounding Rig and acoustic signals | Implemented foundation; unverified | Regional survey profiles, signal confidence, repeated-ping verification, authored site markers, acoustic event publishing/listening and save participation exist. |
 | Greyhaven NPCs | Partial foundation; unverified | Four residents, stable IDs, time-based schedules, waypoint movement, Yarn dialogue and relationship persistence exist. A persistent dockside hub routes the four resident conversations through existing Yarn nodes and relationship gates. Obstacle-aware navigation and quest/world-state progression remain incomplete. |
-| Persistence | Implemented runtime foundation; integration incomplete | Five manual JSON slots, a separate autosave, backups, schema migrations and save participants exist. No complete player-facing save/load screen or automatic cross-scene restore flow exists. |
+| Persistence | Implemented runtime foundation; integration incomplete | Five manual JSON slots, a separate autosave, backups, schema v6 migrations, save participants and a title/pause save/load UI exist. Automatic cross-scene restore and complete campaign resume flow remain unverified/incomplete. |
 | Player interface | Partial foundation; unverified | UI Toolkit field HUD, cargo inventory, Yarn dialogue/relationship meter, title/pause/save/load/settings overlay and seven-location dockside hub are present. Live map, market transactions, full quest UI, controller focus and comprehensive accessibility remain absent. |
 | Creature AI and living population | Planned / not established in runtime | The repository has design documents, but no complete creature perception/behavior or population simulation runtime. |
 | Economy, quests and regional travel | Planned / partial design | No complete sell/repair/fuel/upgrade loop, quest campaign, or interconnected regional travel system is established in runtime. |
@@ -114,8 +114,9 @@ M0 remains **in progress** until all of the following are evidenced:
 5. All existing Edit Mode tests pass in the target editor.
 6. The new Play Mode smoke tests pass for boat, water, camera, sea-time, harvesting, NPC interaction and save/restore.
 7. Manual Greyhaven testing confirms the boat/camera/ocean foundation is stable and understandable.
-8. A clean Windows 64-bit development build launches into Greyhaven.
-9. Known remote repository protection limitations are recorded and an explicit owner decision is made.
+8. The dockside hub, inventory, dialogue and front-end overlays pass modal exclusivity and pause restoration checks on keyboard and gamepad.
+9. A clean Windows 64-bit development build launches into Greyhaven.
+10. Known remote repository protection limitations are recorded and an explicit owner decision is made.
 
 ## 6. Immediate production direction
 
