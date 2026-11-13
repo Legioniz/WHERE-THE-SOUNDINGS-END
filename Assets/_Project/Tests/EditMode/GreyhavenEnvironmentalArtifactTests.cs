@@ -74,16 +74,16 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(roots[2].transform.Find("Estuary_Ecological_And_Shoreline_Assets/Tide_Line_Wrack_And_Debris/Storm_Tossed_Driftwood_A_Trunk"), Is.Not.Null);
             Assert.That(roots[3].transform.Find("Lighthouse_Headland_Maritime_Assets/Keepers_Weather_Station_Tripod_Leg_0"), Is.Not.Null);
 
-            int count = 0;
+            int rendererCount = 0;
             for (int i = 0; i < 4; i++)
             {
-                count += roots[i].GetComponentsInChildren<Renderer>(true).Length;
+                rendererCount += roots[i].GetComponentsInChildren<Renderer>(true).Length;
                 Assert.That(roots[i].GetComponentsInChildren<Collider>(true), Is.Empty);
                 Assert.That(roots[i].GetComponentsInChildren<MonoBehaviour>(true), Is.Empty);
                 Assert.That(roots[i].GetComponentsInChildren<Rigidbody>(true), Is.Empty);
                 Assert.That(roots[i].GetComponentsInChildren<Light>(true), Is.Empty);
             }
-            Assert.That(count, Is.GreaterThan(250), "The art pass should create a substantial but static set of assembled assets.");
+            Assert.That(rendererCount, Is.GreaterThan(250), "The art pass should create a substantial but static set of assembled assets.");
         }
 
         [Test]
