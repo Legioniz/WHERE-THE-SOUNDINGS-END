@@ -200,7 +200,12 @@ namespace WhereTheSoundingsEnd.Economy
                     lastTripGrossCents.ToString(CultureInfo.InvariantCulture),
                     lastTripExpenseCents.ToString(CultureInfo.InvariantCulture),
                     lastTripSeconds.ToString("R", CultureInfo.InvariantCulture),
-                    lastTripFuel.ToString("R", CultureInfo.InvariantCulture))
+                    lastTripFuel.ToString("R", CultureInfo.InvariantCulture),
+                    tripActive ? "1" : "0",
+                    tripGrossCents.ToString(CultureInfo.InvariantCulture),
+                    tripExpenseCents.ToString(CultureInfo.InvariantCulture),
+                    tripFuelConsumed.ToString("R", CultureInfo.InvariantCulture),
+                    tripStartGameSeconds.ToString("R", CultureInfo.InvariantCulture))
             });
         }
 
@@ -221,7 +226,21 @@ namespace WhereTheSoundingsEnd.Economy
                 long gross, expenses, lastGross, lastExpenses;
                 double seconds, lastSeconds;
                 float fuelUsed, lastFuel;
-                if (p.Length != 9 ||
+                int active = 0;
+                long activeGross = 0L;
+                long activeExpenses = 0L;
+                float activeFuel = 0f;
+                double activeStart = 0d;
+                bool legacyRecord = p.Length == 9;
+                bool activeRecordValid = legacyRecord ||
+                    (p.Length == 14 &&
+                     int.TryParse(p[9], NumberStyles.Integer, CultureInfo.InvariantCulture, out active) &&
+                     (active == 0 || active == 1) &&
+                     long.TryParse(p[10], NumberStyles.Integer, CultureInfo.InvariantCulture, out activeGross) && activeGross >= 0 &&
+                     long.TryParse(p[11], NumberStyles.Integer, CultureInfo.InvariantCulture, out activeExpenses) && activeExpenses >= 0 &&
+                     float.TryParse(p[12], NumberStyles.Float, CultureInfo.InvariantCulture, out activeFuel) && IsFinite(activeFuel) && activeFuel >= 0f &&
+                     double.TryParse(p[13], NumberStyles.Float, CultureInfo.InvariantCulture, out activeStart) && IsFinite(activeStart) && activeStart >= 0d);
+                if ((!legacyRecord && p.Length != 14) || !activeRecordValid ||
                     !int.TryParse(p[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out trips) || trips < 0 ||
                     !long.TryParse(p[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out gross) || gross < 0 ||
                     !long.TryParse(p[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out expenses) || expenses < 0 ||
@@ -258,7 +277,7 @@ namespace WhereTheSoundingsEnd.Economy
                 WorldFlagSaveData flag = data.progress.worldFlags[i];
                 if (flag == null || flag.flagId != SaveFlagId) continue;
                 string[] p = (flag.stringValue ?? string.Empty).Split('|');
-                if (p.Length != 9) return;
+                if (p.Length != 9 && p.Length != 14) return;
                 int.TryParse(p[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out completedTrips);
                 long.TryParse(p[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out lifetimeGrossCents);
                 long.TryParse(p[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out lifetimeExpenseCents);
@@ -268,6 +287,18 @@ namespace WhereTheSoundingsEnd.Economy
                 long.TryParse(p[6], NumberStyles.Integer, CultureInfo.InvariantCulture, out lastTripExpenseCents);
                 double.TryParse(p[7], NumberStyles.Float, CultureInfo.InvariantCulture, out lastTripSeconds);
                 float.TryParse(p[8], NumberStyles.Float, CultureInfo.InvariantCulture, out lastTripFuel);
+                if (p.Length == 14)
+                {
+                    int active;
+                    int.TryParse(p[9], NumberStyles.Integer, CultureInfo.InvariantCulture, out active);
+                    tripActive = active == 1;
+                    long.TryParse(p[10], NumberStyles.Integer, CultureInfo.InvariantCulture, out tripGrossCents);
+                    long.TryParse(p[11], NumberStyles.Integer, CultureInfo.InvariantCulture, out tripExpenseCents);
+                    float.TryParse(p[12], NumberStyles.Float, CultureInfo.InvariantCulture, out tripFuelConsumed);
+                    double.TryParse(p[13], NumberStyles.Float, CultureInfo.InvariantCulture, out tripStartGameSeconds);
+                    tripStartRealtime = Time.unscaledTimeAsDouble;
+                    docksideSessionObserved = false;
+                }
                 return;
             }
         }
