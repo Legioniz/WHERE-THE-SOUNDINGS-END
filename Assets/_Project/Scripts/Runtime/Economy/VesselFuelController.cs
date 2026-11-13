@@ -41,7 +41,7 @@ namespace WhereTheSoundingsEnd.Economy
         public float ConsumePropulsion(float throttle, float engineLoad, float deltaTime)
         {
             if (!IsFinite(throttle) || !IsFinite(engineLoad) || !IsFinite(deltaTime) ||
-                deltaTime <= 0f || fuelUnits <= 0f || Mathf.Abs(throttle) < 0.05f)
+                deltaTime <= 0f || !CanPropel || Mathf.Abs(throttle) < 0.05f)
                 return 0f;
 
             float load = Mathf.Clamp01(engineLoad);
