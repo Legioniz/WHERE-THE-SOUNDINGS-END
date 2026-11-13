@@ -86,8 +86,20 @@ namespace WhereTheSoundingsEnd.Economy
             if (amount <= 0f) return;
             Action<float> handler = FuelConsumed;
             if (handler == null) return;
-            try { handler(amount); }
-            catch (Exception exception) { Debug.LogException(exception, this); }
+            Delegate[] listeners = handler.GetInvocationList();
+            for (int i = 0; i < listeners.Length; i++)
+            {
+                try
+                {
+                    ((Action<float>)listeners[i])(amount);
+                }
+                catch (Exception exception)
+                {
+                    // Fuel is already consumed. Preserve delivery to telemetry and every
+                    // other observer even if one presentation listener fails.
+                    Debug.LogWarning("Fuel-consumption listener failed: " + exception.Message, this);
+                }
+            }
         }
 
         public float GetRefuelAmount(float requestedUnits)
