@@ -113,7 +113,7 @@ Not yet connected because the corresponding gameplay systems do not exist in the
 - A dedicated save confirmation prompt and clear player-facing autosave status indicator. The title/pause front end now exposes five manual slots, a separate autosave load path, save/load/delete actions and operation feedback; autosave itself is implemented.
 - Loading into a different scene automatically. The coordinator currently requires the target scene to be active before restoring its participants.
 
-A field's presence in SaveGameData is a persistence contract, not proof that the related gameplay feature is implemented. The current cargo and dialogue adapters are runtime-ready but still need authored item definitions and a configured DialogueRunner in Unity. Add a focused ISaveParticipant when each system gains authoritative runtime state.
+A field's presence in SaveGameData is a persistence contract, not proof that the related gameplay feature is implemented. Greyhaven's Editor builder generates its starter cargo definitions and configured DialogueRunner; a clean Unity bootstrap and runtime save/restore pass are still required to verify those generated references. Add a focused ISaveParticipant when each new system gains authoritative runtime state.
 
 ## Related documents
 
@@ -141,7 +141,7 @@ Schema v5 also records:
 - acoustic pressure, latest heard event/region/position/timestamp, and a bounded 128-event duplicate guard;
 - maritime incident countdown, caption/hush durations, hush blend, and active false-navigation-light position/remaining duration.
 
-Schema 4 saves migrate with weather defaults derived from their old weather label, a safe weather-shift delay, no pending bird event, and empty acoustic/inspection history. Existing schema 0–3 migrations remain ordered and preserved.
+Schema 4 saves migrate with weather defaults derived from their old weather label, a safe weather-shift delay, no pending bird event, and empty acoustic/inspection history. Existing schema 0–3 migrations remain ordered and preserved. The current v5-to-v6 migration separately initializes NPC relationship-memory ledgers and maps legacy zero relationship values to neutral 50.
 
 Generated scenes include an AcousticWorldListener. It subscribes to AcousticEventBus, scores audibility by range/loudness/sensitivity/background noise, deduplicates heard IDs, applies a small disturbance response, and exposes a scored SignalHeard event for future creature or navigation listeners. It does not poll AudioSources.
 
