@@ -1106,6 +1106,17 @@ namespace WhereTheSoundingsEnd.Interaction
             walletLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             walletLabel.style.marginBottom = 5;
             vendorActions.Add(walletLabel);
+            ExpeditionEconomyTelemetry telemetry = vesselBody != null
+                ? vesselBody.GetComponent<ExpeditionEconomyTelemetry>() : null;
+            if (telemetry != null)
+            {
+                Label expedition = new Label(telemetry.BuildSummary());
+                expedition.style.whiteSpace = WhiteSpace.Normal;
+                expedition.style.fontSize = 10;
+                expedition.style.color = new Color(0.72f, 0.78f, 0.73f);
+                expedition.style.marginBottom = 8;
+                vendorActions.Add(expedition);
+            }
         }
 
         private static string FormatMoney(long cents)
