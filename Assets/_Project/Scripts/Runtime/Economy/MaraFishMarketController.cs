@@ -43,6 +43,15 @@ namespace WhereTheSoundingsEnd.Economy
         public bool IsOpen => mara != null && mara.CanTrade &&
                               string.Equals(mara.ActivityId, MarketShiftActivity, StringComparison.Ordinal);
 
+        private void OnValidate()
+        {
+            if (!IsFinite(destinationFactor)) destinationFactor = 1f;
+            destinationFactor = Mathf.Clamp(destinationFactor, 0.01f, 100f);
+            if (!IsFinite(scarcityResponse)) scarcityResponse = 0.35f;
+            scarcityResponse = Mathf.Clamp(scarcityResponse, 0f, 10f);
+            if (stock == null) stock = new List<MarketStockSaveData>();
+        }
+
         private void Awake()
         {
             if (cargoHold == null) cargoHold = GetComponent<SpatialCargoHold>();
@@ -86,6 +95,7 @@ namespace WhereTheSoundingsEnd.Economy
                     !IsFinite(placement.saleQuantity) || placement.saleQuantity <= 0f ||
                     placement.saleQuantity > 1000000f ||
                     !IsFinite(definition.BaseSalePriceUsd) || definition.BaseSalePriceUsd <= 0f ||
+                    definition.BaseSalePriceUsd > 1000000f ||
                     (definition.Category != CargoItemCategory.Fish &&
                      definition.Category != CargoItemCategory.Shellfish &&
                      definition.Category != CargoItemCategory.Cephalopod))
@@ -173,7 +183,7 @@ namespace WhereTheSoundingsEnd.Economy
             if (data.economy.marketStocks == null)
                 data.economy.marketStocks = new List<MarketStockSaveData>();
             // Preserve other vendors' market state when additional profiles are added.
-            data.economy.marketStocks.RemoveAll(entry => entry != null && entry.vendorId == VendorId);
+            data.economy.marketStocks.RemoveAll(entry => entry == null || entry.vendorId == VendorId);
             for (int i = 0; i < stock.Count; i++)
             {
                 MarketStockSaveData entry = stock[i];
