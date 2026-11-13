@@ -27,6 +27,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Core/Pcg32Random.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs",
     "Assets/_Project/Scripts/Runtime/Economy/EconomyPolicy.cs",
+    "Assets/_Project/Scripts/Runtime/Economy/EconomyWalletController.cs",
     "Assets/_Project/Tests/EditMode/EconomyPolicyTests.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
