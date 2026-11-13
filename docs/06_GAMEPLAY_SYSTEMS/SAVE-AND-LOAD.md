@@ -34,7 +34,7 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - FishermanAtmosphereDirector persists its incident countdown, caption/hush timers and active false-navigation-light position/remaining duration.
 - AcousticWorldListener persists hearing pressure, last heard signal metadata and a bounded event-ID deduplication ledger.
 - DeepOceanSiteInteractionController persists inspected phenomenon-site IDs.
-- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.
+- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.\n- RegionalChartController persists physically visited region IDs and records corresponding chart unlocks; map marks remain derived from SoundingRigController discoveries.
 - VesselConditionController persists hull and engine condition.
 - SpatialCargoHold persists cargo placements and damaged-cell coordinates.
 - SalvageSite persists committed daily pulls by stable site ID; transient reservations are refunded when actions do not complete.
@@ -97,9 +97,9 @@ Implemented now:
 - Spatial cargo placements, damaged hold cells and equipment placements through SpatialCargoHold.
 - Action-driven day/time, panic and sea disturbance.
 - Hull/engine condition and wreck-site daily depletion.
-- Greyhaven NPC stable IDs, last activity IDs, region IDs, individual relationship scores and bounded relationship-event memory IDs through NpcAgent (schema v6).
+- Greyhaven NPC stable IDs, last activity IDs, region IDs, individual relationship scores and bounded relationship-event memory IDs through NpcAgent (schema v6 relationship memory, retained in schema v7).
 - Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).
-- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs introduced in schema v5 and retained in current schema v6.
+- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs introduced in schema v5 and retained in current schema v7.
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
 
