@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace WhereTheSoundingsEnd.Inventory
@@ -13,8 +14,33 @@ namespace WhereTheSoundingsEnd.Inventory
         DamagedCargo
     }
 
+    [Flags]
+    public enum FishHabitat
+    {
+        None = 0,
+        Nearshore = 1,
+        Kelp = 2,
+        OpenWater = 4,
+        DeepWater = 8,
+        Estuary = 16,
+        All = Nearshore | Kelp | OpenWater | DeepWater | Estuary
+    }
+
+    public enum FishPreferredTechnique
+    {
+        Any,
+        StillFishing,
+        BottomFishing,
+        FloatFishing,
+        Jigging,
+        Trolling,
+        Drifting,
+        Handlining
+    }
+
     /// <summary>
-    /// Authored shape and handling data for one cargo type. Shapes are authored as occupied grid cells.
+    /// Authored shape and handling data for one cargo type. Fish-specific fields are ignored
+    /// for non-fish cargo and provide the data contract used by the fishing simulation.
     /// </summary>
     [CreateAssetMenu(fileName = "CargoItem", menuName = "WHERE THE SOUNDINGS END/Inventory/Cargo Item")]
     public sealed class CargoItemDefinition : ScriptableObject
@@ -33,6 +59,20 @@ namespace WhereTheSoundingsEnd.Inventory
         [SerializeField] private bool isAberrant;
         [SerializeField, Min(1f)] private float sellValueMultiplier = 1f;
 
+        [Header("Fish ecology and encounter")]
+        [SerializeField] private FishHabitat habitats = FishHabitat.All;
+        [SerializeField] private FishPreferredTechnique preferredTechnique = FishPreferredTechnique.Any;
+        [SerializeField] private string preferredBaitId = "any";
+        [SerializeField, Min(0f)] private float minimumDepthMetres;
+        [SerializeField, Min(0f)] private float maximumDepthMetres = 250f;
+        [SerializeField, Range(0.1f, 2f)] private float resistance = 1f;
+        [SerializeField, Range(0f, 1f)] private float burstFrequency = 0.35f;
+        [SerializeField, Min(1)] private int initialPopulation = 36;
+        [SerializeField, Min(0)] private int dailyPopulationRecovery = 2;
+        [SerializeField, Range(0f, 1f)] private float migrationRate = 0.12f;
+        [SerializeField, Min(0.1f)] private float baseCatchSize = 1f;
+        [SerializeField, Min(0.1f)] private float maximumCatchSize = 3f;
+
         public string ItemId { get { return itemId; } }
         public string DisplayName { get { return displayName; } }
         public CargoItemCategory Category { get { return category; } }
@@ -42,6 +82,18 @@ namespace WhereTheSoundingsEnd.Inventory
         public bool IsQuestCritical { get { return isQuestCritical; } }
         public bool IsAberrant { get { return isAberrant; } }
         public float SellValueMultiplier { get { return Mathf.Max(1f, sellValueMultiplier); } }
+        public FishHabitat Habitats { get { return habitats == FishHabitat.None ? FishHabitat.All : habitats; } }
+        public FishPreferredTechnique PreferredTechnique { get { return preferredTechnique; } }
+        public string PreferredBaitId { get { return string.IsNullOrWhiteSpace(preferredBaitId) ? "any" : preferredBaitId; } }
+        public float MinimumDepthMetres { get { return minimumDepthMetres; } }
+        public float MaximumDepthMetres { get { return Mathf.Max(minimumDepthMetres, maximumDepthMetres); } }
+        public float Resistance { get { return resistance; } }
+        public float BurstFrequency { get { return burstFrequency; } }
+        public int InitialPopulation { get { return initialPopulation; } }
+        public int DailyPopulationRecovery { get { return dailyPopulationRecovery; } }
+        public float MigrationRate { get { return migrationRate; } }
+        public float BaseCatchSize { get { return baseCatchSize; } }
+        public float MaximumCatchSize { get { return Mathf.Max(baseCatchSize, maximumCatchSize); } }
 
         private void OnValidate()
         {
@@ -50,6 +102,10 @@ namespace WhereTheSoundingsEnd.Inventory
 
             if (string.IsNullOrWhiteSpace(itemId))
                 itemId = name.ToLowerInvariant().Replace(' ', '_');
+
+            maximumDepthMetres = Mathf.Max(minimumDepthMetres, maximumDepthMetres);
+            maximumCatchSize = Mathf.Max(baseCatchSize, maximumCatchSize);
+            initialPopulation = Mathf.Max(1, initialPopulation);
         }
     }
 }

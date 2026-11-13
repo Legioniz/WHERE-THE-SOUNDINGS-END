@@ -71,7 +71,7 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 
 ## Creature roster, fishing, and trade
 
-- [Catchable seafood and market species catalog](04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)
+- [Fishing simulation runtime](08_TECHNICAL_DESIGN/FISHING-SIMULATION.md) — encounter state machine, equipment/progression, species profiles, population persistence, migration approximation and verification boundary.\n- [Catchable seafood and market species catalog](04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)
 - [Fish species index](04_CHARACTERS_AND_ENTITIES/FISH-SPECIES.md)
 - [Mutated and unnatural catchable specimens](04_CHARACTERS_AND_ENTITIES/MUTATED-AND-UNNATURAL-CATCHES.md)
 - [Creature Bible](04_CHARACTERS_AND_ENTITIES/CREATURE-BIBLE.md)

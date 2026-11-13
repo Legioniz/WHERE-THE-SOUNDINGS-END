@@ -1,5 +1,29 @@
 # Development Log
 
+## 2026-11-14 — Greyhaven fishing encounter, tackle and population foundation
+
+**Branch:** fishing implementation work in progress; awaiting repository CI and review.
+
+### Implemented in source
+- Added FishingSystemDirector to the persistent vessel. HarvestingMinigameController routes the existing Fish input to it while retaining the independent dredging reservation/commit flow.
+- Added rod, line, hook, reel, bait and seven fishing methods. Tackle tiers unlock at five and twelve lifetime catches; selected loadout, technique and catch count use existing namespaced progress flags.
+- Added cast/deployment, variable bite waiting, a hook window, multi-beat fish fight, tension management, tackle-dependent line failure, missed-pull recovery, fish escape and manual line retrieval.
+- Extended fish cargo definitions with habitat, depth, preferred bait/method, resistance, burst frequency, stock, recovery, migration and catch-size metadata. Greyhaven's generated catalog now authors distinct profiles for its ordinary and anomalous starter fish.
+- Added per-species/per-habitat aggregate stock depletion, bounded daily recovery and six-in-game-hour habitat migration. Stock/timing uses existing regional stock and world-flag save fields; save schema remains unchanged.
+- Added deterministic Edit Mode policy tests and authoritative gameplay/technical documentation.
+
+### Verification boundary
+- Repository CI, C# syntax validation and Edit Mode test execution must be checked after the PR is opened.
+- Unity 6000.3.28f1 compilation, Greyhaven asset/scene rebuild, Play Mode encounter/input/cargo/save-load testing and Windows Development Build remain outstanding.
+- The habitat resolver and depths are temporary Greyhaven coordinate heuristics. Population migration is a simple cyclic transfer, not a validated marine ecology model.
+- The loadout/encounter UI is a temporary IMGUI prototype; market purchases, gear durability, per-catch length/weight records, seasonal ecology and full economy integration remain open.
+
+### Compatibility
+- No save schema version bump or new save DTO is required; namespaced fishing flags and regional stock entries reuse existing fields.
+- Dredging continues to use its existing salvage reservation contract.
+- The new fishing director is attached to the persistent vessel, never to streamed scenery roots.
+
+
 > Project: WHERE THE SOUNDINGS END  
 > Status: Active working log  
 > Owner: Project lead  

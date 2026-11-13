@@ -24,6 +24,18 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 
 **ENV-04 acceptance:** rebuild all six streamed Greyhaven areas at revision 3; inspect the harbour work lane, village service approaches, estuary vegetation, shoreline tide line and lighthouse headland from the gameplay camera; confirm grounded placement, no prop overlap that obscures navigation, no collision/runtime/save side effects, and acceptable memory/draw-call impact in a Windows Development Build.
 
+## P1 — Fishing encounter and Greyhaven ecology
+
+| ID | Priority | Task | Size | Dependencies | Status |
+|---|---|---|---|---|---|
+| FISH-01 | P1 | Replace single fishing timing minigame with loadout, cast/deploy, bite, hook and multi-beat fight | L | Existing HarvestingMinigameController, SeaStateDirector, cargo hold | Source implemented; Unity verification open |
+| FISH-02 | P1 | Add species-authored habitat/depth, bait/method preference, resistance, burst behavior and catch-size profiles | M | FISH-01, Greyhaven cargo catalog | Source and builder profiles implemented; rebuild/verification open |
+| FISH-03 | P1 | Add per-habitat stock depletion, recovery, migration and save persistence | M | FISH-02, existing regional stock save DTO | Source implemented; Unity save/load verification open |
+| FISH-04 | P1 | Add tackle tiers, loadout selection and catch-count unlock progression | M | FISH-01, existing progress flags | Source implemented; economy purchase integration deferred |
+| FISH-05 | P1 | Replace prototype fishing OnGUI and coordinate habitat/depth estimates with authored fishing grounds and UI Toolkit | L | Greyhaven fishing Play Mode review, shared depth data contract | Open |
+
+**FISH-01–04 verification:** run Unity 6000.3.28f1 import/compile and Edit Mode tests; rebuild Greyhaven; demonstrate every technique, all encounter exits, species eligibility, tackle milestones, cargo-full failure and save/load. Confirm dredging still reserves/commits/releases pulls correctly. Static CI is not runtime acceptance.
+
 ## M0 — Foundation stabilization and verification
 
 > **Status: M0 in progress.** Unity verification is still required.

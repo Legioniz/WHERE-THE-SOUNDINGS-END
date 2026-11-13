@@ -35,6 +35,7 @@ namespace WhereTheSoundingsEnd.World
         private string status = "F: fish   G: dredge";
         private Texture2D ringTexture;
         private Texture2D targetTexture;
+        private FishingSystemDirector fishingSystem;
         private SalvageSite activeSalvageSite;
         private string activeSalvageReservationId;
 
@@ -47,11 +48,17 @@ namespace WhereTheSoundingsEnd.World
             controls = input;
             cargoHold = hold;
             seaState = director;
+            fishingSystem = GetComponent<FishingSystemDirector>();
+            if (fishingSystem == null) fishingSystem = gameObject.AddComponent<FishingSystemDirector>();
+            fishingSystem.Configure(input, hold, director);
         }
 
         private void Awake()
         {
             if (cargoHold == null) cargoHold = GetComponent<SpatialCargoHold>();
+            fishingSystem = GetComponent<FishingSystemDirector>();
+            if (fishingSystem == null) fishingSystem = gameObject.AddComponent<FishingSystemDirector>();
+            fishingSystem.Configure(controls, cargoHold, seaState);
             ringTexture = CreateRingTexture(128, new Color(0.78f, 0.83f, 0.77f, 0.9f));
             targetTexture = CreateArcTexture(128, 0.22f, new Color(0.86f, 0.37f, 0.22f, 0.95f));
         }
@@ -62,6 +69,7 @@ namespace WhereTheSoundingsEnd.World
             fishAction = controls.FindAction("Fish", false);
             dredgeAction = controls.FindAction("Dredge", false);
             harvestBeatAction = controls.FindAction("HarvestBeat", false);
+            if (fishingSystem != null) fishingSystem.Configure(controls, cargoHold, seaState);
         }
 
         private void OnDisable()
@@ -80,7 +88,10 @@ namespace WhereTheSoundingsEnd.World
             if (action == HarvestActionType.None)
             {
                 if (fishAction != null && fishAction.WasPressedThisFrame())
-                    Begin(HarvestActionType.Fishing);
+                {
+                    if (fishingSystem != null) fishingSystem.TryStartFishing();
+                    else Begin(HarvestActionType.Fishing);
+                }
                 else if (dredgeAction != null && dredgeAction.WasPressedThisFrame())
                     Begin(HarvestActionType.Dredging);
                 return;
