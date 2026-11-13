@@ -10,6 +10,7 @@ namespace WhereTheSoundingsEnd.Tests
     public sealed class ExpeditionEconomyTelemetryTests
     {
         private GameObject owner;
+        private GameObject restoredOwner;
 
         [SetUp]
         public void SetUp()
@@ -23,6 +24,7 @@ namespace WhereTheSoundingsEnd.Tests
         public void TearDown()
         {
             if (owner != null) Object.DestroyImmediate(owner);
+            if (restoredOwner != null) Object.DestroyImmediate(restoredOwner);
         }
 
         [Test]
@@ -68,6 +70,30 @@ namespace WhereTheSoundingsEnd.Tests
             {
                 Object.DestroyImmediate(restored.gameObject);
             }
+        }
+
+        [Test]
+        public void InProgressTripSurvivesSaveAndReload()
+        {
+            ExpeditionEconomyTelemetry telemetry = owner.AddComponent<ExpeditionEconomyTelemetry>();
+            telemetry.ObservePropulsion(1f);
+            owner.GetComponent<EconomyWalletController>().TryApplyTransaction("active.trip.sale", 700L);
+
+            SaveGameData data = SaveGameData.CreateNew(1, "greyhaven");
+            telemetry.CaptureSaveData(data);
+
+            restoredOwner = new GameObject("Restored active trip telemetry");
+            EconomyWalletController restoredWallet = restoredOwner.AddComponent<EconomyWalletController>();
+            restoredOwner.AddComponent<VesselFuelController>();
+            ExpeditionEconomyTelemetry restored = restoredOwner.AddComponent<ExpeditionEconomyTelemetry>();
+            string error;
+            Assert.IsTrue(restored.TryValidateSaveData(data, out error), error);
+            restored.RestoreSaveData(data);
+            Assert.IsTrue(restored.TripActive);
+            StringAssert.Contains("GROSS $7.00", restored.BuildSummary());
+
+            Assert.IsTrue(restoredWallet.TryApplyTransaction("active.trip.repair", -200L));
+            StringAssert.Contains("COST $2.00", restored.BuildSummary());
         }
 
         [Test]
