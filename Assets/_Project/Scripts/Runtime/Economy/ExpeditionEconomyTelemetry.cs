@@ -2,7 +2,6 @@ using System;
 using System.Globalization;
 using System.Collections.Generic;
 using UnityEngine;
-using WhereTheSoundingsEnd.Boat;
 using WhereTheSoundingsEnd.Interaction;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.World;
@@ -23,7 +22,6 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private VesselFuelController fuel;
         [SerializeField] private SeaStateDirector seaState;
         [SerializeField] private DocksideHubController dockside;
-        [SerializeField] private BoatPrototypeController boat;
 
         [SerializeField] private int completedTrips;
         [SerializeField] private long lifetimeGrossCents;
@@ -89,7 +87,6 @@ namespace WhereTheSoundingsEnd.Economy
         {
             if (wallet == null) wallet = GetComponent<EconomyWalletController>();
             if (fuel == null) fuel = GetComponent<VesselFuelController>();
-            if (boat == null) boat = GetComponent<BoatPrototypeController>();
             if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             if (dockside == null) dockside = GetComponent<DocksideHubController>();
             if (dockside == null) dockside = FindFirstObjectByType<DocksideHubController>();
