@@ -31,7 +31,7 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 | M0-07 | P0 | Verify save/load, autosave, backups and participant restore | M | M0-03, M0-05 | Front-end save UI and schema v6 source present; Unity integration open |
 | M0-08 | P0 | Produce and smoke-test a clean Windows 64-bit development build | M | M0-03 through M0-07 | Open |
 
-| M0-09 | P0 | Verify dockside hub, modal exclusivity and Greyhaven additive streaming in Unity | M | M0-03, M0-04, M0-05 | Source/tests authored; Unity verification open |
+| M0-10 | P0 | Verify dockside hub, modal exclusivity and Greyhaven additive streaming in Unity | M | M0-03, M0-04, M0-05 | Source/tests authored; Unity verification open |
 | M0-09 | P1 | Decide how to enforce main-branch review/check requirements | S | Owner plan/visibility decision | Blocked by private-repository plan limitation |
 
 ### M0-01 — Resolve the known semantic compile defect
@@ -117,6 +117,10 @@ Verify:
 ### M0-08 — Windows build smoke test
 
 Build from the verified Unity editor and generated Build Settings. Launch on a clean Windows environment, start Greyhaven, exercise boat movement and one harvesting/survey action, save, quit and relaunch. Record build configuration, machine, results and any known limitations.
+
+### M0-10 — Dockside and streaming Unity acceptance
+
+Run the generated Greyhaven scene in Unity 6000.3.28f1. Rebuild the six additive area scenes, execute the streaming Play Mode test, run all dockside Edit Mode tests, verify all seven location menus, test Escape/gamepad Start close, prove inventory/dialogue/pause mutual exclusion, and verify the Inn checkpoint uses the existing autosave. Record editor version, hardware, pass/fail and any transition hitch observations.
 
 ### M0-09 — Remote repository protection decision
 
