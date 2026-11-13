@@ -492,7 +492,8 @@ namespace WhereTheSoundingsEnd.Persistence
                 data.dialogue.floatVariables.Count,
                 data.dialogue.stringVariables.Count,
                 data.dialogue.boolVariables.Count,
-                data.dialogue.completedNodeIds.Count
+                data.dialogue.completedNodeIds.Count,
+                data.economy.processedTransactionIds.Count
             };
             for (int index = 0; index < collectionCounts.Length; index++)
             {
