@@ -54,7 +54,7 @@ namespace WhereTheSoundingsEnd.Narrative
             if (npcAgent == null)
                 Debug.LogError("HarbourmasterInteraction requires an NpcAgent. Dialogue is disabled until one is assigned.", this);
 
-            if (controls == null) return;
+            if (externallyManagedByDocksideHub || controls == null) return;
             InputActionMap map = controls.FindActionMap("Boat", false);
             _interactAction = map?.FindAction("Interact", false);
             if (_interactAction != null && !_interactAction.enabled)
