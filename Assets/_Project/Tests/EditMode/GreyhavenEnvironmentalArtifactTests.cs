@@ -40,6 +40,27 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void WreckArtifacts_UseWreckLocalSpaceInsteadOfWorldOrigin()
+        {
+            GreyhavenEnvironmentBuilder.BuildEnvironmentalArtifacts(
+                roots[0].transform, roots[1].transform, roots[2].transform,
+                roots[3].transform, roots[4].transform,
+                materials[0], materials[1], materials[2], materials[3], materials[4],
+                materials[5], materials[6], materials[7], materials[8]);
+
+            Transform wreck = roots[4].transform.Find("Greyhaven_Outer_Channel_Wreck_Field");
+            wreck.position = new Vector3(30f, -0.25f, 55f);
+            Transform bell = wreck.Find("Wreck_Environmental_Artifacts/Wreck_Bell_Rim");
+            Assert.That(bell, Is.Not.Null);
+            Assert.That(bell.localPosition.x, Is.EqualTo(-1.35f).Within(0.001f));
+            Assert.That(bell.localPosition.y, Is.EqualTo(-0.62f).Within(0.001f));
+            Assert.That(bell.localPosition.z, Is.EqualTo(0.55f).Within(0.001f));
+            Assert.That(bell.position.x, Is.EqualTo(28.65f).Within(0.001f));
+            Assert.That(bell.position.y, Is.EqualTo(-0.87f).Within(0.001f));
+            Assert.That(bell.position.z, Is.EqualTo(55.55f).Within(0.001f));
+        }
+
+        [Test]
         public void BuildEnvironmentalArtifacts_CreatesDistrictDressingWithoutGameplayComponents()
         {
             GreyhavenEnvironmentBuilder.BuildEnvironmentalArtifacts(
@@ -63,6 +84,10 @@ namespace WhereTheSoundingsEnd.Tests
                     "Environmental artifact dressing must not add gameplay collision.");
                 Assert.That(roots[i].GetComponentsInChildren<MonoBehaviour>(true), Is.Empty,
                     "Environmental artifact dressing must not add runtime gameplay components.");
+                Assert.That(roots[i].GetComponentsInChildren<Rigidbody>(true), Is.Empty,
+                    "Environmental artifact dressing must remain static.");
+                Assert.That(roots[i].GetComponentsInChildren<Light>(true), Is.Empty,
+                    "Environmental artifact dressing must not create per-prop lights.");
 
                 foreach (Renderer renderer in renderers)
                 {
