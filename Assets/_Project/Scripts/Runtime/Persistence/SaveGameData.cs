@@ -414,6 +414,12 @@ namespace WhereTheSoundingsEnd.Persistence
                         // Legacy currency was an integer number of whole USD.
                         data.economy.walletCents = Math.Max(0L, (long)data.player.currency) * 100L;
                         data.economy.processedTransactionIds = new List<string>();
+                        for (int placementIndex = 0; placementIndex < data.inventory.placements.Count; placementIndex++)
+                        {
+                            CargoPlacementSaveData placement = data.inventory.placements[placementIndex];
+                            if (placement != null)
+                                placement.saleQuantity = Math.Max(1, placement.quantity);
+                        }
                         data.schemaVersion = 8;
                         break;
 
