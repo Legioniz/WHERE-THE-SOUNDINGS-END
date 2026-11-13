@@ -53,7 +53,8 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 | Persistence | Implemented runtime foundation; integration incomplete | Five manual JSON slots, a separate autosave, backups, schema v6 migrations, save participants and a title/pause save/load UI exist. Automatic cross-scene restore and complete campaign resume flow remain unverified/incomplete. |
 | Player interface | Partial foundation; unverified | UI Toolkit field HUD, cargo inventory, Yarn dialogue/relationship meter, title/pause/save/load/settings overlay and seven-location dockside hub are present. Live map, market transactions, full quest UI, controller focus and comprehensive accessibility remain absent. |
 | Creature AI and living population | Planned / not established in runtime | The repository has design documents, but no complete creature perception/behavior or population simulation runtime. |
-| Economy, quests and regional travel | Planned / partial design | No complete sell/repair/fuel/upgrade loop, quest campaign, or interconnected regional travel system is established in runtime. |
+| Economy | Detailed researched design; runtime not implemented | Existing USD price schedule and economy mathematics are now integrated with a vendor/NPC/cargo/vessel/save design. No functioning wallet transactions, buyer demand, purchases, fuel costs, paid repairs or market UI are established in runtime. |
+| Quests and regional travel | Planned / partial design | No complete quest campaign or interconnected regional travel system is established in runtime. |
 | Environments and assets | Generated greybox only; local area streaming implemented | Editor builders construct the Greyhaven terrain, service buildings and six static additive area scenes. Final art/audio content and committed scene outputs are not present in the audited tree. |
 
 ## 4. Findings and actions
@@ -160,3 +161,10 @@ The Greyhaven Editor builder now authors deterministic static prop clusters for 
 Artifacts are collider-free and add no runtime scripts, rigidbodies, lights, save participants, interactions, journal entries, objectives or map discoveries. Parent-local cylinder/sphere placement preserves the wreck cluster under its offset salvage-site root. Edit Mode tests were added for district hierarchy, static constraints and local-space placement. The streamed-area revision was incremented; generated scenes must be rebuilt.
 
 **Status:** source implemented; Unity Editor import, tests, scene rebuild, visual inspection, Play Mode and Windows build remain unverified.
+
+
+## 5. Economy design integration — 2026-11-14
+
+The economy was cross-checked against the existing seafood price schedule, economy mathematics, cargo hold, vessel condition, dockside hub, NPC relationship rules and save DTO. The repository already defined USD species prices, destination market factors, quality/freshness/demand ranges, legal eligibility, research rewards, operating-cost categories and anti-exploit rules. A new [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md) specification now connects those rules to Mara Venn, Tomas Vale, Inez Sarmiento and the Harbourmaster.
+
+This is a documentation/design integration only. No runtime wallet, sales, dynamic market stock, purchasing, fuel consumption, paid repair or service UI is claimed as implemented. ECO-01 through ECO-11 in the Task Backlog define the implementation and acceptance order.
