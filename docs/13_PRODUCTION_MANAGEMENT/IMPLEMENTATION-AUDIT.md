@@ -151,3 +151,12 @@ The original audit above records its historical baseline at c1ff1975. Since that
 - RegionalChartPolicyTests and RegionalChartSaveTests cover unknown suppression, idempotent visits, discovered-only site marks and save migration/preservation.
 
 **Current status:** source implemented; Unity verification pending. This is a local survey plot, not a world-scale map or inter-region travel system. The Outer Shoals and Hollow Trench remain isolated test scenes. Run the generated-scene rebuild and verify UI, region detection, modal transitions and save/load in Unity 6000.3.28f1 before treating the feature as runtime-accepted.
+
+
+## 2026-11-13 addendum — Greyhaven environmental artifacts
+
+The Greyhaven Editor builder now authors deterministic static prop clusters for harbour, village services, estuary, lighthouse and the outer-channel wreck. The pass adds working-life residue, domestic details, repair scraps, weathered equipment and shoreline debris. It uses project-authored shared materials and primitive greybox geometry; it is not final production art.
+
+Artifacts are collider-free and add no runtime scripts, rigidbodies, lights, save participants, interactions, journal entries, objectives or map discoveries. Parent-local cylinder/sphere placement preserves the wreck cluster under its offset salvage-site root. Edit Mode tests were added for district hierarchy, static constraints and local-space placement. The streamed-area revision was incremented; generated scenes must be rebuilt.
+
+**Status:** source implemented; Unity Editor import, tests, scene rebuild, visual inspection, Play Mode and Windows build remain unverified.

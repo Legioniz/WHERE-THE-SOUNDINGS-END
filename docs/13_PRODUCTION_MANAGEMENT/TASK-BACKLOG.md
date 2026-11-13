@@ -195,3 +195,15 @@ A new player can start the slice and complete this sequence without developer co
 - Keep unvisited region names and locations hidden. Plot only the vessel and phenomenon sites already discovered by the Sounding Rig. Never draw unknown-site pins, compass pointers, bearings or routes.
 - Preserve prior unlockedRegionIds while adding physical visit records; migrate schema v6 to v7 without inventing visits.
 - **Acceptance:** rebuild all generated scenes in Unity 6000.3.28f1; verify first-entry/re-entry behavior, map M/button/Esc input, modal exclusivity, site discovery visibility, schema 6/7 save-load, marker scaling and absence of unknown content. Verify the feature does not imply inter-region travel; the deep-water scenes remain isolated sandboxes.
+
+
+## Greyhaven environmental dressing — 2026-11-13
+
+**Source status:** First deterministic artifact pass implemented; Unity visual acceptance open.
+
+- [ ] Rebuild all six Greyhaven additive area scenes with the updated streamed-area revision.
+- [ ] Inspect prop placement at gameplay camera height; correct floating, clipping, scale, density and occlusion.
+- [ ] Confirm central pier, service approaches, dock chart, lighthouse silhouette and wreck inspection radius remain clear.
+- [ ] Run the new artifact Edit Mode tests and all existing Edit Mode tests in Unity 6000.3.28f1.
+- [ ] Verify the artifact groups stream with their owning area and create no colliders, runtime components, lights, rigidbodies or save changes.
+- [ ] Replace highest-visibility greybox props with original/licensed production meshes only after asset provenance and performance review.

@@ -291,3 +291,17 @@
 ## 2026-11-13 — Unexplained warning indicator
 
 Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirector. A 5.5% reserved incident-roll band produces a brief, non-directional broken-corner flash without text, audio, bearing, map mark, objective, journal entry, or gameplay effect. Remaining incident rolls are remapped to preserve the established incident mix. The cue is not persisted and does not change save schema. Edit Mode policy coverage and repository validation guards were added. Unity visual inspection and test execution remain pending.
+
+
+## 2026-11-13 — Greyhaven environmental artifact and set-dressing pass
+
+**Source status:** Implemented in the Editor scene builder; generated scene rebuild and Unity visual acceptance pending.
+
+- Added deterministic clusters of maritime work residue, personal belongings, repair scraps, shoreline debris and keeper equipment across the harbour, village, estuary, lighthouse and outer-channel wreck.
+- Added shared muted material variants for oxidized metal, chipped ceramic, salt-faded canvas and tarred rope. Existing material creation remains shared and GPU-instanced.
+- Kept artifacts static, collider-free and free of runtime scripts, lights, rigidbodies, save state and interaction behavior. They do not create journal entries, objectives, chart discoveries or NPC state changes.
+- Corrected artifact cylinder/sphere transforms to use parent-local coordinates, including the wreck whose parent is offset from world origin.
+- Added Edit Mode coverage for district hierarchy, no-collider/no-runtime-component constraints, renderer presence and wreck local-space placement.
+- Incremented the generated streamed-area revision so existing generated scenes are recognized as stale and must be rebuilt.
+
+**Verification boundary:** Repository CI/static checks can verify source contracts and syntax only. Unity Editor import/compilation, Edit Mode execution, generated scene inspection, camera readability, clipping/grounding, Play Mode streaming, profiling and Windows build remain pending.
