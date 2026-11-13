@@ -114,7 +114,7 @@ namespace WhereTheSoundingsEnd.Economy
                 long lineTotal = EconomyPolicy.CalculateSaleLineCents(
                     (decimal)placement.saleQuantity,
                     (decimal)definition.BaseSalePriceUsd,
-                    (decimal)destinationFactor,
+                    (decimal)destinationFactor * GetRelationshipSaleFactor(mara.RelationshipScore),
                     qualityFactor,
                     freshnessFactor,
                     demand,
@@ -245,6 +245,14 @@ namespace WhereTheSoundingsEnd.Economy
                 });
             }
             stock = restored;
+        }
+
+        private static decimal GetRelationshipSaleFactor(int score)
+        {
+            if (score >= 90) return 1.10m;
+            if (score >= 75) return 1.05m;
+            if (score >= 60) return 1.02m;
+            return 1.00m;
         }
 
         private static bool IsFinite(float value)
