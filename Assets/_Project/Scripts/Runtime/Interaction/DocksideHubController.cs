@@ -861,7 +861,12 @@ namespace WhereTheSoundingsEnd.Interaction
                     salvageLines.Append(line.unitLabel);
                     salvageLines.Append("  /  ");
                     salvageLines.Append(FormatMoney(line.lineTotalCents));
-                    salvageLines.Append(" USD");
+                    salvageLines.Append(" USD  /  DEMAND ");
+                    salvageLines.Append(line.demandFactor.ToString("0.00"));
+                    salvageLines.Append("  /  STOCK ");
+                    salvageLines.Append(line.buyerStock);
+                    salvageLines.Append("/");
+                    salvageLines.Append(line.buyerTargetStock);
                     if (i < salvageOffer.Count - 1) salvageLines.Append("\\n");
                 }
                 Label linesLabel = new Label(salvageLines.ToString());
