@@ -967,6 +967,15 @@ def main() -> int:
             if required_text not in vendor_source:
                 failures.append(f"GreyhavenVendorServices is missing purchase/service integration: {required_text}")
 
+        contract_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/HarbourmasterContractController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "TryAcceptNext", "TryCompleteActive", "TryCommitRemoval",
+            "wallet.TryApplyTransaction", "CaptureSaveData", "RestoreSaveData",
+            "ISaveParticipant", "ISaveDataValidator",
+        ):
+            if required_text not in contract_source:
+                failures.append(f"HarbourmasterContractController is missing delivery/save integration: {required_text}")
+
         research_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/HarbourmasterResearchController.cs").read_text(encoding="utf-8")
         for required_text in (
             "DiscoveredSiteIds", "TryCommitRemoval", "wallet.TryApplyTransaction",
@@ -1001,6 +1010,9 @@ def main() -> int:
         for required_text in (
             "GetComponent<MaraFishMarketController>()",
             "GetComponent<GreyhavenVendorServices>()",
+            "GetComponent<HarbourmasterContractController>()",
+            "AddComponent<HarbourmasterContractController>()",
+            "TryAcceptNext", "TryCompleteActive",
             "GetComponent<HarbourmasterResearchController>()",
             "GetComponent<VesselEquipmentController>()",
             "TrySubmitNext", "TrySell", "TryPurchase",
