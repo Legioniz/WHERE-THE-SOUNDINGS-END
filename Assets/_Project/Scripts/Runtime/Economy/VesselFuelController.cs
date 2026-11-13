@@ -71,6 +71,7 @@ namespace WhereTheSoundingsEnd.Economy
         {
             if (!IsFinite(units) || units <= 0f) return;
             fuelUnits = Mathf.Clamp(fuelUnits + units, 0f, capacity);
+            emergencyFuelUnits = emergencyReserveCapacity;
         }
 
         public void CaptureSaveData(SaveGameData data)
