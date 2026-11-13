@@ -427,7 +427,7 @@ namespace WhereTheSoundingsEnd.Narrative
             if (chartController == null)
                 chartController = FindFirstObjectByType<RegionalChartController>();
 
-            if (chartController == null || !chartController.HasCurrentChart ||
+            if (chartController == null ||
                 _inventoryOpen || IsDialogueOpen ||
                 (docksideHub != null && docksideHub.IsMenuOpen) ||
                 (frontEnd != null && frontEnd.IsOverlayOpen) ||
