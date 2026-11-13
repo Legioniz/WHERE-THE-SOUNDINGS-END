@@ -198,6 +198,7 @@ namespace WhereTheSoundingsEnd.Interaction
         private MaraFishMarketController maraMarket;
         private GreyhavenVendorServices vendorServices;
         private HarbourmasterContractController harbourmasterContracts;
+        private HarbourmasterResearchController harbourmasterResearch;
         private VesselFuelController fuelController;
         private VesselEquipmentController equipmentController;
         private Label locationTitle;
@@ -241,6 +242,9 @@ namespace WhereTheSoundingsEnd.Interaction
             harbourmasterContracts = boatBody != null ? boatBody.GetComponent<HarbourmasterContractController>() : null;
             if (boatBody != null && harbourmasterContracts == null)
                 harbourmasterContracts = boatBody.gameObject.AddComponent<HarbourmasterContractController>();
+            harbourmasterResearch = boatBody != null ? boatBody.GetComponent<HarbourmasterResearchController>() : null;
+            if (boatBody != null && harbourmasterResearch == null)
+                harbourmasterResearch = boatBody.gameObject.AddComponent<HarbourmasterResearchController>();
             fuelController = boatBody != null ? boatBody.GetComponent<VesselFuelController>() : null;
             equipmentController = boatBody != null ? boatBody.GetComponent<VesselEquipmentController>() : null;
             if (boatBody != null && equipmentController == null)
@@ -718,6 +722,28 @@ namespace WhereTheSoundingsEnd.Interaction
                 });
                 vendorActions.Add(accept);
             }
+
+            vendorActions.Add(new Label("RESEARCH AND CHART PERMITS"));
+            if (harbourmasterResearch == null)
+            {
+                vendorActions.Add(new Label("The research ledger is unavailable."));
+                return;
+            }
+            Label researchText = new Label(harbourmasterResearch.GetBoardText(harbourmaster));
+            researchText.style.whiteSpace = WhiteSpace.Normal;
+            researchText.style.color = new Color(0.78f, 0.82f, 0.75f);
+            vendorActions.Add(researchText);
+            Button submitResearch = MakeButton("SUBMIT RESEARCH EVIDENCE", () =>
+            {
+                string message;
+                harbourmasterResearch.TrySubmitNext(harbourmaster, out message);
+                statusLabel.text = message;
+                furnitureTitle.text = "HARBOURMASTER / RESEARCH DESK";
+                furnitureDetail.text = message;
+                RenderHarbourmasterContracts(harbourmaster);
+            });
+            submitResearch.SetEnabled(harbourmasterResearch.DiscoveryCount > 0);
+            vendorActions.Add(submitResearch);
         }
 
         private void RenderMaraServices()
@@ -880,6 +906,32 @@ namespace WhereTheSoundingsEnd.Interaction
                     }
                 }
             }
+            if (equipmentController != null && vendorServices != null)
+            {
+                AddEquipmentRepairAction(VesselEquipmentController.EngineSlot, "ENGINE");
+                AddEquipmentRepairAction(VesselEquipmentController.RodSlot, "FISHING ROD");
+                AddEquipmentRepairAction(VesselEquipmentController.LanternSlot, "DECK LANTERN");
+            }
+        }
+
+        private void AddEquipmentRepairAction(string slotId, string label)
+        {
+            if (vendorActions == null || vendorServices == null || equipmentController == null) return;
+            long quote = vendorServices.GetEquipmentRepairQuoteCents(slotId);
+            if (quote <= 0L) return;
+            Button repair = MakeButton("SERVICE " + label + "  /  " + FormatMoney(quote) + " USD", () =>
+            {
+                long charged;
+                string error;
+                bool success = vendorServices.TryRepairEquipmentSlot(slotId,
+                    "dockside.tomas.equipment." + slotId + "." + Guid.NewGuid().ToString("N"),
+                    out charged, out error);
+                statusLabel.text = success ? label + " SERVICED  /  -" + FormatMoney(charged) + " USD." :
+                    "EQUIPMENT SERVICE DECLINED  /  " + error;
+                RenderTomasServices();
+            });
+            repair.SetEnabled(vendorServices.WalletCents >= quote);
+            vendorActions.Add(repair);
         }
 
         private void RenderInezServices()
@@ -999,9 +1051,8 @@ namespace WhereTheSoundingsEnd.Interaction
                 if (!string.IsNullOrEmpty(slotId) && equipmentController != null)
                 {
                     Button equip = MakeButton("INSTALL " + definition.DisplayName.ToUpperInvariant() +
-                        (equipmentController.GetType() != null && itemId == equipmentController.EngineItemId ||
-                         itemId == equipmentController.RodItemId || itemId == equipmentController.LanternItemId
-                            ? "  /  CURRENTLY INSTALLED" : "  /  EQUIP"),
+                        (itemId == equipmentController.EngineItemId || itemId == equipmentController.RodItemId ||
+                         itemId == equipmentController.LanternItemId ? "  /  CURRENTLY INSTALLED" : "  /  EQUIP"),
                         () =>
                         {
                             string message;
