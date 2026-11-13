@@ -70,7 +70,11 @@ A new campaign receives a one-time $25.00 starter wallet balance. A zero-balance
 
 **Not yet implemented:** research submissions, permits, complete catch legality and protected-species rules, the full catalogue price authoring, active rod/reel/line equipment-slot application, destination-specific travel-market routes, detailed fuel range/net-profit analytics, and full Unity Play Mode balancing. The first three persistent Greyhaven salvage delivery contracts are now available through the Harbourmaster's dockside service panel; the board supports one active contract at a time, atomic cargo-for-wallet completion, and save persistence. The editor builder must be run in Unity to regenerate the Greyhaven scene with the new runtime components and authored cargo data.
 
-## 5.1 Harbourmaster delivery contracts\n\nThe Harbourmaster's dockside panel now exposes a compact three-contract salvage board. The player accepts one job, carries the requested salvage to Greyhaven, and submits it at the office. The initial jobs request Corroded Ship Fittings, Salt-Stiff Canvas, or Waterlogged Timber, with fixed prototype rewards of $8.50, $5.00, and $7.00 respectively. A completed contract is recorded once; its reward uses the existing idempotent wallet ledger, and the cargo placement is removed only when the wallet transaction commits. Active contract identity and the completion bitmask are stored in a namespaced existing world flag, so the save schema remains v8. These are introductory local deliveries, not yet a full research/permit progression system.\n\n## 6. Sale value and market demand
+## 5.1 Harbourmaster delivery contracts
+
+The Harbourmaster's dockside panel now exposes a compact three-contract salvage board. The player accepts one job, carries the requested salvage to Greyhaven, and submits it at the office. The initial jobs request Corroded Ship Fittings, Salt-Stiff Canvas, or Waterlogged Timber, with fixed prototype rewards of $8.50, $5.00, and $7.00 respectively. A completed contract is recorded once; its reward uses the existing idempotent wallet ledger, and the cargo placement is removed only when the wallet transaction commits. Active contract identity and the completion bitmask are stored in a namespaced existing world flag, so the save schema remains v8. These are introductory local deliveries, not yet a full research/permit progression system.
+
+## 6. Sale value and market demand
 
 For each eligible sale line, use the existing economy formula:
 
