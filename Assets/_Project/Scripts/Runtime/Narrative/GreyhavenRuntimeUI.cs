@@ -30,6 +30,12 @@ namespace WhereTheSoundingsEnd.Narrative
         private VisualElement _dialoguePanel;
         private VisualElement _optionsContainer;
         private VisualElement _inventoryPanel;
+        private VisualElement _chartPanel;
+        private VisualElement _chartSurface;
+        private VisualElement _chartSiteList;
+        private VisualElement _chartVisitedList;
+        private Label _chartRegionLabel;
+        private Label _chartStatusLabel;
         private VisualElement _gridContainer;
         private VisualElement _catalogueContainer;
         private Label _promptLabel;
@@ -46,6 +52,9 @@ namespace WhereTheSoundingsEnd.Narrative
         private InputAction _inventoryAction;
         private bool _ownsInventoryAction;
         private bool _inventoryOpen;
+        private bool _chartOpen;
+        private string _lastChartNotice = string.Empty;
+        private RegionalChartController chartController;
         private bool _lineWaiting;
         private bool _pauseOwned;
         private float _timeScaleBeforeUi;
@@ -62,6 +71,7 @@ namespace WhereTheSoundingsEnd.Narrative
         public SpatialCargoHold CargoHold { get => cargoHold; set => cargoHold = value; }
         public InputActionAsset Controls { get => controls; set => controls = value; }
         public bool IsInventoryOpen => _inventoryOpen;
+        public bool IsChartOpen => _chartOpen;
         public bool IsDialogueOpen => dialogueRunner != null && dialogueRunner.IsDialogueRunning;
         public GreyhavenFrontEndUI FrontEnd => frontEnd;
         public DocksideHubController DocksideHub { get => docksideHub; set => docksideHub = value; }
@@ -69,6 +79,7 @@ namespace WhereTheSoundingsEnd.Narrative
         private void Start()
         {
             _seaState = FindFirstObjectByType<SeaStateDirector>();
+            chartController = FindFirstObjectByType<RegionalChartController>();
             InitializeUi();
             BindInventoryInput();
             frontEnd = GetComponent<GreyhavenFrontEndUI>();
@@ -88,11 +99,25 @@ namespace WhereTheSoundingsEnd.Narrative
 
         private void Update()
         {
+            if (chartController != null && !string.IsNullOrWhiteSpace(chartController.LatestDiscovery) &&
+                !string.Equals(_lastChartNotice, chartController.LatestDiscovery, StringComparison.Ordinal))
+            {
+                _lastChartNotice = chartController.LatestDiscovery;
+                SetInteractionPrompt(_lastChartNotice);
+            }
+
             Keyboard keyboard = Keyboard.current;
             if (_inventoryAction != null && _inventoryAction.WasPressedThisFrame())
                 ToggleInventory();
 
             if (keyboard == null) return;
+
+            if (_chartOpen)
+            {
+                if (keyboard.escapeKey.wasPressedThisFrame || keyboard.mKey.wasPressedThisFrame)
+                    SetChartVisible(false);
+                return;
+            }
 
             if (_inventoryOpen)
             {
@@ -102,6 +127,9 @@ namespace WhereTheSoundingsEnd.Narrative
                     RotateSelected();
                 return;
             }
+
+            if (!_inventoryOpen && (keyboard.mKey.wasPressedThisFrame))
+                ToggleChart();
 
             if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
             {
@@ -143,6 +171,7 @@ namespace WhereTheSoundingsEnd.Narrative
             BuildHud();
             BuildDialoguePanel();
             BuildInventoryPanel();
+            BuildChartPanel();
             RefreshInventory();
         }
 
@@ -180,9 +209,17 @@ namespace WhereTheSoundingsEnd.Narrative
             title.style.fontSize = 13;
             row.Add(title);
 
+            VisualElement actions = new VisualElement();
+            actions.style.flexDirection = FlexDirection.Row;
+            row.Add(actions);
+
+            Button chartButton = MakeButton("CHART  [M]", () => ToggleChart());
+            chartButton.style.minWidth = 118;
+            actions.Add(chartButton);
+
             Button holdButton = MakeButton("CARGO HOLD  [I]", () => ToggleInventory());
             holdButton.style.minWidth = 150;
-            row.Add(holdButton);
+            actions.Add(holdButton);
 
             _promptLabel = new Label(string.Empty);
             _promptLabel.style.color = new Color(0.88f, 0.78f, 0.55f);
@@ -271,6 +308,273 @@ namespace WhereTheSoundingsEnd.Narrative
             _continueButton.style.alignSelf = Align.FlexEnd;
             _continueButton.style.minWidth = 210;
             _dialoguePanel.Add(_continueButton);
+        }
+
+
+        private void BuildChartPanel()
+        {
+            _chartPanel = new VisualElement();
+            _chartPanel.style.position = Position.Absolute;
+            _chartPanel.style.left = 0;
+            _chartPanel.style.right = 0;
+            _chartPanel.style.top = 0;
+            _chartPanel.style.bottom = 0;
+            _chartPanel.style.justifyContent = Justify.Center;
+            _chartPanel.style.alignItems = Align.Center;
+            _chartPanel.style.backgroundColor = new Color(0.008f, 0.018f, 0.021f, 0.94f);
+            _chartPanel.style.display = DisplayStyle.None;
+            _chartPanel.pickingMode = PickingMode.Position;
+            _root.Add(_chartPanel);
+
+            VisualElement window = new VisualElement();
+            window.style.width = new Length(96, LengthUnit.Percent);
+            window.style.maxWidth = 1180;
+            window.style.maxHeight = new Length(94, LengthUnit.Percent);
+            window.style.paddingLeft = 20;
+            window.style.paddingRight = 20;
+            window.style.paddingTop = 16;
+            window.style.paddingBottom = 16;
+            window.style.backgroundColor = new Color(0.055f, 0.075f, 0.073f, 1f);
+            window.style.borderTopWidth = 2;
+            window.style.borderTopColor = new Color(0.70f, 0.43f, 0.25f);
+            window.style.flexDirection = FlexDirection.Column;
+            _chartPanel.Add(window);
+
+            VisualElement header = new VisualElement();
+            header.style.flexDirection = FlexDirection.Row;
+            header.style.alignItems = Align.Center;
+            header.style.justifyContent = Justify.SpaceBetween;
+            header.style.marginBottom = 12;
+            window.Add(header);
+
+            VisualElement titleGroup = new VisualElement();
+            titleGroup.style.flexDirection = FlexDirection.Column;
+            header.Add(titleGroup);
+            Label title = new Label("VESSEL CHART / FIELD NOTES");
+            title.style.color = new Color(0.91f, 0.85f, 0.71f);
+            title.style.fontSize = 20;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            titleGroup.Add(title);
+            _chartRegionLabel = new Label("NO CHART SELECTED");
+            _chartRegionLabel.style.color = new Color(0.68f, 0.76f, 0.70f);
+            _chartRegionLabel.style.fontSize = 12;
+            titleGroup.Add(_chartRegionLabel);
+            header.Add(MakeButton("CLOSE  [ESC]", () => SetChartVisible(false)));
+
+            VisualElement body = new VisualElement();
+            body.style.flexDirection = FlexDirection.Row;
+            body.style.flexGrow = 1f;
+            body.style.minHeight = 0;
+            window.Add(body);
+
+            _chartSurface = new VisualElement();
+            _chartSurface.style.position = Position.Relative;
+            _chartSurface.style.flexGrow = 1f;
+            _chartSurface.style.minWidth = 360;
+            _chartSurface.style.height = 490;
+            _chartSurface.style.backgroundColor = new Color(0.70f, 0.66f, 0.54f);
+            _chartSurface.style.borderTopWidth = 2;
+            _chartSurface.style.borderBottomWidth = 2;
+            _chartSurface.style.borderLeftWidth = 2;
+            _chartSurface.style.borderRightWidth = 2;
+            _chartSurface.style.borderTopColor = new Color(0.35f, 0.32f, 0.25f);
+            _chartSurface.style.borderBottomColor = new Color(0.35f, 0.32f, 0.25f);
+            _chartSurface.style.borderLeftColor = new Color(0.35f, 0.32f, 0.25f);
+            _chartSurface.style.borderRightColor = new Color(0.35f, 0.32f, 0.25f);
+            body.Add(_chartSurface);
+
+            VisualElement side = new VisualElement();
+            side.style.width = 285;
+            side.style.minWidth = 230;
+            side.style.marginLeft = 18;
+            side.style.flexDirection = FlexDirection.Column;
+            body.Add(side);
+
+            _chartStatusLabel = new Label(string.Empty);
+            _chartStatusLabel.style.color = new Color(0.87f, 0.81f, 0.67f);
+            _chartStatusLabel.style.whiteSpace = WhiteSpace.Normal;
+            _chartStatusLabel.style.marginBottom = 12;
+            side.Add(_chartStatusLabel);
+
+            Label sitesTitle = new Label("RECORDED SOUNDINGS");
+            sitesTitle.style.color = new Color(0.83f, 0.65f, 0.46f);
+            sitesTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
+            sitesTitle.style.marginBottom = 6;
+            side.Add(sitesTitle);
+            _chartSiteList = new VisualElement();
+            _chartSiteList.style.flexDirection = FlexDirection.Column;
+            side.Add(_chartSiteList);
+
+            Label visitedTitle = new Label("CHARTS IN YOUR LOGBOOK");
+            visitedTitle.style.color = new Color(0.83f, 0.65f, 0.46f);
+            visitedTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
+            visitedTitle.style.marginTop = 18;
+            visitedTitle.style.marginBottom = 6;
+            side.Add(visitedTitle);
+            _chartVisitedList = new VisualElement();
+            _chartVisitedList.style.flexDirection = FlexDirection.Column;
+            side.Add(_chartVisitedList);
+        }
+
+        private void ToggleChart()
+        {
+            if (_chartOpen)
+            {
+                SetChartVisible(false);
+                return;
+            }
+
+            if (chartController == null)
+                chartController = FindFirstObjectByType<RegionalChartController>();
+
+            if (chartController == null ||
+                _inventoryOpen || IsDialogueOpen ||
+                (docksideHub != null && docksideHub.IsMenuOpen) ||
+                (frontEnd != null && frontEnd.IsOverlayOpen) ||
+                Time.timeScale <= 0.0001f ||
+                (_seaState != null && _seaState.IsGameplayActionBusy))
+                return;
+
+            SetChartVisible(true);
+        }
+
+        private void SetChartVisible(bool visible)
+        {
+            if (_chartPanel == null) return;
+            _chartOpen = visible;
+            _chartPanel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            if (visible)
+            {
+                RefreshChart();
+                AcquirePause();
+            }
+            else
+            {
+                ReleasePauseWhenUiClosed();
+            }
+        }
+
+        private void RefreshChart()
+        {
+            if (_chartSurface == null || chartController == null) return;
+            _chartSurface.Clear();
+            _chartSiteList.Clear();
+            _chartVisitedList.Clear();
+
+            Label surfaceHeading = new Label("FIELD PLOT  /  LOCAL SURVEY EXTENT");
+            surfaceHeading.style.position = Position.Absolute;
+            surfaceHeading.style.left = 12;
+            surfaceHeading.style.top = 8;
+            surfaceHeading.style.color = new Color(0.22f, 0.24f, 0.20f);
+            surfaceHeading.style.fontSize = 10;
+            surfaceHeading.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _chartSurface.Add(surfaceHeading);
+
+            for (int line = 1; line <= 3; line++)
+            {
+                float percent = line * 25f;
+                VisualElement vertical = new VisualElement();
+                vertical.style.position = Position.Absolute;
+                vertical.style.left = new Length(percent, LengthUnit.Percent);
+                vertical.style.top = 0;
+                vertical.style.bottom = 0;
+                vertical.style.width = 1;
+                vertical.style.backgroundColor = new Color(0.34f, 0.35f, 0.29f, 0.24f);
+                _chartSurface.Add(vertical);
+
+                VisualElement horizontal = new VisualElement();
+                horizontal.style.position = Position.Absolute;
+                horizontal.style.top = new Length(percent, LengthUnit.Percent);
+                horizontal.style.left = 0;
+                horizontal.style.right = 0;
+                horizontal.style.height = 1;
+                horizontal.style.backgroundColor = new Color(0.34f, 0.35f, 0.29f, 0.24f);
+                _chartSurface.Add(horizontal);
+            }
+
+            _chartRegionLabel.text = chartController.HasCurrentChart
+                ? RegionalChartController.GetDisplayName(chartController.CurrentRegionId).ToUpperInvariant()
+                : "NO CHART ON FILE";
+            _chartStatusLabel.text = chartController.HasCurrentChart
+                ? "Only waters physically visited are recorded. Unknown regions are omitted. No compass, bearings or unverified positions are supplied."
+                : "NO CHART ON FILE. This water remains unrecorded.";
+
+            if (!chartController.HasCurrentChart)
+            {
+                Label unknown = new Label("UNRECORDED WATER\nNO MARKS  /  NO BEARINGS");
+                unknown.style.position = Position.Absolute;
+                unknown.style.left = new Length(15, LengthUnit.Percent);
+                unknown.style.top = new Length(42, LengthUnit.Percent);
+                unknown.style.color = new Color(0.28f, 0.28f, 0.23f);
+                unknown.style.unityTextAlign = TextAnchor.MiddleCenter;
+                unknown.style.width = new Length(70, LengthUnit.Percent);
+                unknown.style.whiteSpace = WhiteSpace.Normal;
+                _chartSurface.Add(unknown);
+            }
+            else
+            {
+                AddChartMarker(chartController.GetChartPosition(chartController.VesselPosition), "VESSEL", false);
+                List<DeepOceanPhenomenonSite> knownSites = chartController.GetKnownSitesForCurrentRegion();
+                for (int i = 0; i < knownSites.Count; i++)
+                {
+                    DeepOceanPhenomenonSite site = knownSites[i];
+                    AddChartMarker(chartController.GetChartPosition(site.transform.position),
+                        (i + 1).ToString("00"), true);
+                    Label siteLabel = new Label(site.DisplayName);
+                    siteLabel.style.color = new Color(0.24f, 0.20f, 0.16f);
+                    siteLabel.style.fontSize = 10;
+                    siteLabel.style.marginBottom = 4;
+                    _chartSiteList.Add(siteLabel);
+                }
+                if (knownSites.Count == 0)
+                {
+                    Label none = new Label("No confirmed site marks. Use the Sounding Rig to record a return.");
+                    none.style.color = new Color(0.73f, 0.76f, 0.70f);
+                    none.style.whiteSpace = WhiteSpace.Normal;
+                    _chartSiteList.Add(none);
+                }
+            }
+
+            List<string> visitedNames = chartController.GetVisitedRegionNames();
+            for (int i = 0; i < visitedNames.Count; i++)
+            {
+                Label visited = new Label("•  " + visitedNames[i]);
+                visited.style.color = new Color(0.75f, 0.79f, 0.72f);
+                visited.style.fontSize = 11;
+                _chartVisitedList.Add(visited);
+            }
+        }
+
+        private void AddChartMarker(Vector2 normalizedPosition, string label, bool isSite)
+        {
+            VisualElement marker = new VisualElement();
+            marker.style.position = Position.Absolute;
+            marker.style.left = new Length(normalizedPosition.x * 100f, LengthUnit.Percent);
+            marker.style.top = new Length(normalizedPosition.y * 100f, LengthUnit.Percent);
+            marker.style.width = isSite ? 13 : 17;
+            marker.style.height = isSite ? 13 : 17;
+            marker.style.marginLeft = isSite ? -6 : -8;
+            marker.style.marginTop = isSite ? -6 : -8;
+            marker.style.backgroundColor = isSite
+                ? new Color(0.63f, 0.19f, 0.12f)
+                : new Color(0.10f, 0.20f, 0.18f);
+            marker.style.borderTopLeftRadius = 20;
+            marker.style.borderTopRightRadius = 20;
+            marker.style.borderBottomLeftRadius = 20;
+            marker.style.borderBottomRightRadius = 20;
+            marker.tooltip = isSite ? "Recorded sounding site" : "Current vessel position";
+            _chartSurface.Add(marker);
+
+            Label markerLabel = new Label(label);
+            markerLabel.style.position = Position.Absolute;
+            markerLabel.style.left = new Length(normalizedPosition.x * 100f, LengthUnit.Percent);
+            markerLabel.style.top = new Length(normalizedPosition.y * 100f, LengthUnit.Percent);
+            markerLabel.style.marginLeft = 10;
+            markerLabel.style.marginTop = -6;
+            markerLabel.style.color = new Color(0.18f, 0.20f, 0.17f);
+            markerLabel.style.fontSize = 9;
+            markerLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _chartSurface.Add(markerLabel);
         }
 
         private void BuildInventoryPanel()
@@ -641,7 +945,7 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
             }
 
-            if (!DocksideModalPolicy.CanOpenInventory(
+            if (_chartOpen || !DocksideModalPolicy.CanOpenInventory(
                     docksideHub != null && docksideHub.IsMenuOpen,
                     frontEnd != null && frontEnd.IsOverlayOpen,
                     IsDialogueOpen) ||
@@ -679,7 +983,7 @@ namespace WhereTheSoundingsEnd.Narrative
         private void ReleasePauseWhenUiClosed()
         {
             bool dialogueVisible = _dialoguePanel != null && _dialoguePanel.style.display == DisplayStyle.Flex;
-            if (!dialogueVisible) ReleasePause();
+            if (!dialogueVisible && !_chartOpen && !_inventoryOpen) ReleasePause();
         }
 
         private void ReleasePause()
@@ -712,7 +1016,7 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
             }
 
-            if (_inventoryOpen || (docksideHub != null && docksideHub.IsMenuOpen) ||
+            if (_inventoryOpen || _chartOpen || (docksideHub != null && docksideHub.IsMenuOpen) ||
                 (frontEnd != null && frontEnd.IsOverlayOpen) ||
                 Time.timeScale <= 0.0001f || dialogueRunner.IsDialogueRunning)
                 return;

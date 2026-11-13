@@ -263,3 +263,26 @@
 - The four flags use the existing Yarn typed-variable persistence path through YarnDialogueSaveParticipant and SaveGameData.dialogue.
 - Repository validation and C# syntax checks are the next automated gates. Yarn compilation, conditional-option filtering, save/load restoration, Unity presentation, Edit Mode/Play Mode tests and Windows build remain unverified until executed in Unity 6000.3.28f1.
 - The Choir's cause and the new witness synthesis remain unresolved; this is narrative evidence, not a canonical supernatural explanation.
+
+## 2026-11-13 — Regional chart discovery and fog-of-war
+
+**Source status:** Implemented in the gameplay branch; CI and Unity verification pending.
+
+### Implemented
+- Added RegionalChartPolicy and RegionalChartController. The persistent vessel records a region only when it enters that region's authored survey bounds; first visits add a stable ID to visitedRegionIds and the existing unlockedRegionIds progression collection.
+- Added a UI Toolkit regional chart opened with M or the HUD button and closed with Esc. The local plot shows the vessel and only sites already discovered by the Sounding Rig.
+- Unknown regions are omitted. Unknown sites receive no name, marker, tooltip, bearing, compass pointer or route. The existing Greyhaven dockside settlement chart remains a separate static wayfinding prop.
+- Attached chart discovery to Greyhaven and both deep-ocean survey sandbox builders. The controller remains on the persistent vessel, never on streamed static area roots.
+- Added save schema v7 with WorldSaveData.visitedRegionIds. The v6-to-v7 migration initializes an empty visit list and preserves existing unlockedRegionIds.
+- Added four policy tests and three save migration/persistence tests. Updated progression, world-map, acoustic-navigation, HUD, controls, save, test and production documentation.
+
+### Compatibility and boundaries
+- Existing SoundingRigController remains authoritative for discovered site IDs. Chart markers are derived from that discovery set; no duplicate site discovery ledger is added.
+- No boat physics, input action asset, NPC identity/dialogue, streamed-area ownership or quest schema changed.
+- Unlocking currently means chart knowledge after physical entry. It does not connect the Outer Shoals or Hollow Trench sandboxes into inter-region travel and does not gate scene loading.
+- The local plot uses authored survey bounds; it is not a calibrated nautical projection, GPS, compass, world map, coastline raster or route planner.
+
+### Verification boundary
+- Edit Mode tests are authored but not executed in Unity 6000.3.28f1.
+- GitHub CI can check project integrity and C# syntax, but does not prove Unity semantic compilation, UI Toolkit rendering, runtime region detection, map marker placement or save/load integration.
+- Rebuild Greyhaven and both survey sandboxes, then verify region entry, site discovery, modal exclusivity and schema 6/7 restoration in Unity.

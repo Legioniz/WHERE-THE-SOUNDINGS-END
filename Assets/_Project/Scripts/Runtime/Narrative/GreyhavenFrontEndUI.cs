@@ -66,7 +66,7 @@ namespace WhereTheSoundingsEnd.Narrative
             }
 
             if (!DocksideModalPolicy.CanOpenPauseMenu(
-                GameplayUI != null && GameplayUI.DocksideHub != null && GameplayUI.DocksideHub.IsMenuOpen,
+                GameplayUI != null && ((GameplayUI.DocksideHub != null && GameplayUI.DocksideHub.IsMenuOpen) || GameplayUI.IsChartOpen),
                 GameplayUI != null && GameplayUI.IsInventoryOpen,
                 GameplayUI != null && GameplayUI.IsDialogueOpen))
                 return;

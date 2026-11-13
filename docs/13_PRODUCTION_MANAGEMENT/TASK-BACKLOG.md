@@ -185,3 +185,13 @@ A new player can start the slice and complete this sequence without developer co
 - Add occupation-specific personal details while keeping core evidence available at neutral-or-better trust.
 - Preserve stable NPC IDs, relationship event memory, Yarn command contracts, save schema v6 and dockside routing.
 - **Acceptance still required:** compile the Yarn project in Unity 6000.3.28f1; verify all four clue options and partial/complete comparison branches; save after each clue and confirm flags restore; test neutral/low-trust access and Familiar personal-topic gates; review line pacing and UI overflow in Play Mode.
+
+## M0-11 — Regional chart discovery and fog-of-war verification
+
+**Source status:** Runtime controller, chart UI, save schema v7 migration, Edit Mode policy/save tests and documentation are authored. Unity verification remains open.
+
+- Attach RegionalChartController to the persistent vessel in Greyhaven and both survey sandboxes.
+- Record a region only after the vessel enters its DeepOceanSurveyRegion bounds; first visit unlocks the chart entry once.
+- Keep unvisited region names and locations hidden. Plot only the vessel and phenomenon sites already discovered by the Sounding Rig. Never draw unknown-site pins, compass pointers, bearings or routes.
+- Preserve prior unlockedRegionIds while adding physical visit records; migrate schema v6 to v7 without inventing visits.
+- **Acceptance:** rebuild all generated scenes in Unity 6000.3.28f1; verify first-entry/re-entry behavior, map M/button/Esc input, modal exclusivity, site discovery visibility, schema 6/7 save-load, marker scaling and absence of unknown content. Verify the feature does not imply inter-region travel; the deep-water scenes remain isolated sandboxes.

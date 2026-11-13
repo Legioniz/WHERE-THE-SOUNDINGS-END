@@ -12,7 +12,8 @@
 - Pure time, depth, confidence, deterministic-key and probability calculations.
 - Regional profile configuration and habitat eligibility.
 - Inventory geometry, blocked cells, item placement and damage.
-- Save DTO validation and schema migration.
+- Save DTO validation and schema migration, including schema 6-to-7 regional visit migration.
+- RegionalChartPolicy unknown-region suppression, idempotent first-visit unlocks, and discovered-site-only marks.
 - Stable opportunity identity and idempotent event evaluation.
 - Acoustic signal construction, range/loudness/sensitivity/noise scoring, event deduplication and listener persistence.
 - NPC schedule resolution, overnight schedule boundaries, and NPC relationship save/restore.
@@ -24,6 +25,7 @@
 - Repeat area transitions and check that queued requests are cancelled when out of range, re-entry during unload is safely re-queued, and no area is left in a failed/loading/unloading state.
 - Confirm no visible one-frame gap, missing collision surface, duplicate static geometry, or player freeze occurs during repeated transitions.
 - Boat handling, speed gating and Sounding Rig input.
+- Regional chart: M/button open, Esc close, no overlap with inventory/dialogue/dockside/pause, only visited region names, vessel plot, discovered-site-only marks, no unknown bearings/compass/route markers.
 - Dockside hub: access only inside a shore-approach radius at or below 0.85 m/s, no duplicate NPC trigger prompt or shared-input ownership, menu pause/restore, Escape and gamepad Start close, no overlapping inventory/dialogue/pause panels, correct resident Yarn handoff, cargo appraisal read-only behaviour, vessel diagnostics and guest-ledger autosave checkpoint.
 - Verify all seven location menus and furniture actions at supported resolutions; confirm no menu opens while fishing, dredging, sounding, dialogue or inventory is active.
 - Hull contact against piers, breakwater rocks, terrain and wrecks; root-hull-only collision ownership; no visual collider seams; normal-impact damage; per-physics-step contact aggregation; collision acoustic event propagation.
@@ -39,7 +41,7 @@
 
 ### Integration
 - Complete trip, fishing, salvage, survey, recovery and save/load.
-- Load supported schema 0–5 fixtures through current schema 6 without inventing survey progress; migrate schema 4 weather labels into safe timer defaults and verify the schema 5-to-6 NPC relationship-memory migration.
+- Load supported schema 0–5 fixtures through current schema 7 without inventing survey progress; migrate schema 4 weather labels into safe timer defaults and verify the schema 5-to-6 NPC relationship-memory migration and schema 6-to-7 empty regional-visit migration.
 - Survey multiple regions and verify opportunity IDs do not collide.
 - Confirm repeated pings from the same heading do not promote an uncertain return.
 - Confirm a second ping from a different heading in the same region and within the time window can promote the interpretation.
@@ -57,6 +59,9 @@
 - Stream the harbour and village areas in/out repeatedly and confirm furniture appears/disappears with its owning static area without duplicate props or persistent-scene references.
 - Confirm NPC relationship scores and Yarn first-meeting/trust variables restore independently after a save/load cycle.
 - Confirm Outer Shoals and Hollow Trench sandbox scenes contain valid regional profiles and authored site markers.
+- Enter and leave each DeepOceanSurveyRegion; verify the first visit unlocks exactly once, persists through save/load, and never exposes other region names.
+- Discover an authored phenomenon site with the Sounding Rig; verify its mark appears only in its visited region and no unknown site receives a placeholder marker.
+- Verify chart local plotting bounds and marker scaling; no compass, GPS, route or world-scale coordinate is implied.
 
 ### Performance
 - Capture the `[AreaStreaming]` load/unload telemetry in a Windows Development Build. Record per-area load duration, referenced mesh/material/texture counts and estimated asset bytes, global allocated/reserved memory, managed memory and GC memory.
@@ -73,7 +78,7 @@
 
 ## Current automated coverage
 
-The Edit Mode assembly contains deterministic suites for the following policies and regressions, including dockside access/modal exclusivity and maritime-surface transitions:
+The Edit Mode assembly contains deterministic suites for the following policies and regressions, including dockside access/modal exclusivity, regional chart discovery/save migration and maritime-surface transitions:
 - action-driven clock policy;
 - cargo damage / repair / quest-cargo protection;
 - save migration to schema v4;
@@ -93,7 +98,7 @@ The Edit Mode assembly contains deterministic suites for the following policies 
 - Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
 - Fixed-step surface-velocity estimation and normalized interpolation between previous/current wave snapshots.
 
-The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v6 and ordered v4-to-v5/v5-to-v6 migrations, dockside modal wiring, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
+The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v7 and ordered v4-to-v5/v5-to-v6/v6-to-v7 migrations, dockside modal wiring, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 
 ## Verification boundary
 

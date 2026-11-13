@@ -10,7 +10,7 @@ namespace WhereTheSoundingsEnd.Persistence
     [Serializable]
     public sealed class SaveGameData
     {
-        public const int CurrentSchemaVersion = 6;
+        public const int CurrentSchemaVersion = 7;
 
         public int schemaVersion;
         public int slotNumber;
@@ -53,6 +53,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public int dayNumber = 1;
         public double timeOfDaySeconds;
         public string activeRegionId = "greyhaven";
+        public List<string> visitedRegionIds = new List<string>();
         public string weatherId = "clear";
         public string tideStateId = "unknown";
         public float seaDisturbance;
@@ -390,6 +391,14 @@ namespace WhereTheSoundingsEnd.Persistence
                         data.schemaVersion = 6;
                         break;
 
+                    case 6:
+                        NormalizeDefaults(data);
+                        // Regional chart discovery starts empty for existing saves.
+                        // Current/legacy region state is not treated as a physical visit.
+                        data.world.visitedRegionIds = new List<string>();
+                        data.schemaVersion = 7;
+                        break;
+
                     default:
                         error = "No migration path exists for save schema version " + data.schemaVersion + ".";
                         return false;
@@ -441,6 +450,7 @@ namespace WhereTheSoundingsEnd.Persistence
                 data.world.discoveredPhenomenonSiteIds.Count,
                 data.world.evaluatedSurveyOpportunityIds.Count,
                 data.world.inspectedPhenomenonSiteIds.Count,
+                data.world.visitedRegionIds.Count,
                 data.world.heardAcousticEventIds.Count,
                 data.inventory.cargo.Count,
                 data.inventory.equipment.Count,
@@ -865,6 +875,7 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.world.discoveredPhenomenonSiteIds == null) data.world.discoveredPhenomenonSiteIds = new List<string>();
             if (data.world.evaluatedSurveyOpportunityIds == null) data.world.evaluatedSurveyOpportunityIds = new List<string>();
             if (data.world.inspectedPhenomenonSiteIds == null) data.world.inspectedPhenomenonSiteIds = new List<string>();
+            if (data.world.visitedRegionIds == null) data.world.visitedRegionIds = new List<string>();
             if (data.world.heardAcousticEventIds == null) data.world.heardAcousticEventIds = new List<string>();
             if (data.world.latestOmen == null) data.world.latestOmen = string.Empty;
             if (data.world.lastAcousticEventId == null) data.world.lastAcousticEventId = string.Empty;
