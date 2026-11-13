@@ -190,6 +190,10 @@ def main() -> int:
             failures.append("Greyhaven builder does not attach regional chart discovery to the persistent vessel.")
         if "RegionalChartController" not in (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8"):
             failures.append("Deep-ocean survey sandboxes do not attach regional chart discovery.")
+        front_end_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs").read_text(encoding="utf-8")
+        if "GameplayUI.IsChartOpen" not in front_end_source:
+            failures.append("GreyhavenFrontEndUI must reject pause opening over the regional chart.")
+
         chart_ui_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs").read_text(encoding="utf-8")
         for required_text in ("BuildChartPanel", "ToggleChart", "NO MARKS  /  NO BEARINGS", "GetKnownSitesForCurrentRegion"):
             if required_text not in chart_ui_source:
