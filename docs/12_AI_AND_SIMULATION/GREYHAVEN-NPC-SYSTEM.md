@@ -1,8 +1,8 @@
 # Greyhaven NPC System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Relationship-reactive dialogue foundation implemented; market transactions remain future integration  
-> Version: 0.2  
+> Status: Relationship-reactive dialogue and dockside resident handoff implemented; market transactions and Unity verification remain open  
+> Version: 0.3  
 > Last reviewed: 2026-11-13
 
 ## Design goals
