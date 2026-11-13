@@ -68,11 +68,11 @@ namespace WhereTheSoundingsEnd.Tests
                 materials[0], materials[1], materials[2], materials[3], materials[4],
                 materials[5], materials[6], materials[7], materials[8]);
 
-            Assert.That(roots[0].transform.Find("Harbour_Bespoke_Maritime_Assets/West_Mooring_Bollard"), Is.Not.Null);
-            Assert.That(roots[1].transform.Find("Village_Working_Life_Assets/Repair_Shed_Hand_Winch"), Is.Not.Null);
+            Assert.That(roots[0].transform.Find("Harbour_Bespoke_Maritime_Assets/West_Mooring_Bollard_Shaft"), Is.Not.Null);
+            Assert.That(roots[1].transform.Find("Village_Working_Life_Assets/Repair_Shed_Hand_Winch_Bed"), Is.Not.Null);
             Assert.That(roots[2].transform.Find("Estuary_Ecological_And_Shoreline_Assets/Mangrove_Roots_And_Canopy_Variants/East_Mangrove_01"), Is.Not.Null);
             Assert.That(roots[2].transform.Find("Estuary_Ecological_And_Shoreline_Assets/Tide_Line_Wrack_And_Debris/Storm_Tossed_Driftwood_A_Trunk"), Is.Not.Null);
-            Assert.That(roots[3].transform.Find("Lighthouse_Headland_Maritime_Assets/Keepers_Weather_Station"), Is.Not.Null);
+            Assert.That(roots[3].transform.Find("Lighthouse_Headland_Maritime_Assets/Keepers_Weather_Station_Tripod_Leg_0"), Is.Not.Null);
 
             int count = 0;
             for (int i = 0; i < 4; i++)
