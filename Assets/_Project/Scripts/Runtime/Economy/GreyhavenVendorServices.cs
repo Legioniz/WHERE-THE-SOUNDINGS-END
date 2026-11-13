@@ -63,16 +63,18 @@ namespace WhereTheSoundingsEnd.Economy
             if (condition == null) return 0L;
             decimal hull = (decimal)Mathf.Max(0f, 100f - condition.HullIntegrity);
             decimal engine = (decimal)Mathf.Max(0f, 100f - condition.EngineCondition);
-            return SafeAdd(
+            long baseQuote = SafeAdd(
                 EconomyPolicy.CalculateRepairCostCents(hull, (decimal)hullRepairUsdPerPoint),
                 EconomyPolicy.CalculateRepairCostCents(engine, (decimal)engineRepairUsdPerPoint));
+            return ApplyDiscount(baseQuote, GetRelationshipDiscount(tomas != null ? tomas.RelationshipScore : 0));
         }
 
         public long GetRefuelQuoteCents(float requestedUnits)
         {
             if (fuel == null) return 0L;
             float amount = fuel.GetRefuelAmount(requestedUnits);
-            return EconomyPolicy.CalculateFuelCostCents((decimal)amount, (decimal)fuelUsdPerUnit);
+            long baseQuote = EconomyPolicy.CalculateFuelCostCents((decimal)amount, (decimal)fuelUsdPerUnit);
+            return ApplyDiscount(baseQuote, GetRelationshipDiscount(tomas != null ? tomas.RelationshipScore : 0));
         }
 
         public bool TryRepairAll(string transactionId, out long chargedCents, out string error)
@@ -302,6 +304,14 @@ namespace WhereTheSoundingsEnd.Economy
             if (score >= 75) return 0.10m;
             if (score >= 60) return 0.05m;
             return 0m;
+        }
+
+        private static long ApplyDiscount(long cents, decimal discount)
+        {
+            if (cents <= 0L) return 0L;
+            decimal result = decimal.Round(cents * (1m - Math.Max(0m, Math.Min(0.20m, discount))),
+                0, MidpointRounding.AwayFromZero);
+            return result <= 0m ? 0L : (long)result;
         }
 
         private static long SafeAdd(long a, long b)
