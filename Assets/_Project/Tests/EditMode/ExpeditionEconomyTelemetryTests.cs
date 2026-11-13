@@ -32,6 +32,7 @@ namespace WhereTheSoundingsEnd.Tests
         {
             ExpeditionEconomyTelemetry telemetry = owner.AddComponent<ExpeditionEconomyTelemetry>();
             telemetry.ObservePropulsion(1f);
+            owner.GetComponent<VesselFuelController>().ConsumePropulsion(1f, 1f, 10f);
 
             EconomyWalletController wallet = owner.GetComponent<EconomyWalletController>();
             Assert.IsTrue(wallet.TryApplyTransaction("trip.sale", 1250L));
@@ -44,6 +45,7 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.AreEqual(900L, telemetry.LastTripNetCents);
             StringAssert.Contains("GROSS $12.50", telemetry.BuildSummary());
             StringAssert.Contains("COST $3.50", telemetry.BuildSummary());
+            StringAssert.Contains("FUEL 0.1", telemetry.BuildSummary());
         }
 
         [Test]
