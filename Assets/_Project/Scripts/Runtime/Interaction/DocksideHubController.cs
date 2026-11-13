@@ -197,6 +197,7 @@ namespace WhereTheSoundingsEnd.Interaction
         private VisualElement vendorActions;
         private MaraFishMarketController maraMarket;
         private GreyhavenVendorServices vendorServices;
+        private VesselFuelController fuelController;
         private Label locationTitle;
         private Label locationSubtitle;
         private Label interiorDescription;
@@ -235,6 +236,7 @@ namespace WhereTheSoundingsEnd.Interaction
             vesselCondition = condition;
             maraMarket = boatBody != null ? boatBody.GetComponent<MaraFishMarketController>() : null;
             vendorServices = boatBody != null ? boatBody.GetComponent<GreyhavenVendorServices>() : null;
+            fuelController = boatBody != null ? boatBody.GetComponent<VesselFuelController>() : null;
             seaState = clock;
             saveCoordinator = saves;
             locations = definitions == null
@@ -1039,11 +1041,16 @@ namespace WhereTheSoundingsEnd.Interaction
                    Mathf.RoundToInt(Mathf.Clamp01(vesselCondition.HullIntegrity) * 100f) +
                    "%\nENGINE CONDITION  /  " +
                    Mathf.RoundToInt(Mathf.Clamp01(vesselCondition.EngineCondition) * 100f) +
-                   "%\nLAST DAMAGE REPORT  /  " +
+                   "%\nFUEL  /  " +
+                   (fuelController != null
+                       ? fuelController.FuelUnits.ToString("0.0") + " / " + fuelController.Capacity.ToString("0.0") +
+                         " UNITS  /  EMERGENCY RESERVE " + fuelController.EmergencyFuelUnits.ToString("0.0")
+                       : "UNAVAILABLE") +
+                   "\nLAST DAMAGE REPORT  /  " +
                    (string.IsNullOrWhiteSpace(vesselCondition.LastDamageReport)
                        ? "No recent damage report."
                        : vesselCondition.LastDamageReport) +
-                   "\n\nDiagnosis only. No repair materials or currency are consumed.";
+                   "\n\nUse Tomas's service counter for paid repairs and refuelling.";
         }
 
         private string SaveHarbourLog()
