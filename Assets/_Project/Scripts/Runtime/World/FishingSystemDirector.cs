@@ -408,7 +408,7 @@ namespace WhereTheSoundingsEnd.World
             float size = FishingSimulationPolicy.CalculateCatchSize(hookedFish.BaseCatchSize,
                 hookedFish.MaximumCatchSize, quality, UnityEngine.Random.Range(0.65f, 1f));
             string instanceId;
-            if (!cargoHold.TryPlaceFirstFit(hookedFish.ItemId, 1, quality, 1f, out instanceId))
+            if (!cargoHold.TryPlaceFirstFit(hookedFish.ItemId, 1, quality, 1f, out instanceId, size))
             {
                 CancelFishing("HOLD FULL — the fish slips away before it can be secured.");
                 return;
