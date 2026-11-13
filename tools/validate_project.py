@@ -82,6 +82,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
     "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs",
+    "Assets/_Project/Scripts/Editor/GreyhavenMaritimeAssetBuilder.cs",
     "Assets/_Project/Tests/EditMode/GreyhavenEnvironmentalArtifactTests.cs",
     "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs",
     "Assets/_Project/Scripts/Editor/BoatVisualModelBuilder.cs",
@@ -292,9 +293,21 @@ def main() -> int:
             if required_text not in greyhaven_builder:
                 failures.append(f"Greyhaven area builder is missing: {required_text}")
 
+        maritime_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenMaritimeAssetBuilder.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "BuildBollard", "BuildLobsterPot", "BuildMangrove", "BuildReedClump",
+            "BuildWeatherStation", "BuildNetRack", "WearPatch", "RemoveCollider",
+            "Estuary_Ecological_And_Shoreline_Assets", "Village_Working_Life_Assets",
+            "Harbour_Bespoke_Maritime_Assets", "Lighthouse_Headland_Maritime_Assets",
+        ):
+            if required_text not in maritime_builder:
+                failures.append(f"GreyhavenMaritimeAssetBuilder is missing art feature: {required_text}")
+
         artifact_tests = (ROOT / "Assets/_Project/Tests/EditMode/GreyhavenEnvironmentalArtifactTests.cs").read_text(encoding="utf-8")
         for required_text in (
             "BuildEnvironmentalArtifacts_CreatesDistrictDressingWithoutGameplayComponents",
+            "Build_BespokeMaritimePassCreatesDistinctRegionalAssetsWithoutGameplayComponents",
+            "rendererCount, Is.GreaterThanOrEqualTo(250)",
             "GetComponentsInChildren<Collider>", "GetComponentsInChildren<MonoBehaviour>",
             "rendererCount, Is.GreaterThanOrEqualTo(60)",
         ):
