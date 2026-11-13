@@ -124,6 +124,13 @@ namespace WhereTheSoundingsEnd.Economy
             return true;
         }
 
+        public long GetHoldRepairQuoteCents()
+        {
+            if (!TomasAvailable || cargo == null) return 0L;
+            long baseQuote = EconomyPolicy.CalculateRepairCostCents(1m, (decimal)holdCellRepairUsd);
+            return ApplyDiscount(baseQuote, GetRelationshipDiscount(tomas != null ? tomas.RelationshipScore : 0));
+        }
+
         public bool TryRepairHoldCell(int x, int y, string transactionId,
             out long chargedCents, out string error)
         {
@@ -131,7 +138,7 @@ namespace WhereTheSoundingsEnd.Economy
             if (!TomasAvailable) { error = "Tomas is not available to trade right now."; return false; }
             if (cargo == null || wallet == null || !cargo.IsCellBlocked(x, y))
             { error = "That hold cell does not require repair."; return false; }
-            long quote = EconomyPolicy.CalculateRepairCostCents(1m, (decimal)holdCellRepairUsd);
+            long quote = GetHoldRepairQuoteCents();
             if (!IsValidTransactionId(transactionId) || wallet.HasProcessedTransaction(transactionId) ||
                 !wallet.TryApplyTransaction(transactionId, -quote))
             { error = "The hold repair could not be paid for. No repair was applied."; return false; }
