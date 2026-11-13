@@ -396,3 +396,16 @@ Review these after fuel, bait, repairs, equipment prices, boat upgrades, storage
 - [Economy mathematics](ECONOMY-MATHEMATICS.md)
 - [Fish population and food-web model](FISH-POPULATION-MODEL.md)
 - [Development roadmap](../13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md)
+
+
+## 15. Greyhaven salvage baseline — provisional, per recovered piece
+
+These are prototype-only authored values for the first Greyhaven salvage buyer, Inez Sarmiento. They are not seafood rates and are not represented as observed real-world market prices. The values are deliberately modest and use a per-piece unit because the current salvage records do not retain a reliable material weight.
+
+| ID | Recovered material | Buyer | Base price | Unit | Status |
+|---|---|---|---:|---|---|
+| SALVAGE-WOOD-01 | Waterlogged Timber | Inez Sarmiento | $1.50 | piece | Provisional prototype value |
+| SALVAGE-CLOTH-01 | Salt-Stiff Canvas | Inez Sarmiento | $0.85 | piece | Provisional prototype value |
+| SALVAGE-SCRAP-01 | Corroded Ship Fittings | Inez Sarmiento | $2.75 | piece | Provisional prototype value |
+
+Salvage offers still apply the configured buyer stock/demand, cargo quality and freshness factors, and the Inez relationship modifier. These prices must be playtested against salvage time, hold-cell footprint, repair-material utility and trip fuel costs before being treated as final balance. Unlisted salvage remains ineligible for ordinary sale.

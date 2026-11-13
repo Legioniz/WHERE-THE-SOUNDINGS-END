@@ -376,3 +376,29 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 - Static validator now requires the policy and tests.
 
 **Boundary:** This is a cohesive data/policy foundation, not the completed economy. Authored schedule values on assets, vendor transactions, market stock, purchases, fuel consumption, repairs, NPC trade gates and UI remain outstanding. Unity compile/Test Runner execution has not been performed in this environment.
+
+
+## 2026-11-14 — Mara fish market transactions (ECO-04 partial)
+
+- Added MaraFishMarketController to the persistent generated vessel. It discovers Mara by stable NPC ID and uses her existing market-shift schedule and relationship trade gate.
+- Added the first Greyhaven seafood price authoring from the existing USD/kg schedule for FSH-001, FSH-002, FSH-003, FSH-005 and FSH-007. Unpriced, aberrant, salvage, quest and equipment cargo remains ineligible.
+- Added itemized sale offers using each cargo instance's retained weight, quality and freshness; buyer-specific demand responds to persisted stock and remains bounded by EconomyPolicy.
+- Added per-vendor/item stock persistence to the existing schema-v8 economy DTO. Legacy v8 saves normalize the new list safely without a schema bump.
+- Added a synchronous cargo removal commit boundary: all selected instances are validated, the idempotent wallet payment is committed, and only then is the complete selection removed. Failed commits leave cargo intact.
+- Added Edit Mode test source for failed, successful, duplicate and missing-item cargo commits; required-file checks now include the market runtime and tests.
+
+**Boundary:** callable Mara market runtime is present; the dockside UI, purchases, passive restock, salvage buyers, relationship price modifiers and other vendor services remain open. Run the Greyhaven editor builder in Unity to regenerate the boat with the controller and apply the authored starter price fields. Unity compilation, Edit Mode execution and Play Mode testing have not been run here.
+
+
+## 2026-11-14 — Connected Greyhaven economy services (ECO-04–10 partial)
+
+- Added persisted vessel fuel with propulsion-load consumption, no idle/paused drain, and a separately saved emergency reserve for low-power return after the main tank empties.
+- Added Tomas's schedule/trust-gated service counter: itemized hull/engine repair quotes, per-cell hold repair, refuelling and bounded relationship discounts. Charges are committed before deterministic repairs are applied.
+- Added Inez's schedule/trust-gated supply counter: stocked starter equipment and four bait types, relationship discounts, spatial cargo fit validation and rollback if payment fails. Bait is now consumed one unit only when the selected fishing cast is deployed.
+- Added Inez's salvage appraisal and atomic purchase of the three authored Greyhaven salvage materials. Their provisional per-piece USD values are explicitly recorded in the price schedule; unlisted salvage remains ineligible.
+- Added once-per-game-day bounded restocking for Mara's seafood buyer and Inez's supply/material inventory, persisting current stock, target stock and last restock day in the existing schema-v8 economy DTO.
+- Integrated itemized seafood/salvage offers, sale confirmation, purchases, repairs and refuelling into the existing dockside modal. Vessel inspection now reports main and emergency fuel.
+- Added a one-time $25.00 starting wallet grant for untouched zero-balance campaigns; a depleted wallet with transaction history is never replenished on load.
+- Added Edit Mode test source for propulsion fuel behavior, emergency reserve and stack-aware bait consumption; required-file validation now includes the new runtime services and tests.
+
+**Remaining:** full legal-catch/closed-area/quota checks, Harbourmaster contracts and research rewards, complete catalogue prices, active equipment-slot application, destination-market travel pricing, trip range/net-income telemetry and economy playtests. Unity Editor compilation, Edit Mode execution, generated-scene rebuild and Play Mode testing have not been run here.

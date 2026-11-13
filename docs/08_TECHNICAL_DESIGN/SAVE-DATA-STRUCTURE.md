@@ -50,7 +50,7 @@ All content relationships use stable string IDs. Random stream state and increme
 - Vector3SaveData stores position, Euler rotation, and velocity as numeric x/y/z fields.
 - InventoryStackSaveData stores itemId, quantity, quality and freshness.
 - CargoPlacementSaveData stores each physical cargo instance, placement, quality, freshness and saleQuantity in its authored sale unit.
-- EconomySaveData stores walletCents and the bounded processedTransactionIds ledger.
+- EconomySaveData stores walletCents, the bounded processedTransactionIds ledger, and per-vendor/item current stock, target stock and lastRestockDay. Schema-v8 saves created before market stock was introduced receive an empty stock list during normalization; each vendor seeds missing stock from its authored target and begins restocking from the current game day. VesselSaveData stores main fuel and a separately saved emergencyFuel reserve. A legacy zero-balance wallet with no transaction history receives the one-time $25.00 starting balance; transaction history prevents repeat grants.
 - EquipmentSaveData stores slotId, itemId and condition.
 - QuestProgressSaveData and ObjectiveProgressSaveData preserve quest stage and objective progress.
 - JournalEntrySaveData preserves entry identity, interpretation and read state.

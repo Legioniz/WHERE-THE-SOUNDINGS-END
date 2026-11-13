@@ -9,6 +9,7 @@ using WhereTheSoundingsEnd.Narrative;
 using WhereTheSoundingsEnd.NPC;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.World;
+using WhereTheSoundingsEnd.Economy;
 
 namespace WhereTheSoundingsEnd.Interaction
 {
@@ -193,6 +194,10 @@ namespace WhereTheSoundingsEnd.Interaction
         private VisualElement overlay;
         private VisualElement locationList;
         private VisualElement furnitureList;
+        private VisualElement vendorActions;
+        private MaraFishMarketController maraMarket;
+        private GreyhavenVendorServices vendorServices;
+        private VesselFuelController fuelController;
         private Label locationTitle;
         private Label locationSubtitle;
         private Label interiorDescription;
@@ -229,6 +234,9 @@ namespace WhereTheSoundingsEnd.Interaction
             controls = input;
             cargoHold = hold;
             vesselCondition = condition;
+            maraMarket = boatBody != null ? boatBody.GetComponent<MaraFishMarketController>() : null;
+            vendorServices = boatBody != null ? boatBody.GetComponent<GreyhavenVendorServices>() : null;
+            fuelController = boatBody != null ? boatBody.GetComponent<VesselFuelController>() : null;
             seaState = clock;
             saveCoordinator = saves;
             locations = definitions == null
@@ -467,6 +475,20 @@ namespace WhereTheSoundingsEnd.Interaction
             furnitureList.style.minHeight = 110;
             interior.Add(furnitureList);
 
+            Label servicesHeading = new Label("RESIDENT SERVICES");
+            servicesHeading.style.color = new Color(0.82f, 0.78f, 0.66f);
+            servicesHeading.style.fontSize = 11;
+            servicesHeading.style.unityFontStyleAndWeight = FontStyle.Bold;
+            servicesHeading.style.marginTop = 10;
+            servicesHeading.style.marginBottom = 5;
+            interior.Add(servicesHeading);
+
+            vendorActions = new ScrollView(ScrollViewMode.Vertical);
+            vendorActions.style.maxHeight = 170;
+            vendorActions.style.minHeight = 42;
+            vendorActions.style.flexShrink = 0f;
+            interior.Add(vendorActions);
+
             VisualElement detail = new VisualElement();
             detail.style.marginTop = 12;
             detail.style.paddingLeft = 14;
@@ -601,6 +623,8 @@ namespace WhereTheSoundingsEnd.Interaction
                 furnitureList.Add(button);
             }
 
+            RenderVendorServices(location);
+
             bool hasResident = location.Resident != null &&
                                !string.IsNullOrWhiteSpace(location.DialogueNode);
             residentButton.style.display = hasResident ? DisplayStyle.Flex : DisplayStyle.None;
@@ -611,6 +635,320 @@ namespace WhereTheSoundingsEnd.Interaction
                     : location.Resident.DisplayName.ToUpperInvariant() + "  /  REFUSES TO SPEAK";
                 residentButton.SetEnabled(location.Resident.CanTalk);
             }
+        }
+
+        private void RenderVendorServices(DocksideLocationDefinition location)
+        {
+            if (vendorActions == null) return;
+            vendorActions.Clear();
+            if (location == null || location.Resident == null) return;
+
+            string residentId = location.Resident.NpcId;
+            if (residentId == MaraFishMarketController.VendorId)
+            {
+                RenderMaraServices();
+                return;
+            }
+            if (residentId == GreyhavenVendorServices.TomasId)
+            {
+                RenderTomasServices();
+                return;
+            }
+            if (residentId == GreyhavenVendorServices.InezId)
+                RenderInezServices();
+        }
+
+        private void RenderMaraServices()
+        {
+            if (vendorActions == null) return;
+            vendorActions.Clear();
+            AddWalletBalanceLabel();
+            if (maraMarket == null || cargoHold == null)
+            {
+                vendorActions.Add(new Label("The fish market service is not connected to this vessel."));
+                return;
+            }
+
+            List<string> eligibleIds = new List<string>();
+            for (int i = 0; i < cargoHold.Placements.Count; i++)
+            {
+                CargoPlacement placement = cargoHold.Placements[i];
+                CargoItemDefinition definition = placement != null
+                    ? cargoHold.GetItemDefinition(placement.itemId) : null;
+                if (definition != null && definition.OrdinarySaleEligible && !definition.IsAberrant &&
+                    (definition.Category == CargoItemCategory.Fish ||
+                     definition.Category == CargoItemCategory.Shellfish ||
+                     definition.Category == CargoItemCategory.Cephalopod))
+                    eligibleIds.Add(placement.instanceId);
+            }
+
+            List<MarketSaleLine> offer = null;
+            long total = 0L;
+            string error = null;
+            bool canQuote = eligibleIds.Count > 0 &&
+                maraMarket.TryBuildOffer(eligibleIds, out offer, out total, out error);
+            Label summary = new Label(canQuote
+                ? "SEAFOOD OFFER  /  " + FormatMoney(total) + " USD  /  " + offer.Count + " CARGO LOTS"
+                : (eligibleIds.Count == 0 ? "No eligible seafood in the hold." : (error ?? "Market offer unavailable.")));
+            summary.style.whiteSpace = WhiteSpace.Normal;
+            summary.style.color = new Color(0.82f, 0.78f, 0.66f);
+            vendorActions.Add(summary);
+            if (canQuote)
+            {
+                System.Text.StringBuilder itemized = new System.Text.StringBuilder();
+                for (int lineIndex = 0; lineIndex < offer.Count; lineIndex++)
+                {
+                    MarketSaleLine line = offer[lineIndex];
+                    itemized.Append(line.displayName);
+                    itemized.Append("  /  ");
+                    itemized.Append(line.saleQuantity.ToString("0.00"));
+                    itemized.Append(" ");
+                    itemized.Append(line.unitLabel);
+                    itemized.Append("  /  ");
+                    itemized.Append(FormatMoney(line.lineTotalCents));
+                    itemized.Append(" USD  /  DEMAND ");
+                    itemized.Append(line.demandFactor.ToString("0.00"));
+                    if (lineIndex < offer.Count - 1) itemized.Append("\\n");
+                }
+                Label details = new Label(itemized.ToString());
+                details.style.whiteSpace = WhiteSpace.Normal;
+                details.style.color = new Color(0.73f, 0.79f, 0.73f);
+                details.style.fontSize = 11;
+                vendorActions.Add(details);
+            }
+
+            if (canQuote)
+            {
+                Button sell = MakeButton("SELL ALL ELIGIBLE SEAFOOD  /  " + FormatMoney(total), () =>
+                {
+                    List<MarketSaleLine> receipt;
+                    long paid;
+                    string failure;
+                    bool success = maraMarket.TrySell(eligibleIds,
+                        "dockside.mara.sale." + Guid.NewGuid().ToString("N"),
+                        out receipt, out paid, out failure);
+                    statusLabel.text = success
+                        ? "SALE COMPLETE  /  +" + FormatMoney(paid) + " USD  /  " + receipt.Count + " LOTS SOLD."
+                        : "SALE NOT COMPLETED  /  " + failure;
+                    furnitureTitle.text = "MARA'S FISH MARKET";
+                    furnitureDetail.text = statusLabel.text;
+                    RenderMaraServices();
+                });
+                vendorActions.Add(sell);
+            }
+            else
+            {
+                Button refresh = MakeButton("RECHECK MARKET OFFER", RenderMaraServices);
+                vendorActions.Add(refresh);
+            }
+        }
+
+        private void RenderTomasServices()
+        {
+            if (vendorActions == null) return;
+            vendorActions.Clear();
+            AddWalletBalanceLabel();
+            if (vendorServices == null)
+            {
+                vendorActions.Add(new Label("Tomas's service counter is not connected to this vessel."));
+                return;
+            }
+
+            long repairQuote = vendorServices.GetRepairQuoteCents();
+            Button repair = MakeButton("REPAIR HULL + ENGINE  /  " + FormatMoney(repairQuote), () =>
+            {
+                long charged;
+                string error;
+                bool success = vendorServices.TryRepairAll(
+                    "dockside.tomas.repair." + Guid.NewGuid().ToString("N"), out charged, out error);
+                statusLabel.text = success
+                    ? "REPAIRS COMPLETE  /  -" + FormatMoney(charged) + " USD."
+                    : "REPAIR DECLINED  /  " + error;
+                furnitureTitle.text = "TOMAS'S REPAIR SHED";
+                furnitureDetail.text = statusLabel.text;
+                RenderTomasServices();
+            });
+            repair.SetEnabled(repairQuote > 0L && vendorServices.WalletCents >= repairQuote);
+            vendorActions.Add(repair);
+
+            long fuelQuote = vendorServices.GetRefuelQuoteCents(25f);
+            Button refuel = MakeButton("REFUEL UP TO 25 UNITS  /  " + FormatMoney(fuelQuote), () =>
+            {
+                float added;
+                long charged;
+                string error;
+                bool success = vendorServices.TryRefuel(25f,
+                    "dockside.tomas.fuel." + Guid.NewGuid().ToString("N"),
+                    out added, out charged, out error);
+                statusLabel.text = success
+                    ? "REFUELLED  /  +" + added.ToString("0.0") + " UNITS  /  -" + FormatMoney(charged) + " USD."
+                    : "REFUEL DECLINED  /  " + error;
+                furnitureTitle.text = "TOMAS'S FUEL PUMP";
+                furnitureDetail.text = statusLabel.text;
+                RenderTomasServices();
+            });
+            refuel.SetEnabled(fuelQuote > 0L && vendorServices.WalletCents >= fuelQuote);
+            vendorActions.Add(refuel);
+
+            if (cargoHold != null)
+            {
+                for (int y = 0; y < cargoHold.Height; y++)
+                {
+                    for (int x = 0; x < cargoHold.Width; x++)
+                    {
+                        if (!cargoHold.IsCellBlocked(x, y)) continue;
+                        int cellX = x;
+                        int cellY = y;
+                        long cellQuote = vendorServices.GetHoldRepairQuoteCents();
+                        Button cellRepair = MakeButton("REPAIR HOLD CELL " + (x + 1) + "-" + (y + 1) +
+                            "  /  " + FormatMoney(cellQuote), () =>
+                            {
+                                long charged;
+                                string error;
+                                bool success = vendorServices.TryRepairHoldCell(cellX, cellY,
+                                    "dockside.tomas.hold." + Guid.NewGuid().ToString("N"),
+                                    out charged, out error);
+                                statusLabel.text = success
+                                    ? "HOLD CELL REPAIRED  /  -" + FormatMoney(charged) + " USD."
+                                    : "HOLD REPAIR DECLINED  /  " + error;
+                                RenderTomasServices();
+                            });
+                        cellRepair.SetEnabled(cellQuote > 0L && vendorServices.WalletCents >= cellQuote);
+                        vendorActions.Add(cellRepair);
+                    }
+                }
+            }
+        }
+
+        private void RenderInezServices()
+        {
+            if (vendorActions == null) return;
+            vendorActions.Clear();
+            AddWalletBalanceLabel();
+            if (vendorServices == null)
+            {
+                vendorActions.Add(new Label("Inez's supply counter is not connected to this vessel."));
+                return;
+            }
+
+            List<string> salvageIds = new List<string>();
+            if (cargoHold != null)
+            {
+                for (int i = 0; i < cargoHold.Placements.Count; i++)
+                {
+                    CargoPlacement placement = cargoHold.Placements[i];
+                    CargoItemDefinition definition = placement != null
+                        ? cargoHold.GetItemDefinition(placement.itemId) : null;
+                    if (definition != null && definition.Category == CargoItemCategory.Salvage &&
+                        definition.OrdinarySaleEligible)
+                        salvageIds.Add(placement.instanceId);
+                }
+            }
+
+            List<MarketSaleLine> salvageOffer = null;
+            long salvageTotal = 0L;
+            string salvageError = null;
+            bool canSellSalvage = vendorServices.TryBuildSalvageOffer(
+                salvageIds, out salvageOffer, out salvageTotal, out salvageError);
+            Label salvageSummary = new Label(canSellSalvage
+                ? "SALVAGE APPRAISAL  /  " + FormatMoney(salvageTotal) + " USD  /  " + salvageOffer.Count + " ITEMS"
+                : (salvageIds.Count == 0 ? "No eligible salvage aboard." : (salvageError ?? "Salvage offer unavailable.")));
+            salvageSummary.style.whiteSpace = WhiteSpace.Normal;
+            salvageSummary.style.color = new Color(0.82f, 0.78f, 0.66f);
+            vendorActions.Add(salvageSummary);
+
+            if (canSellSalvage)
+            {
+                System.Text.StringBuilder salvageLines = new System.Text.StringBuilder();
+                for (int i = 0; i < salvageOffer.Count; i++)
+                {
+                    MarketSaleLine line = salvageOffer[i];
+                    salvageLines.Append(line.displayName);
+                    salvageLines.Append("  /  ");
+                    salvageLines.Append(line.saleQuantity.ToString("0.00"));
+                    salvageLines.Append(" ");
+                    salvageLines.Append(line.unitLabel);
+                    salvageLines.Append("  /  ");
+                    salvageLines.Append(FormatMoney(line.lineTotalCents));
+                    salvageLines.Append(" USD  /  DEMAND ");
+                    salvageLines.Append(line.demandFactor.ToString("0.00"));
+                    salvageLines.Append("  /  STOCK ");
+                    salvageLines.Append(line.buyerStock);
+                    salvageLines.Append("/");
+                    salvageLines.Append(line.buyerTargetStock);
+                    if (i < salvageOffer.Count - 1) salvageLines.Append("\\n");
+                }
+                Label linesLabel = new Label(salvageLines.ToString());
+                linesLabel.style.whiteSpace = WhiteSpace.Normal;
+                linesLabel.style.fontSize = 11;
+                vendorActions.Add(linesLabel);
+
+                Button sellSalvage = MakeButton("SELL ELIGIBLE SALVAGE  /  " + FormatMoney(salvageTotal), () =>
+                {
+                    List<MarketSaleLine> receipt;
+                    long paid;
+                    string error;
+                    bool success = vendorServices.TrySellSalvage(salvageIds,
+                        "dockside.inez.salvage." + Guid.NewGuid().ToString("N"),
+                        out receipt, out paid, out error);
+                    statusLabel.text = success
+                        ? "SALVAGE SOLD  /  +" + FormatMoney(paid) + " USD."
+                        : "SALVAGE SALE DECLINED  /  " + error;
+                    furnitureTitle.text = "INEZ'S SALVAGE APPRAISAL";
+                    furnitureDetail.text = statusLabel.text;
+                    RenderInezServices();
+                });
+                vendorActions.Add(sellSalvage);
+            }
+
+            string[] itemIds =
+            {
+                "SUP-BAIT-WORM", "SUP-BAIT-FISH", "SUP-BAIT-SHELLFISH", "SUP-BAIT-LURE",
+                "GEAR-ROD-01", "GEAR-LAMP-01", "GEAR-ENGINE-01"
+            };
+            for (int i = 0; i < itemIds.Length; i++)
+            {
+                string itemId = itemIds[i];
+                CargoItemDefinition definition = cargoHold != null ? cargoHold.GetItemDefinition(itemId) : null;
+                if (definition == null) continue;
+                int quantity = itemId.StartsWith("SUP-BAIT-", StringComparison.Ordinal) ? 5 : 1;
+                long quote = vendorServices.GetPurchaseQuoteCents(itemId, quantity);
+                int stock = vendorServices.GetStock(itemId);
+                Button purchase = MakeButton("BUY " + definition.DisplayName.ToUpperInvariant() +
+                    " x" + quantity + "  /  " + FormatMoney(quote) + "  /  STOCK " + stock, () =>
+                {
+                    long charged;
+                    string error;
+                    bool success = vendorServices.TryPurchase(itemId, quantity,
+                        "dockside.inez.purchase." + Guid.NewGuid().ToString("N"),
+                        out charged, out error);
+                    statusLabel.text = success
+                        ? "PURCHASE COMPLETE  /  " + definition.DisplayName + " x" + quantity +
+                          "  /  -" + FormatMoney(charged) + " USD."
+                        : "PURCHASE DECLINED  /  " + error;
+                    furnitureTitle.text = "INEZ'S NET AND SUPPLY SHED";
+                    furnitureDetail.text = statusLabel.text;
+                    RenderInezServices();
+                });
+                purchase.SetEnabled(quote > 0L && vendorServices.WalletCents >= quote);
+                vendorActions.Add(purchase);
+            }
+        }
+
+        private void AddWalletBalanceLabel()
+        {
+            long balance = vendorServices != null ? vendorServices.WalletCents :
+                (maraMarket != null ? maraMarket.WalletCents : 0L);
+            Label walletLabel = new Label("AVAILABLE WALLET  /  " + FormatMoney(balance) + " USD");
+            walletLabel.style.color = new Color(0.78f, 0.84f, 0.75f);
+            walletLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            walletLabel.style.marginBottom = 5;
+            vendorActions.Add(walletLabel);
+        }
+
+        private static string FormatMoney(long cents)
+        {
+            return (cents / 100m).ToString("0.00");
         }
 
         private void SelectFurniture(DocksideFurnitureOption option)
@@ -733,11 +1071,17 @@ namespace WhereTheSoundingsEnd.Interaction
                    Mathf.RoundToInt(Mathf.Clamp01(vesselCondition.HullIntegrity) * 100f) +
                    "%\nENGINE CONDITION  /  " +
                    Mathf.RoundToInt(Mathf.Clamp01(vesselCondition.EngineCondition) * 100f) +
-                   "%\nLAST DAMAGE REPORT  /  " +
+                   "%\nFUEL  /  " +
+                   (fuelController != null
+                       ? fuelController.FuelUnits.ToString("0.0") + " / " + fuelController.Capacity.ToString("0.0") +
+                         " UNITS  /  EMERGENCY RESERVE " + fuelController.EmergencyFuelUnits.ToString("0.0") +
+                         "  /  FULL-LOAD ESTIMATE " + fuelController.EstimatedFullLoadMinutes.ToString("0") + " MIN"
+                       : "UNAVAILABLE") +
+                   "\nLAST DAMAGE REPORT  /  " +
                    (string.IsNullOrWhiteSpace(vesselCondition.LastDamageReport)
                        ? "No recent damage report."
                        : vesselCondition.LastDamageReport) +
-                   "\n\nDiagnosis only. No repair materials or currency are consumed.";
+                   "\n\nUse Tomas's service counter for paid repairs and refuelling.";
         }
 
         private string SaveHarbourLog()

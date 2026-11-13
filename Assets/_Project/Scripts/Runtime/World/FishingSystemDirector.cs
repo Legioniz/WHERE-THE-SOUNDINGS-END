@@ -74,6 +74,7 @@ namespace WhereTheSoundingsEnd.World
         };
 
         private static readonly string[] Baits = { "worm", "small-fish", "shellfish", "lure" };
+        private static readonly string[] BaitItemIds = { "SUP-BAIT-WORM", "SUP-BAIT-FISH", "SUP-BAIT-SHELLFISH", "SUP-BAIT-LURE" };
         private static readonly FishHabitat[] HabitatOrder =
         {
             FishHabitat.Estuary, FishHabitat.Nearshore, FishHabitat.Kelp,
@@ -148,12 +149,6 @@ namespace WhereTheSoundingsEnd.World
                 Time.timeScale <= 0.0001f || (seaState != null && seaState.PanicLevel > 0.98f))
                 return false;
 
-            if (seaState != null && !seaState.TryClaimInteraction())
-            {
-                status = "Finish the current interaction first.";
-                return false;
-            }
-
             Rigidbody vessel = GetComponent<Rigidbody>();
             float speed = vessel != null ? new Vector2(vessel.linearVelocity.x, vessel.linearVelocity.z).magnitude : 0f;
             if ((technique == FishingTechnique.Trolling && speed < 1.5f) ||
@@ -162,6 +157,25 @@ namespace WhereTheSoundingsEnd.World
                 status = technique == FishingTechnique.Trolling
                     ? "Trolling requires the vessel to be moving."
                     : "Slow the vessel before setting the line.";
+                return false;
+            }
+
+            string baitItemId = BaitItemIds[Mathf.Clamp(baitIndex, 0, BaitItemIds.Length - 1)];
+            if (cargoHold.GetAvailableQuantity(baitItemId) < 1)
+            {
+                status = "NO BAIT — return to Inez and purchase " + BaitLabels[baitIndex] + " bait.";
+                return false;
+            }
+
+            if (seaState != null && !seaState.TryClaimInteraction())
+            {
+                status = "Finish the current interaction first.";
+                return false;
+            }
+
+            if (!cargoHold.TryConsumeOne(baitItemId))
+            {
+                status = "BAIT INVENTORY CHANGED — no cast was made.";
                 return false;
             }
 
@@ -666,7 +680,11 @@ namespace WhereTheSoundingsEnd.World
                     hookIndex = NextUnlocked(Hooks, hookIndex, totalCatches);
                 if (GUI.Button(new Rect(panelX + 170, Screen.height - 86, 150, 22), "Reel: " + Reels[reelIndex].label + "  ‹"))
                     reelIndex = NextUnlocked(Reels, reelIndex, totalCatches);
-                if (GUI.Button(new Rect(panelX + 10, Screen.height - 60, 150, 22), "Bait: " + BaitLabels[baitIndex] + "  ‹"))
+                int selectedBait = Mathf.Clamp(baitIndex, 0, Baits.Length - 1);
+                int baitCount = cargoHold != null ? cargoHold.GetAvailableQuantity(BaitItemIds[selectedBait]) : 0;
+                string baitStatus = baitCount > 0 ? " x" + baitCount : "  /  EMPTY";
+                if (GUI.Button(new Rect(panelX + 10, Screen.height - 60, 150, 22),
+                    "Bait: " + BaitLabels[selectedBait] + baitStatus + "  ‹"))
                     baitIndex = (baitIndex + 1) % Baits.Length;
                 if (GUI.Button(new Rect(panelX + 170, Screen.height - 60, 150, 22), "Method: " + technique + "  ‹"))
                     technique = Techniques[(Array.IndexOf(Techniques, technique) + 1) % Techniques.Length];

@@ -12,7 +12,8 @@ namespace WhereTheSoundingsEnd.Economy
     [DisallowMultipleComponent]
     public sealed class EconomyWalletController : MonoBehaviour, ISaveParticipant, ISaveDataValidator
     {
-        [SerializeField, Min(0)] private long walletCents;
+        private const long NewCampaignStartingBalanceCents = 2500L;
+        [SerializeField, Min(0)] private long walletCents = NewCampaignStartingBalanceCents;
         [SerializeField] private List<string> processedTransactionIds = new List<string>();
 
         private readonly HashSet<string> transactionLookup = new HashSet<string>(StringComparer.Ordinal);
@@ -22,6 +23,7 @@ namespace WhereTheSoundingsEnd.Economy
         private void Awake()
         {
             RebuildTransactionLookup();
+            GrantStartingBalanceIfUninitialized();
         }
 
         private void OnValidate()
@@ -110,7 +112,16 @@ namespace WhereTheSoundingsEnd.Economy
             List<string> restoredIds = new List<string>(data.economy.processedTransactionIds);
             walletCents = data.economy.walletCents;
             processedTransactionIds = restoredIds;
+            GrantStartingBalanceIfUninitialized();
             RebuildTransactionLookup();
+        }
+
+        private void GrantStartingBalanceIfUninitialized()
+        {
+            // A zero-balance campaign with no transaction history is an untouched new/legacy slot.
+            // Once any transaction exists, a depleted wallet is never topped up on load.
+            if (walletCents == 0L && processedTransactionIds != null && processedTransactionIds.Count == 0)
+                walletCents = NewCampaignStartingBalanceCents;
         }
 
         private void RebuildTransactionLookupIfNeeded()

@@ -1,7 +1,7 @@
 # Economy and Trading System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime foundation partially implemented — vendor transactions and services pending  
+> Status: Greyhaven seafood/salvage sales, bait/supply purchasing, fuel, repair and dockside service runtime partially implemented; full catalogue and playtest verification pending  
 > Owner: Project lead  
 > Version: 0.1  
 > Last reviewed: 2026-11-14  
@@ -46,16 +46,31 @@ Greyhaven's current residents are retained; do not introduce duplicate shopkeepe
 
 | Vendor / resident | Role | Buys | Sells / services |
 |---|---|---|---|
-| Mara Venn — Fish Market | Primary seafood buyer | Legal fish, shellfish and cephalopods; special accepted specimens only when configured | Bait and basic fishing consumables when stock is authored |
-| Tomas Vale — Boat Repair Shed | Mechanic / shipwright | Selected salvage parts only when a purchase order exists | Hull, engine and hold repairs; fuel; vessel/equipment upgrades |
-| Inez Sarmiento — Net Mender Shed | Gear and materials specialist | Net-related salvage and approved recovered materials | Lines, hooks, nets, tackle and net-repair supplies |
+| Mara Venn — Fish Market | Primary seafood buyer | Configured ordinary seafood | No supply sales in the current Greyhaven runtime |
+| Tomas Vale — Boat Repair Shed | Mechanic / shipwright | No unrestricted salvage buying yet | Paid hull, engine and damaged-hold repairs; fuel |
+| Inez Sarmiento — Net Mender Shed | Gear and materials specialist | Configured recovered salvage materials | Starter equipment and four bait types; further tackle catalogue remains open |
 | Harbourmaster — Harbour Office | Authority / research broker | No unrestricted commodity buying | Explicit salvage contracts, research submissions, permits and one-time evidence rewards |
 
 Vendor acceptance is a hard gate. A vendor must not buy an item simply because it has a price. Quest-critical cargo, protected wildlife, closed-area catches, undersized catches and quarantined specimens cannot be sold through ordinary commodity transactions.
 
 Vendor stock and buying capacity are finite but readable. A vendor's occupation determines preferences and available services; their schedule determines whether the service is currently staffed. Do not create a universal menu that lets the player buy every item from every resident.
 
-## 5. Sale value and market demand
+## 5. Current Greyhaven runtime integration
+
+The current generated Greyhaven vessel owns the wallet, Mara market, fuel controller and resident vendor services. These components reuse the existing spatial cargo hold, vessel condition, sea-state clock, NPC schedules and relationship scores rather than duplicating their state.
+
+- **Mara:** accepts only authored ordinary seafood definitions, shows line-by-line weight/quality/freshness/demand offers, and buys through an idempotent atomic cargo/wallet transaction. Aberrant and unpriced catches are rejected.
+- **Inez:** appraises and buys the three authored salvage materials through the same atomic transaction boundary. She sells starter rod, lamp, engine and worm/small-fish/shellfish/lure bait in bounded stock. Purchases require hold space and available funds; cargo placement is rolled back if payment fails. Bait is a stack in the hold and one unit is consumed only when a cast is deployed.
+- **Tomas:** quotes and charges for actual missing hull/engine integrity, individual damaged hold cells and refuelling. Quotes apply bounded trust discounts and are shown before confirmation. Repairs cannot exceed 100%.
+- **Fuel:** main tank consumption is based on actual propulsion load and throttle; idle, zero-throttle, paused and dockside time do not drain fuel. A small separately saved emergency reserve permits low-power return after the main tank is empty.
+- **Markets:** Mara and Inez stock is per vendor/item, saved with current/target stock and last restock day. Demand is bounded by the existing policy; stock replenishes gradually once per elapsed in-game day.
+- **Dockside:** existing dockside modal ownership is retained. Resident-specific actions expose seafood/salvage appraisals, sale confirmation, purchases, repairs and refuelling.
+
+A new campaign receives a one-time $25.00 starter wallet balance. A zero-balance save with a transaction history is never topped up. The current salvage values are explicitly provisional and are defined in the seafood price schedule's supplemental salvage table.
+
+**Not yet implemented:** Harbourmaster salvage/research contracts, complete catch legality and protected-species rules, the full catalogue price authoring, active rod/reel/line equipment-slot application, destination-specific travel-market routes, detailed fuel range/net-profit analytics, and full Unity Play Mode balancing. The editor builder must be run in Unity to regenerate the Greyhaven scene with the new runtime components and authored cargo data.
+
+## 6. Sale value and market demand
 
 For each eligible sale line, use the existing economy formula:
 
@@ -77,7 +92,7 @@ The response coefficient is a tuning parameter owned by the market profile, not 
 
 Market factors are destination-based. Catch origin does not grant the destination premium. A player may inspect posted prices before travelling, but selling is only possible at a buyer physically present in the current destination.
 
-## 6. NPC relationship and trade behavior
+## 7. NPC relationship and trade behavior
 
 Use existing stable NPC IDs and `NpcAgent.RelationshipScore`, `CanTrade` and relationship memory events. Do not create a second trust score.
 
@@ -92,7 +107,7 @@ Use existing stable NPC IDs and `NpcAgent.RelationshipScore`, `CanTrade` and rel
 
 Keep relationship effects asymmetric where character identity warrants it. Mara may value consistent, well-handled landings; Tomas may reward responsible maintenance and reliable payment; Inez may value returning reusable net materials. The Harbourmaster's evidence and contract decisions remain separate from commodity pricing.
 
-## 7. Purchasing, stock and cargo
+## 8. Purchasing, stock and cargo
 
 Purchases must validate, in order: vendor open, vendor accepts/sells item, relationship gate, available vendor stock, valid quantity, wallet balance, destination hold/equipment capacity, and final price. Only then commit money and inventory atomically.
 
@@ -103,7 +118,7 @@ Purchases must validate, in order: vendor open, vendor accepts/sells item, relat
 - Cargo hold space remains a physical constraint. No purchased item may appear in the hold if it cannot fit.
 - Vendor stock is persistent and refreshes only by the documented stock simulation; scene reloads and save reloads must not restock it.
 
-## 8. Repairs and vessel services
+## 9. Repairs and vessel services
 
 Use existing `VesselConditionController` hull/engine integrity and `SpatialCargoHold` damaged-cell state. The economy is a payer and transaction coordinator; it does not own vessel physics or cargo geometry.
 
@@ -115,7 +130,7 @@ Repair quote components:
 
 Show a quote before confirmation. Repairs restore only the selected component and never exceed 100%. A failed or unaffordable repair changes nothing. Do not charge a fixed fee when no repair is required.
 
-## 9. Fuel and operating costs
+## 10. Fuel and operating costs
 
 Fuel is a voyage resource and is stored on the vessel. Consumption must be tied to actual propulsion/engine load rather than wall-clock time while docked or paused. The player should be able to see current fuel, estimated remaining range and the estimated cost to refill before departure.
 
@@ -128,7 +143,7 @@ Fuel is a voyage resource and is stored on the vessel. Consumption must be tied 
 
 The exact consumption and service price coefficients remain tuning values and must be measured during the vertical slice. Do not copy *DREDGE* fuel rates or assume a particular real-world vessel's litres-per-kilometre figure.
 
-## 10. Salvage, materials and discoveries
+## 11. Salvage, materials and discoveries
 
 Salvage has three possible uses, resolved by item definition and contract:
 1. Sell as commodity to an accepting buyer.
@@ -137,7 +152,7 @@ Salvage has three possible uses, resolved by item definition and contract:
 
 Do not let a material be sold and simultaneously count toward a repair recipe or quest. One cargo instance has one owner/state at a time. Unique research payouts are claimed once per stable specimen/evidence ID and persisted. A discovery's narrative value may exceed its commodity price; not every artifact should be sellable.
 
-## 11. Transaction integrity and persistence
+## 12. Transaction integrity and persistence
 
 All transaction methods must be atomic: validate first, then mutate wallet, cargo, vendor stock, vessel condition or relationship state. If any step fails, roll back or do not commit. Use stable item/vendor/event IDs, invariant numeric validation, bounded collections and duplicate-transaction protection.
 
@@ -152,7 +167,7 @@ Persist:
 
 Use the existing save coordinator and ordered schema migrations. Never store mutable market stock in a ScriptableObject asset; assets define starting stock, base prices and tuning only. Runtime market state belongs in the save DTO.
 
-## 12. UI and feedback
+## 13. UI and feedback
 
 The dockside hub keeps exclusive modal ownership. Add service actions to existing locations instead of opening competing overlays:
 - Fish Market: inventory selection, offer breakdown, buyer stock/demand, confirm sale.
@@ -162,7 +177,7 @@ The dockside hub keeps exclusive modal ownership. Add service actions to existin
 
 Every transaction displays item, quantity/unit, base price, destination factor, quality/freshness, demand, relationship modifier, total and post-transaction wallet. Purchases display stock and hold fit. Repairs display current/target condition and line-item cost. Errors must explain the failed condition. Keyboard and gamepad focus must be preserved.
 
-## 13. Implementation sequence and acceptance gates
+## 14. Implementation sequence and acceptance gates
 
 ### Runtime foundation update — 2026-11-14
 
@@ -171,6 +186,19 @@ Every transaction displays item, quantity/unit, base price, destination factor, 
 `EconomyWalletController` now owns the live integer-cent wallet and bounded idempotency ledger on the generated vessel and participates in the existing save coordinator. This does not yet implement vendor stock/demand persistence, sales/purchases, fuel burn, paid repairs, NPC service bindings or dockside economy UI. Do not treat the wallet and pure policies as a playable trading loop.
 
 
+
+### Runtime implementation — connected Greyhaven economy
+
+The generated player vessel now owns `MaraFishMarketController`, `VesselFuelController`, `GreyhavenVendorServices` and `EconomyWalletController`. These reuse the existing spatial hold, NPC schedules/relationships, vessel condition, boat propulsion and save coordinator.
+
+- Mara builds itemized offers for the five authored starter fish and atomically pays/removes eligible catch. Aberrant, quest and unpriced cargo is rejected.
+- Inez buys three explicitly provisional salvage materials and sells stocked bait/starter equipment. Purchase placement is validated against the spatial hold; failed payment rolls the placement back. The four bait types map to the fishing system's actual bait choices and one unit is consumed only when the cast deploys.
+- Tomas sells refuelling, hull/engine repairs and damaged hold-cell repairs. Quotes use actual missing condition and bounded trust discounts; the wallet is charged before repairs are applied.
+- Main fuel drains only from propulsion load and throttle. A separately saved emergency reserve enables a reduced-power return after the main tank empties. Paid refuelling restores that reserve.
+- Mara and Inez stock is saved per vendor/item and replenishes gradually once per elapsed in-game day. Buyer stock and demand are shown in the itemized dockside offer.
+- The existing dockside modal exposes the resident-specific sale, purchase, repair and refuelling actions. New campaigns start with $25.00; transaction history prevents repeat starter grants.
+
+The editor builder must be run in Unity to regenerate Greyhaven with the new runtime components and bait/salvage definitions. Current scope does not include the full seafood catalogue, closed-area/quota legality, Harbourmaster research/contract rewards, active equipment-slot application, destination-market travel routes or income-per-hour balancing. Unity compilation, Edit Mode execution, Play Mode testing and economy playtests remain required.
 
 ### E0 — Data and persistence
 - Add authored base sale values/units and vendor profiles without changing stable item IDs.
@@ -200,7 +228,7 @@ Every transaction displays item, quantity/unit, base price, destination factor, 
 - Tune only after the 45–90 minute Greyhaven slice is playable.
 - Do not mark the economy complete until Unity tests and actual player tests demonstrate the loop.
 
-## 14. Research references
+## 15. Research references
 
 - Black Salt Games developer interview, *Trawling in the deep: How Black Salt Games made spooky fishing RPG DREDGE*, Game Developer: https://www.gamedeveloper.com/design/trawling-in-the-deep-how-black-salt-games-made-spooky-fishing-rpg-i-dredge-i-
 - Joel Mason, *Deep Dive: The surprising depth of spatial inventories in DREDGE*, Game Developer: https://www.gamedeveloper.com/design/deep-dive-the-surprising-depth-of-spatial-inventories-in-dredge

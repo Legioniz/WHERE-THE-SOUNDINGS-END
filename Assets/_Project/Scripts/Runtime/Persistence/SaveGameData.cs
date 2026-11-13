@@ -53,6 +53,17 @@ namespace WhereTheSoundingsEnd.Persistence
         // USD is stored as integer cents to avoid floating-point wallet drift.
         public long walletCents;
         public List<string> processedTransactionIds = new List<string>();
+        public List<MarketStockSaveData> marketStocks = new List<MarketStockSaveData>();
+    }
+
+    [Serializable]
+    public sealed class MarketStockSaveData
+    {
+        public string vendorId;
+        public string itemId;
+        public int currentStock;
+        public int targetStock;
+        public int lastRestockDay;
     }
 
     [Serializable]
@@ -130,6 +141,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public Vector3SaveData angularVelocity = new Vector3SaveData();
         public float hullIntegrity = 100.0f;
         public float fuel = 100.0f;
+        public float emergencyFuel = 2.0f;
         public float engineCondition = 100.0f;
     }
 
@@ -928,6 +940,7 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.dialogue == null) data.dialogue = new DialogueSaveData();
             if (data.economy == null) data.economy = new EconomySaveData();
             if (data.economy.processedTransactionIds == null) data.economy.processedTransactionIds = new List<string>();
+            if (data.economy.marketStocks == null) data.economy.marketStocks = new List<MarketStockSaveData>();
 
             if (data.player.position == null) data.player.position = new Vector3SaveData();
             if (data.player.rotationEuler == null) data.player.rotationEuler = new Vector3SaveData();

@@ -310,11 +310,59 @@ namespace WhereTheSoundingsEnd.Editor
                 CreateCargoDefinition("GEAR-ROD-01", "Handline Rod", CargoItemCategory.Equipment,
                     new[] { Vector2Int.zero, Vector2Int.up, Vector2Int.up * 2, Vector2Int.up * 3 }, 0f),
                 CreateCargoDefinition("GEAR-LAMP-01", "Deck Lantern", CargoItemCategory.Equipment,
-                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f)
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f),
+                CreateCargoDefinition("SUP-BAIT-WORM", "Worm Bait", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero }, 0f),
+                CreateCargoDefinition("SUP-BAIT-FISH", "Small Fish Bait", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero, Vector2Int.right }, 0f),
+                CreateCargoDefinition("SUP-BAIT-SHELLFISH", "Shellfish Bait", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero }, 0f),
+                CreateCargoDefinition("SUP-BAIT-LURE", "Reusable Lure", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero, Vector2Int.right }, 0f)
             };
 
             ConfigureFishEcology(definitions);
+            ConfigureEconomy(definitions);
             return definitions;
+        }
+
+        private static void ConfigureEconomy(List<CargoItemDefinition> definitions)
+        {
+            // Initial Greyhaven species use the authoritative schedule's USD/kg values.
+            // Unlisted seafood, aberrant specimens, quest cargo and equipment remain ineligible
+            // until their legal buyer contract and price unit are explicitly authored.
+            Dictionary<string, float> seafoodUsdPerKg = new Dictionary<string, float>(StringComparer.Ordinal)
+            {
+                { "FSH-001", 2.30f },
+                { "FSH-002", 1.98f },
+                { "FSH-003", 3.49f },
+                { "FSH-005", 2.14f },
+                { "FSH-007", 0.95f }
+            };
+            // Provisional salvage baseline: authored per recovered piece, not per kilogram.
+            Dictionary<string, float> salvageUsdPerUnit = new Dictionary<string, float>(StringComparer.Ordinal)
+            {
+                { "SALVAGE-WOOD-01", 1.50f },
+                { "SALVAGE-CLOTH-01", 0.85f },
+                { "SALVAGE-SCRAP-01", 2.75f }
+            };
+
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                CargoItemDefinition definition = definitions[i];
+                if (definition == null) continue;
+
+                float price;
+                bool seafood = seafoodUsdPerKg.TryGetValue(definition.ItemId, out price);
+                bool salvage = !seafood && salvageUsdPerUnit.TryGetValue(definition.ItemId, out price);
+                bool eligible = seafood || salvage;
+                SerializedObject serialized = new SerializedObject(definition);
+                serialized.FindProperty("baseSalePriceUsd").floatValue = eligible ? price : 0f;
+                serialized.FindProperty("saleUnitLabel").stringValue = seafood ? "kg" : "unit";
+                serialized.FindProperty("ordinarySaleEligible").boolValue = eligible;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(definition);
+            }
         }
 
         private static void ConfigureFishEcology(List<CargoItemDefinition> definitions)
@@ -503,6 +551,9 @@ namespace WhereTheSoundingsEnd.Editor
 
             boat.gameObject.AddComponent<VesselConditionController>();
             boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.EconomyWalletController>();
+            boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.VesselFuelController>();
+            boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.MaraFishMarketController>();
+            boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.GreyhavenVendorServices>();
 
             AcousticWorldListener acousticListener = parent.gameObject.AddComponent<AcousticWorldListener>();
             acousticListener.Configure(seaState);
