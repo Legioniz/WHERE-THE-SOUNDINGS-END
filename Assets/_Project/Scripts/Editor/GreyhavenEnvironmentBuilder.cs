@@ -2011,7 +2011,8 @@ namespace WhereTheSoundingsEnd.Editor
             Transform parent, Material wood, Material metal, Material glass, Material paper,
             Material ink, Material rust, Material ceramic, Material cloth, Material rope)
         {
-            Transform market = Group("Market_Backlane_Artifacts", parent);
+            Transform root = Group("Village_Environmental_Artifacts", parent);
+            Transform market = Group("Market_Backlane_Artifacts", root);
             float marketGround = HeightAt(-35f, -35f);
             ArtifactCube(market, "Fish_Crate_Stack_Lower", new Vector3(-35f, marketGround + 0.42f, -35f),
                 new Vector3(1.1f, 0.82f, 0.9f), wood, 7f);
@@ -2026,7 +2027,7 @@ namespace WhereTheSoundingsEnd.Editor
             ArtifactCube(market, "Tally_Slate_Chalk_Dust", new Vector3(-36.1f, marketGround + 0.714f, -34.2f),
                 new Vector3(0.28f, 0.008f, 0.025f), paper, 13f);
 
-            Transform repair = Group("Repair_Shed_Scrap_Artifacts", parent);
+            Transform repair = Group("Repair_Shed_Scrap_Artifacts", root);
             float repairGround = HeightAt(9f, -48f);
             ArtifactCylinder(repair, "Retired_Propeller_Hub", new Vector3(9f, repairGround + 0.22f, -48f),
                 new Vector3(0.32f, 0.22f, 0.32f), rust, Quaternion.identity);
@@ -2043,7 +2044,7 @@ namespace WhereTheSoundingsEnd.Editor
             ArtifactCube(repair, "Oil_Stained_Canvas", new Vector3(10.1f, repairGround + 0.08f, -49.2f),
                 new Vector3(0.85f, 0.035f, 0.62f), cloth, 17f);
 
-            Transform netShed = Group("Net_Mender_Yard_Artifacts", parent);
+            Transform netShed = Group("Net_Mender_Yard_Artifacts", root);
             float netGround = HeightAt(-55f, -53f);
             ArtifactCube(netShed, "Net_Weights_Crate", new Vector3(-55f, netGround + 0.32f, -53f),
                 new Vector3(0.88f, 0.62f, 0.72f), wood, -12f);
@@ -2060,7 +2061,7 @@ namespace WhereTheSoundingsEnd.Editor
             ArtifactSphere(netShed, "Net_Float_Faded", new Vector3(-53.4f, netGround + 0.28f, -52.2f),
                 new Vector3(0.2f, 0.2f, 0.2f), cloth);
 
-            Transform inn = Group("Inn_Threshold_Artifacts", parent);
+            Transform inn = Group("Inn_Threshold_Artifacts", root);
             float innGround = HeightAt(45f, -59f);
             ArtifactCylinder(inn, "Rain_Barrel", new Vector3(45f, innGround + 0.48f, -59f),
                 new Vector3(0.72f, 0.48f, 0.72f), wood, Quaternion.identity);
@@ -2078,7 +2079,8 @@ namespace WhereTheSoundingsEnd.Editor
             Transform parent, Material wood, Material metal, Material glass,
             Material rust, Material ceramic, Material cloth, Material rope)
         {
-            Transform east = Group("Eastern_Mudflat_Debris_Artifacts", parent);
+            Transform root = Group("Estuary_Environmental_Artifacts", parent);
+            Transform east = Group("Eastern_Mudflat_Debris_Artifacts", root);
             float eastGround = HeightAt(68f, -27f);
             ArtifactCube(east, "Tidal_Fish_Trap_Frame_Base", new Vector3(68f, eastGround + 0.16f, -27f),
                 new Vector3(1.5f, 0.12f, 1.05f), wood, 13f);
@@ -2098,7 +2100,7 @@ namespace WhereTheSoundingsEnd.Editor
             ArtifactCube(east, "Salt_Bottle_Remnant", new Vector3(70.2f, eastGround + 0.12f, -27.8f),
                 new Vector3(0.12f, 0.3f, 0.12f), ceramic, 16f);
 
-            Transform west = Group("Western_Mudflat_Debris_Artifacts", parent);
+            Transform west = Group("Western_Mudflat_Debris_Artifacts", root);
             float westGround = HeightAt(-76f, -27f);
             ArtifactCube(west, "Old_Tide_Stake", new Vector3(-76f, westGround + 0.7f, -27f),
                 new Vector3(0.12f, 1.4f, 0.12f), wood, -8f);
