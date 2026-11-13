@@ -58,6 +58,8 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, true, false, 1f));
             Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, false, true, 1f));
             Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, false, false, 0f));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, false, false, float.NaN));
+            Assert.IsFalse(DocksideModalPolicy.CanOpenDocksideMenu(false, false, false, false, float.PositiveInfinity));
         }
 
         [Test]
