@@ -15,7 +15,7 @@ GreyhavenRuntimeUI builds the starter Greyhaven HUD with Unity UI Toolkit:
 - A shared interaction prompt beneath the strip. The dockside hub owns the generated Greyhaven location prompt; hand-authored resident/site interactions can use the same presenter API.
 - Contextual status and feedback within inventory and dialogue panels.
 
-The chart overlay shows only physically visited regions and Sounding Rig-discovered site marks. Unknown regions and sites receive no names, pins, bearings or compass guidance. It uses a local survey plot, not a calibrated nautical map.
+The chart overlay can be opened in unknown water, where it remains blank and gives no current-region name, marks, bearings or compass. In a visited region it shows only Sounding Rig-discovered site marks. Unknown regions and sites receive no names, pins, bearings or compass guidance. It uses a local survey plot, not a calibrated nautical map.
 
 The HUD is a functional greybox. It is not a final production HUD or a complete expedition instrument suite.
 
