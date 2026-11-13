@@ -1,4 +1,6 @@
 using NUnit.Framework;
+using UnityEngine;
+using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.Economy;
 
 namespace WhereTheSoundingsEnd.Tests
@@ -50,6 +52,49 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(result, Is.EqualTo(long.MaxValue));
             Assert.That(EconomyPolicy.TryApplyWalletDelta(500L, -200L, out result), Is.True);
             Assert.That(result, Is.EqualTo(300L));
+        }
+
+
+        [Test]
+        public void Wallet_TransactionsAreAtomicAndIdempotentAcrossSaveRestore()
+        {
+            GameObject owner = new GameObject("EconomyWalletTest");
+            try
+            {
+                EconomyWalletController wallet = owner.AddComponent<EconomyWalletController>();
+                Assert.That(wallet.TryApplyTransaction("seed", 1000L), Is.True);
+                Assert.That(wallet.TryApplyTransaction("sale-001", 250L), Is.True);
+                Assert.That(wallet.TryApplyTransaction("sale-001", 250L), Is.False);
+                Assert.That(wallet.TryApplyTransaction("purchase-001", -2000L), Is.False);
+                Assert.That(wallet.WalletCents, Is.EqualTo(1250L));
+
+                SaveGameData snapshot = SaveGameData.CreateNew(1, "Greyhaven");
+                wallet.CaptureSaveData(snapshot);
+                Assert.That(wallet.TryApplyTransaction("repair-001", -250L), Is.True);
+                wallet.RestoreSaveData(snapshot);
+
+                Assert.That(wallet.WalletCents, Is.EqualTo(1250L));
+                Assert.That(wallet.HasProcessedTransaction("sale-001"), Is.True);
+                Assert.That(wallet.HasProcessedTransaction("repair-001"), Is.False);
+            }
+            finally
+            {
+                Object.DestroyImmediate(owner);
+            }
+        }
+
+        [Test]
+        public void SaveMigration_V7WholeDollarCurrencyBecomesIntegerCents()
+        {
+            SaveGameData legacy = SaveGameData.CreateNew(1, "Greyhaven");
+            legacy.schemaVersion = 7;
+            legacy.player.currency = 42;
+
+            string error;
+            Assert.That(SaveGameDataMigration.TryPrepare(legacy, out error), Is.True, error);
+            Assert.That(legacy.schemaVersion, Is.EqualTo(8));
+            Assert.That(legacy.economy.walletCents, Is.EqualTo(4200L));
+            Assert.That(legacy.player.currency, Is.EqualTo(42));
         }
 
         [Test]
