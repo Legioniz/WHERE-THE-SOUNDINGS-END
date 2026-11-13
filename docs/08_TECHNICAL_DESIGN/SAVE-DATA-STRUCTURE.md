@@ -75,7 +75,11 @@ Save schema v7 is the current save contract and extends each NPC state record wi
 
 Schema 5 NPC relationship scores were not modified by gameplay and used zero as their original default. The v5-to-v6 migration maps an empty or zero legacy score to neutral 50, initializes each memory list, and preserves any non-zero score. Later saves store the score and event ledger together.
 
-## Regional chart persistence\n\nSchema v7 adds WorldSaveData.visitedRegionIds. RegionalChartController records a region only after the vessel physically enters that region's DeepOceanSurveyRegion bounds. The same stable ID is added to the existing ProgressSaveData.unlockedRegionIds collection. A visit unlocks the chart record, not an inter-region travel route. The chart lists only visited regions and shows a phenomenon-site mark only when SoundingRigController has already discovered that stable site ID. Unknown regions and sites remain absent.\n\n## Runtime API
+## Regional chart persistence
+
+Schema v7 adds WorldSaveData.visitedRegionIds. RegionalChartController records a region only after the vessel physically enters that region's DeepOceanSurveyRegion bounds. The same stable ID is added to the existing ProgressSaveData.unlockedRegionIds collection. A visit unlocks the chart record, not an inter-region travel route. The chart lists only visited regions and shows a phenomenon-site mark only when SoundingRigController has already discovered that stable site ID. Unknown regions and sites remain absent.
+
+## Runtime API
 
 - SaveFileService.Save(slot, data)
 - SaveFileService.TryLoad(slot, out data)
