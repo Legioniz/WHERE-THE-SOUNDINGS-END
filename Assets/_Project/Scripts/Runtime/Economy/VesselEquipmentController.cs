@@ -63,6 +63,7 @@ namespace WhereTheSoundingsEnd.Economy
 
         private void Update()
         {
+            if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             if (HasLantern && LanternCondition > 0.01f)
             {
                 if (seaState != null && seaState.IsNight)
