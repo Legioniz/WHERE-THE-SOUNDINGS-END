@@ -12,7 +12,7 @@ namespace WhereTheSoundingsEnd.World
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody))]
-    public sealed class RegionalChartController : MonoBehaviour, ISaveParticipant
+    public sealed class RegionalChartController : MonoBehaviour, ISaveParticipant, ISaveDataValidator
     {
         [SerializeField] private Rigidbody vesselBody;
         [SerializeField, Min(0.1f)] private float regionRefreshSeconds = 0.5f;
@@ -41,6 +41,13 @@ namespace WhereTheSoundingsEnd.World
         {
             if (vesselBody == null) vesselBody = GetComponent<Rigidbody>();
             RefreshSceneReferences();
+        }
+
+        private void Start()
+        {
+            // Resolve the initial harbour chart before any early checkpoint can be requested.
+            RefreshSceneReferences();
+            ResolveCurrentRegion();
         }
 
         private void OnEnable()
@@ -100,7 +107,8 @@ namespace WhereTheSoundingsEnd.World
             for (int i = 0; i < sites.Length; i++)
             {
                 DeepOceanPhenomenonSite site = sites[i];
-                if (site == null || !string.Equals(site.RegionId, CurrentRegionId, StringComparison.OrdinalIgnoreCase))
+                if (site == null || !site.IsValidForRegion ||
+                    !string.Equals(site.RegionId, CurrentRegionId, StringComparison.OrdinalIgnoreCase))
                     continue;
                 if (RegionalChartPolicy.ShouldRevealSite(visitedRegionIds, discovered, site.RegionId, site.SiteId))
                     known.Add(site);
