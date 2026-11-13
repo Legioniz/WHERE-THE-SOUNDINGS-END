@@ -203,6 +203,8 @@ namespace WhereTheSoundingsEnd.Economy
                     saleQuantity = placement.saleQuantity,
                     unitLabel = definition.SaleUnitLabel,
                     demandFactor = demand,
+                    buyerStock = itemStock.currentStock,
+                    buyerTargetStock = itemStock.targetStock,
                     lineTotalCents = lineCents
                 });
             }
