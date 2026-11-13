@@ -2,8 +2,8 @@
 
 > Project: WHERE THE SOUNDINGS END  
 > Status: M0 in progress — source audit recorded; Unity verification pending  
-> Audit date: 2026-11-12  
-> Audited baseline: `main` at `3f882eb` (before the fixed-step cadence patch in this review)  
+> Audit date: 2026-11-13  
+> Audited baseline: `main` at `a215eb72` after the streaming and dockside-hub merges  
 > Source correction: `06a7004`  
 > Owner: Project lead
 
@@ -11,7 +11,7 @@
 
 The repository is a **connected Unity gameplay prototype**, not a directly playable or commercially complete game. It has meaningful foundations for boat handling, ocean presentation, action-driven time, harvesting, cargo, the Sounding Rig, acoustic events, Greyhaven NPCs, and save/autosave.
 
-The most important M0 result is a confirmed source-level C# compilation defect in the Greyhaven scene builder. The builder passed an undeclared `trim` identifier when creating Inez Sarmiento. It has been corrected to use the existing `concrete` material in commit [`06a7004`](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/commit/06a700406bad809e6671af26163e147dbd309811). This is a source correction, **not proof of Unity compilation**. The next gate is a clean import and compile in Unity `6000.3.28f1`.
+The most important M0 result remains the need to validate the generated Unity project in the pinned editor. Earlier source-level C# defects in the Greyhaven scene builder were corrected and repository CI now parses all C# sources. The builder passed an undeclared `trim` identifier when creating Inez Sarmiento. It has been corrected to use the existing `concrete` material in commit [`06a7004`](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/commit/06a700406bad809e6671af26163e147dbd309811). This is a source correction, **not proof of Unity compilation**. The next gate is a clean import and compile in Unity `6000.3.28f1`.
 
 M0 is not complete. The repository's latest verified CI baseline was green for repository/configuration checks and C# syntax parsing. The boat/wave/camera source integration has since been updated in commit `1c58d63`; the resulting CI run and the new test-file inventory must be checked separately. These checks do not resolve C# symbols against Unity and package assemblies, run Edit Mode tests, execute Play Mode, or build Windows.
 
@@ -28,7 +28,7 @@ The audited Git tree contained 337 entries (292 blobs and 45 trees). The current
 | Dialogue | Yarn Spinner Unity 3.2.8 |
 | Test framework | Unity Test Framework 1.4.6 |
 | Runtime/editor structure | Separate runtime and Editor assembly definitions |
-| Automated tests | Eight Edit Mode test source files (seven existing suites plus new wave-integration math coverage) |
+| Automated tests | Thirteen Edit Mode test source files and one Play Mode transition test source, in separate assemblies; Unity execution pending |
 | CI | Repository/configuration validator, C# syntax parser, repository safeguard validator |
 | Initial target | Windows 64-bit, single-player |
 
@@ -49,12 +49,12 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 | Fishing and dredging | Partial prototype; unverified | Timed harvesting minigames, catalogue-based catch selection, salvage-site depletion and cargo placement exist. Catch selection is not yet a region/habitat/population simulation. |
 | Cargo and vessel condition | Partial prototype; unverified | Spatial cargo placement, blocked/damaged cells, impact damage, and hull/engine condition exist. A complete service/economy loop is absent. |
 | Sounding Rig and acoustic signals | Implemented foundation; unverified | Regional survey profiles, signal confidence, repeated-ping verification, authored site markers, acoustic event publishing/listening and save participation exist. |
-| Greyhaven NPCs | Partial foundation; unverified | Four residents, stable IDs, time-based schedules, waypoint movement, Yarn dialogue and relationship persistence exist. Obstacle-aware navigation and quest/world-state progression remain incomplete. |
+| Greyhaven NPCs | Partial foundation; unverified | Four residents, stable IDs, time-based schedules, waypoint movement, Yarn dialogue and relationship persistence exist. A persistent dockside hub routes the four resident conversations through existing Yarn nodes and relationship gates. Obstacle-aware navigation and quest/world-state progression remain incomplete. |
 | Persistence | Implemented runtime foundation; integration incomplete | Five manual JSON slots, a separate autosave, backups, schema migrations and save participants exist. No complete player-facing save/load screen or automatic cross-scene restore flow exists. |
-| Player interface | Partial foundation; unverified | A UI Toolkit dialogue presenter and spatial cargo inventory are present, alongside prototype status/interaction displays. Main menu, settings, map/chart, market and full save UI remain absent. |
+| Player interface | Partial foundation; unverified | UI Toolkit field HUD, cargo inventory, Yarn dialogue/relationship meter, title/pause/save/load/settings overlay and seven-location dockside hub are present. Live map, market transactions, full quest UI, controller focus and comprehensive accessibility remain absent. |
 | Creature AI and living population | Planned / not established in runtime | The repository has design documents, but no complete creature perception/behavior or population simulation runtime. |
 | Economy, quests and regional travel | Planned / partial design | No complete sell/repair/fuel/upgrade loop, quest campaign, or interconnected regional travel system is established in runtime. |
-| Environments and assets | Generated greybox only | The scene builders construct blockout geometry and placeholder materials. Final art/audio content and committed scene outputs are not present in the audited tree. |
+| Environments and assets | Generated greybox only; local area streaming implemented | Editor builders construct the Greyhaven terrain, service buildings and six static additive area scenes. Final art/audio content and committed scene outputs are not present in the audited tree. |
 
 ## 4. Findings and actions
 
@@ -63,8 +63,8 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 | AUD-01 | P0 | Greyhaven builder referenced an undeclared `trim` variable in Inez's resident setup. | Would fail semantic C# compilation despite passing syntax parsing. Replaced the argument with the declared `concrete` material. Confirm with Unity compiler. | Source corrected; Unity verification pending |
 | AUD-02 | P0 | A clean repository checkout has no committed generated scenes, build-scene list, `.meta` files or package lock. | First import must prove the Editor bootstrap works and the project resolves reproducibly. Generate/commit stable Unity metadata and the resolved package lock; decide whether generated scenes are committed or regenerated as a documented build step. | Open |
 | AUD-03 | P0 | CI does not compile Unity assemblies or execute Unity tests. | Keep static checks, but require a target-editor import/compile, Edit Mode run, Play Mode/integration run and Windows build before M0 exit. Do not label a passing syntax job as a successful Unity build. | Open |
-| AUD-04 | P0 | Edit Mode tests are authored but have not been executed in the target editor. | Eight Edit Mode test files provide deterministic coverage, including the new fixed-step surface-velocity and wave-render interpolation regressions. Run the suite in Unity `6000.3.28f1` and record results. | Open |
-| AUD-05 | P0 | No Play Mode test scripts or Play Mode test assembly are tracked. | Add a small integration suite for boat/water/camera, input, action-driven time, harvesting, NPC/dialogue pause behavior and save lifecycle. | Open |
+| AUD-04 | P0 | Edit Mode tests are authored but have not been executed in the target editor. | Thirteen Edit Mode test source files now cover boat physics, streaming/access policies, modal exclusion, terrain, NPC, save, cargo and surface math. Run the full suite in Unity `6000.3.28f1` and record results. | Open |
+| AUD-05 | P0 | Play Mode coverage is still narrow and has not been executed. | A Play Mode assembly and Greyhaven additive-area transition test are now authored. Expand coverage to boat/water/camera, input, action-driven time, harvesting, dockside modal transitions, NPC/dialogue and save lifecycle; run in Unity. | Source added; Unity execution open |
 | AUD-06 | P0 | Boat, water and camera are connected in source but have no observed runtime acceptance evidence. | The source integration now includes continuous wave transitions, amplitude-aware velocity, capped probe depth, single-source camera heave, shared-surface camera wiring, and fixed-step wave snapshots before buoyancy with render-only interpolation. Still validate stable draft, wave response, frame-rate independence, stopping distance, turning/reverse behavior, camera framing, drift look-ahead and sea-clock interaction in Unity. | Source pass committed; Unity acceptance open |
 | AUD-07 | P0 | Save participants are discovered without a declared restore ordering contract. | Exercise full capture/restore with boat, world clock, cargo, vessel condition, NPC and Yarn data. If any participant depends on another, introduce explicit restore phases/order and regression tests. | Open |
 | AUD-08 | P1 | The repository is private and the GitHub rulesets endpoint reports that rulesets require GitHub Pro or a public repository. | Required review/status-check enforcement is not established by the committed files alone. Preserve PR discipline and decide separately whether to change plan or visibility; do not change repository visibility automatically. | Blocked by account/repository plan choice |
@@ -73,6 +73,15 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 | AUD-11 | P1 | Two Dependabot pull requests are open for major GitHub Actions updates. | Review workflow compatibility and both PR checks before merging. Keep action references pinned to full commit SHAs. | Open |
 | AUD-12 | P0 | Wave state advanced in render-frame `Update`, while buoyancy sampled it in `FixedUpdate`; vertical water velocity was divided by render-frame delta rather than the physics interval. | Advance and snapshot wave state in an early-order `FixedUpdate` using `Time.fixedDeltaTime`; interpolate only the visible mesh in `LateUpdate`; add deterministic interpolation tests and static cadence guards. | Source corrected in this review; Unity acceptance open |
 | AUD-13 | P0 | Collision damage used total relative speed and manually damped Rigidbody velocity after the solver response; Greyhaven visual colliders could report overlapping contacts. | Use contact-normal impact speed, aggregate same-step contacts, preserve solver-owned velocity, consolidate Greyhaven to one root collision hull, publish accepted impacts to the acoustic bus and add regression coverage. | Source corrected in this review; Unity acceptance open |
+
+| AUD-14 | P0 | Dockside, inventory and front-end pause overlays had independent pause/input ownership, allowing overlapping panels and competing Time.timeScale restoration. | Added DocksideModalPolicy and runtime gates across DocksideHubController, GreyhavenRuntimeUI and GreyhavenFrontEndUI; added deterministic Edit Mode regressions. Verify keyboard/gamepad event ordering and pause restoration in Unity. | Source corrected; Unity verification pending |
+| AUD-15 | P1 | Generated resident trigger components could still enable/disable the shared Interact action even though the dockside hub owns resident selection. | Externally managed HarbourmasterInteraction instances now skip shared-action ownership. Verify the hub remains responsive when residents are enabled/disabled or scenes are rebuilt. | Source corrected; Unity verification pending |
+
+## Follow-up reconciliation — 2026-11-13
+
+The current source now includes a persistent seven-location Greyhaven dockside hub, furniture inspection actions, existing resident Yarn handoff, cargo/vessel diagnostics, and an Inn checkpoint through the existing autosave. The hub is a menu presentation, not walkable 3D interiors. Six additive static Greyhaven area scenes and transition telemetry are also authored; the streaming Play Mode test remains unexecuted.
+
+A second source pass introduced shared modal policy across dockside, inventory, dialogue and front-end overlays, including gamepad Start/Esc close behavior and generated resident input ownership. The corresponding tests and validator guards are authored. PR #8 CI run #274 and PR #9 CI run #275 passed repository integrity, C# syntax and safeguard jobs. These are static checks only; Unity import/semantic compilation, Edit Mode execution, Play Mode, scene regeneration, hardware profiling and Windows build remain open.
 
 ### CI evidence
 
