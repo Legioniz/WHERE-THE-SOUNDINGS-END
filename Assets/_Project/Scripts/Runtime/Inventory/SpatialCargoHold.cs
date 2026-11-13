@@ -173,7 +173,7 @@ namespace WhereTheSoundingsEnd.Inventory
             float quality,
             float freshness,
             out string instanceId,
-            float saleQuantity = 1f)
+            float saleQuantity = -1f)
         {
             instanceId = null;
             if (saleQuantity == -1f) saleQuantity = quantity;
