@@ -133,6 +133,55 @@ namespace WhereTheSoundingsEnd.Inventory
             return true;
         }
 
+        /// <summary>
+        /// Commits a multi-item removal only when every requested instance is present and
+        /// the supplied wallet/ledger commit succeeds. Validation and commit run synchronously
+        /// on Unity's main thread; no cargo is removed on a failed commit.
+        /// </summary>
+        public bool TryCommitRemoval(IList<string> instanceIds, Func<bool> commit, out List<CargoPlacement> removed)
+        {
+            removed = null;
+            if (instanceIds == null || instanceIds.Count == 0 || commit == null)
+                return false;
+
+            HashSet<string> uniqueIds = new HashSet<string>(StringComparer.Ordinal);
+            List<int> indices = new List<int>(instanceIds.Count);
+            List<CargoPlacement> candidates = new List<CargoPlacement>(instanceIds.Count);
+            for (int requestedIndex = 0; requestedIndex < instanceIds.Count; requestedIndex++)
+            {
+                string id = instanceIds[requestedIndex];
+                if (string.IsNullOrWhiteSpace(id) || !uniqueIds.Add(id))
+                    return false;
+
+                int foundIndex = placements.FindIndex(item =>
+                    item != null && string.Equals(item.instanceId, id, StringComparison.Ordinal));
+                if (foundIndex < 0)
+                    return false;
+
+                indices.Add(foundIndex);
+                candidates.Add(placements[foundIndex]);
+            }
+
+            bool committed;
+            try { committed = commit(); }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+                return false;
+            }
+
+            if (!committed)
+                return false;
+
+            // Remove from highest index downward so earlier indices remain valid.
+            indices.Sort();
+            for (int i = indices.Count - 1; i >= 0; i--)
+                placements.RemoveAt(indices[i]);
+
+            removed = candidates;
+            return true;
+        }
+
         public bool TryRemove(string instanceId, out CargoPlacement removed)
         {
             int index = placements.FindIndex(item =>
