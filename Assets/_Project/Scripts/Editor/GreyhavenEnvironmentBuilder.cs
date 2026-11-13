@@ -29,7 +29,7 @@ namespace WhereTheSoundingsEnd.Editor
         private const string MaterialsPath = "Assets/_Project/Art/Materials";
         private const string MeshesPath = "Assets/_Project/Art/Meshes";
         private const string StreamedSceneFolder = "Assets/_Project/Scenes";
-        private const string StreamedAreaRevision = "2";
+        private const string StreamedAreaRevision = "3";
         private static readonly string[] StreamedAreaScenePaths =
         {
             StreamedSceneFolder + "/Greyhaven_Terrain.unity",
@@ -107,6 +107,8 @@ namespace WhereTheSoundingsEnd.Editor
             BuildBuoys(landmarks, red, green, metal);
             BuildEnvironmentalArtifacts(harbor, village, estuary, landmarks, water,
                 wood, metal, glass, chartPaper, chartInk, rust, ceramic, cloth, rope);
+            GreyhavenMaritimeAssetBuilder.Build(harbor, village, estuary, landmarks,
+                wood, metal, rust, ceramic, cloth, rope, foliage, rock, glass);
             BuildBoat(player, controls, cargoCatalog, seaSurface);
             BuildCameraAndLight(lighting, player, seaSurface);
 
