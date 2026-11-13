@@ -132,8 +132,9 @@ namespace WhereTheSoundingsEnd.World
                 throw new ArgumentNullException(nameof(data), "Save data must contain world and progress state.");
             data.world.visitedRegionIds.Clear();
             data.world.visitedRegionIds.AddRange(visitedRegionIds);
-            data.progress.unlockedRegionIds.Clear();
-            data.progress.unlockedRegionIds.AddRange(unlockedRegionIds);
+            foreach (string id in unlockedRegionIds)
+                if (!data.progress.unlockedRegionIds.Contains(id))
+                    data.progress.unlockedRegionIds.Add(id);
         }
 
         public void RestoreSaveData(SaveGameData data)
