@@ -793,8 +793,9 @@ namespace WhereTheSoundingsEnd.Interaction
                         if (!cargoHold.IsCellBlocked(x, y)) continue;
                         int cellX = x;
                         int cellY = y;
-                        Button cellRepair = MakeButton("REPAIR HOLD CELL " + (x + 1) + "-" + (y + 1) + "  /  $1.25",
-                            () =>
+                        long cellQuote = vendorServices.GetHoldRepairQuoteCents();
+                        Button cellRepair = MakeButton("REPAIR HOLD CELL " + (x + 1) + "-" + (y + 1) +
+                            "  /  " + FormatMoney(cellQuote), () =>
                             {
                                 long charged;
                                 string error;
@@ -806,6 +807,7 @@ namespace WhereTheSoundingsEnd.Interaction
                                     : "HOLD REPAIR DECLINED  /  " + error;
                                 RenderTomasServices();
                             });
+                        cellRepair.SetEnabled(cellQuote > 0L && vendorServices.WalletCents >= cellQuote);
                         vendorActions.Add(cellRepair);
                     }
                 }
