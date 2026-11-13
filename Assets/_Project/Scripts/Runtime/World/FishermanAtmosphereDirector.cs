@@ -39,6 +39,7 @@ namespace WhereTheSoundingsEnd.World
         private float[] hushBaseVolumes = System.Array.Empty<float>();
         private float hushRemaining;
         private float hushBlend = 1f;
+        private float unexplainedWarningRemaining;
 
         private void Awake()
         {
@@ -80,6 +81,7 @@ namespace WhereTheSoundingsEnd.World
         private void Update()
         {
             float realDelta = Time.deltaTime;
+            unexplainedWarningRemaining = Mathf.Max(0f, unexplainedWarningRemaining - realDelta);
             if (captionRemaining > 0f)
             {
                 captionRemaining -= realDelta;
@@ -110,6 +112,15 @@ namespace WhereTheSoundingsEnd.World
         private void RollIncident()
         {
             float roll = Random.value;
+            if (UnexplainedWarningPolicy.ShouldTrigger(roll))
+            {
+                TriggerUnexplainedWarning();
+                return;
+            }
+
+            // Reserve a small slice for the unexplained cue, then remap the remaining
+            // range so the established incident mix keeps its original proportions.
+            roll = UnexplainedWarningPolicy.RemapIncidentRoll(roll);
             if (roll < 0.25f) TriggerDeadCalm();
             else if (roll < 0.48f) TriggerWrongWaySwell();
             else if (roll < 0.62f)
@@ -134,6 +145,15 @@ namespace WhereTheSoundingsEnd.World
                 PlayAtBoat(distantCallClip, vesselBody.position + vesselBody.transform.forward * Random.Range(35f, 65f), 0.2f);
                 ShowCaption("[a long animal call carries over the water]");
             }
+        }
+
+        private void TriggerUnexplainedWarning()
+        {
+            // A brief, non-directional visual anomaly. It has no gameplay effect,
+            // explanatory caption, audio cue, journal entry, or persistent state.
+            unexplainedWarningRemaining = 2.2f;
+            currentCaption = string.Empty;
+            captionRemaining = 0f;
         }
 
         private void TriggerDeadCalm()
@@ -239,6 +259,7 @@ namespace WhereTheSoundingsEnd.World
 
         private void OnGUI()
         {
+            DrawUnexplainedIndicator();
             if (string.IsNullOrEmpty(currentCaption) || captionRemaining <= 0f) return;
 
             GUIStyle style = new GUIStyle(GUI.skin.label)
@@ -250,6 +271,32 @@ namespace WhereTheSoundingsEnd.World
             };
             style.normal.textColor = new Color(0.82f, 0.84f, 0.81f);
             GUI.Label(new Rect(Screen.width * 0.5f - 300f, Screen.height - 92f, 600f, 34f), currentCaption, style);
+        }
+
+        private void DrawUnexplainedIndicator()
+        {
+            if (unexplainedWarningRemaining <= 0f) return;
+
+            // Four disconnected corner strokes: no text, arrow, bearing, or semantic icon.
+            float flicker = 0.28f + 0.72f * Mathf.Clamp01(
+                0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 19f) *
+                Mathf.Sin(Time.unscaledTime * 7.3f + 0.8f));
+            Color previous = GUI.color;
+            GUI.color = new Color(0.88f, 0.74f, 0.48f, flicker);
+            const float size = 18f;
+            const float stroke = 2f;
+            float x = Screen.width - 48f;
+            float y = 28f;
+
+            GUI.DrawTexture(new Rect(x, y, 7f, stroke), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(x, y, stroke, 7f), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(x + size - 7f, y, 7f, stroke), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(x + size - stroke, y, stroke, 7f), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(x, y + size - stroke, 7f, stroke), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(x, y + size - 7f, stroke, 7f), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(x + size - 7f, y + size - stroke, 7f, stroke), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(x + size - stroke, y + size - 7f, stroke, 7f), Texture2D.whiteTexture);
+            GUI.color = previous;
         }
 
         public void CaptureSaveData(SaveGameData data)
