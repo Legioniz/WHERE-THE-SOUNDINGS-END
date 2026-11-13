@@ -154,6 +154,8 @@ Acceptance checks:
 
 ## 11. Related specifications
 
+- [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md) — runtime ownership, vendors, transactions, fuel, repairs, NPC trading, persistence and UI integration.
+
 - [Seafood Selling Price Schedule](SEAFOOD-SELLING-PRICE-SCHEDULE.md)
 - [Catchable Seafood and Market Species Catalog](../../04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)
 - [Mutated and Unnatural Catchable Specimens](../../04_CHARACTERS_AND_ENTITIES/MUTATED-AND-UNNATURAL-CATCHES.md)

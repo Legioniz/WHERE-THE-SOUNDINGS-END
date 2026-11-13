@@ -87,7 +87,7 @@ The title/pause front end includes a player-facing manual save/load screen for f
 
 ## Project status and verification boundary
 
-The repository contains a connected prototype, not a complete 20-hour game. Creature AI, population simulation, a full regional travel network, the finished market/economy loop, quest campaign, and site-specific physical hazard simulations remain incomplete. Deep-ocean site markers are survey evidence; they do not yet implement the heat/chemistry/pressure/entanglement effects of vents, seeps, hydrates, brine pools, or wreck hazards.
+The repository contains a connected prototype, not a complete 20-hour game. Creature AI, population simulation, a full regional travel network, the finished market/economy loop, quest campaign, and site-specific physical hazard simulations remain incomplete. The economy now has an integrated researched design specification that connects the existing USD seafood price schedule and economy mathematics to Greyhaven's current NPCs, spatial cargo, vessel condition and save architecture; runtime transactions, fuel use, services and market UI remain unimplemented. Deep-ocean site markers are survey evidence; they do not yet implement the heat/chemistry/pressure/entanglement effects of vents, seeps, hydrates, brine pools, or wreck hazards.
 
 The static check is:
 
