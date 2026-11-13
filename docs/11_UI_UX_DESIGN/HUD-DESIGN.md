@@ -38,14 +38,15 @@ The hold interface shows a 7×9 cargo grid, blocked/damaged cells, selected item
 Only one of the following gameplay-facing modal states may own the screen at a time:
 1. Dockside location/furniture hub.
 2. Cargo inventory.
-3. Yarn dialogue.
-4. Front-end title/pause/save/settings overlay.
+3. Regional chart.
+4. Yarn dialogue.
+5. Front-end title/pause/save/settings overlay.
 
 DocksideModalPolicy supplies deterministic guards used by the runtime UI:
 - Dockside cannot open over inventory, dialogue, an active gameplay action, a front-end overlay or a paused time scale.
 - Inventory cannot open over dockside, dialogue, the regional chart or front-end overlays.
 - The regional chart cannot open over inventory, dialogue, dockside, front-end overlays, a paused state or an active gameplay action.
-- Pause cannot open over dockside, inventory or dialogue.
+- Pause cannot open over dockside, inventory, the regional chart or dialogue.
 - Esc / Start closes the active dockside menu; it must not also open the pause page.
 
 Each pause owner restores only the time scale it captured. The UI must never restore gameplay while another modal still owns the pause.
