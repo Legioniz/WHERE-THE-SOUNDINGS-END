@@ -534,7 +534,9 @@ namespace WhereTheSoundingsEnd.Editor
 
             boat.gameObject.AddComponent<VesselConditionController>();
             boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.EconomyWalletController>();
+            boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.VesselFuelController>();
             boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.MaraFishMarketController>();
+            boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.GreyhavenVendorServices>();
 
             AcousticWorldListener acousticListener = parent.gameObject.AddComponent<AcousticWorldListener>();
             acousticListener.Configure(seaState);
