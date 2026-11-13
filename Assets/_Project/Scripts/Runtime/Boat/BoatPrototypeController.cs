@@ -127,7 +127,11 @@ namespace WhereTheSoundingsEnd.Boat
             // away from the site while the reserved pull is in progress.
             bool movementLocked = harvestingController != null && harvestingController.IsDredging;
             float throttle = movementLocked ? 0f : Mathf.Clamp(moveInput.y, -1f, 1f);
-            if (fuelController != null && fuelController.FuelUnits <= 0.0001f) throttle = 0f;
+            if (fuelController != null)
+            {
+                if (!fuelController.CanPropel) throttle = 0f;
+                else if (fuelController.FuelUnits <= 0.0001f) throttle = Mathf.Clamp(throttle, -0.18f, 0.18f);
+            }
             float steering = movementLocked ? 0f : Mathf.Clamp(moveInput.x, -1f, 1f);
             Vector3 forward = transform.forward;
             Vector3 right = transform.right;
@@ -157,7 +161,7 @@ namespace WhereTheSoundingsEnd.Boat
             if (fuelController != null && Mathf.Abs(throttle) >= 0.05f)
             {
                 fuelController.ConsumePropulsion(throttle, CurrentEngineLoad, Time.fixedDeltaTime);
-                if (fuelController.FuelUnits <= 0.0001f)
+                if (!fuelController.CanPropel)
                 {
                     throttle = 0f;
                     CurrentThrottle = 0f;
