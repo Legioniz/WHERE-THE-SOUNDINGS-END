@@ -316,7 +316,7 @@ namespace WhereTheSoundingsEnd.Economy
                 MarketStockSaveData entry = data.economy.marketStocks[i];
                 if (entry == null || string.IsNullOrWhiteSpace(entry.vendorId) ||
                     string.IsNullOrWhiteSpace(entry.itemId) || entry.currentStock < 0 ||
-                    entry.currentStock > MaximumStock || entry.targetStock < 1 ||
+                    entry.currentStock > MaximumStock || entry.targetStock < 1 || entry.lastRestockDay < 0 ||
                     entry.targetStock > MaximumStock || !seen.Add(entry.vendorId + "|" + entry.itemId))
                 { error = "The save contains malformed or duplicate vendor inventory."; return false; }
             }
