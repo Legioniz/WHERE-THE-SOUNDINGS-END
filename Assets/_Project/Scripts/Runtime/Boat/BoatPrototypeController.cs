@@ -40,6 +40,8 @@ namespace WhereTheSoundingsEnd.Boat
         private InputAction moveAction;
         private VesselConditionController vesselCondition;
         private VesselFuelController fuelController;
+        private VesselEquipmentController equipmentController;
+        private ExpeditionEconomyTelemetry economyTelemetry;
         private HarvestingMinigameController harvestingController;
         private Vector2 moveInput;
 
@@ -67,6 +69,8 @@ namespace WhereTheSoundingsEnd.Boat
             body = GetComponent<Rigidbody>();
             vesselCondition = GetComponent<VesselConditionController>();
             fuelController = GetComponent<VesselFuelController>();
+            equipmentController = GetComponent<VesselEquipmentController>();
+            economyTelemetry = GetComponent<ExpeditionEconomyTelemetry>();
             body.useGravity = true;
             body.constraints = RigidbodyConstraints.None;
             body.interpolation = RigidbodyInterpolation.Interpolate;
@@ -120,6 +124,10 @@ namespace WhereTheSoundingsEnd.Boat
                 vesselCondition = GetComponent<VesselConditionController>();
             if (fuelController == null)
                 fuelController = GetComponent<VesselFuelController>();
+            if (equipmentController == null)
+                equipmentController = GetComponent<VesselEquipmentController>();
+            if (economyTelemetry == null)
+                economyTelemetry = GetComponent<ExpeditionEconomyTelemetry>();
             if (harvestingController == null)
                 harvestingController = GetComponent<HarvestingMinigameController>();
 
@@ -158,6 +166,8 @@ namespace WhereTheSoundingsEnd.Boat
             NormalizedEngineRpm = BoatMotorTelemetryMath.CalculateEngineRpmNormalized(
                 throttle, motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
 
+            if (economyTelemetry != null) economyTelemetry.ObservePropulsion(throttle);
+
             if (fuelController != null && Mathf.Abs(throttle) >= 0.05f)
             {
                 fuelController.ConsumePropulsion(throttle, CurrentEngineLoad, Time.fixedDeltaTime);
@@ -175,6 +185,8 @@ namespace WhereTheSoundingsEnd.Boat
                 throttle, forwardSpeed, engineCondition, hullIntegrity,
                 maximumForwardSpeed, maximumReverseSpeed,
                 forwardAcceleration, reverseAcceleration, brakingAcceleration);
+            if (equipmentController != null)
+                propulsion *= equipmentController.EnginePowerMultiplier;
             if (Mathf.Abs(propulsion) > 0.0001f)
                 body.AddForce(forward * propulsion, ForceMode.Acceleration);
 
