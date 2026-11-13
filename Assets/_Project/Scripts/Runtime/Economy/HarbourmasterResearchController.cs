@@ -146,6 +146,7 @@ namespace WhereTheSoundingsEnd.Economy
             }
 
             submittedMask |= 1 << index;
+            if (regionalChart == null) regionalChart = FindFirstObjectByType<RegionalChartController>();
             if (regionalChart != null) regionalChart.GrantChartPermit(item.permitRegionId);
             message = "RESEARCH ACCEPTED  /  " + item.title + "  /  +" +
                 (item.rewardCents / 100m).ToString("0.00") + " USD  /  " + item.permitName + " recorded.";
