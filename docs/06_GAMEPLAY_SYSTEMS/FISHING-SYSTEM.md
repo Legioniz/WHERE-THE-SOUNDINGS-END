@@ -15,7 +15,7 @@ Fishing is a deliberate boat-side activity: choose tackle and method, cast into 
 1. **Loadout:** select rod, line, hook, reel, bait and technique before casting.
 2. **Casting/deployment:** cast distance is affected by rod, line and method. The landing point is used to select a fishing habitat.
 3. **Waiting:** an action-driven fishing activity advances the existing sea clock. The bite wait is variable.
-4. **Bite and hook:** an eligible species is selected using local stock, habitat/depth, method preference and bait preference. The player must respond during the hook window.
+4. **Bite and hook:** an eligible species is selected using local stock, habitat/depth, method preference and bait preference. The player must respond during a narrow, species-dependent hook window. A second missed strike spooks the fish and ends the deployment.
 5. **Fight:** several timed pulls are required. Species resistance and burst frequency affect tension. Good timing tires the fish and advances retrieval; poor timing loses progress and raises tension. Rod, line, hook and reel affect control and safe tension.
 6. **Landing:** catch quality is derived from successful pulls and final line tension. Species-specific size bounds determine the displayed catch size.
 7. **Cargo:** the catch uses the existing spatial hold and stores its quality/freshness fields. A full or damaged hold can cause the fish to escape.
@@ -37,7 +37,7 @@ The starter tackle is available immediately. The second tier unlocks after five 
 
 ## Techniques
 
-The current Greyhaven prototype supports still fishing, bottom fishing, float fishing, jigging, trolling, drifting and handlining. Trolling requires vessel movement. Still, bottom, float, jigging and handlining require a slow/stationary vessel; drifting permits movement. Techniques also alter effective fishing depth and bite timing: bottom fishing targets deeper layers, float fishing targets shallower layers, jigging/trolling shorten the expected wait, and handlining trades patience for direct control. Technique/species preferences affect candidate weighting rather than making every non-preferred method impossible.
+The current Greyhaven prototype supports still fishing, bottom fishing, float fishing, jigging, trolling, drifting and handlining. Trolling requires vessel movement. Still, bottom, float, jigging and handlining require a slow/stationary vessel; drifting permits movement. Techniques also alter effective fishing depth and bite timing: bottom fishing targets deeper layers, float fishing targets shallower layers, jigging/trolling shorten the expected wait, and handlining trades patience for direct control. Technique/species preferences affect candidate weighting rather than making every non-preferred method impossible. Stronger species demand tighter hook and fight timing; tackle control modestly widens the timing window, while repeated mistakes can lose the fish.
 
 ## Species and habitats
 
@@ -59,7 +59,7 @@ The landed result reports species, estimated catch size in kilograms and a quali
 
 - Retrieving the line manually ends the active encounter without a catch.
 - Missing the bite returns to the waiting phase; the bait remains deployed.
-- Missed fight beats reduce progress and increase tension.
+- Missed fight beats sharply reduce progress, reduce fatigue, and increase line tension. The target window tightens with species resistance and later fight beats.
 - Exceeding the tackle's safe tension snaps the line and loses the fish.
 - The fish escapes after the fight outlasts the configured beat budget.
 - If cargo cannot accept the fish, it is not awarded.
