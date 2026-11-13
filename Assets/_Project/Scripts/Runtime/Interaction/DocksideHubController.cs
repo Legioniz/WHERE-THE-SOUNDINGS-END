@@ -643,6 +643,14 @@ namespace WhereTheSoundingsEnd.Interaction
             vendorActions.Clear();
             if (location == null || location.Resident == null) return;
 
+            long walletBalance = vendorServices != null ? vendorServices.WalletCents :
+                (maraMarket != null ? maraMarket.WalletCents : 0L);
+            Label walletLabel = new Label("AVAILABLE WALLET  /  " + FormatMoney(walletBalance) + " USD");
+            walletLabel.style.color = new Color(0.78f, 0.84f, 0.75f);
+            walletLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            walletLabel.style.marginBottom = 5;
+            vendorActions.Add(walletLabel);
+
             string residentId = location.Resident.NpcId;
             if (residentId == MaraFishMarketController.VendorId)
             {
