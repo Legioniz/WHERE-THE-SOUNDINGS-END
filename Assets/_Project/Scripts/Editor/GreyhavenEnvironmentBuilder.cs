@@ -503,6 +503,7 @@ namespace WhereTheSoundingsEnd.Editor
 
             boat.gameObject.AddComponent<VesselConditionController>();
             boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.EconomyWalletController>();
+            boat.gameObject.AddComponent<WhereTheSoundingsEnd.Economy.MaraFishMarketController>();
 
             AcousticWorldListener acousticListener = parent.gameObject.AddComponent<AcousticWorldListener>();
             acousticListener.Configure(seaState);
