@@ -93,6 +93,7 @@ namespace WhereTheSoundingsEnd.World
         [SerializeField, Range(0.02f, 0.4f)] private float strikeWindow = 0.12f;
 
         private InputAction harvestBeatAction;
+        private VesselEquipmentController equipment;
         private FishingEncounterPhase phase;
         private FishingTechnique technique = FishingTechnique.StillFishing;
         private int rodIndex;
@@ -138,6 +139,7 @@ namespace WhereTheSoundingsEnd.World
         private void Awake()
         {
             if (cargoHold == null) cargoHold = GetComponent<SpatialCargoHold>();
+            equipment = GetComponent<VesselEquipmentController>();
             if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             if (harvestBeatAction == null && controls != null)
                 harvestBeatAction = controls.FindAction("HarvestBeat", false);
@@ -180,8 +182,10 @@ namespace WhereTheSoundingsEnd.World
             }
 
             EnsurePopulationStocks();
+            if (equipment == null) equipment = GetComponent<VesselEquipmentController>();
+            float installedRodRange = equipment != null ? equipment.RodCastMultiplier : 0.72f;
             selectedCastDistance = baseCastDistance * Rods[rodIndex].castMultiplier *
-                                   Lines[lineIndex].castMultiplier * TechniqueCastMultiplier(technique);
+                                   Lines[lineIndex].castMultiplier * TechniqueCastMultiplier(technique) * installedRodRange;
             Vector3 castPoint = transform.position + transform.forward * selectedCastDistance;
             activeHabitat = DetermineHabitat(castPoint);
             estimatedDepth = EstimateDepth(activeHabitat) * TechniqueDepthMultiplier(technique);
@@ -264,7 +268,7 @@ namespace WhereTheSoundingsEnd.World
             phase = FishingEncounterPhase.HookWindow;
             phaseTimer = 0f;
             targetPhase = UnityEngine.Random.Range(0.25f, 0.75f);
-            currentHookWindow = FishingSimulationPolicy.CalculateTimingWindow(strikeWindow, hookedFish.Resistance, (Rods[rodIndex].control + Hooks[hookIndex].control) * 0.5f);
+            currentHookWindow = FishingSimulationPolicy.CalculateTimingWindow(strikeWindow, hookedFish.Resistance, (Rods[rodIndex].control + Hooks[hookIndex].control) * 0.5f * (equipment != null ? equipment.RodControlMultiplier : 0.70f));
             status = "BITE! " + hookedFish.DisplayName + " is testing the bait — strike when the marker crosses the narrow target.";
         }
 
@@ -274,7 +278,7 @@ namespace WhereTheSoundingsEnd.World
             phaseTimer = 0f;
             fightBeats = 0;
             targetPhase = UnityEngine.Random.Range(0.2f, 0.8f);
-            currentFightWindow = FishingSimulationPolicy.CalculateTimingWindow(strikeWindow, hookedFish.Resistance * 0.85f, (Rods[rodIndex].control + Hooks[hookIndex].control + Reels[reelIndex].control) / 3f);
+            currentFightWindow = FishingSimulationPolicy.CalculateTimingWindow(strikeWindow, hookedFish.Resistance * 0.85f, (Rods[rodIndex].control + Hooks[hookIndex].control + Reels[reelIndex].control) / 3f * (equipment != null ? equipment.RodControlMultiplier : 0.70f));
             tension = Mathf.Clamp(0.3f + hookedFish.Resistance * 0.12f, 0.2f, 0.65f);
             status = hookedFish.DisplayName.ToUpperInvariant() + " HOOKED — manage tension and tire it out. SPACE / ENTER at the marked moment.";
         }
