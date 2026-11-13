@@ -49,7 +49,7 @@ namespace WhereTheSoundingsEnd.World
             int amount = Mathf.FloorToInt(expectedAmount);
             float fractionalPart = expectedAmount - amount;
             if (roll < fractionalPart) amount++;
-            return Mathf.Clamp(amount, 0, population / 3);
+            return Mathf.Clamp(amount, 0, Mathf.Max(1, population / 3));
         }
 
         public static float CalculateCatchQuality(int successfulBeats, float finalTension)
