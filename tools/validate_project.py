@@ -82,6 +82,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
     "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs",
+    "Assets/_Project/Tests/EditMode/GreyhavenEnvironmentalArtifactTests.cs",
     "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs",
     "Assets/_Project/Scripts/Editor/BoatVisualModelBuilder.cs",
     "Assets/_Project/Tests/EditMode/BoatVisualModelTests.cs",
@@ -283,9 +284,22 @@ def main() -> int:
             "Mara_Venn_Market_Workstation", "Tomas_Vale_Repair_Workbench",
             "Inez_Sarmiento_Net_Mending_Workspace", "Harbourmaster_Quay_Log_Station",
             "Sea_Glass_Collection_Shelf", "Radio_Experiment_Casing", "Knot_Sample_Board",
+            "BuildEnvironmentalArtifacts", "BuildHarbourArtifactCluster",
+            "BuildVillageArtifactClusters", "BuildEstuaryArtifactClusters",
+            "BuildLighthouseArtifactCluster", "BuildWreckArtifactCluster",
+            "StreamedAreaRevision = \"2\"",
         ):
             if required_text not in greyhaven_builder:
                 failures.append(f"Greyhaven area builder is missing: {required_text}")
+
+        artifact_tests = (ROOT / "Assets/_Project/Tests/EditMode/GreyhavenEnvironmentalArtifactTests.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "BuildEnvironmentalArtifacts_CreatesDistrictDressingWithoutGameplayComponents",
+            "GetComponentsInChildren<Collider>", "GetComponentsInChildren<MonoBehaviour>",
+            "rendererCount, Is.GreaterThanOrEqualTo(60)",
+        ):
+            if required_text not in artifact_tests:
+                failures.append(f"GreyhavenEnvironmentalArtifactTests is missing coverage: {required_text}")
 
         dockside_source = (ROOT / "Assets/_Project/Scripts/Runtime/Interaction/DocksideHubController.cs").read_text(encoding="utf-8")
         for required_text in (
