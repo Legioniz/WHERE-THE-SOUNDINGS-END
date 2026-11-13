@@ -157,7 +157,7 @@ Schema v5 originally introduced:
 - discoveredPhenomenonSiteIds;
 - evaluatedSurveyOpportunityIds.
 
-The survey fields remain in current schema v7. Schema v7 additionally adds WorldSaveData.visitedRegionIds for physical chart discovery; the v6-to-v7 migration starts with no invented visits and preserves existing unlockedRegionIds. Schema 4 saves receive safe weather defaults, no pending bird event, and empty acoustic/inspection history. Old campaign saves remain loadable without inventing player discoveries.
+The survey fields remain in current schema v8. Schema v7 added WorldSaveData.visitedRegionIds for physical chart discovery; the v6-to-v7 migration starts with no invented visits and preserves existing unlockedRegionIds. Schema 4 saves receive safe weather defaults, no pending bird event, and empty acoustic/inspection history. Old campaign saves remain loadable without inventing player discoveries.
 
 **Persistence rule:** Discovery and evaluated opportunities are durable campaign state. UI captions, audio clips, temporary echoes and presentation objects are transient and must not be saved.
 
