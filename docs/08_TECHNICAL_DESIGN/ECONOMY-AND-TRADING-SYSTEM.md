@@ -1,7 +1,7 @@
 # Economy and Trading System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime foundation partially implemented — vendor transactions and services pending  
+> Status: Mara seafood market runtime implemented; purchasing, services and dockside transaction UI pending  
 > Owner: Project lead  
 > Version: 0.1  
 > Last reviewed: 2026-11-14  
