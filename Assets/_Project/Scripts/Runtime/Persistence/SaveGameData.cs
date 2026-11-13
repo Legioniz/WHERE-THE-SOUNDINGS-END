@@ -934,6 +934,12 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.inventory.equipment == null) data.inventory.equipment = new List<EquipmentSaveData>();
             if (data.inventory.placements == null) data.inventory.placements = new List<CargoPlacementSaveData>();
             if (data.inventory.damagedCells == null) data.inventory.damagedCells = new List<GridCellSaveData>();
+            for (int placementIndex = 0; placementIndex < data.inventory.placements.Count; placementIndex++)
+            {
+                CargoPlacementSaveData placement = data.inventory.placements[placementIndex];
+                if (placement != null && (placement.saleQuantity <= 0f || float.IsNaN(placement.saleQuantity) || float.IsInfinity(placement.saleQuantity)))
+                    placement.saleQuantity = 1f;
+            }
             if (data.inventory.holdWidth <= 0) data.inventory.holdWidth = 7;
             if (data.inventory.holdHeight <= 0) data.inventory.holdHeight = 9;
 
