@@ -16,6 +16,23 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(FishingSimulationPolicy.IsTechniqueCompatible(preferred, actual), Is.EqualTo(expected));
         }
 
+        [TestCase(0.12f, 0.5f, 1f, 0.1075f)]
+        [TestCase(0.12f, 2f, 1f, 0.07f)]
+        [TestCase(0.12f, 0.5f, 1.5f, 0.125f)]
+        public void TimingWindow_ShrinksForStrongerFishAndWidensWithBetterControl(
+            float baseWindow, float resistance, float control, float expected)
+        {
+            Assert.That(FishingSimulationPolicy.CalculateTimingWindow(baseWindow, resistance, control),
+                Is.EqualTo(expected).Within(0.0001f));
+        }
+
+        [Test]
+        public void TimingWindow_AlwaysHasAFairMinimumAndMaximum()
+        {
+            Assert.That(FishingSimulationPolicy.CalculateTimingWindow(0.4f, 3f, 0.1f), Is.EqualTo(0.055f));
+            Assert.That(FishingSimulationPolicy.CalculateTimingWindow(0.4f, 0f, 2f), Is.EqualTo(0.18f));
+        }
+
         [TestCase(0, 0f, 0)]
         [TestCase(20, 0.1f, 2)]
         [TestCase(8, 0.01f, 1)]
