@@ -21,21 +21,31 @@ No additional package, scene root, ScriptableObject dependency or save schema mi
 
 Idle → WaitingForBite → HookWindow → Fighting → Idle
 
-A missed bite returns to WaitingForBite; cancellation, line snap, fight timeout, manual retrieval, pause or dialogue interruption returns to Idle. Fishing sets the existing harvest activity flag for its entire deployed-line lifecycle. Dredging retains its existing reservation/commit/release contract.
+A missed bite returns to WaitingForBite once; a second missed strike spooks the fish and ends the deployment. Cancellation, line snap, fight timeout, manual retrieval, pause or dialogue interruption returns to Idle. Fishing sets the existing harvest activity flag for its entire deployed-line lifecycle. Dredging retains its existing reservation/commit/release contract.
 
 ## Authored species data
 
 Fish-only CargoItemDefinition fields include habitat flags, preferred technique/bait, minimum/maximum habitat depth, resistance, burst frequency, initial stock, daily recovery, migration rate and minimum/maximum catch size. Greyhaven's deterministic Editor builder writes distinct profiles to the ordinary and anomalous starter species assets. Rebuilding Greyhaven updates these assets; it does not create a second catalogue.
 
+## RNG semantics and probability math
+
+- Bite waiting samples a duration; it does not currently roll a separate bite-success chance. At expiry, eligible stocked species are selected. An empty candidate set produces another wait interval.
+- Species roulette is weighted, not a direct percentage table. Candidate weight is local population multiplied by `0.35` for technique mismatch, `0.28` for bait mismatch and `0.15` for aberrant status. Both mismatches compound to `0.098` of base weight. Final probability is normalized as candidate weight divided by total eligible weight.
+- The aberration event gate is evaluated once per selection attempt when an eligible aberrant species is present. Chance is `0.025 + 0.22 × clamp01(panic) + 0.08 × clamp01(disturbance)`, so its true range is 2.5%–32.5%; the old 38% clamp was unreachable and has been corrected. Gate success adds aberrant species to weighted selection; it is not itself the final catch probability.
+- Burst frequency is a per-second rate. Per-frame chance uses the exponential hazard conversion `1 - exp(-rate × deltaTime)`, making cumulative chance frame-rate independent.
+- Migration amount uses stochastic rounding of `population × migrationRate` per six-hour interval. The fractional remainder becomes the probability of moving one additional fish; source population is bounded to prevent emptying a habitat in one tick.
+- Candidate weights are not UI percentages. Any future odds display must compute each final probability after the full candidate set has been assembled and normalized.
+- Catch size is a quality-scaled result, not a probability: its random factor is sampled uniformly from `0.65` to `1.0`. The previous `1.05` upper bound was clamped to `1.0`, creating an artificial pile-up at the maximum.
+
 ## Habitat and ecology approximation
 
 The current Greyhaven habitat resolver classifies the cast point as estuary, nearshore, kelp, open water or deep water from local coordinates/distance. It maps each habitat to a fixed estimated depth, then applies technique-specific depth multipliers (bottom deeper, float shallower, with intermediate values for jigging/trolling/handlining). Bite wait timing is also method-adjusted. This is deliberately a prototype heuristic because the current ocean surface and survey bathymetry systems do not expose a shared fishing-depth query. Do not use these estimates as nautical depth data.
 
-Population is aggregate integer stock keyed by species and habitat. Each landed fish removes one stock unit. Recovery is applied in elapsed in-game-day increments and capped at twice initial stock. Every six in-game hours, a bounded fraction migrates to the next habitat in the authored habitat order that the species can inhabit. Migration is a simplified cyclic transfer, not a biologically validated route. All stock and timing values use existing save collections under namespaced IDs.
+Population is aggregate integer stock keyed by species and habitat. Each landed fish removes one stock unit. Recovery is applied in complete elapsed in-game-day increments and capped at twice initial stock; fractional-day remainder is retained. Every six in-game hours, a bounded, stochastically rounded fraction migrates to the next habitat in the authored habitat order that the species can inhabit. Migration is a simplified cyclic transfer, not a biologically validated route. All stock and timing values use existing save collections under namespaced IDs.
 
 ## Gear and progression
 
-The first three gear tiers are code-authored prototype choices. Tier two unlocks at five lifetime catches; tier three at twelve. Rod/line/hook/reel stats affect cast range, tension tolerance, control or retrieval progress. Selected gear, bait, technique and lifetime catch count are persisted through namespaced ProgressSaveData.worldFlags. No global inventory/economy purchase flow is implied; the current unlock milestone is a fishing-specific prototype progression.
+The first three gear tiers are code-authored prototype choices. Tier two unlocks at five lifetime catches; tier three at twelve. Rod/line/hook/reel stats affect cast range, tension tolerance, control or retrieval progress. Species resistance narrows hook/fight timing windows; tackle control widens them only modestly. Fight timing windows become tighter as the encounter progresses, fish burst loads are sharper, and missed pulls cost more progress while raising tension. Selected gear, bait, technique and lifetime catch count are persisted through namespaced ProgressSaveData.worldFlags. No global inventory/economy purchase flow is implied; the current unlock milestone is a fishing-specific prototype progression.
 
 ## Known follow-up work
 
@@ -45,6 +55,7 @@ The first three gear tiers are code-authored prototype choices. Tier two unlocks
 - Add real cast power/aim input, line trajectory, bait deployment and line retrieval animations/audio.
 - Add per-catch instance metadata for measured length, weight, freshness and identification/research status.
 - Add more technique-specific control patterns, species escape strategies, hook damage, tackle wear and repair.
+- Tune the hard skill curve with controller/keyboard playtests; current timing is deliberately demanding but not yet player-validated.
 - Validate population recovery/migration against an explicit ecological design model and add deterministic random streams.
 - Integrate fishing gear purchases/upgrades with the future Greyhaven economy and market NPC.
 - Add Play Mode tests for input routing, action-clock pause, encounter cancellation, cargo-full failure, save/restore and existing dredging regression.

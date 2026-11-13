@@ -74,6 +74,11 @@ namespace WhereTheSoundingsEnd.World
         };
 
         private static readonly string[] Baits = { "worm", "small-fish", "shellfish", "lure" };
+        private static readonly FishHabitat[] HabitatOrder =
+        {
+            FishHabitat.Estuary, FishHabitat.Nearshore, FishHabitat.Kelp,
+            FishHabitat.OpenWater, FishHabitat.DeepWater
+        };
         private static readonly string[] BaitLabels = { "Worm", "Small fish", "Shellfish", "Lure" };
         private static readonly FishingTechnique[] Techniques = (FishingTechnique[])Enum.GetValues(typeof(FishingTechnique));
 
@@ -84,7 +89,7 @@ namespace WhereTheSoundingsEnd.World
         [SerializeField, Min(0.2f)] private float biteWaitMinimum = 3.5f;
         [SerializeField, Min(0.2f)] private float biteWaitMaximum = 8f;
         [SerializeField, Min(0.2f)] private float fightBeatDuration = 1.35f;
-        [SerializeField, Range(0.02f, 0.4f)] private float strikeWindow = 0.16f;
+        [SerializeField, Range(0.02f, 0.4f)] private float strikeWindow = 0.12f;
 
         private InputAction harvestBeatAction;
         private FishingEncounterPhase phase;
@@ -103,6 +108,9 @@ namespace WhereTheSoundingsEnd.World
         private float fightProgress;
         private int fightBeats;
         private int successfulBeats;
+        private int missedBites;
+        private float currentHookWindow;
+        private float currentFightWindow;
         private float selectedCastDistance;
         private float estimatedDepth;
         private double lastMigrationGameSeconds;
@@ -169,6 +177,7 @@ namespace WhereTheSoundingsEnd.World
             fightProgress = 0f;
             fightBeats = 0;
             successfulBeats = 0;
+            missedBites = 0;
             waitTimer = UnityEngine.Random.Range(biteWaitMinimum, Mathf.Max(biteWaitMinimum, biteWaitMaximum)) *
                         TechniqueBiteWaitMultiplier(technique);
             phase = FishingEncounterPhase.WaitingForBite;
@@ -209,7 +218,7 @@ namespace WhereTheSoundingsEnd.World
                 if (harvestBeatAction != null && harvestBeatAction.WasPressedThisFrame())
                 {
                     float hookPosition = Mathf.Clamp01(phaseTimer / 1.25f);
-                    if (Mathf.Abs(hookPosition - targetPhase) <= strikeWindow * 1.5f)
+                    if (Mathf.Abs(hookPosition - targetPhase) <= currentHookWindow)
                         BeginFight();
                     else
                         MissedBite();
@@ -241,27 +250,31 @@ namespace WhereTheSoundingsEnd.World
             phase = FishingEncounterPhase.HookWindow;
             phaseTimer = 0f;
             targetPhase = UnityEngine.Random.Range(0.25f, 0.75f);
-            status = "BITE! " + hookedFish.DisplayName + " is testing the bait — strike at the marked moment.";
+            currentHookWindow = FishingSimulationPolicy.CalculateTimingWindow(strikeWindow, hookedFish.Resistance, (Rods[rodIndex].control + Hooks[hookIndex].control) * 0.5f);
+            status = "BITE! " + hookedFish.DisplayName + " is testing the bait — strike when the marker crosses the narrow target.";
         }
 
         private void BeginFight()
         {
             phase = FishingEncounterPhase.Fighting;
             phaseTimer = 0f;
-            fightBeats = Mathf.Clamp(Mathf.RoundToInt(5f + hookedFish.Resistance * 2f), 5, 9);
+            fightBeats = 0;
             targetPhase = UnityEngine.Random.Range(0.2f, 0.8f);
+            currentFightWindow = FishingSimulationPolicy.CalculateTimingWindow(strikeWindow, hookedFish.Resistance * 0.85f, (Rods[rodIndex].control + Hooks[hookIndex].control + Reels[reelIndex].control) / 3f);
             tension = Mathf.Clamp(0.3f + hookedFish.Resistance * 0.12f, 0.2f, 0.65f);
             status = hookedFish.DisplayName.ToUpperInvariant() + " HOOKED — manage tension and tire it out. SPACE / ENTER at the marked moment.";
         }
 
         private void UpdateFightTension()
         {
-            float burst = UnityEngine.Random.value < hookedFish.BurstFrequency * Time.deltaTime * 0.75f
-                ? 1.8f : 1f;
+            float burstChance = FishingSimulationPolicy.CalculateEventChance(
+                hookedFish.BurstFrequency * 1.15f, Time.deltaTime);
+            float burst = UnityEngine.Random.value < burstChance ? 2.8f : 1f;
             float resistance = hookedFish.Resistance;
             float rodLimit = Rods[rodIndex].tensionLimit;
             float lineLimit = Lines[lineIndex].tensionLimit;
-            tension += resistance * burst * Time.deltaTime * 0.075f;
+            tension += resistance * burst * Time.deltaTime * 0.105f;
+            tension = Mathf.Clamp(tension + fatigue * Time.deltaTime * 0.012f, 0f, 1.5f);
             tension = Mathf.Clamp(tension, 0f, 1.5f);
 
             float safeLimit = Mathf.Min(1.4f, (rodLimit + lineLimit + Reels[reelIndex].tensionLimit) / 3f);
@@ -281,7 +294,7 @@ namespace WhereTheSoundingsEnd.World
         private void RegisterFightBeat()
         {
             float phasePosition = Mathf.Clamp01(phaseTimer / fightBeatDuration);
-            bool timed = Mathf.Abs(phasePosition - targetPhase) <= strikeWindow;
+            bool timed = Mathf.Abs(phasePosition - targetPhase) <= currentFightWindow;
             ResolveFightBeat(timed);
         }
 
@@ -291,16 +304,16 @@ namespace WhereTheSoundingsEnd.World
             if (successful)
             {
                 successfulBeats++;
-                fatigue += 0.18f * Hooks[hookIndex].control * Rods[rodIndex].control;
-                fightProgress += 0.18f * Hooks[hookIndex].control * Reels[reelIndex].retrieveSpeed;
+                fatigue += 0.15f * Hooks[hookIndex].control * Rods[rodIndex].control;
+                fightProgress += 0.15f * Hooks[hookIndex].control * Reels[reelIndex].retrieveSpeed;
                 tension = Mathf.Max(0.12f, tension - 0.13f * Lines[lineIndex].control);
                 status = "GOOD CONTROL — the fish is tiring. Keep the line steady.";
             }
             else
             {
-                tension += 0.14f * hookedFish.Resistance;
-                fightProgress = Mathf.Max(0f, fightProgress - 0.055f);
-                fatigue = Mathf.Max(0f, fatigue - 0.035f);
+                tension += 0.18f * hookedFish.Resistance;
+                fightProgress = Mathf.Max(0f, fightProgress - 0.075f);
+                fatigue = Mathf.Max(0f, fatigue - 0.05f);
                 status = "MISSED THE PULL — tension rises and the fish regains strength.";
             }
 
@@ -318,11 +331,18 @@ namespace WhereTheSoundingsEnd.World
             }
 
             phaseTimer = 0f;
-            targetPhase = UnityEngine.Random.Range(0.18f, 0.82f);
+            targetPhase = UnityEngine.Random.Range(0.12f, 0.88f);
+            currentFightWindow = FishingSimulationPolicy.CalculateTimingWindow(strikeWindow, hookedFish.Resistance * (1f + fightBeats * 0.035f), (Rods[rodIndex].control + Hooks[hookIndex].control + Reels[reelIndex].control) / 3f);
         }
 
         private void MissedBite()
         {
+            missedBites++;
+            if (missedBites >= 2)
+            {
+                CancelFishing("THE FISH SPOOKED — two missed strikes alerted it. Retrieve the line and change your approach.");
+                return;
+            }
             phase = FishingEncounterPhase.WaitingForBite;
             hookedFish = null;
             waitTimer = UnityEngine.Random.Range(biteWaitMinimum * 0.8f, biteWaitMaximum) *
@@ -335,6 +355,8 @@ namespace WhereTheSoundingsEnd.World
             List<CargoItemDefinition> candidates = new List<CargoItemDefinition>();
             List<float> weights = new List<float>();
             float total = 0f;
+            bool aberrationRolled = false;
+            bool aberrationAllowed = false;
             IReadOnlyList<CargoItemDefinition> definitions = cargoHold.ItemDefinitions;
 
             for (int i = 0; i < definitions.Count; i++)
@@ -346,15 +368,24 @@ namespace WhereTheSoundingsEnd.World
 
                 float stock = GetPopulation(fish, activeHabitat);
                 if (stock <= 0f) continue;
-                float weight = stock;
-                if (fish.PreferredTechnique != FishPreferredTechnique.Any &&
-                    !TechniqueMatches(fish.PreferredTechnique, technique))
-                    weight *= 0.35f;
-                if (fish.PreferredBaitId != "any" && fish.PreferredBaitId != Baits[baitIndex])
-                    weight *= 0.28f;
-                if (fish.IsAberrant && (seaState == null || !seaState.RollAberration()))
-                    continue;
-                if (fish.IsAberrant) weight *= 0.15f;
+                if (fish.IsAberrant)
+                {
+                    // One shared gate per bite-selection attempt: catalogue size must not
+                    // multiply the aberration event chance.
+                    if (!aberrationRolled)
+                    {
+                        aberrationAllowed = seaState != null && seaState.RollAberration();
+                        aberrationRolled = true;
+                    }
+                    if (!aberrationAllowed) continue;
+                }
+
+                bool techniqueMatches = fish.PreferredTechnique == FishPreferredTechnique.Any ||
+                                        TechniqueMatches(fish.PreferredTechnique, technique);
+                bool baitMatches = fish.PreferredBaitId == "any" ||
+                                   fish.PreferredBaitId == Baits[baitIndex];
+                float weight = FishingSimulationPolicy.CalculateCandidateWeight(
+                    stock, techniqueMatches, baitMatches, fish.IsAberrant);
 
                 candidates.Add(fish);
                 weights.Add(weight);
@@ -375,7 +406,7 @@ namespace WhereTheSoundingsEnd.World
         {
             float quality = FishingSimulationPolicy.CalculateCatchQuality(successfulBeats, tension);
             float size = FishingSimulationPolicy.CalculateCatchSize(hookedFish.BaseCatchSize,
-                hookedFish.MaximumCatchSize, quality, UnityEngine.Random.Range(0.65f, 1.05f));
+                hookedFish.MaximumCatchSize, quality, UnityEngine.Random.Range(0.65f, 1f));
             string instanceId;
             if (!cargoHold.TryPlaceFirstFit(hookedFish.ItemId, 1, quality, 1f, out instanceId))
             {
@@ -481,6 +512,86 @@ namespace WhereTheSoundingsEnd.World
             return FishingSimulationPolicy.IsTechniqueCompatible(preferred, actual);
         }
 
+        private void EnsurePopulationStocks()
+        {
+            if (cargoHold == null) return;
+            IReadOnlyList<CargoItemDefinition> definitions = cargoHold.ItemDefinitions;
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                CargoItemDefinition fish = definitions[i];
+                if (fish == null || fish.Category != CargoItemCategory.Fish) continue;
+                for (int h = 0; h < HabitatOrder.Length; h++)
+                {
+                    FishHabitat habitat = HabitatOrder[h];
+                    if ((fish.Habitats & habitat) != 0)
+                        GetPopulation(fish, habitat);
+                }
+            }
+        }
+
+        private void AdvanceMigration()
+        {
+            if (seaState == null || cargoHold == null) return;
+            double now = seaState.ElapsedGameSeconds;
+            if (lastMigrationGameSeconds <= 0d)
+            {
+                lastMigrationGameSeconds = now;
+                return;
+            }
+
+            const double migrationIntervalSeconds = 21600d;
+            int elapsedIntervals = (int)Math.Floor(
+                Math.Max(0d, now - lastMigrationGameSeconds) / migrationIntervalSeconds);
+            if (elapsedIntervals <= 0) return;
+
+            // Bound work after a very long offline gap; remaining intervals are processed
+            // on subsequent frames without discarding elapsed simulation time.
+            int intervalsToProcess = Math.Min(elapsedIntervals, 365);
+            IReadOnlyList<CargoItemDefinition> definitions = cargoHold.ItemDefinitions;
+            for (int interval = 0; interval < intervalsToProcess; interval++)
+            {
+                for (int i = 0; i < definitions.Count; i++)
+                {
+                    CargoItemDefinition fish = definitions[i];
+                    if (fish == null || fish.Category != CargoItemCategory.Fish) continue;
+
+                    int[] transfers = new int[HabitatOrder.Length];
+                    for (int source = 0; source < HabitatOrder.Length; source++)
+                    {
+                        FishHabitat sourceHabitat = HabitatOrder[source];
+                        if ((fish.Habitats & sourceHabitat) == 0) continue;
+
+                        int destination = -1;
+                        for (int offset = 1; offset < HabitatOrder.Length; offset++)
+                        {
+                            int candidate = (source + offset) % HabitatOrder.Length;
+                            if ((fish.Habitats & HabitatOrder[candidate]) != 0)
+                            {
+                                destination = candidate;
+                                break;
+                            }
+                        }
+                        if (destination < 0) continue;
+
+                        int stock = Mathf.RoundToInt(GetPopulation(fish, sourceHabitat));
+                        int amount = FishingSimulationPolicy.CalculateMigrationAmount(stock, fish.MigrationRate, UnityEngine.Random.value);
+                        transfers[source] -= amount;
+                        transfers[destination] += amount;
+                    }
+
+                    for (int h = 0; h < HabitatOrder.Length; h++)
+                    {
+                        if (transfers[h] == 0) continue;
+                        string key = PopulationKey(fish.ItemId, HabitatOrder[h]);
+                        GetPopulation(fish, HabitatOrder[h]);
+                        populations[key] = Mathf.Max(0, populations[key] + transfers[h]);
+                    }
+                }
+            }
+
+            lastMigrationGameSeconds += intervalsToProcess * migrationIntervalSeconds;
+        }
+
         private float GetPopulation(CargoItemDefinition fish, FishHabitat habitat)
         {
             string key = PopulationKey(fish.ItemId, habitat);
@@ -506,10 +617,12 @@ namespace WhereTheSoundingsEnd.World
             }
 
             double elapsedDays = Math.Max(0d, now - previous) / 86400d;
-            if (elapsedDays < 1d) return;
-            int recovery = Mathf.RoundToInt((float)(fish.DailyPopulationRecovery * elapsedDays));
+            int completeDays = (int)Math.Floor(elapsedDays);
+            if (completeDays <= 0) return;
+            int recovery = fish.DailyPopulationRecovery * completeDays;
             populations[key] = Mathf.Clamp(populations[key] + recovery, 0, fish.InitialPopulation * 2);
-            populationTimes[key] = now;
+            // Preserve fractional-day remainder instead of rounding it away on each query.
+            populationTimes[key] = previous + completeDays * 86400d;
         }
 
         private void ChangePopulation(CargoItemDefinition fish, FishHabitat habitat, int delta)

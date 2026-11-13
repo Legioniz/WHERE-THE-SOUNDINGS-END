@@ -12,12 +12,51 @@ namespace WhereTheSoundingsEnd.World
                    (int)preferred == (int)actual + 1;
         }
 
-        public static int CalculateMigrationAmount(int population, float migrationRate)
+        public static float CalculateAberrationChance(float panicLevel, float seaDisturbance)
+        {
+            float panic = Mathf.Clamp01(panicLevel);
+            float disturbance = Mathf.Clamp01(seaDisturbance);
+            return Mathf.Clamp(0.025f + panic * 0.22f + disturbance * 0.08f, 0.025f, 0.325f);
+        }
+
+        /// <summary>
+        /// Converts a per-second event rate into a frame-duration probability using the
+        /// exponential survival model. Splitting a time interval across frames preserves
+        /// the same cumulative event probability.
+        /// </summary>
+        public static float CalculateEventChance(float eventsPerSecond, float deltaSeconds)
+        {
+            if (eventsPerSecond <= 0f || deltaSeconds <= 0f) return 0f;
+            return Mathf.Clamp01(1f - Mathf.Exp(-eventsPerSecond * deltaSeconds));
+        }
+
+        /// <summary>Returns a relative candidate weight, not an absolute percentage.</summary>
+        public static float CalculateCandidateWeight(
+            float population, bool techniqueMatches, bool baitMatches, bool isAberrant)
+        {
+            if (population <= 0f) return 0f;
+            float weight = population;
+            if (!techniqueMatches) weight *= 0.35f;
+            if (!baitMatches) weight *= 0.28f;
+            if (isAberrant) weight *= 0.15f;
+            return weight;
+        }
+
+        public static float CalculateTimingWindow(float baseWindow, float resistance, float tackleControl)
+        {
+            float difficultyPenalty = Mathf.Clamp(resistance, 0f, 3f) * 0.025f;
+            float equipmentBonus = (Mathf.Clamp(tackleControl, 0.5f, 1.5f) - 1f) * 0.035f;
+            return Mathf.Clamp(baseWindow - difficultyPenalty + equipmentBonus, 0.055f, 0.18f);
+        }
+
+        public static int CalculateMigrationAmount(int population, float migrationRate, float roll)
         {
             if (population <= 1 || migrationRate <= 0f) return 0;
-            int amount = Mathf.FloorToInt(population * Mathf.Clamp01(migrationRate));
-            if (amount == 0 && population >= 8) amount = 1;
-            return Mathf.Clamp(amount, 0, population / 3);
+            float expectedAmount = population * Mathf.Clamp01(migrationRate);
+            int amount = Mathf.FloorToInt(expectedAmount);
+            float fractionalPart = expectedAmount - amount;
+            if (roll < fractionalPart) amount++;
+            return Mathf.Clamp(amount, 0, Mathf.Max(1, population / 3));
         }
 
         public static float CalculateCatchQuality(int successfulBeats, float finalTension)

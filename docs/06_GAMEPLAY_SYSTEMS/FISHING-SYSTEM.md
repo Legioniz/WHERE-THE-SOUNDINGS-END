@@ -15,7 +15,7 @@ Fishing is a deliberate boat-side activity: choose tackle and method, cast into 
 1. **Loadout:** select rod, line, hook, reel, bait and technique before casting.
 2. **Casting/deployment:** cast distance is affected by rod, line and method. The landing point is used to select a fishing habitat.
 3. **Waiting:** an action-driven fishing activity advances the existing sea clock. The bite wait is variable.
-4. **Bite and hook:** an eligible species is selected using local stock, habitat/depth, method preference and bait preference. The player must respond during the hook window.
+4. **Bite and hook:** an eligible species is selected using local stock, habitat/depth, method preference and bait preference. The player must respond during a narrow, species-dependent hook window. A second missed strike spooks the fish and ends the deployment.
 5. **Fight:** several timed pulls are required. Species resistance and burst frequency affect tension. Good timing tires the fish and advances retrieval; poor timing loses progress and raises tension. Rod, line, hook and reel affect control and safe tension.
 6. **Landing:** catch quality is derived from successful pulls and final line tension. Species-specific size bounds determine the displayed catch size.
 7. **Cargo:** the catch uses the existing spatial hold and stores its quality/freshness fields. A full or damaged hold can cause the fish to escape.
@@ -37,7 +37,7 @@ The starter tackle is available immediately. The second tier unlocks after five 
 
 ## Techniques
 
-The current Greyhaven prototype supports still fishing, bottom fishing, float fishing, jigging, trolling, drifting and handlining. Trolling requires vessel movement. Still, bottom, float, jigging and handlining require a slow/stationary vessel; drifting permits movement. Techniques also alter effective fishing depth and bite timing: bottom fishing targets deeper layers, float fishing targets shallower layers, jigging/trolling shorten the expected wait, and handlining trades patience for direct control. Technique/species preferences affect candidate weighting rather than making every non-preferred method impossible.
+The current Greyhaven prototype supports still fishing, bottom fishing, float fishing, jigging, trolling, drifting and handlining. Trolling requires vessel movement. Still, bottom, float, jigging and handlining require a slow/stationary vessel; drifting permits movement. Techniques also alter effective fishing depth and bite timing: bottom fishing targets deeper layers, float fishing targets shallower layers, jigging/trolling shorten the expected wait, and handlining trades patience for direct control. Technique/species preferences affect candidate weighting rather than making every non-preferred method impossible. Stronger species demand tighter hook and fight timing; tackle control modestly widens the timing window, while repeated mistakes can lose the fish.
 
 ## Species and habitats
 
@@ -45,9 +45,19 @@ Fish metadata is authored on CargoItemDefinition: habitat flags, preferred techn
 
 The current habitat resolver is a Greyhaven prototype heuristic based on cast position and distance from the settlement. Depth is an authored habitat estimate, not live bathymetry. It must be replaced by a region-owned fishing-ground/depth data source before expanding beyond Greyhaven.
 
+## RNG and probability rules
+
+The bite timer is a variable wait duration, not a bite-success percentage. When it expires, the system attempts to select an eligible stocked species; if none is eligible, it waits and retries. This means a suitable stocked ground currently guarantees a candidate on a successful selection attempt rather than rolling a separate no-bite probability.
+
+Species selection uses weighted roulette: each eligible species receives a relative weight equal to local stock, multiplied by `0.35` for a technique mismatch, `0.28` for a bait mismatch, and `0.15` for an aberrant specimen after the aberration gate succeeds. These are weight multipliers, not independent displayed chances. For example, a species mismatching both technique and bait retains `0.35 × 0.28 = 0.098` (9.8%) of its original weight before normalization against every other candidate. Its final selection probability is its adjusted weight divided by the sum of all candidate weights.
+
+The aberration gate is rolled once per bite-selection attempt when at least one eligible aberrant species exists, not once per aberrant species. Its chance is `2.5% + 22% × panic + 8% × sea disturbance`, with both inputs normalized to `0–1`; the actual maximum is `32.5%`. Passing this gate only admits aberrant candidates into weighted selection; it does not guarantee an aberrant catch.
+
+Fish burst frequency is interpreted as a per-second event rate and converted to a frame-duration probability using `1 − exp(−rate × deltaTime)`. This preserves the same cumulative probability when frame duration changes. Migration uses stochastic rounding of `population × migrationRate` once per six in-game hours, with movement bounded to preserve most of the source stock. The chance of a fractional fish movement is the fractional part of the expected amount.
+
 ## Population model
 
-The runtime tracks aggregate per-species stocks per habitat, not individual fish GameObjects. A landed fish removes one unit from the local stock. Stocks recover by the authored daily recovery amount (bounded at twice the initial population). Every six in-game hours, a bounded share may migrate to the next eligible habitat in the prototype habitat cycle. Population values, simulation timestamps and migration clock are saved through existing ProgressSaveData.regionalStocks and fishing-prefixed worldFlags; no save schema bump is required.
+The runtime tracks aggregate per-species stocks per habitat, not individual fish GameObjects. A landed fish removes one unit from the local stock. Stocks recover by complete elapsed in-game days using the authored daily recovery amount (bounded at twice the initial population); fractional-day remainder is preserved. Every six in-game hours, a bounded share may migrate to the next eligible habitat in the prototype habitat cycle. Population values, simulation timestamps and migration clock are saved through existing ProgressSaveData.regionalStocks and fishing-prefixed worldFlags; no save schema bump is required.
 
 This is an intentionally lightweight simulation. It does not yet model spawning seasons, age cohorts, temperature/current fields, fishing mortality caps, food webs, catch quotas, or cross-region migration. Do not describe it as a complete marine ecosystem.
 
@@ -59,7 +69,7 @@ The landed result reports species, estimated catch size in kilograms and a quali
 
 - Retrieving the line manually ends the active encounter without a catch.
 - Missing the bite returns to the waiting phase; the bait remains deployed.
-- Missed fight beats reduce progress and increase tension.
+- Missed fight beats sharply reduce progress, reduce fatigue, and increase line tension. The target window tightens with species resistance and later fight beats.
 - Exceeding the tackle's safe tension snaps the line and loses the fish.
 - The fish escapes after the fight outlasts the configured beat budget.
 - If cargo cannot accept the fish, it is not awarded.

@@ -143,7 +143,7 @@ namespace WhereTheSoundingsEnd.World
 
         public bool RollAberration()
         {
-            float chance = Mathf.Clamp(0.025f + panicLevel * 0.22f + seaDisturbance * 0.08f, 0.025f, 0.38f);
+            float chance = FishingSimulationPolicy.CalculateAberrationChance(panicLevel, seaDisturbance);
             return Random.value < chance;
         }
 
