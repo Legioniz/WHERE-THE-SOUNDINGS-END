@@ -124,7 +124,7 @@ A field's presence in SaveGameData is a persistence contract, not proof that the
 
 ## Deep-ocean survey persistence
 
-Schema v5 introduced three survey fields to WorldSaveData; these fields remain part of the current schema v6:
+Schema v5 introduced three survey fields to WorldSaveData; these fields remain part of the current schema v7:
 - soundingPulseCount: monotonic accepted-pulse sequence used in stable opportunity IDs;
 - discoveredPhenomenonSiteIds: stable site IDs already found by the player;
 - evaluatedSurveyOpportunityIds: recent opportunity IDs retained as a duplicate-evaluation guard.
