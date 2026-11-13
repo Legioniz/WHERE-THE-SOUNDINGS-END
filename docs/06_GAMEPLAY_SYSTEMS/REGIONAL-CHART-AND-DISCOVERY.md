@@ -19,7 +19,7 @@ The chart is a record of what the crew has actually encountered, not an omniscie
 3. The same first visit adds the region ID to the existing ProgressSaveData.unlockedRegionIds collection. The chart entry is therefore unlocked by physical discovery, not by menu selection or a hidden global list.
 4. Re-entering a visited region does not award another unlock or discovery event.
 5. A saved region remains known after loading, but a region never visited remains absent from the player's chart.
-6. The chart UI lists only visited region names. It does not display locked-region names, silhouettes, question-mark pins, compass bearings or route directions.
+6. The chart UI can be opened in unknown water, but shows a blank field plot with no current-region name, marks, bearings or compass. Its log lists only previously visited region names. It does not display locked-region names, silhouettes, question-mark pins or route directions.
 
 The unlock is a chart/progression record. It does not yet connect the isolated Outer Shoals and Hollow Trench sandbox scenes into a regional travel network, nor does it gate scene loading. Inter-region travel remains future work.
 
@@ -29,7 +29,7 @@ The current regional chart is a local survey plot:
 - The vessel position is plotted inside the active region's authored survey radius.
 - A phenomenon site is plotted only if the region has been visited and its stable site ID is already in SoundingRigController.DiscoveredSiteIds.
 - An unknown or undiscovered site produces no marker, label, icon, distance, bearing or tooltip.
-- A region with no recorded soundings shows a blank field plot and instructs the player to use the Sounding Rig; it does not seed placeholder marks.
+- Unknown water shows a blank field plot with no location identity. A visited region with no recorded soundings shows the vessel position and instructs the player to use the Sounding Rig; it does not seed placeholder marks.
 - The UI has no compass rose, heading arrow, GPS coordinates, route line or directional marker for unknown content.
 - The existing fixed Greyhaven dock chart remains a separate settlement wayfinding prop. It is not the open-water chart and does not reveal offshore unknown regions.
 
