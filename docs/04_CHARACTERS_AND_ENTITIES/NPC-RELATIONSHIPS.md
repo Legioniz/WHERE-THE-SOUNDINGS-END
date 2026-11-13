@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Relationship-driven dialogue and runtime trust rules implemented for Greyhaven; trade transactions and world-action reactions remain future integration  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-12
+> Version: 0.3  
+> Last reviewed: 2026-11-13
 
 ## Purpose
 
@@ -103,3 +103,9 @@ Relationship penalties must create social consequences without permanently block
 - `docs/12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md`
 - `docs/03_STORY_AND_NARRATIVE/DIALOGUE-SYSTEM.md`
 - `docs/06_GAMEPLAY_SYSTEMS/SAVE-AND-LOAD.md`
+
+## Narrative evidence and relationship access
+
+The expanded Greyhaven investigation uses four shared Yarn clue flags: $gh_clue_bell_log, $gh_clue_cold_catch, $gh_clue_hull_marks, and $gh_clue_net_return. These are story-discovery flags, not relationship scores and not a substitute for NpcAgent memory. Discovering an observation does not award trust merely for reopening a conversation.
+
+Core evidence topics are available to any resident who permits normal conversation; they are not gated at Familiar, Trusted or Ally. The cross-record comparison appears after at least one observation has been found and offers a cautious partial summary until all four are known. Personal routine/hobby details remain gated at the existing Familiar threshold (60). No resident's trust is changed by reading the evidence summary, and the existing per-resident event IDs, trust thresholds and save schema remain unchanged.
