@@ -12,7 +12,8 @@
 - Pure time, depth, confidence, deterministic-key and probability calculations.
 - Regional profile configuration and habitat eligibility.
 - Inventory geometry, blocked cells, item placement and damage.
-- Save DTO validation and schema migration, including schema 6-to-7 regional visit migration.\n- RegionalChartPolicy unknown-region suppression, idempotent first-visit unlocks, and discovered-site-only marks.
+- Save DTO validation and schema migration, including schema 6-to-7 regional visit migration.
+- RegionalChartPolicy unknown-region suppression, idempotent first-visit unlocks, and discovered-site-only marks.
 - Stable opportunity identity and idempotent event evaluation.
 - Acoustic signal construction, range/loudness/sensitivity/noise scoring, event deduplication and listener persistence.
 - NPC schedule resolution, overnight schedule boundaries, and NPC relationship save/restore.
@@ -24,7 +25,8 @@
 - Repeat area transitions and check that queued requests are cancelled when out of range, re-entry during unload is safely re-queued, and no area is left in a failed/loading/unloading state.
 - Confirm no visible one-frame gap, missing collision surface, duplicate static geometry, or player freeze occurs during repeated transitions.
 - Boat handling, speed gating and Sounding Rig input.
-- Regional chart: M/button open, Esc close, no overlap with inventory/dialogue/dockside/pause, only visited region names, vessel plot, discovered-site-only marks, no unknown bearings/compass/route markers.\n- Dockside hub: access only inside a shore-approach radius at or below 0.85 m/s, no duplicate NPC trigger prompt or shared-input ownership, menu pause/restore, Escape and gamepad Start close, no overlapping inventory/dialogue/pause panels, correct resident Yarn handoff, cargo appraisal read-only behaviour, vessel diagnostics and guest-ledger autosave checkpoint.
+- Regional chart: M/button open, Esc close, no overlap with inventory/dialogue/dockside/pause, only visited region names, vessel plot, discovered-site-only marks, no unknown bearings/compass/route markers.
+- Dockside hub: access only inside a shore-approach radius at or below 0.85 m/s, no duplicate NPC trigger prompt or shared-input ownership, menu pause/restore, Escape and gamepad Start close, no overlapping inventory/dialogue/pause panels, correct resident Yarn handoff, cargo appraisal read-only behaviour, vessel diagnostics and guest-ledger autosave checkpoint.
 - Verify all seven location menus and furniture actions at supported resolutions; confirm no menu opens while fishing, dredging, sounding, dialogue or inventory is active.
 - Hull contact against piers, breakwater rocks, terrain and wrecks; root-hull-only collision ownership; no visual collider seams; normal-impact damage; per-physics-step contact aggregation; collision acoustic event propagation.
 - Rigidbody buoyancy, wave following, heave/pitch/roll stability, forward/reverse thrust, opposing-throttle braking, speed taper, rudder flow, and lateral water resistance.
@@ -56,7 +58,10 @@
 - Confirm resident furniture is static and collider-free, is assigned to the intended additive area scene, and does not obstruct NPC schedule destinations, the quay walking lane, market service face, repair bay, net-shed approach, road access or boat mooring.
 - Stream the harbour and village areas in/out repeatedly and confirm furniture appears/disappears with its owning static area without duplicate props or persistent-scene references.
 - Confirm NPC relationship scores and Yarn first-meeting/trust variables restore independently after a save/load cycle.
-- Confirm Outer Shoals and Hollow Trench sandbox scenes contain valid regional profiles and authored site markers.\n- Enter and leave each DeepOceanSurveyRegion; verify the first visit unlocks exactly once, persists through save/load, and never exposes other region names.\n- Discover an authored phenomenon site with the Sounding Rig; verify its mark appears only in its visited region and no unknown site receives a placeholder marker.\n- Verify chart local plotting bounds and marker scaling; no compass, GPS, route or world-scale coordinate is implied.
+- Confirm Outer Shoals and Hollow Trench sandbox scenes contain valid regional profiles and authored site markers.
+- Enter and leave each DeepOceanSurveyRegion; verify the first visit unlocks exactly once, persists through save/load, and never exposes other region names.
+- Discover an authored phenomenon site with the Sounding Rig; verify its mark appears only in its visited region and no unknown site receives a placeholder marker.
+- Verify chart local plotting bounds and marker scaling; no compass, GPS, route or world-scale coordinate is implied.
 
 ### Performance
 - Capture the `[AreaStreaming]` load/unload telemetry in a Windows Development Build. Record per-area load duration, referenced mesh/material/texture counts and estimated asset bytes, global allocated/reserved memory, managed memory and GC memory.
