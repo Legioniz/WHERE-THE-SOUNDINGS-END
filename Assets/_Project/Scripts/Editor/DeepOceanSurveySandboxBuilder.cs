@@ -135,6 +135,7 @@ namespace WhereTheSoundingsEnd.Editor
             DeepOceanSiteInteractionController interactions =
                 boat.AddComponent<DeepOceanSiteInteractionController>();
             interactions.Configure(controls, seaState);
+            boat.AddComponent<RegionalChartController>();
 
             BuildCameraAndLight(world.transform, boat.transform, trench, waterSurface);
             RenderSettings.ambientLight = trench
