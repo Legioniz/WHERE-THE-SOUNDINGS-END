@@ -21,7 +21,7 @@ No additional package, scene root, ScriptableObject dependency or save schema mi
 
 Idle → WaitingForBite → HookWindow → Fighting → Idle
 
-A missed bite returns to WaitingForBite; cancellation, line snap, fight timeout, manual retrieval, pause or dialogue interruption returns to Idle. Fishing sets the existing harvest activity flag for its entire deployed-line lifecycle. Dredging retains its existing reservation/commit/release contract.
+A missed bite returns to WaitingForBite once; a second missed strike spooks the fish and ends the deployment. Cancellation, line snap, fight timeout, manual retrieval, pause or dialogue interruption returns to Idle. Fishing sets the existing harvest activity flag for its entire deployed-line lifecycle. Dredging retains its existing reservation/commit/release contract.
 
 ## Authored species data
 
@@ -35,7 +35,7 @@ Population is aggregate integer stock keyed by species and habitat. Each landed 
 
 ## Gear and progression
 
-The first three gear tiers are code-authored prototype choices. Tier two unlocks at five lifetime catches; tier three at twelve. Rod/line/hook/reel stats affect cast range, tension tolerance, control or retrieval progress. Selected gear, bait, technique and lifetime catch count are persisted through namespaced ProgressSaveData.worldFlags. No global inventory/economy purchase flow is implied; the current unlock milestone is a fishing-specific prototype progression.
+The first three gear tiers are code-authored prototype choices. Tier two unlocks at five lifetime catches; tier three at twelve. Rod/line/hook/reel stats affect cast range, tension tolerance, control or retrieval progress. Species resistance narrows hook/fight timing windows; tackle control widens them only modestly. Fight timing windows become tighter as the encounter progresses, fish burst loads are sharper, and missed pulls cost more progress while raising tension. Selected gear, bait, technique and lifetime catch count are persisted through namespaced ProgressSaveData.worldFlags. No global inventory/economy purchase flow is implied; the current unlock milestone is a fishing-specific prototype progression.
 
 ## Known follow-up work
 
@@ -45,6 +45,7 @@ The first three gear tiers are code-authored prototype choices. Tier two unlocks
 - Add real cast power/aim input, line trajectory, bait deployment and line retrieval animations/audio.
 - Add per-catch instance metadata for measured length, weight, freshness and identification/research status.
 - Add more technique-specific control patterns, species escape strategies, hook damage, tackle wear and repair.
+- Tune the hard skill curve with controller/keyboard playtests; current timing is deliberately demanding but not yet player-validated.
 - Validate population recovery/migration against an explicit ecological design model and add deterministic random streams.
 - Integrate fishing gear purchases/upgrades with the future Greyhaven economy and market NPC.
 - Add Play Mode tests for input routing, action-clock pause, encounter cancellation, cargo-full failure, save/restore and existing dredging regression.
