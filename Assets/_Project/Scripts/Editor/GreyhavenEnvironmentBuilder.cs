@@ -331,13 +331,20 @@ namespace WhereTheSoundingsEnd.Editor
             // Initial Greyhaven species use the authoritative schedule's USD/kg values.
             // Unlisted, aberrant, salvage, quest and equipment records remain ineligible
             // until their legal buyer contract and price unit are explicitly authored.
-            Dictionary<string, float> usdPerKg = new Dictionary<string, float>(StringComparer.Ordinal)
+            Dictionary<string, float> seafoodUsdPerKg = new Dictionary<string, float>(StringComparer.Ordinal)
             {
                 { "FSH-001", 2.30f },
                 { "FSH-002", 1.98f },
                 { "FSH-003", 3.49f },
                 { "FSH-005", 2.14f },
                 { "FSH-007", 0.95f }
+            };
+            // Provisional salvage baseline: authored per recovered piece, not per kilogram.
+            Dictionary<string, float> salvageUsdPerUnit = new Dictionary<string, float>(StringComparer.Ordinal)
+            {
+                { "SALVAGE-WOOD-01", 1.50f },
+                { "SALVAGE-CLOTH-01", 0.85f },
+                { "SALVAGE-SCRAP-01", 2.75f }
             };
 
             for (int i = 0; i < definitions.Count; i++)
@@ -346,10 +353,12 @@ namespace WhereTheSoundingsEnd.Editor
                 if (definition == null) continue;
 
                 float price;
-                bool eligible = usdPerKg.TryGetValue(definition.ItemId, out price);
+                bool seafood = seafoodUsdPerKg.TryGetValue(definition.ItemId, out price);
+                bool salvage = !seafood && salvageUsdPerUnit.TryGetValue(definition.ItemId, out price);
+                bool eligible = seafood || salvage;
                 SerializedObject serialized = new SerializedObject(definition);
                 serialized.FindProperty("baseSalePriceUsd").floatValue = eligible ? price : 0f;
-                serialized.FindProperty("saleUnitLabel").stringValue = eligible ? "kg" : "unit";
+                serialized.FindProperty("saleUnitLabel").stringValue = seafood ? "kg" : "unit";
                 serialized.FindProperty("ordinarySaleEligible").boolValue = eligible;
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(definition);
