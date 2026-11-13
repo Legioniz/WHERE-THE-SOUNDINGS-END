@@ -280,6 +280,17 @@ namespace WhereTheSoundingsEnd.Interaction
             RestoreTimeScale();
         }
 
+        private void OnDisable()
+        {
+            if (menuOpen)
+                CloseMenu();
+            else
+            {
+                RestoreTimeScale();
+                ClearOwnedPrompt();
+            }
+        }
+
         private void Update()
         {
             if (vesselBody == null) return;
