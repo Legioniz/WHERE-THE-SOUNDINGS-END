@@ -20,8 +20,8 @@ The generated Greyhaven_Blockout scene owns:
 - Player vessel Rigidbody, boat controller, camera, and controls.
 - Water mesh simulation and surface sampling.
 - Dynamic fishing/salvage/survey sites and the acoustic/world simulation.
-- Dialogue runner, UI Toolkit document, front-end menus, and interaction components.
-- NPC agents, NPC schedules, interaction triggers, and waypoint anchors.
+- Dialogue runner, UI Toolkit documents, front-end menus, dockside hub and interaction components.
+- NPC agents, NPC schedules, externally managed resident trigger components, dockside access points and waypoint anchors.
 - World clock, atmosphere director, save coordinator, autosave, and save participants.
 - AreaStreamingDirector, which owns area load state and travel-distance checks.
 
@@ -40,7 +40,7 @@ The Editor bootstrap splits static-only child hierarchies into six scenes:
 | Greyhaven_Estuary_East.unity | greyhaven.estuary.east | East estuary sediment and mangroves |
 | Greyhaven_Lighthouse.unity | greyhaven.lighthouse | Lighthouse tower, lantern room, roof, and bearing light |
 
-The generator refuses to move a hierarchy that contains a custom MonoBehaviour or Rigidbody. NPC agents and their anchors therefore remain in the persistent gameplay scene. Buoys, water, salvage interactions, and other simulation objects remain persistent unless deliberately moved into a future data-driven system.
+The generator refuses to move a hierarchy that contains a custom MonoBehaviour or Rigidbody. NPC agents and their anchors therefore remain in the persistent gameplay scene. The DocksideHubController and its UIDocument are children of the persistent world root, not any extracted static area. They remain available while the village and lighthouse scenery load/unload. Buoys, water, salvage interactions, and other simulation objects remain persistent unless deliberately moved into a future data-driven system.
 
 Each generated area scene contains exactly one StreamedAreaSceneRoot, saved inactive. The loader is the only system that activates this root.
 
@@ -70,7 +70,7 @@ StreamedAreaSceneRoot.TryValidate rejects an area before activation if any of th
 6. A renderer has fewer material slots than the mesh has submeshes.
 7. The scene has an extra root object or does not have exactly one area root.
 
-A rejected scene is unloaded. The streaming layer does not spawn substitute cubes, render magenta materials, or accept partially loaded asset sets. A missing scene/build-list entry is also rejected before load starts.
+A rejected scene is unloaded. The streaming layer does not spawn substitute cubes, render magenta materials, or accept partially loaded asset sets. The persistent dockside menu is not a streamed interior scene: it is a UI presentation bound to location coordinates and existing runtime systems. A missing scene/build-list entry is also rejected before load starts.
 
 ## 5. State transitions
 
