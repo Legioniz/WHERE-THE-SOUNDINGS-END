@@ -11,7 +11,7 @@ namespace WhereTheSoundingsEnd.Economy
 {
     /// <summary>
     /// Measures actual expedition transactions, game-clock duration and fuel consumption.
-    /// A trip begins on propulsion and closes when the player opens the dockside service hub.
+    /// A trip begins on propulsion and closes after the player finishes a dockside service session.
     /// This records evidence for balancing; it does not silently rebalance prices at runtime.
     /// </summary>
     [DisallowMultipleComponent]
@@ -48,6 +48,9 @@ namespace WhereTheSoundingsEnd.Economy
         public long LastTripNetCents => lastTripGrossCents - lastTripExpenseCents;
         public double LastTripNetPerHourUsd => lastTripSeconds > 0.01d
             ? (LastTripNetCents / 100d) / (lastTripSeconds / 3600d) : 0d;
+        public long LifetimeNetCents => lifetimeGrossCents - lifetimeExpenseCents;
+        public double LifetimeNetPerHourUsd => lifetimeGameSeconds > 0.01d
+            ? (LifetimeNetCents / 100d) / (lifetimeGameSeconds / 3600d) : 0d;
 
         private void Awake()
         {
@@ -162,16 +165,21 @@ namespace WhereTheSoundingsEnd.Economy
 
         public string BuildSummary()
         {
+            if (tripActive)
+                return "CURRENT EXPEDITION  /  GROSS $" + (tripGrossCents / 100m).ToString("0.00") +
+                    "  /  COST $" + (tripExpenseCents / 100m).ToString("0.00") +
+                    "  /  NET $" + ((tripGrossCents - tripExpenseCents) / 100m).ToString("0.00") +
+                    "  /  FUEL " + tripFuelConsumed.ToString("0.0");
             if (completedTrips == 0)
-                return tripActive ? "EXPEDITION IN PROGRESS  /  GROSS $" +
-                    (tripGrossCents / 100m).ToString("0.00") + "  /  COST $" +
-                    (tripExpenseCents / 100m).ToString("0.00") : "NO COMPLETED EXPEDITIONS RECORDED YET.";
+                return "NO COMPLETED EXPEDITIONS RECORDED YET.";
             return "LAST EXPEDITION  /  GROSS $" + (lastTripGrossCents / 100m).ToString("0.00") +
                 "  /  COST $" + (lastTripExpenseCents / 100m).ToString("0.00") +
                 "  /  NET $" + (LastTripNetCents / 100m).ToString("0.00") +
                 "  /  NET PER HOUR $" + LastTripNetPerHourUsd.ToString("0.00") +
                 "  /  FUEL " + lastTripFuel.ToString("0.0") +
-                "  /  " + completedTrips + " TRIPS RECORDED";
+                "  /  LIFETIME NET $" + (LifetimeNetCents / 100m).ToString("0.00") +
+                "  /  AVG NET PER HOUR $" + LifetimeNetPerHourUsd.ToString("0.00") +
+                "  /  " + completedTrips + " TRIPS";
         }
 
         public void CaptureSaveData(SaveGameData data)
