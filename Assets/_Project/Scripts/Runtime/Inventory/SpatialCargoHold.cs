@@ -16,6 +16,7 @@ namespace WhereTheSoundingsEnd.Inventory
         [Min(1)] public int quantity = 1;
         [Range(0f, 1f)] public float quality = 1f;
         [Range(0f, 1f)] public float freshness = 1f;
+        [Min(0.001f)] public float saleQuantity = 1f;
     }
 
     /// <summary>
@@ -76,11 +77,13 @@ namespace WhereTheSoundingsEnd.Inventory
             int quantity,
             float quality,
             float freshness,
-            out string instanceId)
+            out string instanceId,
+            float saleQuantity = -1f)
         {
             instanceId = null;
             CargoItemDefinition definition = FindDefinition(itemId);
-            if (definition == null || quantity < 1) return false;
+            if (saleQuantity == -1f) saleQuantity = quantity;
+            if (definition == null || quantity < 1 || !IsFinite(saleQuantity) || saleQuantity <= 0f) return false;
 
             bool[,] occupied = BuildOccupiedGrid(null);
             bool[,] blocked = CargoGridGeometry.BuildBlockedGrid(width, height, blockedCells);
@@ -101,7 +104,8 @@ namespace WhereTheSoundingsEnd.Inventory
                 rotationQuarterTurns = ((rotationQuarterTurns % 4) + 4) % 4,
                 quantity = quantity,
                 quality = Mathf.Clamp01(quality),
-                freshness = Mathf.Clamp01(freshness)
+                freshness = Mathf.Clamp01(freshness),
+                saleQuantity = IsFinite(saleQuantity) ? Mathf.Max(0.001f, saleQuantity) : 1f
             });
             return true;
         }
@@ -168,10 +172,12 @@ namespace WhereTheSoundingsEnd.Inventory
             int quantity,
             float quality,
             float freshness,
-            out string instanceId)
+            out string instanceId,
+            float saleQuantity = -1f)
         {
             instanceId = null;
-            if (FindDefinition(itemId) == null || quantity < 1) return false;
+            if (saleQuantity == -1f) saleQuantity = quantity;
+            if (FindDefinition(itemId) == null || quantity < 1 || !IsFinite(saleQuantity) || saleQuantity <= 0f) return false;
 
             for (int rotation = 0; rotation < 4; rotation++)
             {
@@ -179,7 +185,7 @@ namespace WhereTheSoundingsEnd.Inventory
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        if (TryPlace(itemId, x, y, rotation, quantity, quality, freshness, out instanceId))
+                        if (TryPlace(itemId, x, y, rotation, quantity, quality, freshness, out instanceId, saleQuantity))
                             return true;
                     }
                 }
@@ -325,7 +331,8 @@ namespace WhereTheSoundingsEnd.Inventory
                     rotationQuarterTurns = item.rotationQuarterTurns,
                     quantity = item.quantity,
                     quality = item.quality,
-                    freshness = item.freshness
+                    freshness = item.freshness,
+                    saleQuantity = item.saleQuantity
                 });
             }
         }
@@ -372,7 +379,8 @@ namespace WhereTheSoundingsEnd.Inventory
                     !instanceIds.Add(saved.instanceId) ||
                     string.IsNullOrWhiteSpace(saved.itemId) || saved.quantity < 1 ||
                     saved.rotationQuarterTurns < 0 || saved.rotationQuarterTurns > 3 ||
-                    !IsNormalized(saved.quality) || !IsNormalized(saved.freshness))
+                    !IsNormalized(saved.quality) || !IsNormalized(saved.freshness) ||
+                    !IsFinite(saved.saleQuantity) || saved.saleQuantity <= 0f)
                 {
                     error = "The save contains a malformed or duplicate cargo instance at index " + i + ".";
                     return false;
@@ -433,7 +441,8 @@ namespace WhereTheSoundingsEnd.Inventory
                     rotationQuarterTurns = saved.rotationQuarterTurns,
                     quantity = saved.quantity,
                     quality = saved.quality,
-                    freshness = saved.freshness
+                    freshness = saved.freshness,
+                    saleQuantity = saved.saleQuantity
                 });
             }
 
@@ -452,6 +461,8 @@ namespace WhereTheSoundingsEnd.Inventory
                          Guid.TryParseExact(instanceId, "D", out parsed);
             return valid && parsed != Guid.Empty;
         }
+
+        private static bool IsFinite(float value) { return !float.IsNaN(value) && !float.IsInfinity(value); }
 
         private static bool IsNormalized(float value)
         {

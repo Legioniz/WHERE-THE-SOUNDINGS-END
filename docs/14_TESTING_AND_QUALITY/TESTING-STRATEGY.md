@@ -12,7 +12,8 @@
 - Pure time, depth, confidence, deterministic-key and probability calculations.
 - Regional profile configuration and habitat eligibility.
 - Inventory geometry, blocked cells, item placement and damage.
-- Save DTO validation and schema migration, including schema 6-to-7 regional visit migration.
+- Save DTO validation and schema migration, including schema 6-to-7 regional visit migration and schema 7-to-8 economy wallet conversion.
+- Economy sale-line rounding, modifier clamps, stock-driven demand bounds, repair/fuel quote rounding, wallet overflow/overspend rejection, transaction idempotency, wallet save/restore and legacy currency migration.
 - RegionalChartPolicy unknown-region suppression, idempotent first-visit unlocks, and discovered-site-only marks.
 - Stable opportunity identity and idempotent event evaluation.
 - Acoustic signal construction, range/loudness/sensitivity/noise scoring, event deduplication and listener persistence.
@@ -41,7 +42,7 @@
 
 ### Integration
 - Complete trip, fishing, salvage, survey, recovery and save/load.
-- Load supported schema 0–5 fixtures through current schema 7 without inventing survey progress; migrate schema 4 weather labels into safe timer defaults and verify the schema 5-to-6 NPC relationship-memory migration and schema 6-to-7 empty regional-visit migration.
+- Load supported schema 0–7 fixtures through current schema 8 without inventing survey progress; migrate schema 4 weather labels into safe timer defaults, schema 5-to-6 NPC relationship memory, schema 6-to-7 empty regional visits, and schema 7-to-8 whole-dollar currency into integer cents.
 - Survey multiple regions and verify opportunity IDs do not collide.
 - Confirm repeated pings from the same heading do not promote an uncertain return.
 - Confirm a second ping from a different heading in the same region and within the time window can promote the interpretation.
@@ -98,7 +99,7 @@ The Edit Mode assembly contains deterministic suites for the following policies 
 - Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
 - Fixed-step surface-velocity estimation and normalized interpolation between previous/current wave snapshots.
 
-The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v7 and ordered v4-to-v5/v5-to-v6/v6-to-v7 migrations, dockside modal wiring, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
+The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v8 and ordered v4-to-v5/v5-to-v6/v6-to-v7/v7-to-v8 migrations, dockside modal wiring, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 
 ## Verification boundary
 

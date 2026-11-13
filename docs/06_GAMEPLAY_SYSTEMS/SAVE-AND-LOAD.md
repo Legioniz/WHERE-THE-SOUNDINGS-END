@@ -98,9 +98,9 @@ Implemented now:
 - Spatial cargo placements, damaged hold cells and equipment placements through SpatialCargoHold.
 - Action-driven day/time, panic and sea disturbance.
 - Hull/engine condition and wreck-site daily depletion.
-- Greyhaven NPC stable IDs, last activity IDs, region IDs, individual relationship scores and bounded relationship-event memory IDs through NpcAgent (schema v6 relationship memory, retained in schema v7).
+- Greyhaven NPC stable IDs, last activity IDs, region IDs, individual relationship scores and bounded relationship-event memory IDs through NpcAgent (schema v6 relationship memory, retained in schema v8).
 - Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).
-- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs introduced in schema v5 and retained in current schema v7.
+- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs introduced in schema v5 and retained in current schema v8.
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
 
@@ -124,7 +124,7 @@ A field's presence in SaveGameData is a persistence contract, not proof that the
 
 ## Deep-ocean survey persistence
 
-Schema v5 introduced three survey fields to WorldSaveData; these fields remain part of the current schema v7:
+Schema v5 introduced three survey fields to WorldSaveData; these fields remain part of the current schema v8:
 - soundingPulseCount: monotonic accepted-pulse sequence used in stable opportunity IDs;
 - discoveredPhenomenonSiteIds: stable site IDs already found by the player;
 - evaluatedSurveyOpportunityIds: recent opportunity IDs retained as a duplicate-evaluation guard.
@@ -142,7 +142,7 @@ Schema v5 also records:
 - acoustic pressure, latest heard event/region/position/timestamp, and a bounded 128-event duplicate guard;
 - maritime incident countdown, caption/hush durations, hush blend, and active false-navigation-light position/remaining duration.
 
-Schema 4 saves migrate with weather defaults derived from their old weather label, a safe weather-shift delay, no pending bird event, and empty acoustic/inspection history. Existing schema 0–3 migrations remain ordered and preserved. The current v5-to-v6 migration separately initializes NPC relationship-memory ledgers and maps legacy zero relationship values to neutral 50.
+Schema 4 saves migrate with weather defaults derived from their old weather label, a safe weather-shift delay, no pending bird event, and empty acoustic/inspection history. Existing schema 0–3 migrations remain ordered and preserved. The v5-to-v6 migration separately initializes NPC relationship-memory ledgers and maps legacy zero relationship values to neutral 50; v7-to-v8 migrates the legacy whole-dollar currency field into the integer-cent economy wallet.
 
 Generated scenes include an AcousticWorldListener. It subscribes to AcousticEventBus, scores audibility by range/loudness/sensitivity/background noise, deduplicates heard IDs, applies a small disturbance response, and exposes a scored SignalHeard event for future creature or navigation listeners. It does not poll AudioSources.
 

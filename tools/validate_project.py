@@ -26,6 +26,9 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Core/ActionDrivenClockPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Core/Pcg32Random.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs",
+    "Assets/_Project/Scripts/Runtime/Economy/EconomyPolicy.cs",
+    "Assets/_Project/Scripts/Runtime/Economy/EconomyWalletController.cs",
+    "Assets/_Project/Tests/EditMode/EconomyPolicyTests.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
@@ -160,8 +163,8 @@ def main() -> int:
                 failures.append("Input action/binding identifiers must be unique.")
 
         save_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs").read_text(encoding="utf-8")
-        if "CurrentSchemaVersion = 7" not in save_source:
-            failures.append("SaveGameData schema must be version 7 after regional chart discovery persistence changes.")
+        if "CurrentSchemaVersion = 8" not in save_source:
+            failures.append("SaveGameData schema must be version 8 after economy wallet persistence changes.")
 
         if "case 4:" not in save_source or "data.schemaVersion = 5;" not in save_source:
             failures.append("SaveGameData is missing the schema 4 to 5 atmosphere-state migration.")
@@ -169,6 +172,8 @@ def main() -> int:
             failures.append("SaveGameData is missing the schema 5 to 6 NPC relationship-memory migration.")
         if "case 6:" not in save_source or "data.schemaVersion = 7;" not in save_source or "visitedRegionIds" not in save_source:
             failures.append("SaveGameData is missing the schema 6 to 7 regional chart discovery migration.")
+        if "case 7:" not in save_source or "data.schemaVersion = 8;" not in save_source or "walletCents" not in save_source:
+            failures.append("SaveGameData is missing the schema 7 to 8 economy wallet migration.")
 
         for required_text in (
             "weatherRemainingGameSeconds", "weatherShiftCooldownGameSeconds",

@@ -10,7 +10,7 @@ namespace WhereTheSoundingsEnd.Persistence
     [Serializable]
     public sealed class SaveGameData
     {
-        public const int CurrentSchemaVersion = 7;
+        public const int CurrentSchemaVersion = 8;
 
         public int schemaVersion;
         public int slotNumber;
@@ -29,6 +29,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public InventorySaveData inventory = new InventorySaveData();
         public ProgressSaveData progress = new ProgressSaveData();
         public DialogueSaveData dialogue = new DialogueSaveData();
+        public EconomySaveData economy = new EconomySaveData();
 
         public static SaveGameData CreateNew(int slot, string activeSceneId)
         {
@@ -44,6 +45,14 @@ namespace WhereTheSoundingsEnd.Persistence
                 saveReason = string.Empty
             };
         }
+    }
+
+    [Serializable]
+    public sealed class EconomySaveData
+    {
+        // USD is stored as integer cents to avoid floating-point wallet drift.
+        public long walletCents;
+        public List<string> processedTransactionIds = new List<string>();
     }
 
     [Serializable]
@@ -162,6 +171,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public int quantity = 1;
         public float quality = 1.0f;
         public float freshness = 1.0f;
+        public float saleQuantity = 1.0f;
     }
 
     [Serializable]
@@ -399,6 +409,20 @@ namespace WhereTheSoundingsEnd.Persistence
                         data.schemaVersion = 7;
                         break;
 
+                    case 7:
+                        NormalizeDefaults(data);
+                        // Legacy currency was an integer number of whole USD.
+                        data.economy.walletCents = Math.Max(0L, (long)data.player.currency) * 100L;
+                        data.economy.processedTransactionIds = new List<string>();
+                        for (int placementIndex = 0; placementIndex < data.inventory.placements.Count; placementIndex++)
+                        {
+                            CargoPlacementSaveData placement = data.inventory.placements[placementIndex];
+                            if (placement != null)
+                                placement.saleQuantity = Math.Max(1, placement.quantity);
+                        }
+                        data.schemaVersion = 8;
+                        break;
+
                     default:
                         error = "No migration path exists for save schema version " + data.schemaVersion + ".";
                         return false;
@@ -438,6 +462,12 @@ namespace WhereTheSoundingsEnd.Persistence
                 return false;
             }
 
+            if (data.economy.walletCents < 0L || data.economy.walletCents > 1000000000000L)
+            {
+                error = "The save contains an invalid economy wallet balance.";
+                return false;
+            }
+
             if (data.inventory.holdWidth > 128 || data.inventory.holdHeight > 128)
             {
                 error = "The save contains hold dimensions outside the supported bounds.";
@@ -468,7 +498,8 @@ namespace WhereTheSoundingsEnd.Persistence
                 data.dialogue.floatVariables.Count,
                 data.dialogue.stringVariables.Count,
                 data.dialogue.boolVariables.Count,
-                data.dialogue.completedNodeIds.Count
+                data.dialogue.completedNodeIds.Count,
+                data.economy.processedTransactionIds.Count
             };
             for (int index = 0; index < collectionCounts.Length; index++)
             {
@@ -895,6 +926,8 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.inventory == null) data.inventory = new InventorySaveData();
             if (data.progress == null) data.progress = new ProgressSaveData();
             if (data.dialogue == null) data.dialogue = new DialogueSaveData();
+            if (data.economy == null) data.economy = new EconomySaveData();
+            if (data.economy.processedTransactionIds == null) data.economy.processedTransactionIds = new List<string>();
 
             if (data.player.position == null) data.player.position = new Vector3SaveData();
             if (data.player.rotationEuler == null) data.player.rotationEuler = new Vector3SaveData();
@@ -908,6 +941,12 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.inventory.equipment == null) data.inventory.equipment = new List<EquipmentSaveData>();
             if (data.inventory.placements == null) data.inventory.placements = new List<CargoPlacementSaveData>();
             if (data.inventory.damagedCells == null) data.inventory.damagedCells = new List<GridCellSaveData>();
+            for (int placementIndex = 0; placementIndex < data.inventory.placements.Count; placementIndex++)
+            {
+                CargoPlacementSaveData placement = data.inventory.placements[placementIndex];
+                if (placement != null && (placement.saleQuantity <= 0f || float.IsNaN(placement.saleQuantity) || float.IsInfinity(placement.saleQuantity)))
+                    placement.saleQuantity = Math.Max(1, placement.quantity);
+            }
             if (data.inventory.holdWidth <= 0) data.inventory.holdWidth = 7;
             if (data.inventory.holdHeight <= 0) data.inventory.holdHeight = 9;
 

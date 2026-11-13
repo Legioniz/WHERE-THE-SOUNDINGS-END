@@ -48,7 +48,7 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 | M0-04 | P0 | Run all 13 current Edit Mode test source files in Unity | M | M0-02 | Authored; Unity execution open |
 | M0-05 | P0 | Expand and run focused Play Mode integration tests | L | M0-03, M0-04 | Greyhaven streaming test authored; Unity execution and broader coverage open |
 | M0-06 | P0 | Validate boat, water and camera behavior together | L | M0-03, M0-05 | Source integration/cadence corrected; Unity acceptance open |
-| M0-07 | P0 | Verify save/load, autosave, backups and participant restore | M | M0-03, M0-05 | Front-end save UI and schema v6 source present; Unity integration open |
+| M0-07 | P0 | Verify save/load, autosave, backups and participant restore | M | M0-03, M0-05 | Front-end save UI and schema v8 source present; Unity integration open |
 | M0-08 | P0 | Produce and smoke-test a clean Windows 64-bit development build | M | M0-03 through M0-07 | Open |
 | M0-10 | P0 | Verify dockside hub, modal exclusivity and Greyhaven additive streaming in Unity | M | M0-03, M0-04, M0-05 | Source/tests authored; Unity verification open |
 | M0-09 | P1 | Decide how to enforce main-branch review/check requirements | S | Owner plan/visibility decision | Blocked by private-repository plan limitation |
@@ -237,9 +237,9 @@ Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOM
 
 | ID | Priority | Task | Dependencies | Status |
 |---|---|---|---|---|
-| ECO-01 | P1 | Add sale-unit/quantity and base-price data to cargo definitions using the existing schedule; preserve stable item IDs | Existing cargo catalog and price schedule | Open |
-| ECO-02 | P1 | Add economy save DTO, integer-cent wallet, schema migration and legacy currency conversion | Save schema v7, save migration tests | Open |
-| ECO-03 | P1 | Implement deterministic sale, demand, repair, fuel-cost and affordability policies | ECO-01, ECO-02 | Open |
+| ECO-01 | P1 | Add sale-unit/quantity and base-price data to cargo definitions using the existing schedule; preserve stable item IDs | Existing cargo catalog and price schedule | Partial — authored fields and persisted catch quantity; price catalog authoring remains open |
+| ECO-02 | P1 | Add economy save DTO, integer-cent wallet, schema migration and legacy currency conversion | Save schema v7, save migration tests | Partial — schema v8 cents wallet DTO, v7 migration and generated-vessel wallet component; Unity migration/wallet tests remain open |
+| ECO-03 | P1 | Implement deterministic sale, demand, repair, fuel-cost and affordability policies | ECO-01, ECO-02 | Partial — deterministic policies, idempotent wallet runtime and Edit Mode test source; Unity execution and service integration remain open |
 | ECO-04 | P1 | Implement vendor profiles, item acceptance, buyer stock, demand refresh and atomic cargo sales | ECO-03, SpatialCargoHold | Open |
 | ECO-05 | P1 | Implement purchases, vendor stock, bait/supply consumption and hold/equipment capacity checks | ECO-04, cargo/equipment definitions | Open |
 | ECO-06 | P1 | Integrate fuel consumption with propulsion/engine load; expose range and refuel quotes | ECO-03, BoatPrototypeController, VesselConditionController | Open |
@@ -263,3 +263,12 @@ Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOM
 - A zero-fuel state has a disclosed recovery path and cannot permanently softlock the campaign.
 - Wallet, market state, fuel, cargo condition and transaction/reward idempotency survive save/load and schema migration.
 - The economy is not complete until Unity compilation, Edit Mode tests, Play Mode integration and vertical-slice playtests pass.
+
+
+### ECO-01–03 source foundation — 2026-11-14
+
+- Added authored base USD price, sale-unit label and explicit ordinary-sale eligibility to `CargoItemDefinition`; zero/unconfigured prices and disabled eligibility remain unsellable by default.
+- Added per-instance sale quantity to cargo placements and save records. `FishingSystemDirector` now passes the landed catch weight into the cargo placement instead of losing the calculated kilogram value.
+- Advanced save schema from v7 to v8 with an integer-cent wallet field and bounded transaction-id ledger. Existing whole-dollar `PlayerSaveData.currency` values migrate at 100 cents per unit; the legacy field is retained for backward compatibility.
+- Added `EconomyPolicy` for sale-line math, demand bounds, repair/fuel quotes and safe wallet delta calculation, plus Edit Mode test source.
+- Remaining: populate each ScriptableObject from the authoritative schedule; connect buyer stock, atomic sales/purchases, fuel/repairs, vendor/NPC gates and UI.

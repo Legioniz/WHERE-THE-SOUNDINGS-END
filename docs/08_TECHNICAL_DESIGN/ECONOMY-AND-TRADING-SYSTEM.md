@@ -1,7 +1,7 @@
 # Economy and Trading System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Integrated design specification — runtime implementation pending  
+> Status: Runtime foundation partially implemented — vendor transactions and services pending  
 > Owner: Project lead  
 > Version: 0.1  
 > Last reviewed: 2026-11-14  
@@ -163,6 +163,14 @@ The dockside hub keeps exclusive modal ownership. Add service actions to existin
 Every transaction displays item, quantity/unit, base price, destination factor, quality/freshness, demand, relationship modifier, total and post-transaction wallet. Purchases display stock and hold fit. Repairs display current/target condition and line-item cost. Errors must explain the failed condition. Keyboard and gamepad focus must be preserved.
 
 ## 13. Implementation sequence and acceptance gates
+
+### Runtime foundation update — 2026-11-14
+
+`EconomyPolicy` implements deterministic sale-line rounding, bounded quality/freshness/demand/live modifiers, stock-driven demand, repair/fuel quote arithmetic and overflow-safe wallet deltas. `SaveGameData` is schema v8 with a cents wallet and transaction-id ledger; v7 whole-dollar balances migrate to cents. Cargo instances now retain total sale quantity in their authored unit (stack count for ordinary stacked goods; landed kilograms for each fish), and fishing records the already-calculated landed weight rather than discarding it. Item definitions expose authored price/unit/ordinary-sale eligibility fields; existing assets still require reviewed schedule values before they can be sold.
+
+`EconomyWalletController` now owns the live integer-cent wallet and bounded idempotency ledger on the generated vessel and participates in the existing save coordinator. This does not yet implement vendor stock/demand persistence, sales/purchases, fuel burn, paid repairs, NPC service bindings or dockside economy UI. Do not treat the wallet and pure policies as a playable trading loop.
+
+
 
 ### E0 — Data and persistence
 - Add authored base sale values/units and vendor profiles without changing stable item IDs.

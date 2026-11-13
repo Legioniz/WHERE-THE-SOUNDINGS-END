@@ -81,7 +81,7 @@ Runtime saves are stored outside the project in `Application.persistentDataPath/
 - `autosave.json`
 - corresponding `.bak` recovery files
 
-Save schema v7 preserves boat transform/velocity, cargo, vessel condition, daily salvage depletion, sea time, weather intensity and remaining duration, weather cooldown, hallucination cooldown, pending seabird events, the latest omen, maritime incident countdown/caption/hush/false-light state, Sounding Rig discoveries and opportunities, acoustic hearing history, inspected site IDs, bounded per-NPC relationship-event memory, and physically visited chart regions. Save participants are discovered by the scene coordinator.
+Save schema v8 preserves boat transform/velocity, cargo (including sale quantity), vessel condition, daily salvage depletion, sea time, weather intensity and remaining duration, weather cooldown, hallucination cooldown, pending seabird events, the latest omen, maritime incident countdown/caption/hush/false-light state, Sounding Rig discoveries and opportunities, acoustic hearing history, inspected site IDs, bounded per-NPC relationship-event memory, physically visited chart regions, and the integer-cent USD wallet with its processed-transaction ledger. Save participants are discovered by the scene coordinator.
 
 The title/pause front end includes a player-facing manual save/load screen for five slots plus the separate autosave. Cross-scene restore, mid-dialogue resume, and persistence adapters for future creature/population/quest/economy systems are not complete.
 
