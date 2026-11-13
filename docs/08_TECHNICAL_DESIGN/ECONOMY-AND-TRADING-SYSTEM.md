@@ -187,13 +187,18 @@ Every transaction displays item, quantity/unit, base price, destination factor, 
 
 
 
-### Runtime implementation — Mara's Greyhaven fish market
+### Runtime implementation — connected Greyhaven economy
 
-MaraFishMarketController is attached to the persistent player vessel and uses the existing SpatialCargoHold, EconomyWalletController, and NpcAgent for ownership. It only opens while Mara's market_shift activity is active and her existing CanTrade relationship gate passes. The initial authored commodity catalogue is limited to FSH-001, FSH-002, FSH-003, FSH-005 and FSH-007 at their existing USD/kg schedule values; aberrant specimens, salvage, quest cargo, equipment and unpriced definitions remain ineligible.
+The generated player vessel now owns `MaraFishMarketController`, `VesselFuelController`, `GreyhavenVendorServices` and `EconomyWalletController`. These reuse the existing spatial hold, NPC schedules/relationships, vessel condition, boat propulsion and save coordinator.
 
-The market builds itemized line offers from each cargo instance's retained sale quantity, quality and freshness. Demand is buyer/item-specific and recalculated from persisted current/target stock using the existing bounded policy. A sale requires a unique caller-supplied transaction ID. The hold validates every selected instance first, invokes the idempotent wallet commit, then removes the complete selection; failed validation or payment leaves cargo untouched. Successful sales increase Mara's stock and reduce future demand. Market stock is saved in the existing economy DTO without changing schema v8; old v8 saves normalize to an empty market list and seed stock when first quoted.
+- Mara builds itemized offers for the five authored starter fish and atomically pays/removes eligible catch. Aberrant, quest and unpriced cargo is rejected.
+- Inez buys three explicitly provisional salvage materials and sells stocked bait/starter equipment. Purchase placement is validated against the spatial hold; failed payment rolls the placement back. The four bait types map to the fishing system's actual bait choices and one unit is consumed only when the cast deploys.
+- Tomas sells refuelling, hull/engine repairs and damaged hold-cell repairs. Quotes use actual missing condition and bounded trust discounts; the wallet is charged before repairs are applied.
+- Main fuel drains only from propulsion load and throttle. A separately saved emergency reserve enables a reduced-power return after the main tank empties. Paid refuelling restores that reserve.
+- Mara and Inez stock is saved per vendor/item and replenishes gradually once per elapsed in-game day. Buyer stock and demand are shown in the itemized dockside offer.
+- The existing dockside modal exposes the resident-specific sale, purchase, repair and refuelling actions. New campaigns start with $25.00; transaction history prevents repeat starter grants.
 
-Current boundary: this is a callable runtime transaction service, not yet a player-facing market panel. It does not implement purchasing, passive market restock, salvage buying, relationship discounts, Tomas/Inez services or full dockside receipts. The editor builder must be run in Unity to regenerate the vessel with the new controller and author the starter price fields. Unity compilation and Edit Mode execution remain unverified.
+The editor builder must be run in Unity to regenerate Greyhaven with the new runtime components and bait/salvage definitions. Current scope does not include the full seafood catalogue, closed-area/quota legality, Harbourmaster research/contract rewards, active equipment-slot application, destination-market travel routes or income-per-hour balancing. Unity compilation, Edit Mode execution, Play Mode testing and economy playtests remain required.
 
 ### E0 — Data and persistence
 - Add authored base sale values/units and vendor profiles without changing stable item IDs.
