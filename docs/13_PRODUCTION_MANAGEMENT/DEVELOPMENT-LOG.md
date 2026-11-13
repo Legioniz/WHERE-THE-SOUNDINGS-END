@@ -8,7 +8,7 @@
 
 ## 2026-11-13 — Cross-system modal ownership and repository documentation reconciliation
 
-**Commit:** Pending repository validation and pull-request integration.
+**Commit:** `c1ff19756dc62936f2c6c78f3b344b0fdbcbb093` (PR #10 squash merge).
 
 ### Implemented
 - Added a shared DocksideModalPolicy used by the dockside hub, inventory/dialogue presenter and front-end pause overlay. Dockside, inventory, dialogue and title/pause/save/settings panels cannot open over one another.
@@ -19,12 +19,13 @@
 
 ### Verification boundary
 - Edit Mode tests are authored but have not been executed in Unity 6000.3.28f1.
-- GitHub Actions will run repository integrity, C# syntax and safeguard validation after the PR is opened.
+- GitHub Actions run #279 passed repository integrity, Unity project validation, C# syntax parsing and repository safeguards.
 - UI Toolkit rendering, actual Input System event ordering, keyboard/gamepad focus, pause restoration, generated scene rebuild and Play Mode remain unverified.
 
 ### Compatibility and risk
 - No save schema or stable NPC/dialogue IDs changed. The dockside hub continues to use existing save participants and checkpoint autosave.
 - The modal policy is source-level integration coverage; Unity runtime behavior still needs human verification.
+- The first CI attempt exposed an over-specific validator expectation that looked for the pause-policy call in the hub instead of its actual front-end owner. The validator was corrected to inspect the actual owner; run #279 then passed both jobs.
 
 ## 2026-11-13 — Greyhaven boat-operated dockside interaction hub
 

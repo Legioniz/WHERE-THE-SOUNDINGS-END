@@ -78,7 +78,7 @@ Milestones are evidence gates, not calendar-only achievements. Dates are approxi
 - Greyhaven now has a persistent seven-location boat-operated dockside hub, resident Yarn handoff, furniture inspections, vessel/cargo diagnostics and a guest-ledger autosave checkpoint. Menu-based interior presentation is implemented; walkable 3D interiors are not.
 - Greyhaven static scenery is split into six additive scenes with load/unload safeguards and development profiling telemetry. A Play Mode transition test is authored but not yet executed.
 - Shared modal ownership now prevents dockside, inventory, dialogue and front-end pause overlays from overlapping. Edit Mode regression tests are authored but not yet executed.
-- PR #8 implementation and PR #9 documentation updates merged; GitHub Actions runs #274 and #275 passed repository/C# syntax validation and safeguards. These checks are not Unity compilation or runtime evidence.
+- PR #8 implementation, PR #9 documentation updates and PR #10 modal-ownership/documentation reconciliation merged. GitHub Actions runs #274, #275 and #279 passed repository/C# syntax validation and safeguards. These checks are not Unity compilation or runtime evidence.
 
 
 See [Implementation Audit](IMPLEMENTATION-AUDIT.md) and [Task Backlog](TASK-BACKLOG.md) for evidence and work order.

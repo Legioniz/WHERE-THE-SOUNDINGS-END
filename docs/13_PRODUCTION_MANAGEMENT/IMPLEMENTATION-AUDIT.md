@@ -3,7 +3,7 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: M0 in progress — source audit recorded; Unity verification pending  
 > Audit date: 2026-11-13  
-> Audited baseline: `main` at `a215eb72` after the streaming and dockside-hub merges  
+> Audited baseline: `main` at `c1ff1975` after the dockside modal-ownership reconciliation  
 > Source correction: `06a7004`  
 > Owner: Project lead
 
@@ -17,7 +17,7 @@ M0 is not complete. The repository's latest verified CI baseline was green for r
 
 ## 2. Repository snapshot
 
-The audited main snapshot contains 315 tracked files at base SHA a215eb72. The current technical baseline is:
+The audited main snapshot contains 315 tracked files at base SHA c1ff1975. The current technical baseline is:
 
 | Area | Observed baseline |
 |---|---|
@@ -81,7 +81,7 @@ Status terms are deliberately strict: **implemented** means source/data is prese
 
 The current source now includes a persistent seven-location Greyhaven dockside hub, furniture inspection actions, existing resident Yarn handoff, cargo/vessel diagnostics, and an Inn checkpoint through the existing autosave. The hub is a menu presentation, not walkable 3D interiors. Six additive static Greyhaven area scenes and transition telemetry are also authored; the streaming Play Mode test remains unexecuted.
 
-A second source pass introduced shared modal policy across dockside, inventory, dialogue and front-end overlays, including gamepad Start/Esc close behavior and generated resident input ownership. The corresponding tests and validator guards are authored. PR #8 CI run #274 and PR #9 CI run #275 passed repository integrity, C# syntax and safeguard jobs. These are static checks only; Unity import/semantic compilation, Edit Mode execution, Play Mode, scene regeneration, hardware profiling and Windows build remain open.
+A second source pass introduced shared modal policy across dockside, inventory, dialogue and front-end overlays, including gamepad Start/Esc close behavior and generated resident input ownership. The corresponding tests and validator guards are authored. PR #8 CI run #274, PR #9 CI run #275 and PR #10 CI run #279 passed repository integrity, C# syntax and safeguard jobs. PR #10 also corrected a false-positive validator expectation and reran both jobs successfully. These are static checks only; Unity import/semantic compilation, Edit Mode execution, Play Mode, scene regeneration, hardware profiling and Windows build remain open.
 
 ### CI evidence
 
