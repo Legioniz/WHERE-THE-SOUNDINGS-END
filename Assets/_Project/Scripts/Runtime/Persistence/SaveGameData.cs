@@ -875,6 +875,7 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.world.discoveredPhenomenonSiteIds == null) data.world.discoveredPhenomenonSiteIds = new List<string>();
             if (data.world.evaluatedSurveyOpportunityIds == null) data.world.evaluatedSurveyOpportunityIds = new List<string>();
             if (data.world.inspectedPhenomenonSiteIds == null) data.world.inspectedPhenomenonSiteIds = new List<string>();
+            if (data.world.visitedRegionIds == null) data.world.visitedRegionIds = new List<string>();
             if (data.world.heardAcousticEventIds == null) data.world.heardAcousticEventIds = new List<string>();
             if (data.world.latestOmen == null) data.world.latestOmen = string.Empty;
             if (data.world.lastAcousticEventId == null) data.world.lastAcousticEventId = string.Empty;
