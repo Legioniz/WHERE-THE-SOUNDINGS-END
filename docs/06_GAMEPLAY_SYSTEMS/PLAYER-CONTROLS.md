@@ -19,7 +19,7 @@ The Boat action map in Assets/_Project/Settings/Input/PlayerControls.inputaction
 | Sounding pulse | Q | Right shoulder |
 | Harvest timing beat | Space / Enter | East face button |
 | Pause / close dockside hub | Esc | Start |
-| Inventory | I | North face button |
+| Inventory | I | North face button |\n| Regional chart / close chart | M / Esc | UI pointer / Esc equivalent |
 
 ## Context rules
 
@@ -29,7 +29,7 @@ The Boat action map in Assets/_Project/Settings/Input/PlayerControls.inputaction
 - Inventory, dialogue, dockside and front-end pause/save/settings panels are mutually exclusive.
 - Fishing, dredging and sounding use the shared action map and their existing action gates. A dockside menu cannot open while a gameplay action is active.
 - Dialogue lines advance with Space/Enter; choices use click or keys 1–5.
-- Inventory uses I to toggle, Esc to close, R to preview rotation, and pointer selection for cargo movement.
+- Inventory uses I to toggle, Esc to close, R to preview rotation, and pointer selection for cargo movement.\n- Regional chart uses M or the HUD button to open, Esc or M to close. It is available only after the current region has been physically visited.
 
 ## Ownership and remaining work
 
