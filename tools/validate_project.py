@@ -288,7 +288,7 @@ def main() -> int:
             "BuildEnvironmentalArtifacts", "BuildHarbourArtifactCluster",
             "BuildVillageArtifactClusters", "BuildEstuaryArtifactClusters",
             "BuildLighthouseArtifactCluster", "BuildWreckArtifactCluster",
-            "StreamedAreaRevision = \"2\"",
+            "StreamedAreaRevision = \"3\"",
         ):
             if required_text not in greyhaven_builder:
                 failures.append(f"Greyhaven area builder is missing: {required_text}")
