@@ -346,3 +346,20 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 - Incremented the generated streamed-area revision so existing generated scenes are recognized as stale and must be rebuilt.
 
 **Verification boundary:** Repository CI/static checks can verify source contracts and syntax only. Unity Editor import/compilation, Edit Mode execution, generated scene inspection, camera readability, clipping/grounding, Play Mode streaming, profiling and Windows build remain pending.
+
+
+## 2026-11-14 — Researched economy and trading integration
+
+**Branch:** `feature/greyhaven-economy-trading-20261114`  
+**Source status:** Integrated economy/trading design specification authored; runtime work not yet implemented.
+
+### Research and integration
+- Reviewed developer commentary and design analysis for DREDGE's cargo/freshness/return loop and its decision to avoid fuel busywork, plus Sunless Sea's route planning and destination-specific trade design.
+- Reviewed Unity's ScriptableObject guidance to preserve the boundary between static item/vendor definitions and mutable saved runtime market state.
+- Cross-checked the existing seafood price schedule and economy mathematics rather than creating competing prices or modifier ranges.
+- Connected the economy design to Greyhaven's existing four residents, spatial cargo hold, vessel condition, action-driven sea clock, dockside modal ownership and save architecture.
+- Authored `docs/08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md` and added ECO-01–ECO-11 to the implementation backlog.
+
+### Runtime boundary
+- No economy runtime code, wallet transactions, market demand simulation, fuel consumption, paid repairs, purchasing or service UI is implemented by this documentation change.
+- Next implementation starts with sale units/base prices and schema migration, then deterministic policies, atomic transactions, propulsion fuel integration, vendor services and dockside UI.
