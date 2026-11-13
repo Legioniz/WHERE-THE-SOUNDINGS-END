@@ -69,7 +69,7 @@ Assets/ThirdParty is reserved for externally sourced content. Record origin, lic
 - Narrative/GreyhavenFrontEndUI.cs: title, pause, manual save/load, settings and modal pause ownership.
 - Narrative/HarbourmasterInteraction.cs: boat-proximity trigger and E-key dialogue start for hand-authored scenes; generated Greyhaven residents are routed through the dockside hub.
 - Interaction/DocksideHubController.cs: stationary-vessel access checks, seven location menus, furniture inspections, resident dialogue handoff, gamepad/keyboard close, and exclusive modal pause ownership.
-- Interaction/DocksideModalPolicy: shared deterministic rules preventing dockside, inventory, dialogue and pause overlays from opening over one another.
+- Interaction/DocksideHubController.cs (DocksideModalPolicy): shared deterministic rules preventing dockside, inventory, dialogue and pause overlays from opening over one another.
 - Dialogue/Greyhaven.yarnproject: Yarn Spinner 3.x project definition.
 - Dialogue/Source/Greyhaven_Harbourmaster.yarn: branching first conversation with the Harbourmaster.
 - Boat/BoatPrototypeController.cs: force-driven forward/reverse propulsion, opposing-throttle braking, speed-dependent rudder and vessel-condition response.
