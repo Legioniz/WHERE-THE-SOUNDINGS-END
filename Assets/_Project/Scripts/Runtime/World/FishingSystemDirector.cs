@@ -406,7 +406,7 @@ namespace WhereTheSoundingsEnd.World
         {
             float quality = FishingSimulationPolicy.CalculateCatchQuality(successfulBeats, tension);
             float size = FishingSimulationPolicy.CalculateCatchSize(hookedFish.BaseCatchSize,
-                hookedFish.MaximumCatchSize, quality, UnityEngine.Random.Range(0.65f, 1.05f));
+                hookedFish.MaximumCatchSize, quality, UnityEngine.Random.Range(0.65f, 1f));
             string instanceId;
             if (!cargoHold.TryPlaceFirstFit(hookedFish.ItemId, 1, quality, 1f, out instanceId))
             {
