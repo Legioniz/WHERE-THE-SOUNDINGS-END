@@ -815,6 +815,71 @@ namespace WhereTheSoundingsEnd.Interaction
                 return;
             }
 
+            List<string> salvageIds = new List<string>();
+            if (cargoHold != null)
+            {
+                for (int i = 0; i < cargoHold.Placements.Count; i++)
+                {
+                    CargoPlacement placement = cargoHold.Placements[i];
+                    CargoItemDefinition definition = placement != null
+                        ? cargoHold.GetItemDefinition(placement.itemId) : null;
+                    if (definition != null && definition.Category == CargoItemCategory.Salvage &&
+                        definition.OrdinarySaleEligible)
+                        salvageIds.Add(placement.instanceId);
+                }
+            }
+
+            List<MarketSaleLine> salvageOffer = null;
+            long salvageTotal = 0L;
+            string salvageError = null;
+            bool canSellSalvage = vendorServices.TryBuildSalvageOffer(
+                salvageIds, out salvageOffer, out salvageTotal, out salvageError);
+            Label salvageSummary = new Label(canSellSalvage
+                ? "SALVAGE APPRAISAL  /  " + FormatMoney(salvageTotal) + " USD  /  " + salvageOffer.Count + " ITEMS"
+                : (salvageIds.Count == 0 ? "No eligible salvage aboard." : (salvageError ?? "Salvage offer unavailable.")));
+            salvageSummary.style.whiteSpace = WhiteSpace.Normal;
+            salvageSummary.style.color = new Color(0.82f, 0.78f, 0.66f);
+            vendorActions.Add(salvageSummary);
+
+            if (canSellSalvage)
+            {
+                System.Text.StringBuilder salvageLines = new System.Text.StringBuilder();
+                for (int i = 0; i < salvageOffer.Count; i++)
+                {
+                    MarketSaleLine line = salvageOffer[i];
+                    salvageLines.Append(line.displayName);
+                    salvageLines.Append("  /  ");
+                    salvageLines.Append(line.saleQuantity.ToString("0.00"));
+                    salvageLines.Append(" ");
+                    salvageLines.Append(line.unitLabel);
+                    salvageLines.Append("  /  ");
+                    salvageLines.Append(FormatMoney(line.lineTotalCents));
+                    salvageLines.Append(" USD");
+                    if (i < salvageOffer.Count - 1) salvageLines.Append("\\n");
+                }
+                Label linesLabel = new Label(salvageLines.ToString());
+                linesLabel.style.whiteSpace = WhiteSpace.Normal;
+                linesLabel.style.fontSize = 11;
+                vendorActions.Add(linesLabel);
+
+                Button sellSalvage = MakeButton("SELL ELIGIBLE SALVAGE  /  " + FormatMoney(salvageTotal), () =>
+                {
+                    List<MarketSaleLine> receipt;
+                    long paid;
+                    string error;
+                    bool success = vendorServices.TrySellSalvage(salvageIds,
+                        "dockside.inez.salvage." + Guid.NewGuid().ToString("N"),
+                        out receipt, out paid, out error);
+                    statusLabel.text = success
+                        ? "SALVAGE SOLD  /  +" + FormatMoney(paid) + " USD."
+                        : "SALVAGE SALE DECLINED  /  " + error;
+                    furnitureTitle.text = "INEZ'S SALVAGE APPRAISAL";
+                    furnitureDetail.text = statusLabel.text;
+                    RenderInezServices();
+                });
+                vendorActions.Add(sellSalvage);
+            }
+
             string[] itemIds =
             {
                 "SUP-BAIT-WORM", "SUP-BAIT-FISH", "SUP-BAIT-SHELLFISH", "SUP-BAIT-LURE",
