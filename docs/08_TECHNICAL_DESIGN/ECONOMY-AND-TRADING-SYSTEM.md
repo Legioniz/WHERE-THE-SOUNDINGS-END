@@ -55,7 +55,22 @@ Vendor acceptance is a hard gate. A vendor must not buy an item simply because i
 
 Vendor stock and buying capacity are finite but readable. A vendor's occupation determines preferences and available services; their schedule determines whether the service is currently staffed. Do not create a universal menu that lets the player buy every item from every resident.
 
-## 5. Sale value and market demand
+## 5. Current Greyhaven runtime integration
+
+The current generated Greyhaven vessel owns the wallet, Mara market, fuel controller and resident vendor services. These components reuse the existing spatial cargo hold, vessel condition, sea-state clock, NPC schedules and relationship scores rather than duplicating their state.
+
+- **Mara:** accepts only authored ordinary seafood definitions, shows line-by-line weight/quality/freshness/demand offers, and buys through an idempotent atomic cargo/wallet transaction. Aberrant and unpriced catches are rejected.
+- **Inez:** appraises and buys the three authored salvage materials through the same atomic transaction boundary. She sells starter rod, lamp, engine and worm/small-fish/shellfish/lure bait in bounded stock. Purchases require hold space and available funds; cargo placement is rolled back if payment fails. Bait is a stack in the hold and one unit is consumed only when a cast is deployed.
+- **Tomas:** quotes and charges for actual missing hull/engine integrity, individual damaged hold cells and refuelling. Quotes apply bounded trust discounts and are shown before confirmation. Repairs cannot exceed 100%.
+- **Fuel:** main tank consumption is based on actual propulsion load and throttle; idle, zero-throttle, paused and dockside time do not drain fuel. A small separately saved emergency reserve permits low-power return after the main tank is empty.
+- **Markets:** Mara and Inez stock is per vendor/item, saved with current/target stock and last restock day. Demand is bounded by the existing policy; stock replenishes gradually once per elapsed in-game day.
+- **Dockside:** existing dockside modal ownership is retained. Resident-specific actions expose seafood/salvage appraisals, sale confirmation, purchases, repairs and refuelling.
+
+A new campaign receives a one-time $25.00 starter wallet balance. A zero-balance save with a transaction history is never topped up. The current salvage values are explicitly provisional and are defined in the seafood price schedule's supplemental salvage table.
+
+**Not yet implemented:** Harbourmaster salvage/research contracts, complete catch legality and protected-species rules, the full catalogue price authoring, active rod/reel/line equipment-slot application, destination-specific travel-market routes, detailed fuel range/net-profit analytics, and full Unity Play Mode balancing. The editor builder must be run in Unity to regenerate the Greyhaven scene with the new runtime components and authored cargo data.
+
+## 6. Sale value and market demand
 
 For each eligible sale line, use the existing economy formula:
 
