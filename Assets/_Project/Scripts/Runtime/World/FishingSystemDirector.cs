@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using WhereTheSoundingsEnd.Inventory;
+using WhereTheSoundingsEnd.Economy;
 using WhereTheSoundingsEnd.Persistence;
 
 namespace WhereTheSoundingsEnd.World
