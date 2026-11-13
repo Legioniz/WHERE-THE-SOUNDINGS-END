@@ -30,7 +30,6 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 | M0-06 | P0 | Validate boat, water and camera behavior together | L | M0-03, M0-05 | Source integration/cadence corrected; Unity acceptance open |
 | M0-07 | P0 | Verify save/load, autosave, backups and participant restore | M | M0-03, M0-05 | Front-end save UI and schema v6 source present; Unity integration open |
 | M0-08 | P0 | Produce and smoke-test a clean Windows 64-bit development build | M | M0-03 through M0-07 | Open |
-
 | M0-10 | P0 | Verify dockside hub, modal exclusivity and Greyhaven additive streaming in Unity | M | M0-03, M0-04, M0-05 | Source/tests authored; Unity verification open |
 | M0-09 | P1 | Decide how to enforce main-branch review/check requirements | S | Owner plan/visibility decision | Blocked by private-repository plan limitation |
 
