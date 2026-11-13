@@ -172,6 +172,14 @@ Every transaction displays item, quantity/unit, base price, destination factor, 
 
 
 
+### Runtime implementation — Mara's Greyhaven fish market
+
+MaraFishMarketController is attached to the persistent player vessel and uses the existing SpatialCargoHold, EconomyWalletController, and NpcAgent for ownership. It only opens while Mara's market_shift activity is active and her existing CanTrade relationship gate passes. The initial authored commodity catalogue is limited to FSH-001, FSH-002, FSH-003, FSH-005 and FSH-007 at their existing USD/kg schedule values; aberrant specimens, salvage, quest cargo, equipment and unpriced definitions remain ineligible.
+
+The market builds itemized line offers from each cargo instance's retained sale quantity, quality and freshness. Demand is buyer/item-specific and recalculated from persisted current/target stock using the existing bounded policy. A sale requires a unique caller-supplied transaction ID. The hold validates every selected instance first, invokes the idempotent wallet commit, then removes the complete selection; failed validation or payment leaves cargo untouched. Successful sales increase Mara's stock and reduce future demand. Market stock is saved in the existing economy DTO without changing schema v8; old v8 saves normalize to an empty market list and seed stock when first quoted.
+
+Current boundary: this is a callable runtime transaction service, not yet a player-facing market panel. It does not implement purchasing, passive market restock, salvage buying, relationship discounts, Tomas/Inez services or full dockside receipts. The editor builder must be run in Unity to regenerate the vessel with the new controller and author the starter price fields. Unity compilation and Edit Mode execution remain unverified.
+
 ### E0 — Data and persistence
 - Add authored base sale values/units and vendor profiles without changing stable item IDs.
 - Add a versioned economy save DTO and migration from the current schema.
