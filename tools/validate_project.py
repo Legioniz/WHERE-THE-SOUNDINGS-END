@@ -939,6 +939,16 @@ def main() -> int:
             if required_text not in fishing_source:
                 failures.append(f"FishingSystemDirector is disconnected from installed rod equipment: {required_text}")
 
+        harvest_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/HarvestingMinigameController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "GetComponent<FishingSystemDirector>()",
+            "gameObject.AddComponent<FishingSystemDirector>()",
+            "fishingSystem.Configure(input, hold, director)",
+            "fishingSystem.TryStartFishing()",
+        ):
+            if required_text not in harvest_source:
+                failures.append(f"HarvestingMinigameController is disconnected from fishing runtime: {required_text}")
+
         market_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/MaraFishMarketController.cs").read_text(encoding="utf-8")
         for required_text in (
             "OrdinarySaleEligible", "IsAberrant", "CalculateDemandFactor",
