@@ -4,6 +4,7 @@ using UnityEngine;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.NPC;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Economy
 {
@@ -35,6 +36,7 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private SpatialCargoHold cargoHold;
         [SerializeField] private EconomyWalletController wallet;
         [SerializeField] private NpcAgent mara;
+        [SerializeField] private SeaStateDirector seaState;
         [SerializeField, Min(0.01f)] private float destinationFactor = 1f;
         [SerializeField, Min(0f)] private float scarcityResponse = 0.35f;
         [SerializeField] private List<MarketStockSaveData> stock = new List<MarketStockSaveData>();
@@ -49,6 +51,7 @@ namespace WhereTheSoundingsEnd.Economy
             destinationFactor = Mathf.Clamp(destinationFactor, 0.01f, 100f);
             if (!IsFinite(scarcityResponse)) scarcityResponse = 0.35f;
             scarcityResponse = Mathf.Clamp(scarcityResponse, 0f, 10f);
+            if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             if (stock == null) stock = new List<MarketStockSaveData>();
         }
 
@@ -193,7 +196,8 @@ namespace WhereTheSoundingsEnd.Economy
                     vendorId = VendorId,
                     itemId = entry.itemId,
                     currentStock = entry.currentStock,
-                    targetStock = entry.targetStock
+                    targetStock = entry.targetStock,
+                    lastRestockDay = entry.lastRestockDay
                 });
             }
         }
@@ -235,7 +239,8 @@ namespace WhereTheSoundingsEnd.Economy
                     vendorId = VendorId,
                     itemId = entry.itemId,
                     currentStock = entry.currentStock,
-                    targetStock = entry.targetStock
+                    targetStock = entry.targetStock,
+                    lastRestockDay = entry.lastRestockDay
                 });
             }
             stock = restored;
@@ -266,10 +271,26 @@ namespace WhereTheSoundingsEnd.Economy
                 vendorId = VendorId,
                 itemId = itemId,
                 currentStock = DefaultTargetStock,
-                targetStock = DefaultTargetStock
+                targetStock = DefaultTargetStock,
+                lastRestockDay = seaState != null ? seaState.DayNumber : 1
             };
             stock.Add(created);
             return created;
+        }
+
+        /// <summary>Restocks a bounded fraction of buyer capacity once per completed game day.</summary>
+        private void RefreshStock(MarketStockSaveData entry)
+        {
+            if (entry == null || seaState == null) return;
+            int currentDay = Math.Max(1, seaState.DayNumber);
+            if (entry.lastRestockDay <= 0) entry.lastRestockDay = currentDay;
+            int elapsedDays = currentDay - entry.lastRestockDay;
+            if (elapsedDays <= 0) return;
+
+            int dailyRestock = Math.Max(1, Mathf.CeilToInt(entry.targetStock * 0.35f));
+            long restored = (long)entry.currentStock + (long)dailyRestock * elapsedDays;
+            entry.currentStock = (int)Math.Min(entry.targetStock, Math.Min(MaximumStockPerItem, restored));
+            entry.lastRestockDay = currentDay;
         }
     }
 }
