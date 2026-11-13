@@ -112,7 +112,7 @@ M0 remains **in progress** until all of the following are evidenced:
 3. `Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation` completes without compile/import errors and generates the expected scenes/build list. Re-running setup is safe and repeatable.
 4. Unity reports zero C# compiler errors and no missing scripts in the generated scenes.
 5. All existing Edit Mode tests pass in the target editor.
-6. The new Play Mode smoke tests pass for boat, water, camera, sea-time, harvesting, NPC interaction and save/restore.
+6. The new Play Mode smoke tests pass for boat, water, camera, sea-time, harvesting, NPC interaction, dockside modal transitions, streaming and save/restore.
 7. Manual Greyhaven testing confirms the boat/camera/ocean foundation is stable and understandable.
 8. The dockside hub, inventory, dialogue and front-end overlays pass modal exclusivity and pause restoration checks on keyboard and gamepad.
 9. A clean Windows 64-bit development build launches into Greyhaven.
