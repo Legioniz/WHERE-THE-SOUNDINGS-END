@@ -42,6 +42,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Tests/EditMode/EconomyPolicyTests.cs",
     "Assets/_Project/Tests/EditMode/MaraMarketTransactionTests.cs",
     "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs",
+    "docs/13_PRODUCTION_MANAGEMENT/ECONOMY-INTEGRATION-AUDIT.md",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
