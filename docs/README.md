@@ -50,10 +50,19 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 - [Greyhaven environment and first-hub layout](05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md)
 - [Greyhaven settlement, buildings and wayfinding](05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN-SETTLEMENT-AND-WAYFINDING.md) — building silhouettes, shopfronts, NPC workplace coordinates and the fixed dock chart.
 - [Greyhaven procedural island terrain](08_TECHNICAL_DESIGN/GREYHAVEN-TERRAIN.md) — deterministic shoreline/elevation profile, material regions, collision ownership and Editor validation.
-- [Greyhaven dockside interaction hub](08_TECHNICAL_DESIGN/GREYHAVEN-DOCKSIDE-INTERACTION-HUB.md) — boat-only location menus, furniture actions, resident dialogue integration, access rules and verification limits.
+- [Greyhaven dockside interaction hub](08_TECHNICAL_DESIGN/GREYHAVEN-DOCKSIDE-INTERACTION-HUB.md) — boat-only location menus, furniture actions, resident dialogue integration, modal ownership, access rules and verification limits.
+- [Area streaming and asset residency](08_TECHNICAL_DESIGN/AREA-STREAMING-AND-ASSET-RESIDENCY.md) — six additive Greyhaven static areas, load/unload safeguards, asset validation and development profiling telemetry.
 - [Regional ecology and creature distribution](05_WORLD_AND_LEVEL_DESIGN/REGIONAL-ECOLOGY-AND-CREATURES.md)
 - [Location catalog](05_WORLD_AND_LEVEL_DESIGN/LOCATION-CATALOG.md)
 - [Exploration design](05_WORLD_AND_LEVEL_DESIGN/EXPLORATION-DESIGN.md)
+
+## User interface and interaction
+
+- [Main menu, pause and save/load UI](11_UI_UX_DESIGN/MAIN-MENU.md)
+- [Runtime HUD and modal ownership](11_UI_UX_DESIGN/HUD-DESIGN.md)
+- [Dialogue and resident interface](11_UI_UX_DESIGN/DIALOGUE-INTERFACE.md)
+- [Inventory interface](11_UI_UX_DESIGN/INVENTORY-INTERFACE.md)
+- [Player controls](06_GAMEPLAY_SYSTEMS/PLAYER-CONTROLS.md)
 
 ## Vehicle handling and world physics
 
