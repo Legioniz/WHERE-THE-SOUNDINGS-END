@@ -287,6 +287,10 @@ namespace WhereTheSoundingsEnd.Economy
                 case "GEAR-ROD-01": price = 12.00m; return true;
                 case "GEAR-LAMP-01": price = 8.50m; return true;
                 case "GEAR-ENGINE-01": price = 85.00m; return true;
+                case "SUP-BAIT-WORM": price = 0.45m; return true;
+                case "SUP-BAIT-FISH": price = 0.85m; return true;
+                case "SUP-BAIT-SHELLFISH": price = 0.65m; return true;
+                case "SUP-BAIT-LURE": price = 3.50m; return true;
                 default: price = 0m; return false;
             }
         }
