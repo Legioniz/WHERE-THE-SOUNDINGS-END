@@ -199,6 +199,7 @@ namespace WhereTheSoundingsEnd.Interaction
         private GreyhavenVendorServices vendorServices;
         private HarbourmasterContractController harbourmasterContracts;
         private VesselFuelController fuelController;
+        private VesselEquipmentController equipmentController;
         private Label locationTitle;
         private Label locationSubtitle;
         private Label interiorDescription;
@@ -241,6 +242,9 @@ namespace WhereTheSoundingsEnd.Interaction
             if (boatBody != null && harbourmasterContracts == null)
                 harbourmasterContracts = boatBody.gameObject.AddComponent<HarbourmasterContractController>();
             fuelController = boatBody != null ? boatBody.GetComponent<VesselFuelController>() : null;
+            equipmentController = boatBody != null ? boatBody.GetComponent<VesselEquipmentController>() : null;
+            if (boatBody != null && equipmentController == null)
+                equipmentController = boatBody.gameObject.AddComponent<VesselEquipmentController>();
             seaState = clock;
             saveCoordinator = saves;
             locations = definitions == null
@@ -990,7 +994,56 @@ namespace WhereTheSoundingsEnd.Interaction
                 });
                 purchase.SetEnabled(quote > 0L && vendorServices.WalletCents >= quote);
                 vendorActions.Add(purchase);
+
+                string slotId = VesselEquipmentController.GetSlotForItem(itemId);
+                if (!string.IsNullOrEmpty(slotId) && equipmentController != null)
+                {
+                    Button equip = MakeButton("INSTALL " + definition.DisplayName.ToUpperInvariant() +
+                        (equipmentController.GetType() != null && itemId == equipmentController.EngineItemId ||
+                         itemId == equipmentController.RodItemId || itemId == equipmentController.LanternItemId
+                            ? "  /  CURRENTLY INSTALLED" : "  /  EQUIP"),
+                        () =>
+                        {
+                            string message;
+                            bool success = equipmentController.TryEquip(itemId, out message);
+                            statusLabel.text = message;
+                            furnitureTitle.text = "INEZ'S EQUIPMENT FITTING";
+                            furnitureDetail.text = message;
+                            RenderInezServices();
+                        });
+                    equip.SetEnabled(cargoHold != null && cargoHold.GetAvailableQuantity(itemId) > 0 &&
+                        itemId != equipmentController.EngineItemId &&
+                        itemId != equipmentController.RodItemId &&
+                        itemId != equipmentController.LanternItemId);
+                    vendorActions.Add(equip);
+                }
             }
+            if (equipmentController != null)
+            {
+                AddInstalledEquipmentAction(VesselEquipmentController.EngineSlot, "ENGINE");
+                AddInstalledEquipmentAction(VesselEquipmentController.RodSlot, "FISHING ROD");
+                AddInstalledEquipmentAction(VesselEquipmentController.LanternSlot, "DECK LANTERN");
+            }
+        }
+
+        private void AddInstalledEquipmentAction(string slotId, string label)
+        {
+            if (equipmentController == null || vendorActions == null) return;
+            string itemId = slotId == VesselEquipmentController.EngineSlot ? equipmentController.EngineItemId :
+                slotId == VesselEquipmentController.RodSlot ? equipmentController.RodItemId :
+                equipmentController.LanternItemId;
+            if (string.IsNullOrEmpty(itemId)) return;
+            float condition = slotId == VesselEquipmentController.EngineSlot ? equipmentController.EngineCondition :
+                slotId == VesselEquipmentController.RodSlot ? equipmentController.RodCondition :
+                equipmentController.LanternCondition;
+            Button unequip = MakeButton("STORE " + label + "  /  " + Mathf.RoundToInt(condition * 100f) + "% CONDITION", () =>
+            {
+                string message;
+                equipmentController.TryUnequip(slotId, out message);
+                statusLabel.text = message;
+                RenderInezServices();
+            });
+            vendorActions.Add(unequip);
         }
 
         private void AddWalletBalanceLabel()
