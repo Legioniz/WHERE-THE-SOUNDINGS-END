@@ -129,6 +129,9 @@ namespace WhereTheSoundingsEnd.Economy
         private void OnTransactionApplied(string transactionId, long deltaCents, long resultingBalance)
         {
             if (!tripActive || deltaCents == 0L) return;
+            if (deltaCents < 0L && transactionId != null &&
+                transactionId.StartsWith("dockside.inez.purchase.GEAR-", StringComparison.Ordinal))
+                return; // Equipment is capital investment, not a recurring expedition operating cost.
             if (deltaCents > 0L)
                 tripGrossCents = SafeAdd(tripGrossCents, deltaCents);
             else if (deltaCents < 0L && deltaCents != long.MinValue)
