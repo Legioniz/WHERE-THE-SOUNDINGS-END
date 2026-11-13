@@ -672,7 +672,10 @@ namespace WhereTheSoundingsEnd.Interaction
                 CargoPlacement placement = cargoHold.Placements[i];
                 CargoItemDefinition definition = placement != null
                     ? cargoHold.GetItemDefinition(placement.itemId) : null;
-                if (definition != null && definition.OrdinarySaleEligible)
+                if (definition != null && definition.OrdinarySaleEligible && !definition.IsAberrant &&
+                    (definition.Category == CargoItemCategory.Fish ||
+                     definition.Category == CargoItemCategory.Shellfish ||
+                     definition.Category == CargoItemCategory.Cephalopod))
                     eligibleIds.Add(placement.instanceId);
             }
 
