@@ -32,9 +32,9 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private float lifetimeFuelUsed;
 
         private bool tripActive;
+        private bool docksideSessionObserved;
         private long tripGrossCents;
         private long tripExpenseCents;
-        private long tripStartWalletCents;
         private float tripStartFuel;
         private double tripStartGameSeconds;
         private double tripStartRealtime;
@@ -68,8 +68,15 @@ namespace WhereTheSoundingsEnd.Economy
         {
             ResolveReferences();
             SubscribeWallet();
-            if (tripActive && dockside != null && dockside.IsMenuOpen)
-                CompleteTrip();
+            if (tripActive && dockside != null)
+            {
+                if (dockside.IsMenuOpen) docksideSessionObserved = true;
+                else if (docksideSessionObserved)
+                {
+                    docksideSessionObserved = false;
+                    CompleteTrip();
+                }
+            }
         }
 
         private void ResolveReferences()
@@ -98,7 +105,6 @@ namespace WhereTheSoundingsEnd.Economy
             tripActive = true;
             tripGrossCents = 0L;
             tripExpenseCents = 0L;
-            tripStartWalletCents = wallet.WalletCents;
             tripStartFuel = fuel.FuelUnits;
             tripStartGameSeconds = seaState != null ? seaState.ElapsedGameSeconds : 0d;
             tripStartRealtime = Time.unscaledTimeAsDouble;
@@ -131,6 +137,7 @@ namespace WhereTheSoundingsEnd.Economy
             lifetimeGameSeconds = Math.Min(double.MaxValue, lifetimeGameSeconds + duration);
             lifetimeFuelUsed = Mathf.Min(float.MaxValue, lifetimeFuelUsed + lastTripFuel);
             tripActive = false;
+            docksideSessionObserved = false;
             tripGrossCents = 0L;
             tripExpenseCents = 0L;
         }
@@ -218,6 +225,7 @@ namespace WhereTheSoundingsEnd.Economy
             lastTripSeconds = 0d;
             lastTripFuel = 0f;
             tripActive = false;
+            docksideSessionObserved = false;
             if (data == null || data.progress == null || data.progress.worldFlags == null) return;
             for (int i = 0; i < data.progress.worldFlags.Count; i++)
             {
