@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Working production baseline  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-11
+> Version: 0.3  
+> Last reviewed: 2026-11-13
 
 ## 1. Purpose
 
@@ -71,7 +71,7 @@ Adjust the mix according to the current phase. During a test or release period, 
 ### Gate B — Vertical-slice readiness
 - One region supports a complete expedition loop.
 - At least one NPC arc, one quest, and one meaningful threat are playable.
-- UI, audio, action-driven time, save/load, and recovery are connected.
+- UI, audio, action-driven time, save/load, and recovery are connected. The Greyhaven title/pause/save/settings interface and dockside location hub are source-implemented; modal ownership and runtime acceptance still require Unity verification.
 - Playtests confirm the core loop is understandable and enjoyable.
 - Major accessibility and performance risks are identified.
 
