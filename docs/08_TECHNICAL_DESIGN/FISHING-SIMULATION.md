@@ -27,11 +27,20 @@ A missed bite returns to WaitingForBite once; a second missed strike spooks the 
 
 Fish-only CargoItemDefinition fields include habitat flags, preferred technique/bait, minimum/maximum habitat depth, resistance, burst frequency, initial stock, daily recovery, migration rate and minimum/maximum catch size. Greyhaven's deterministic Editor builder writes distinct profiles to the ordinary and anomalous starter species assets. Rebuilding Greyhaven updates these assets; it does not create a second catalogue.
 
+## RNG semantics and probability math
+
+- Bite waiting samples a duration; it does not currently roll a separate bite-success chance. At expiry, eligible stocked species are selected. An empty candidate set produces another wait interval.
+- Species roulette is weighted, not a direct percentage table. Candidate weight is local population multiplied by `0.35` for technique mismatch, `0.28` for bait mismatch and `0.15` for aberrant status. Both mismatches compound to `0.098` of base weight. Final probability is normalized as candidate weight divided by total eligible weight.
+- The aberration event gate is evaluated once per selection attempt when an eligible aberrant species is present. Chance is `0.025 + 0.22 × clamp01(panic) + 0.08 × clamp01(disturbance)`, so its true range is 2.5%–32.5%; the old 38% clamp was unreachable and has been corrected. Gate success adds aberrant species to weighted selection; it is not itself the final catch probability.
+- Burst frequency is a per-second rate. Per-frame chance uses the exponential hazard conversion `1 - exp(-rate × deltaTime)`, making cumulative chance frame-rate independent.
+- Migration amount uses stochastic rounding of `population × migrationRate` per six-hour interval. The fractional remainder becomes the probability of moving one additional fish; source population is bounded to prevent emptying a habitat in one tick.
+- Candidate weights are not UI percentages. Any future odds display must compute each final probability after the full candidate set has been assembled and normalized.
+
 ## Habitat and ecology approximation
 
 The current Greyhaven habitat resolver classifies the cast point as estuary, nearshore, kelp, open water or deep water from local coordinates/distance. It maps each habitat to a fixed estimated depth, then applies technique-specific depth multipliers (bottom deeper, float shallower, with intermediate values for jigging/trolling/handlining). Bite wait timing is also method-adjusted. This is deliberately a prototype heuristic because the current ocean surface and survey bathymetry systems do not expose a shared fishing-depth query. Do not use these estimates as nautical depth data.
 
-Population is aggregate integer stock keyed by species and habitat. Each landed fish removes one stock unit. Recovery is applied in elapsed in-game-day increments and capped at twice initial stock. Every six in-game hours, a bounded fraction migrates to the next habitat in the authored habitat order that the species can inhabit. Migration is a simplified cyclic transfer, not a biologically validated route. All stock and timing values use existing save collections under namespaced IDs.
+Population is aggregate integer stock keyed by species and habitat. Each landed fish removes one stock unit. Recovery is applied in complete elapsed in-game-day increments and capped at twice initial stock; fractional-day remainder is retained. Every six in-game hours, a bounded, stochastically rounded fraction migrates to the next habitat in the authored habitat order that the species can inhabit. Migration is a simplified cyclic transfer, not a biologically validated route. All stock and timing values use existing save collections under namespaced IDs.
 
 ## Gear and progression
 
