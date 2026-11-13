@@ -74,6 +74,35 @@ A new campaign receives a one-time $25.00 starter wallet balance. A zero-balance
 
 The Harbourmaster's dockside panel now exposes a compact three-contract salvage board. The player accepts one job, carries the requested salvage to Greyhaven, and submits it at the office. The initial jobs request Corroded Ship Fittings, Salt-Stiff Canvas, or Waterlogged Timber, with fixed prototype rewards of $8.50, $5.00, and $7.00 respectively. A completed contract is recorded once; its reward uses the existing idempotent wallet ledger, and the cargo placement is removed only when the wallet transaction commits. Active contract identity and the completion bitmask are stored in a namespaced existing world flag, so the save schema remains v8. These are introductory local deliveries, not yet a full research/permit progression system.
 
+## 5.2 Equipment progression and servicing
+
+The vessel has three physical equipment slots: `engine`, `fishing-rod`, and `lantern`. Installing an item removes its placement from the spatial hold; replacing or storing it returns the previous item to the hold and fails cleanly if the hold cannot accept it. The existing schema-v8 `InventorySaveData.equipment` list stores slot ID, stable item ID and normalized condition. No duplicate cargo copy is created.
+
+- **Outboard engine:** condition scales propulsion output and fuel-use efficiency. Engine wear follows actual throttle/load time.
+- **Handline rod:** condition scales cast range and fishing timing/control. Rod wear is applied after successful landings.
+- **Deck lantern:** creates a point light on the vessel; condition scales intensity and range. It wears during night operation.
+- **Service:** Tomas quotes repairs from missing condition and commits the wallet charge before restoring the slot to full condition. Stored equipment retains its condition.
+
+These are prototype modifiers and wear coefficients. They must be playtested against travel time, fuel cost and upgrade payback before final tuning.
+
+## 5.3 Harbourmaster research and chart permits
+
+The Harbourmaster's research ledger is a separate progression path from salvage delivery contracts. Each one-time submission requires a matching salvage placement and confirmed Sounding Rig site discoveries:
+
+| Submission | Evidence threshold | Salvage | Stipend | Permit |
+|---|---:|---|---:|---|
+| The Inner Water Record | 1 site | Corroded Ship Fittings | $15.00 | The Shallows |
+| Where the Brackish Current Turns | 3 sites | Salt-Stiff Canvas | $30.00 | Blackrock Reach |
+| A Sound Beneath the Soundings | 5 sites | Waterlogged Timber | $50.00 | The Outer Shoals |
+
+Submission consumes the selected salvage only when the idempotent wallet reward commits. The completion bitmask is saved in a namespaced progress world flag; permits are added to the existing unlocked-region collection and applied to the live chart. A permit does not mark the region visited, reveal its location, create a compass bearing, or imply inter-region travel. Stipends are prototype values pending economy playtests.
+
+## 5.4 Expedition economy telemetry
+
+A trip begins when the vessel applies propulsion. It closes after the player finishes a dockside service session, allowing return-market sales and service costs to be included. The telemetry records gross wallet receipts, operating expenses, actual fuel consumed (including emergency-reserve use), action-driven game-clock duration, net result and net income per hour. Equipment purchases are capital investment and are excluded from recurring operating expense; fuel, bait, repairs and service costs are included. Completed-trip aggregates and latest-trip metrics persist through a namespaced world flag without changing schema v8.
+
+The telemetry measures live player behavior; it does not automatically change prices or certify balance. Starter, average and optimized routes still require controlled Unity playtests and documented tuning.
+
 ## 6. Sale value and market demand
 
 For each eligible sale line, use the existing economy formula:
