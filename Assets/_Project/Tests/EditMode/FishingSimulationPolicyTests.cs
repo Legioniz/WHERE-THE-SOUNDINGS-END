@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using UnityEngine;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.World;
 
@@ -33,14 +34,44 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(FishingSimulationPolicy.CalculateTimingWindow(0.4f, 0f, 2f), Is.EqualTo(0.18f));
         }
 
-        [TestCase(0, 0f, 0)]
-        [TestCase(20, 0.1f, 2)]
-        [TestCase(8, 0.01f, 1)]
-        [TestCase(5, 0.5f, 1)]
-        public void MigrationAmount_IsBoundedAndPopulationPreserving(int population, float rate, int expected)
+        [TestCase(0, 0f, 0f, 0)]
+        [TestCase(20, 0.1f, 0.5f, 2)]
+        [TestCase(8, 0.01f, 0.05f, 1)]
+        [TestCase(8, 0.01f, 0.5f, 0)]
+        [TestCase(2, 0.03f, 0.02f, 1)]
+        [TestCase(2, 0.03f, 0.5f, 0)]
+        public void MigrationAmount_UsesFractionalProbabilityAndPreservesPopulation(
+            int population, float rate, float roll, int expected)
         {
-            Assert.That(FishingSimulationPolicy.CalculateMigrationAmount(population, rate), Is.EqualTo(expected));
-            Assert.That(FishingSimulationPolicy.CalculateMigrationAmount(population, rate), Is.LessThanOrEqualTo(population / 3));
+            int amount = FishingSimulationPolicy.CalculateMigrationAmount(population, rate, roll);
+            Assert.That(amount, Is.EqualTo(expected));
+            Assert.That(amount, Is.LessThanOrEqualTo(Mathf.Max(1, population / 3)));
+            Assert.That(amount, Is.LessThan(population));
+        }
+
+        [Test]
+        public void EventChance_IsFrameRateIndependent()
+        {
+            float oneSecond = FishingSimulationPolicy.CalculateEventChance(0.8f, 1f);
+            float halfSecond = FishingSimulationPolicy.CalculateEventChance(0.8f, 0.5f);
+            float twoHalfSeconds = 1f - (1f - halfSecond) * (1f - halfSecond);
+            Assert.That(twoHalfSeconds, Is.EqualTo(oneSecond).Within(0.00001f));
+            Assert.That(FishingSimulationPolicy.CalculateEventChance(0.8f, 0f), Is.EqualTo(0f));
+        }
+
+        [Test]
+        public void CandidateWeights_AreRelativeModifiersNotAbsolutePercentages()
+        {
+            float matched = FishingSimulationPolicy.CalculateCandidateWeight(100f, true, true, false);
+            float techniqueMismatch = FishingSimulationPolicy.CalculateCandidateWeight(100f, false, true, false);
+            float baitMismatch = FishingSimulationPolicy.CalculateCandidateWeight(100f, true, false, false);
+            float bothMismatch = FishingSimulationPolicy.CalculateCandidateWeight(100f, false, false, false);
+            float aberrant = FishingSimulationPolicy.CalculateCandidateWeight(100f, true, true, true);
+
+            Assert.That(techniqueMismatch / matched, Is.EqualTo(0.35f).Within(0.00001f));
+            Assert.That(baitMismatch / matched, Is.EqualTo(0.28f).Within(0.00001f));
+            Assert.That(bothMismatch / matched, Is.EqualTo(0.098f).Within(0.00001f));
+            Assert.That(aberrant / matched, Is.EqualTo(0.15f).Within(0.00001f));
         }
 
         [Test]
