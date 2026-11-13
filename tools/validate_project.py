@@ -601,6 +601,36 @@ def main() -> int:
                 if ally_topics[npc_node] not in node_text:
                     failures.append(f"{npc_node} is missing its Ally-only personal topic.")
 
+            clue_flags = (
+                "gh_clue_bell_log",
+                "gh_clue_cold_catch",
+                "gh_clue_hull_marks",
+                "gh_clue_net_return",
+            )
+            for clue_flag in clue_flags:
+                if f"<<declare ${clue_flag} = false>>" not in yarn_text:
+                    failures.append(f"Greyhaven Yarn is missing persistent clue declaration: {clue_flag}")
+                if f"<<set ${clue_flag} = true>>" not in yarn_text:
+                    failures.append(f"Greyhaven Yarn is missing clue discovery state update: {clue_flag}")
+
+            clue_topics = {
+                "Greyhaven_Harbourmaster": "Ask what the lighthouse log says about the bell.",
+                "Greyhaven_Fishmonger": "Ask why some catches arrive cold in the middle.",
+                "Greyhaven_Mechanic": "Ask him to compare the returned hull's marks with a rock strike.",
+                "Greyhaven_NetMender": "Ask what the missing crew's returned net tells her.",
+            }
+            for npc_node, clue_topic in clue_topics.items():
+                start = yarn_text.index(f"title: {npc_node}")
+                end = yarn_text.find(chr(10) + "===", start)
+                node_text = yarn_text[start:] if end < 0 else yarn_text[start:end]
+                if clue_topic not in node_text:
+                    failures.append(f"{npc_node} is missing its occupation-specific evidence topic.")
+                if "-> Compare the records from the quay." not in node_text:
+                    failures.append(f"{npc_node} is missing the cross-witness evidence comparison.")
+
+            if yarn_text.count("-> Compare the records from the quay.") != 4:
+                failures.append("Greyhaven Yarn must expose exactly one cross-witness comparison in each resident node.")
+
         npc_source = (ROOT / "Assets/_Project/Scripts/Runtime/NPC/NpcAgent.cs").read_text(encoding="utf-8")
         for required_text in (
             "NpcScheduleResolver", "SeaStateDirector", "ISaveParticipant",
