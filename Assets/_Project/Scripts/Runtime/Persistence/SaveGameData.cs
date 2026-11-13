@@ -10,7 +10,7 @@ namespace WhereTheSoundingsEnd.Persistence
     [Serializable]
     public sealed class SaveGameData
     {
-        public const int CurrentSchemaVersion = 7;
+        public const int CurrentSchemaVersion = 8;
 
         public int schemaVersion;
         public int slotNumber;
@@ -29,6 +29,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public InventorySaveData inventory = new InventorySaveData();
         public ProgressSaveData progress = new ProgressSaveData();
         public DialogueSaveData dialogue = new DialogueSaveData();
+        public EconomySaveData economy = new EconomySaveData();
 
         public static SaveGameData CreateNew(int slot, string activeSceneId)
         {
@@ -44,6 +45,14 @@ namespace WhereTheSoundingsEnd.Persistence
                 saveReason = string.Empty
             };
         }
+    }
+
+    [Serializable]
+    public sealed class EconomySaveData
+    {
+        // USD is stored as integer cents to avoid floating-point wallet drift.
+        public long walletCents;
+        public List<string> processedTransactionIds = new List<string>();
     }
 
     [Serializable]
@@ -162,6 +171,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public int quantity = 1;
         public float quality = 1.0f;
         public float freshness = 1.0f;
+        public float saleQuantity = 1.0f;
     }
 
     [Serializable]
@@ -399,6 +409,14 @@ namespace WhereTheSoundingsEnd.Persistence
                         data.schemaVersion = 7;
                         break;
 
+                    case 7:
+                        NormalizeDefaults(data);
+                        // Legacy currency was an integer number of whole USD.
+                        data.economy.walletCents = Math.Max(0L, (long)data.player.currency) * 100L;
+                        data.economy.processedTransactionIds = new List<string>();
+                        data.schemaVersion = 8;
+                        break;
+
                     default:
                         error = "No migration path exists for save schema version " + data.schemaVersion + ".";
                         return false;
@@ -435,6 +453,12 @@ namespace WhereTheSoundingsEnd.Persistence
                 !IsFinite(data.vessel.engineCondition) || data.vessel.engineCondition < 0f || data.vessel.engineCondition > 100f)
             {
                 error = "The save contains invalid vessel condition values.";
+                return false;
+            }
+
+            if (data.economy.walletCents < 0L || data.economy.walletCents > 1000000000000L)
+            {
+                error = "The save contains an invalid economy wallet balance.";
                 return false;
             }
 
@@ -895,6 +919,8 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.inventory == null) data.inventory = new InventorySaveData();
             if (data.progress == null) data.progress = new ProgressSaveData();
             if (data.dialogue == null) data.dialogue = new DialogueSaveData();
+            if (data.economy == null) data.economy = new EconomySaveData();
+            if (data.economy.processedTransactionIds == null) data.economy.processedTransactionIds = new List<string>();
 
             if (data.player.position == null) data.player.position = new Vector3SaveData();
             if (data.player.rotationEuler == null) data.player.rotationEuler = new Vector3SaveData();
