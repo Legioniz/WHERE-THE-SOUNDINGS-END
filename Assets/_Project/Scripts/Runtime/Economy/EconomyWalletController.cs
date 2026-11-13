@@ -62,7 +62,11 @@ namespace WhereTheSoundingsEnd.Economy
             processedTransactionIds.Add(transactionId);
             transactionLookup.Add(transactionId);
             Action<string, long, long> handler = TransactionApplied;
-            if (handler != null) handler(transactionId, deltaCents, walletCents);
+            if (handler != null)
+            {
+                try { handler(transactionId, deltaCents, walletCents); }
+                catch (Exception exception) { Debug.LogException(exception, this); }
+            }
             return true;
         }
 
