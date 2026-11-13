@@ -1,10 +1,10 @@
 # Save Data Structure
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime schema v7 implemented; Unity verification pending  
+> Status: Runtime schema v8 implemented; Unity verification pending  
 > Owner: Project lead  
 > Version: 0.4  
-> Last reviewed: 2026-11-13
+> Last reviewed: 2026-11-14
 
 ## Storage layout
 
@@ -26,7 +26,7 @@ Root DTO: SaveGameData.
 
 | Field | Purpose |
 |---|---|
-| schemaVersion | Migration version; currently 7 |
+| schemaVersion | Migration version; currently 8 |
 | slotNumber | Slot identity, assigned by the file service |
 | saveId | Stable unique identifier for this save record |
 | savedAtUtc | UTC ISO-8601 timestamp |
@@ -37,7 +37,8 @@ Root DTO: SaveGameData.
 | totalPlaytimeSeconds | Campaign playtime |
 | worldSeed | Campaign seed represented as a string to preserve exact integer text |
 | world | Simulation clock, region, weather, tide and disturbance |
-| player | Player transform, health and currency |
+| player | Player transform, health and legacy whole-dollar currency field |
+| economy | Integer-cent USD wallet and processed transaction IDs for idempotency |
 | vessel | Starter vessel transform, physics velocity and future condition values |
 | inventory | Cargo stacks and equipment records |
 | progress | Discoveries, unlocked regions, quests, journal, NPC state, regional stocks, flags, cooldowns and random streams |
@@ -48,6 +49,8 @@ All content relationships use stable string IDs. Random stream state and increme
 
 - Vector3SaveData stores position, Euler rotation, and velocity as numeric x/y/z fields.
 - InventoryStackSaveData stores itemId, quantity, quality and freshness.
+- CargoPlacementSaveData stores each physical cargo instance, placement, quality, freshness and saleQuantity in its authored sale unit.
+- EconomySaveData stores walletCents and the bounded processedTransactionIds ledger.
 - EquipmentSaveData stores slotId, itemId and condition.
 - QuestProgressSaveData and ObjectiveProgressSaveData preserve quest stage and objective progress.
 - JournalEntrySaveData preserves entry identity, interpretation and read state.
@@ -105,3 +108,10 @@ The DTO is a transport/storage representation only. ScriptableObjects remain aut
 The present prototype wires only the starter boat. Player, clock, inventory, quest, regional simulation, and creature systems must register their own save participants as those systems are implemented.
 
 The Greyhaven dockside hub does not add a separate save DTO or schema field. Its Harbour Inn Guest Ledger calls the existing `AutosaveController.RequestCheckpointAutosave` path; cargo, vessel condition, sea state, NPC relationships and Yarn state remain owned by their existing save participants.
+
+
+## Schema v8 economy migration
+
+Schema v8 adds `EconomySaveData` with a USD wallet stored as integer cents and a processed-transaction ID ledger. The v7-to-v8 migration converts the legacy `PlayerSaveData.currency` whole-dollar integer to cents at 100 cents per unit while retaining the legacy field for compatibility. New cargo placement records also preserve sale quantity; legacy placements receive a safe default quantity of one until their item-specific unit is authored. `EconomyWalletController` owns the live wallet and idempotency ledger on the generated player vessel and participates in the existing save coordinator.
+
+The migration and wallet test source is authored but still requires Unity Edit Mode execution. No sale/purchase transaction flow is claimed complete by this schema change.
