@@ -418,3 +418,15 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 - Static repository validation and C# syntax checks are required on the pull request.
 - Unity 6000.3.28f1 compilation, Edit Mode execution, Greyhaven scene regeneration and Play Mode contract acceptance/submission/save-load remain outstanding.
 - Rewards and three salvage jobs are prototype content, not final economy balance. Research submissions, permits and region-linked contracts remain future work.
+
+
+## 2026-11-14 — Equipment progression, Harbourmaster research and expedition telemetry
+
+- Added persistent engine, fishing-rod and deck-lantern slots. Equipping moves the item out of the spatial hold; replacing/storing equipment returns it to the hold where space permits. Slot IDs and condition reuse the existing schema-v8 `InventorySaveData.equipment` list.
+- Added equipment wear: engine wear follows actual propulsion load, rod wear follows successful landings, and lantern wear accumulates during night operation. Tomas can repair installed equipment through idempotent wallet transactions.
+- Applied gameplay effects: engine condition changes propulsion and fuel efficiency; rod condition changes cast distance and fishing control; lantern condition changes a real deck point-light's intensity/range. Inez's dockside panel now supports install/store actions and Tomas's panel supports servicing.
+- Added Harbourmaster research submissions using confirmed Sounding Rig discoveries plus one matching salvage item. Three finite submissions grant research stipends and chart permits; permit unlocks are persisted without adding visited-region records or revealing unknown chart locations.
+- Added expedition accounting that starts on propulsion and closes after the dockside service session. It records sale/contract/research receipts, operating expenses, actual fuel consumed, game-clock duration, trip net and net income/hour. Equipment purchases are excluded as capital investment. Results are surfaced in the dockside panel.
+- Added Edit Mode test source for equipment installation/durability/repair/save validation, research permit persistence and expedition telemetry; updated the project validator.
+
+**Verification boundary:** source delimiter checks pass. Unity 6000.3.28f1 compilation, Edit Mode execution, Greyhaven scene regeneration, Play Mode tests and actual starter/average/optimized economy playtests remain unrun. The telemetry provides measured campaign data once played; it does not itself prove the current economy is balanced. Full seafood catalogue, complete per-catch legality and destination-market trading routes remain open.
