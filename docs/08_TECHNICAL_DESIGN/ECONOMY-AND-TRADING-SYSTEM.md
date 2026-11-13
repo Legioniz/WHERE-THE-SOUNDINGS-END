@@ -145,7 +145,7 @@ Keep relationship effects asymmetric where character identity warrants it. Mara 
 Purchases must validate, in order: vendor open, vendor accepts/sells item, relationship gate, available vendor stock, valid quantity, wallet balance, destination hold/equipment capacity, and final price. Only then commit money and inventory atomically.
 
 - Bait is consumed when a cast/technique actually uses it, not merely by opening a menu.
-- Tackle and equipment are durable inventory/equipment items; do not invent wear rates until the repair and equipment model is authored.
+- Engine, fishing rod and lantern use the authored prototype durability model: engine wear follows propulsion load, rod wear follows successful landings, and lantern wear follows in-game night operation. Condition and installed ownership persist; Tomas can repair each slot. Wear coefficients remain playtest tuning values.
 - A purchase cannot be resold to the same vendor for a profit. Buy and sell quotes must be separate and disclosed.
 - Equipment upgrades must identify the capability unlocked, additional operating cost, route/depth/method access and estimated payback trips.
 - Cargo hold space remains a physical constraint. No purchased item may appear in the hold if it cannot fit.
@@ -159,7 +159,7 @@ Repair quote components:
 - Hull: missing hull integrity × authored cost per integrity point.
 - Engine: missing engine condition × authored cost per integrity point.
 - Hold: number/type of repairable blocked cells × authored material/labour cost.
-- Equipment: only if a real equipment-condition field and repair contract exist.
+- Installed equipment: missing slot condition × item-specific repair rate (engine $18.00, rod $6.50, lantern $5.00 for full restoration before Tomas's relationship discount).
 
 Show a quote before confirmation. Repairs restore only the selected component and never exceed 100%. A failed or unaffordable repair changes nothing. Do not charge a fixed fee when no repair is required.
 
@@ -168,9 +168,9 @@ Show a quote before confirmation. Repairs restore only the selected component an
 Fuel is a voyage resource and is stored on the vessel. Consumption must be tied to actual propulsion/engine load rather than wall-clock time while docked or paused. The player should be able to see current fuel, estimated remaining range and the estimated cost to refill before departure.
 
 - Burn fuel only while the propulsion system is under load.
-- Scale consumption from throttle/engine load and engine condition using one tested formula.
+- Scale consumption from throttle/engine load and installed engine condition/efficiency using one tested formula; the displayed full-load endurance uses the same installed-engine multiplier.
 - No fuel drain while paused, in dialogue, docked with engine off, or idling with zero propulsion.
-- At zero fuel, propulsion is unavailable; the vessel can drift and the player retains a fair recovery option (e.g. a disclosed paid tow/rescue), rather than an unrecoverable softlock.
+- When the main tank is empty, a separately saved emergency reserve allows low-power return. After both main and emergency reserves are exhausted, the vessel can drift; a paid tow/rescue service is not yet implemented and remains a vertical-slice requirement.
 - Refuelling is a priced service with an explicit quantity and total. Do not require a repetitive manual refuel click after every trip.
 - Bait, ice and other consumables are charged only when purchased/consumed. Do not add a flat hidden expedition fee.
 
