@@ -118,3 +118,18 @@ Design additions:
 - Genuine threats retain their existing warning timings and escape rules.
 - Psychological effects never invert controls, conceal real warnings, or gate essential evidence.
 - Final sound assets require licensing / attribution and mono / accessibility review.
+
+
+## Runtime addition — unexplained warning indicators (2026-11-13)
+
+The existing atmosphere director now has a rare, nonverbal anomaly cue. On an eligible maritime-incident roll, a 5.5% reserved outcome briefly draws four disconnected corner strokes at the upper-right edge of the screen. The cue flickers for approximately 2.2 real-time seconds.
+
+**Intent and hard limits**
+- It provides no text, sound, icon, arrow, bearing, distance, target, map mark, objective, journal entry, or explanatory note.
+- It does not imply a specific threat, reveal a location, change vessel handling, damage the boat, or alter inventory/progression.
+- It is transient and is not written to save data; loading a save does not replay an old warning.
+- The remaining incident probability is remapped so existing dead-calm, wrong-way-swell, hull-knock, buoy-bell, false-light, and distant-call proportions remain unchanged.
+- It remains gated by the existing night / panic atmosphere eligibility and action-driven incident clock.
+- The cue is intentionally ambiguous. It is not a combat telegraph and must never replace readable warnings for a real hazard.
+
+This is source-level implementation only. Inspect the visual in Unity 6000.3.28f1 and confirm that the small corner mark is noticeable without resembling a compass, map marker, objective prompt, or standard system error.

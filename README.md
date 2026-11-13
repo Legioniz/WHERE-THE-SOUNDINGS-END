@@ -61,6 +61,7 @@ The harvesting timing action now uses one shared Input System action for keyboar
 - Timed fishing and dredging minigames using spatial cargo placement.
 - Cargo hold geometry, blocked/damaged cells, item placement, salvage-site depletion, and vessel hull/engine condition.
 - Day/night lighting and fog response, panic pressure, dead-calm and wrong-way-swell incidents, distant hull knocks, false navigation lights, and other restrained maritime omens.
+- Rare unexplained warning flashes: a brief, non-directional broken-corner indicator with no text, sound, map mark, journal note, or gameplay effect.
 - A Sounding Rig with regional bathymetry approximations, a day/night biological scattering-layer return, signal confidence, independent-ping verification, authored site discovery, and save persistence.
 - Four Greyhaven residents with action-clock daily schedules, short waypoint movement, stable NPC IDs, persistent individual trust scores, seven-tier reactive Yarn dialogue, character-specific everyday facts and sayings, and trust-gated personal topics.
 - A boat-operated Greyhaven dockside hub with seven location menus, furniture inspections, cargo and vessel diagnostics, existing resident dialogue, and a guest-ledger checkpoint through the current autosave service.

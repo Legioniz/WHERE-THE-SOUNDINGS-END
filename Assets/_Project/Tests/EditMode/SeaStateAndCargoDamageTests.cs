@@ -36,6 +36,24 @@ namespace WhereTheSoundingsEnd.Tests
             AcousticEventBus.ClearSubscribersForTests();
         }
 
+        [TestCase(0f, true)]
+        [TestCase(0.0549f, true)]
+        [TestCase(0.055f, false)]
+        [TestCase(0.5f, false)]
+        [TestCase(1f, false)]
+        public void UnexplainedWarningPolicy_UsesRareBoundedTriggerBand(float roll, bool expected)
+        {
+            Assert.AreEqual(expected, UnexplainedWarningPolicy.ShouldTrigger(roll));
+        }
+
+        [Test]
+        public void UnexplainedWarningPolicy_RemapsRemainingIncidentRangeWithoutChangingEndpoints()
+        {
+            Assert.AreEqual(0f, UnexplainedWarningPolicy.RemapIncidentRoll(UnexplainedWarningPolicy.Probability), 0.0001f);
+            Assert.AreEqual(1f, UnexplainedWarningPolicy.RemapIncidentRoll(1f), 0.0001f);
+            Assert.AreEqual(0.5f, UnexplainedWarningPolicy.RemapIncidentRoll(0.5275f), 0.001f);
+        }
+
         [TestCase(0f, false, false, false)]
         [TestCase(0.26f, false, false, true)]
         [TestCase(0f, true, false, true)]

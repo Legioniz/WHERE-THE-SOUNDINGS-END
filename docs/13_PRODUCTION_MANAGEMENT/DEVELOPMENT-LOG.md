@@ -286,3 +286,8 @@
 - Edit Mode tests are authored but not executed in Unity 6000.3.28f1.
 - GitHub CI can check project integrity and C# syntax, but does not prove Unity semantic compilation, UI Toolkit rendering, runtime region detection, map marker placement or save/load integration.
 - Rebuild Greyhaven and both survey sandboxes, then verify region entry, site discovery, modal exclusivity and schema 6/7 restoration in Unity.
+
+
+## 2026-11-13 — Unexplained warning indicator
+
+Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirector. A 5.5% reserved incident-roll band produces a brief, non-directional broken-corner flash without text, audio, bearing, map mark, objective, journal entry, or gameplay effect. Remaining incident rolls are remapped to preserve the established incident mix. The cue is not persisted and does not change save schema. Edit Mode policy coverage and repository validation guards were added. Unity visual inspection and test execution remain pending.
