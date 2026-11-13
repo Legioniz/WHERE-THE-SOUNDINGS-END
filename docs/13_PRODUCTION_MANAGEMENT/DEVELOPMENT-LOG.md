@@ -6,6 +6,26 @@
 > Version: 0.1  
 > Last reviewed: 2026-11-13
 
+## 2026-11-13 — Cross-system modal ownership and repository documentation reconciliation
+
+**Commit:** Pending repository validation and pull-request integration.
+
+### Implemented
+- Added a shared DocksideModalPolicy used by the dockside hub, inventory/dialogue presenter and front-end pause overlay. Dockside, inventory, dialogue and title/pause/save/settings panels cannot open over one another.
+- Added keyboard Esc and gamepad Start handling for closing the dockside menu without also opening the pause overlay. The hub also refuses to open while the front end is paused.
+- Routed shared Interact ownership to DocksideHubController for generated Greyhaven residents; externally managed legacy resident triggers no longer enable or disable that shared action.
+- Added Edit Mode policy regressions for dockside/inventory/pause modal exclusion and expanded repository validation to enforce runtime wiring.
+- Reconciled README, Greyhaven world/settlement, dialogue/NPC, save schema, technical architecture, streaming, testing, production and UI/UX documentation with the current source.
+
+### Verification boundary
+- Edit Mode tests are authored but have not been executed in Unity 6000.3.28f1.
+- GitHub Actions will run repository integrity, C# syntax and safeguard validation after the PR is opened.
+- UI Toolkit rendering, actual Input System event ordering, keyboard/gamepad focus, pause restoration, generated scene rebuild and Play Mode remain unverified.
+
+### Compatibility and risk
+- No save schema or stable NPC/dialogue IDs changed. The dockside hub continues to use existing save participants and checkpoint autosave.
+- The modal policy is source-level integration coverage; Unity runtime behavior still needs human verification.
+
 ## 2026-11-13 — Greyhaven boat-operated dockside interaction hub
 
 **Commit:** `c95478b25b8ed9ba55acf30ce8804a1e5bfdd27e` (PR #8 squash merge).
@@ -44,7 +64,7 @@
 - Runtime profiling telemetry is implemented, but no real Windows hardware measurements, frame-time captures, GPU VRAM measurements or memory budgets have been collected.
 
 ### Remaining scope
-- Proper walkable interiors and usable furniture interactions are not included in this increment. The current prototype has a boat-only player controller; building out an accessible interior requires an on-foot movement/camera/input mode and a persistent interaction ownership path that remains safe while static village scenes stream.
+- At the time of PR #7, the dockside hub and menu-based furniture actions were not yet included. PR #8 subsequently added seven menu-based location/interior presentations and furniture actions without changing the boat-only movement model. Physical walkable 3D interiors, an on-foot controller, trade, paid repair, net crafting and residential visits remain future work.
 - No save schema, NPC identity/schedule/dialogue contract, boat physics, or static area-scene ownership changed.
 
 ## 2026-11-13 — Greyhaven resident furniture and personality pass
