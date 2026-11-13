@@ -94,7 +94,7 @@ namespace WhereTheSoundingsEnd.Economy
                 if (placement == null) { error = "A selected cargo item is no longer aboard."; return false; }
 
                 CargoItemDefinition definition = cargoHold.GetItemDefinition(placement.itemId);
-                if (definition == null || !definition.OrdinarySaleEligible ||
+                if (definition == null || !definition.OrdinarySaleEligible || definition.IsAberrant ||
                     !IsFinite(placement.saleQuantity) || placement.saleQuantity <= 0f ||
                     placement.saleQuantity > 1000000f ||
                     !IsFinite(definition.BaseSalePriceUsd) || definition.BaseSalePriceUsd <= 0f ||
@@ -216,7 +216,7 @@ namespace WhereTheSoundingsEnd.Economy
                 MarketStockSaveData entry = data.economy.marketStocks[i];
                 if (entry == null || string.IsNullOrWhiteSpace(entry.vendorId) ||
                     string.IsNullOrWhiteSpace(entry.itemId) || entry.currentStock < 0 ||
-                    entry.currentStock > MaximumStockPerItem || entry.targetStock < 1 ||
+                    entry.currentStock > MaximumStockPerItem || entry.targetStock < 1 || entry.lastRestockDay < 0 ||
                     entry.targetStock > MaximumStockPerItem ||
                     !ids.Add(entry.vendorId + "|" + entry.itemId))
                 { error = "The save contains malformed or duplicate vendor stock."; return false; }
