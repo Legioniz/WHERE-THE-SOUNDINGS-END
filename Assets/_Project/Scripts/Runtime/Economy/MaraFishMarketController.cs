@@ -17,6 +17,8 @@ namespace WhereTheSoundingsEnd.Economy
         public float saleQuantity;
         public string unitLabel;
         public decimal demandFactor;
+        public int buyerStock;
+        public int buyerTargetStock;
         public long lineTotalCents;
     }
 
@@ -134,6 +136,8 @@ namespace WhereTheSoundingsEnd.Economy
                     saleQuantity = placement.saleQuantity,
                     unitLabel = definition.SaleUnitLabel,
                     demandFactor = demand,
+                    buyerStock = itemStock.currentStock,
+                    buyerTargetStock = itemStock.targetStock,
                     lineTotalCents = lineTotal
                 });
             }
