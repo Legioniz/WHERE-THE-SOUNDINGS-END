@@ -72,7 +72,7 @@ A new campaign receives a one-time $25.00 starter wallet balance. A zero-balance
 
 ## 5.1 Harbourmaster delivery contracts
 
-The Harbourmaster's dockside panel now exposes a compact three-contract salvage board. The player accepts one job, carries the requested salvage to Greyhaven, and submits it at the office. The initial jobs request Corroded Ship Fittings, Salt-Stiff Canvas, or Waterlogged Timber, with fixed prototype rewards of $8.50, $5.00, and $7.00 respectively. A completed contract is recorded once; its reward uses the existing idempotent wallet ledger, and the cargo placement is removed only when the wallet transaction commits. Active contract identity and the completion bitmask are stored in a namespaced existing world flag, so the save schema remains v8. These are introductory local deliveries, not yet a full research/permit progression system.
+The Harbourmaster's dockside panel now exposes a compact three-contract salvage board. The player accepts one job, carries the requested salvage to Greyhaven, and submits it at the office. The initial jobs request Corroded Ship Fittings, Salt-Stiff Canvas, or Waterlogged Timber, with fixed prototype rewards of $8.50, $5.00, and $7.00 respectively. A completed contract is recorded once; its reward uses the existing idempotent wallet ledger, and the cargo placement is removed only when the wallet transaction commits. Active contract identity and the completion bitmask are stored in a namespaced existing world flag, so the save schema remains v8. These are introductory local deliveries. The separate discovery-gated research and chart-permit progression is documented in section 5.3.
 
 ## 5.2 Equipment progression and servicing
 
