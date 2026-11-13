@@ -16,7 +16,7 @@
 - Repository CI, C# syntax validation and Edit Mode test execution must be checked after the PR is opened.
 - Unity 6000.3.28f1 compilation, Greyhaven asset/scene rebuild, Play Mode encounter/input/cargo/save-load testing and Windows Development Build remain outstanding.
 - The habitat resolver and depths are temporary Greyhaven coordinate heuristics. Population migration is a simple cyclic transfer, not a validated marine ecology model.
-- The loadout/encounter UI is a temporary IMGUI prototype; market purchases, gear durability, per-catch length/weight records, seasonal ecology and full economy integration remain open.
+- The loadout/encounter UI is a temporary IMGUI prototype; market-to-loadout equipment integration, gear durability, per-catch length/weight records, seasonal ecology and full economy integration remain open.
 
 ### Compatibility
 - No save schema version bump or new save DTO is required; namespaced fishing flags and regional stock entries reuse existing fields.
@@ -402,3 +402,19 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 - Added Edit Mode test source for propulsion fuel behavior, emergency reserve and stack-aware bait consumption; required-file validation now includes the new runtime services and tests.
 
 **Remaining:** full legal-catch/closed-area/quota checks, Harbourmaster contracts and research rewards, complete catalogue prices, active equipment-slot application, destination-market travel pricing, trip range/net-income telemetry and economy playtests. Unity Editor compilation, Edit Mode execution, generated-scene rebuild and Play Mode testing have not been run here.
+
+
+## 2026-11-14 — Harbourmaster salvage contract board
+
+**Branch:** `feature/harbourmaster-contracts-equipment-20261114`
+
+### Implemented in source
+- Added a persistent three-job Greyhaven delivery board for Corroded Ship Fittings, Salt-Stiff Canvas and Waterlogged Timber.
+- Connected the board to the existing dockside Harbourmaster service panel; no separate pause/menu owner was introduced.
+- Contract completion removes the selected salvage placement only when the idempotent wallet reward transaction commits. The board accepts one active contract at a time and prevents completed jobs from being repeated.
+- Active contract and completion history reuse the existing progress world-flag save channel; schema v8 is unchanged. Added save validation and Edit Mode test source.
+
+### Verification boundary
+- Static repository validation and C# syntax checks are required on the pull request.
+- Unity 6000.3.28f1 compilation, Edit Mode execution, Greyhaven scene regeneration and Play Mode contract acceptance/submission/save-load remain outstanding.
+- Rewards and three salvage jobs are prototype content, not final economy balance. Research submissions, permits and region-linked contracts remain future work.

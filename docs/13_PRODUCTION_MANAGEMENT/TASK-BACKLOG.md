@@ -231,7 +231,7 @@ A new player can start the slice and complete this sequence without developer co
 
 ## Economy and trading integration — researched design baseline, 2026-11-14
 
-**Source status:** Integrated technical design authored; runtime implementation remains open. Do not mark this feature complete from documentation alone.
+**Source status:** Greyhaven vendor runtime is partially implemented. A persistent three-contract Harbourmaster delivery board is now connected to the dockside hub; active gear-slot application, research/permit progression, full catalogue legality and expedition balancing remain open. Unity verification is still required.
 
 Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md). It extends, rather than replaces, the existing [Economy Mathematics](../07_GAME_RULES_AND_BALANCING/ECONOMY-MATHEMATICS.md) and [Seafood Selling Price Schedule](../07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md).
 
@@ -240,12 +240,12 @@ Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOM
 | ECO-01 | P1 | Add sale-unit/quantity and base-price data to cargo definitions using the existing schedule; preserve stable item IDs | Existing cargo catalog and price schedule | Partial — five starter fish use the authoritative USD/kg schedule; three Greyhaven salvage definitions have explicitly provisional per-unit values; full catalogue authoring and legal-catch flags remain open |
 | ECO-02 | P1 | Add economy save DTO, integer-cent wallet, schema migration and legacy currency conversion | Save schema v7, save migration tests | Partial — schema v8 cents wallet DTO, v7 migration and generated-vessel wallet component; Unity migration/wallet tests remain open |
 | ECO-03 | P1 | Implement deterministic sale, demand, repair, fuel-cost and affordability policies | ECO-01, ECO-02 | Partial — deterministic pricing, demand, repair/fuel quotes, wallet overflow and transaction policies are connected to live services; Unity execution and balancing remain open |
-| ECO-04 | P1 | Implement vendor profiles, item acceptance, buyer stock, demand refresh and atomic cargo sales | ECO-03, SpatialCargoHold | Partial — Mara buys configured ordinary seafood; Inez buys configured salvage; both use per-item stock, bounded demand, persisted daily restock, itemized offers and atomic wallet/cargo commits; full catch legality and Harbourmaster contracts remain open |
+| ECO-04 | P1 | Implement vendor profiles, item acceptance, buyer stock, demand refresh and atomic cargo sales | ECO-03, SpatialCargoHold | Partial — Mara buys configured ordinary seafood; Inez buys configured salvage; both use per-item stock, bounded demand, persisted daily restock, itemized offers and atomic wallet/cargo commits; Harbourmaster contracts use a separate atomic delivery/reward flow; full catch legality remains open |
 | ECO-05 | P1 | Implement purchases, vendor stock, bait/supply consumption and hold/equipment capacity checks | ECO-04, cargo/equipment definitions | Partial — Inez sells stocked bait and starter equipment into the spatial hold; bait is consumed per cast; purchase rollback, stock limits and hold-fit checks implemented; active equipment-slot integration and broader tackle catalogue remain open |
 | ECO-06 | P1 | Integrate fuel consumption with propulsion/engine load; expose range and refuel quotes | ECO-03, BoatPrototypeController, VesselConditionController | Partial — main fuel drains from propulsion load only, zero main fuel enables a saved low-power emergency reserve, and Tomas sells refuelling with trust-adjusted quotes; range estimator UI and trip-cost telemetry remain open |
 | ECO-07 | P1 | Implement paid hull, engine and damaged-hold repairs with itemized quotes | ECO-03, VesselConditionController, SpatialCargoHold | Partial — Tomas charges only for missing hull/engine integrity and damaged hold cells; repairs cannot exceed 100%; Unity integration tests remain open |
-| ECO-08 | P1 | Bind Mara, Tomas, Inez and Harbourmaster to specialised services and existing relationship gates | ECO-04–07, NpcAgent | Partial — Mara, Tomas and Inez use stable NPC IDs, staffed schedule gates and existing trust thresholds; bounded relationship price effects are applied; Harbourmaster contracts/research submissions remain open |
-| ECO-09 | P1 | Add market/repair/supply panels within existing dockside modal ownership | ECO-04–08, DocksideHubController | Partial — itemized seafood/salvage offers, sale confirmation, repair, refuel and Inez purchase actions are integrated into the existing dockside modal; interaction usability and responsive layout still require Play Mode review |
+| ECO-08 | P1 | Bind Mara, Tomas, Inez and Harbourmaster to specialised services and existing relationship gates | ECO-04–07, NpcAgent | Partial — Mara, Tomas and Inez use stable NPC IDs, staffed schedule gates and existing trust thresholds; Harbourmaster delivery jobs are gated by the resident's trade availability; research submissions and permits remain open |
+| ECO-09 | P1 | Add market/repair/supply panels within existing dockside modal ownership | ECO-04–08, DocksideHubController | Partial — itemized seafood/salvage offers, sale confirmation, repair, refuel, Inez purchases and Harbourmaster contract accept/deliver actions are integrated into the existing dockside modal; interaction usability and responsive layout still require Play Mode review |
 | ECO-10 | P1 | Add transaction integrity, anti-duplication, save/load, vendor schedule and controller tests | ECO-01–09 | Partial — transaction IDs, shared stock persistence, cargo commit tests, fuel/bait tests and validator requirements authored; Unity execution and end-to-end save/load coverage remain open |
 | ECO-11 | P1 | Balance starter/average/optimized expeditions using gross, net and net-income-per-hour measurements | ECO-01–10, vertical slice playtests | Open |
 
@@ -272,3 +272,13 @@ Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOM
 - Advanced save schema from v7 to v8 with an integer-cent wallet field and bounded transaction-id ledger. Existing whole-dollar `PlayerSaveData.currency` values migrate at 100 cents per unit; the legacy field is retained for backward compatibility.
 - Added `EconomyPolicy` for sale-line math, demand bounds, repair/fuel quotes and safe wallet delta calculation, plus Edit Mode test source.
 - Remaining: populate each ScriptableObject from the authoritative schedule; connect buyer stock, atomic sales/purchases, fuel/repairs, vendor/NPC gates and UI.
+
+
+### Harbourmaster contract board — 2026-11-14
+
+- Added three one-unit salvage delivery contracts with prototype rewards: Corroded Ship Fittings ($8.50), Salt-Stiff Canvas ($5.00), and Waterlogged Timber ($7.00).
+- The Harbourmaster panel allows one active contract at a time, rejects unavailable resident service, and prevents repeat completion.
+- Delivery removes the selected placement only if the wallet reward ledger accepts the idempotent transaction.
+- Active job and completion history reuse `ProgressSaveData.worldFlags`; no save schema bump.
+- Added save validation tests and required-file guards. Unity execution remains pending.
+- Still open: purchased gear must modify active loadout slots; research submissions/permits; broader contract catalogue; complete catch legality; ECO-11 voyage balancing.

@@ -197,6 +197,7 @@ namespace WhereTheSoundingsEnd.Interaction
         private VisualElement vendorActions;
         private MaraFishMarketController maraMarket;
         private GreyhavenVendorServices vendorServices;
+        private HarbourmasterContractController harbourmasterContracts;
         private VesselFuelController fuelController;
         private Label locationTitle;
         private Label locationSubtitle;
@@ -236,6 +237,9 @@ namespace WhereTheSoundingsEnd.Interaction
             vesselCondition = condition;
             maraMarket = boatBody != null ? boatBody.GetComponent<MaraFishMarketController>() : null;
             vendorServices = boatBody != null ? boatBody.GetComponent<GreyhavenVendorServices>() : null;
+            harbourmasterContracts = boatBody != null ? boatBody.GetComponent<HarbourmasterContractController>() : null;
+            if (boatBody != null && harbourmasterContracts == null)
+                harbourmasterContracts = boatBody.gameObject.AddComponent<HarbourmasterContractController>();
             fuelController = boatBody != null ? boatBody.GetComponent<VesselFuelController>() : null;
             seaState = clock;
             saveCoordinator = saves;
@@ -644,6 +648,12 @@ namespace WhereTheSoundingsEnd.Interaction
             if (location == null || location.Resident == null) return;
 
             string residentId = location.Resident.NpcId;
+            string residentName = location.Resident.DisplayName ?? string.Empty;
+            if (residentName.IndexOf("Harbourmaster", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                RenderHarbourmasterContracts(location.Resident);
+                return;
+            }
             if (residentId == MaraFishMarketController.VendorId)
             {
                 RenderMaraServices();
@@ -656,6 +666,54 @@ namespace WhereTheSoundingsEnd.Interaction
             }
             if (residentId == GreyhavenVendorServices.InezId)
                 RenderInezServices();
+        }
+
+        private void RenderHarbourmasterContracts(NpcAgent harbourmaster)
+        {
+            if (vendorActions == null) return;
+            vendorActions.Clear();
+            AddWalletBalanceLabel();
+            if (harbourmasterContracts == null)
+            {
+                vendorActions.Add(new Label("The Harbourmaster's contract ledger is unavailable."));
+                return;
+            }
+
+            Label board = new Label(harbourmasterContracts.GetBoardText(harbourmaster));
+            board.style.whiteSpace = WhiteSpace.Normal;
+            board.style.color = new Color(0.82f, 0.78f, 0.66f);
+            board.style.marginBottom = 8;
+            vendorActions.Add(board);
+
+            if (!harbourmasterContracts.IsAvailableTo(harbourmaster)) return;
+
+            if (harbourmasterContracts.HasActiveContract)
+            {
+                Button deliver = MakeButton("SUBMIT REQUIRED SALVAGE", () =>
+                {
+                    long reward;
+                    string message;
+                    bool success = harbourmasterContracts.TryCompleteActive(harbourmaster, out reward, out message);
+                    statusLabel.text = message;
+                    furnitureTitle.text = "HARBOURMASTER / CONTRACT DESK";
+                    furnitureDetail.text = message;
+                    RenderHarbourmasterContracts(harbourmaster);
+                });
+                vendorActions.Add(deliver);
+            }
+            else
+            {
+                Button accept = MakeButton("ACCEPT NEXT HARBOUR CONTRACT", () =>
+                {
+                    string message;
+                    bool success = harbourmasterContracts.TryAcceptNext(harbourmaster, out message);
+                    statusLabel.text = message;
+                    furnitureTitle.text = "HARBOURMASTER / CONTRACT DESK";
+                    furnitureDetail.text = message;
+                    RenderHarbourmasterContracts(harbourmaster);
+                });
+                vendorActions.Add(accept);
+            }
         }
 
         private void RenderMaraServices()
