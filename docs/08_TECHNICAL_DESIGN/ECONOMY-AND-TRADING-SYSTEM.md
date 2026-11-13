@@ -68,7 +68,7 @@ The current generated Greyhaven vessel owns the wallet, Mara market, fuel contro
 
 A new campaign receives a one-time $25.00 starter wallet balance. A zero-balance save with a transaction history is never topped up. The current salvage values are explicitly provisional and are defined in the seafood price schedule's supplemental salvage table.
 
-**Not yet implemented:** research submissions, permits, complete catch legality and protected-species rules, the full catalogue price authoring, active rod/reel/line equipment-slot application, destination-specific travel-market routes, detailed fuel range/net-profit analytics, and full Unity Play Mode balancing. The first three persistent Greyhaven salvage delivery contracts are now available through the Harbourmaster's dockside service panel; the board supports one active contract at a time, atomic cargo-for-wallet completion, and save persistence. The editor builder must be run in Unity to regenerate the Greyhaven scene with the new runtime components and authored cargo data.
+**Remaining:** broader authored seafood/invertebrate catalogue, per-catch size/closed-area/prohibited-gear legality, destination-specific trading routes, and actual starter/average/optimized expedition tuning. Telemetry is a measurement system, not evidence that balance is already correct. Unity compilation, Edit Mode execution, Play Mode testing, scene regeneration and economy playtests remain required.
 
 ## 5.1 Harbourmaster delivery contracts
 
