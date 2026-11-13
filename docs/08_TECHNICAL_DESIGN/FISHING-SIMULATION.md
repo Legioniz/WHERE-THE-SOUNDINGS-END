@@ -35,6 +35,7 @@ Fish-only CargoItemDefinition fields include habitat flags, preferred technique/
 - Burst frequency is a per-second rate. Per-frame chance uses the exponential hazard conversion `1 - exp(-rate × deltaTime)`, making cumulative chance frame-rate independent.
 - Migration amount uses stochastic rounding of `population × migrationRate` per six-hour interval. The fractional remainder becomes the probability of moving one additional fish; source population is bounded to prevent emptying a habitat in one tick.
 - Candidate weights are not UI percentages. Any future odds display must compute each final probability after the full candidate set has been assembled and normalized.
+- Catch size is a quality-scaled result, not a probability: its random factor is sampled uniformly from `0.65` to `1.0`. The previous `1.05` upper bound was clamped to `1.0`, creating an artificial pile-up at the maximum.
 
 ## Habitat and ecology approximation
 
