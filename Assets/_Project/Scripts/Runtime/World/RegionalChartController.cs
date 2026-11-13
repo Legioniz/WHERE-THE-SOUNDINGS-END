@@ -102,6 +102,17 @@ namespace WhereTheSoundingsEnd.World
             }
         }
 
+        /// <summary>
+        /// Records an earned permit without marking the region as visited or revealing its
+        /// location. Physical entry remains the only way to add a visited chart record.
+        /// </summary>
+        public bool GrantChartPermit(string regionId)
+        {
+            string id = RegionalChartPolicy.NormalizeId(regionId);
+            if (id.Length == 0) return false;
+            return unlockedRegionIds.Add(id);
+        }
+
         public List<DeepOceanPhenomenonSite> GetKnownSitesForCurrentRegion()
         {
             List<DeepOceanPhenomenonSite> known = new List<DeepOceanPhenomenonSite>();
