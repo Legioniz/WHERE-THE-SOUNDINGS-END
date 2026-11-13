@@ -86,7 +86,7 @@ The Edit Mode assembly contains deterministic suites for the following policies 
 - Site signal confidence from authored signal strength and acoustic attenuation.
 - NPC day/overnight schedule boundaries and missing-window behaviour.
 - NPC stable-ID relationship persistence and schema 5-to-6 memory-ledger migration.
-- Dockside menu, inventory and pause-overlay mutual exclusion, plus non-finite/paused-time rejection.
+- Dockside menu, inventory and pause-overlay mutual exclusion, non-finite/paused-time rejection, and restoration of the prior time scale if the hub component is disabled while open.
 - Contact-point relative velocity including angular motion; contact-normal impact speed, glancing-impact rejection, threshold/capped hull damage, disabled damage-rate tuning, invalid collision inputs and proportional engine damage.
 - Greyhaven shoreline determinism/envelope, bounded multi-scale heightfield, distinct headland and inland-spine elevations, beach/grass/basalt classification and invalid terrain-sample fallback.
 - Four-point buoyancy force and damping response, forward/reverse acceleration, braking behaviour, engine/hull condition effects, and flow-dependent rudder authority.
