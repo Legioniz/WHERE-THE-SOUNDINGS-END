@@ -19,6 +19,7 @@ namespace WhereTheSoundingsEnd.Economy
         private readonly HashSet<string> transactionLookup = new HashSet<string>(StringComparer.Ordinal);
 
         public long WalletCents { get { return walletCents; } }
+        public event Action<string, long, long> TransactionApplied;
 
         private void Awake()
         {
@@ -60,6 +61,8 @@ namespace WhereTheSoundingsEnd.Economy
             walletCents = nextBalance;
             processedTransactionIds.Add(transactionId);
             transactionLookup.Add(transactionId);
+            Action<string, long, long> handler = TransactionApplied;
+            if (handler != null) handler(transactionId, deltaCents, walletCents);
             return true;
         }
 
