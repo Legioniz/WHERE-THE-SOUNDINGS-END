@@ -148,6 +148,16 @@ namespace WhereTheSoundingsEnd.World
             return names;
         }
 
+        public List<string> GetPermittedRegionNames()
+        {
+            List<string> names = new List<string>();
+            foreach (string id in unlockedRegionIds)
+                if (!visitedRegionIds.Contains(id))
+                    names.Add(GetDisplayName(id));
+            names.Sort(StringComparer.Ordinal);
+            return names;
+        }
+
         public void CaptureSaveData(SaveGameData data)
         {
             if (data == null || data.world == null || data.progress == null)
