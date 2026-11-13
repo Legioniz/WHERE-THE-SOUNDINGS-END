@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Proposed  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-12
+> Version: 0.3  
+> Last reviewed: 2026-11-13
 
 This document defines the narrative functions and knowledge boundaries of the principal cast. It does not replace the runtime NPC roster or claim that every character is implemented.
 
@@ -95,3 +95,14 @@ The Sounder, Nell, the Orison Captain and the proposed story relationships are n
 - [Dialogue System](../03_STORY_AND_NARRATIVE/DIALOGUE-SYSTEM.md)
 - [Protagonist](PROTAGONIST.md)
 - [Main Story](../03_STORY_AND_NARRATIVE/MAIN-STORY.md)
+
+## 7. Greyhaven voice and personal-life expansion
+
+The current dialogue pass adds small personal details without changing the residents' established roles or giving any one person the whole mystery:
+
+- **Harbourmaster:** treats charts as records rather than promises; older channel charts disagree around the outer shoal. His authority comes from careful watchkeeping, not supernatural expertise.
+- **Mara Venn:** approaches market survival as a community responsibility. She records catch condition and protects the dignity of the crews who bring it in rather than turning their fear into gossip.
+- **Tomas Vale:** restores radio receivers during quiet hours, mainly to understand the difference between a genuine transmission and equipment interference. He remains skeptical and does not claim radio expertise explains the Choir.
+- **Inez Sarmiento:** makes small woven birds from leftover sound line, a craft learned from her mother. Her hobby contrasts with the practical repair work and reinforces her patient, evidence-led character.
+
+The added details are proposed character texture in the current Yarn prototype. They do not change stable NPC IDs, schedules, relationship rules or the unresolved status of the Orison story.
