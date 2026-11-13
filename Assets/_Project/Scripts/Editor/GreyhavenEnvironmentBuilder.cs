@@ -310,7 +310,15 @@ namespace WhereTheSoundingsEnd.Editor
                 CreateCargoDefinition("GEAR-ROD-01", "Handline Rod", CargoItemCategory.Equipment,
                     new[] { Vector2Int.zero, Vector2Int.up, Vector2Int.up * 2, Vector2Int.up * 3 }, 0f),
                 CreateCargoDefinition("GEAR-LAMP-01", "Deck Lantern", CargoItemCategory.Equipment,
-                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f)
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f),
+                CreateCargoDefinition("SUP-BAIT-WORM", "Worm Bait", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero }, 0f),
+                CreateCargoDefinition("SUP-BAIT-FISH", "Small Fish Bait", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero, Vector2Int.right }, 0f),
+                CreateCargoDefinition("SUP-BAIT-SHELLFISH", "Shellfish Bait", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero }, 0f),
+                CreateCargoDefinition("SUP-BAIT-LURE", "Reusable Lure", CargoItemCategory.Equipment,
+                    new[] { Vector2Int.zero, Vector2Int.right }, 0f)
             };
 
             ConfigureFishEcology(definitions);
