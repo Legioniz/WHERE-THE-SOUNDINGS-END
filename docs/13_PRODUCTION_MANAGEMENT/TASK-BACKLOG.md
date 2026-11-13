@@ -272,4 +272,13 @@ Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOM
 - Advanced save schema from v7 to v8 with an integer-cent wallet field and bounded transaction-id ledger. Existing whole-dollar `PlayerSaveData.currency` values migrate at 100 cents per unit; the legacy field is retained for backward compatibility.
 - Added `EconomyPolicy` for sale-line math, demand bounds, repair/fuel quotes and safe wallet delta calculation, plus Edit Mode test source.
 - Remaining: populate each ScriptableObject from the authoritative schedule; connect buyer stock, atomic sales/purchases, fuel/repairs, vendor/NPC gates and UI.
-\n\n### Harbourmaster contract board — 2026-11-14\n\n- Added three one-unit salvage delivery contracts with prototype rewards: Corroded Ship Fittings ($8.50), Salt-Stiff Canvas ($5.00), and Waterlogged Timber ($7.00).\n- The Harbourmaster panel allows one active contract at a time, rejects unavailable resident service, and prevents repeat completion.\n- Delivery removes the selected placement only if the wallet reward ledger accepts the idempotent transaction.\n- Active job and completion history reuse `ProgressSaveData.worldFlags`; no save schema bump.\n- Added save validation tests and required-file guards. Unity execution remains pending.\n- Still open: purchased gear must modify active loadout slots; research submissions/permits; broader contract catalogue; complete catch legality; ECO-11 voyage balancing.\n
+
+
+### Harbourmaster contract board — 2026-11-14
+
+- Added three one-unit salvage delivery contracts with prototype rewards: Corroded Ship Fittings ($8.50), Salt-Stiff Canvas ($5.00), and Waterlogged Timber ($7.00).
+- The Harbourmaster panel allows one active contract at a time, rejects unavailable resident service, and prevents repeat completion.
+- Delivery removes the selected placement only if the wallet reward ledger accepts the idempotent transaction.
+- Active job and completion history reuse `ProgressSaveData.worldFlags`; no save schema bump.
+- Added save validation tests and required-file guards. Unity execution remains pending.
+- Still open: purchased gear must modify active loadout slots; research submissions/permits; broader contract catalogue; complete catch legality; ECO-11 voyage balancing.
