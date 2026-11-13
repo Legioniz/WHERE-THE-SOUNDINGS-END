@@ -74,6 +74,11 @@ namespace WhereTheSoundingsEnd.World
         };
 
         private static readonly string[] Baits = { "worm", "small-fish", "shellfish", "lure" };
+        private static readonly FishHabitat[] HabitatOrder =
+        {
+            FishHabitat.Estuary, FishHabitat.Nearshore, FishHabitat.Kelp,
+            FishHabitat.OpenWater, FishHabitat.DeepWater
+        };
         private static readonly string[] BaitLabels = { "Worm", "Small fish", "Shellfish", "Lure" };
         private static readonly FishingTechnique[] Techniques = (FishingTechnique[])Enum.GetValues(typeof(FishingTechnique));
 
@@ -262,7 +267,8 @@ namespace WhereTheSoundingsEnd.World
 
         private void UpdateFightTension()
         {
-            float burstChance = Mathf.Clamp01(hookedFish.BurstFrequency * Time.deltaTime * 1.15f);
+            float burstChance = FishingSimulationPolicy.CalculateEventChance(
+                hookedFish.BurstFrequency * 1.15f, Time.deltaTime);
             float burst = UnityEngine.Random.value < burstChance ? 2.8f : 1f;
             float resistance = hookedFish.Resistance;
             float rodLimit = Rods[rodIndex].tensionLimit;
@@ -349,6 +355,8 @@ namespace WhereTheSoundingsEnd.World
             List<CargoItemDefinition> candidates = new List<CargoItemDefinition>();
             List<float> weights = new List<float>();
             float total = 0f;
+            bool aberrationRolled = false;
+            bool aberrationAllowed = false;
             IReadOnlyList<CargoItemDefinition> definitions = cargoHold.ItemDefinitions;
 
             for (int i = 0; i < definitions.Count; i++)
@@ -360,15 +368,24 @@ namespace WhereTheSoundingsEnd.World
 
                 float stock = GetPopulation(fish, activeHabitat);
                 if (stock <= 0f) continue;
-                float weight = stock;
-                if (fish.PreferredTechnique != FishPreferredTechnique.Any &&
-                    !TechniqueMatches(fish.PreferredTechnique, technique))
-                    weight *= 0.35f;
-                if (fish.PreferredBaitId != "any" && fish.PreferredBaitId != Baits[baitIndex])
-                    weight *= 0.28f;
-                if (fish.IsAberrant && (seaState == null || !seaState.RollAberration()))
-                    continue;
-                if (fish.IsAberrant) weight *= 0.15f;
+                if (fish.IsAberrant)
+                {
+                    // One shared gate per bite-selection attempt: catalogue size must not
+                    // multiply the aberration event chance.
+                    if (!aberrationRolled)
+                    {
+                        aberrationAllowed = seaState != null && seaState.RollAberration();
+                        aberrationRolled = true;
+                    }
+                    if (!aberrationAllowed) continue;
+                }
+
+                bool techniqueMatches = fish.PreferredTechnique == FishPreferredTechnique.Any ||
+                                        TechniqueMatches(fish.PreferredTechnique, technique);
+                bool baitMatches = fish.PreferredBaitId == "any" ||
+                                   fish.PreferredBaitId == Baits[baitIndex];
+                float weight = FishingSimulationPolicy.CalculateCandidateWeight(
+                    stock, techniqueMatches, baitMatches, fish.IsAberrant);
 
                 candidates.Add(fish);
                 weights.Add(weight);
@@ -495,6 +512,86 @@ namespace WhereTheSoundingsEnd.World
             return FishingSimulationPolicy.IsTechniqueCompatible(preferred, actual);
         }
 
+        private void EnsurePopulationStocks()
+        {
+            if (cargoHold == null) return;
+            IReadOnlyList<CargoItemDefinition> definitions = cargoHold.ItemDefinitions;
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                CargoItemDefinition fish = definitions[i];
+                if (fish == null || fish.Category != CargoItemCategory.Fish) continue;
+                for (int h = 0; h < HabitatOrder.Length; h++)
+                {
+                    FishHabitat habitat = HabitatOrder[h];
+                    if ((fish.Habitats & habitat) != 0)
+                        GetPopulation(fish, habitat);
+                }
+            }
+        }
+
+        private void AdvanceMigration()
+        {
+            if (seaState == null || cargoHold == null) return;
+            double now = seaState.ElapsedGameSeconds;
+            if (lastMigrationGameSeconds <= 0d)
+            {
+                lastMigrationGameSeconds = now;
+                return;
+            }
+
+            const double migrationIntervalSeconds = 21600d;
+            int elapsedIntervals = (int)Math.Floor(
+                Math.Max(0d, now - lastMigrationGameSeconds) / migrationIntervalSeconds);
+            if (elapsedIntervals <= 0) return;
+
+            // Bound work after a very long offline gap; remaining intervals are processed
+            // on subsequent frames without discarding elapsed simulation time.
+            int intervalsToProcess = Math.Min(elapsedIntervals, 365);
+            IReadOnlyList<CargoItemDefinition> definitions = cargoHold.ItemDefinitions;
+            for (int interval = 0; interval < intervalsToProcess; interval++)
+            {
+                for (int i = 0; i < definitions.Count; i++)
+                {
+                    CargoItemDefinition fish = definitions[i];
+                    if (fish == null || fish.Category != CargoItemCategory.Fish) continue;
+
+                    int[] transfers = new int[HabitatOrder.Length];
+                    for (int source = 0; source < HabitatOrder.Length; source++)
+                    {
+                        FishHabitat sourceHabitat = HabitatOrder[source];
+                        if ((fish.Habitats & sourceHabitat) == 0) continue;
+
+                        int destination = -1;
+                        for (int offset = 1; offset < HabitatOrder.Length; offset++)
+                        {
+                            int candidate = (source + offset) % HabitatOrder.Length;
+                            if ((fish.Habitats & HabitatOrder[candidate]) != 0)
+                            {
+                                destination = candidate;
+                                break;
+                            }
+                        }
+                        if (destination < 0) continue;
+
+                        int stock = Mathf.RoundToInt(GetPopulation(fish, sourceHabitat));
+                        int amount = FishingSimulationPolicy.CalculateMigrationAmount(stock, fish.MigrationRate);
+                        transfers[source] -= amount;
+                        transfers[destination] += amount;
+                    }
+
+                    for (int h = 0; h < HabitatOrder.Length; h++)
+                    {
+                        if (transfers[h] == 0) continue;
+                        string key = PopulationKey(fish.ItemId, HabitatOrder[h]);
+                        GetPopulation(fish, HabitatOrder[h]);
+                        populations[key] = Mathf.Max(0, populations[key] + transfers[h]);
+                    }
+                }
+            }
+
+            lastMigrationGameSeconds += intervalsToProcess * migrationIntervalSeconds;
+        }
+
         private float GetPopulation(CargoItemDefinition fish, FishHabitat habitat)
         {
             string key = PopulationKey(fish.ItemId, habitat);
@@ -520,10 +617,12 @@ namespace WhereTheSoundingsEnd.World
             }
 
             double elapsedDays = Math.Max(0d, now - previous) / 86400d;
-            if (elapsedDays < 1d) return;
-            int recovery = Mathf.RoundToInt((float)(fish.DailyPopulationRecovery * elapsedDays));
+            int completeDays = (int)Math.Floor(elapsedDays);
+            if (completeDays <= 0) return;
+            int recovery = fish.DailyPopulationRecovery * completeDays;
             populations[key] = Mathf.Clamp(populations[key] + recovery, 0, fish.InitialPopulation * 2);
-            populationTimes[key] = now;
+            // Preserve fractional-day remainder instead of rounding it away on each query.
+            populationTimes[key] = previous + completeDays * 86400d;
         }
 
         private void ChangePopulation(CargoItemDefinition fish, FishHabitat habitat, int delta)
