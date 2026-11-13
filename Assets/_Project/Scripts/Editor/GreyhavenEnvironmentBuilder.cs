@@ -329,7 +329,7 @@ namespace WhereTheSoundingsEnd.Editor
         private static void ConfigureEconomy(List<CargoItemDefinition> definitions)
         {
             // Initial Greyhaven species use the authoritative schedule's USD/kg values.
-            // Unlisted, aberrant, salvage, quest and equipment records remain ineligible
+            // Unlisted seafood, aberrant specimens, quest cargo and equipment remain ineligible
             // until their legal buyer contract and price unit are explicitly authored.
             Dictionary<string, float> seafoodUsdPerKg = new Dictionary<string, float>(StringComparer.Ordinal)
             {
