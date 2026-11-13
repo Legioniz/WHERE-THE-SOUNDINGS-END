@@ -18,6 +18,7 @@ Greyhaven_Blockout owns:
 - Player vessel Rigidbody, boat controller, hydrodynamics, camera and shared Input System action map.
 - Water surface mesh and analytic surface sampler.
 - Fishing, dredging, sounding and dynamic site interactions.
+- RegionalChartController on the persistent vessel, owning physical region-visit detection, chart unlock records and discovered-site filtering.
 - SeaStateDirector, atmosphere/horror systems and acoustic event listeners.
 - Four NpcAgent residents, schedules, waypoint anchors and Yarn dialogue.
 - GreyhavenRuntimeUI, GreyhavenFrontEndUI and the persistent DocksideHubController.
@@ -64,7 +65,11 @@ OuterShoals_SurveySandbox and HollowTrench_SurveySandbox are generated standalon
 
 Do not edit generated static area roots by attaching runtime scripts or rigidbodies. Update the builder or create a persistent gameplay owner instead.
 
-## 7. Verification boundary
+## 7. Regional chart ownership
+
+The Greyhaven persistent vessel owns RegionalChartController. The controller reads active DeepOceanSurveyRegion bounds and SoundingRigController discoveries, and writes visit/unlock state through the existing save coordinator. It is not attached to streamed static area roots. The GreyhavenRuntimeUI presents the local chart; unknown regions and undiscovered sites are intentionally omitted.
+
+## 8. Verification boundary
 
 GitHub CI validates repository contracts and C# syntax. It does not import Unity assemblies, compile Yarn, regenerate scenes, run Edit Mode/Play Mode tests, measure transition hitches or build Windows.
 
