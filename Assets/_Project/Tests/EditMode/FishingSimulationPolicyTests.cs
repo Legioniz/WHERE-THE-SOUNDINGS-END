@@ -29,7 +29,7 @@ namespace WhereTheSoundingsEnd.Tests
         [Test]
         public void TimingWindow_AlwaysHasAFairMinimumAndMaximum()
         {
-            Assert.That(FishingSimulationPolicy.CalculateTimingWindow(0.4f, 3f, 0.1f), Is.EqualTo(0.055f));
+            Assert.That(FishingSimulationPolicy.CalculateTimingWindow(0.02f, 3f, 0.5f), Is.EqualTo(0.055f));
             Assert.That(FishingSimulationPolicy.CalculateTimingWindow(0.4f, 0f, 2f), Is.EqualTo(0.18f));
         }
 
