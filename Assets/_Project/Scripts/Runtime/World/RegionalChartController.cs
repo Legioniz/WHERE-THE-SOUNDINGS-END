@@ -152,6 +152,7 @@ namespace WhereTheSoundingsEnd.World
         {
             if (data == null || data.world == null || data.progress == null) return;
             currentRegion = null;
+            latestDiscovery = string.Empty;
             visitedRegionIds.Clear();
             unlockedRegionIds.Clear();
             if (data.world.visitedRegionIds != null)
