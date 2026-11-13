@@ -31,6 +31,7 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField, Min(0f)] private float fuelUsdPerUnit = 0.11f;
         [SerializeField, Min(0f)] private float holdCellRepairUsd = 1.25f;
 
+        public long WalletCents => wallet != null ? wallet.WalletCents : 0L;
         public float FuelUnits => fuel != null ? fuel.FuelUnits : 0f;
         public float FuelCapacity => fuel != null ? fuel.Capacity : 0f;
         public bool TomasAvailable => tomas != null && tomas.CanTrade &&
