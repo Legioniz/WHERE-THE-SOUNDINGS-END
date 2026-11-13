@@ -45,6 +45,10 @@ REQUIRED_FILES = [
     "docs/08_TECHNICAL_DESIGN/AREA-STREAMING-AND-ASSET-RESIDENCY.md",
     "docs/08_TECHNICAL_DESIGN/GREYHAVEN-DOCKSIDE-INTERACTION-HUB.md",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyMath.cs",
+    "Assets/_Project/Scripts/Runtime/World/RegionalChartPolicy.cs",
+    "Assets/_Project/Scripts/Runtime/World/RegionalChartController.cs",
+    "Assets/_Project/Tests/EditMode/RegionalChartPolicyTests.cs",
+    "Assets/_Project/Tests/EditMode/RegionalChartSaveTests.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyRegion.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonSite.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonRules.cs",
@@ -149,13 +153,15 @@ def main() -> int:
                 failures.append("Input action/binding identifiers must be unique.")
 
         save_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs").read_text(encoding="utf-8")
-        if "CurrentSchemaVersion = 6" not in save_source:
-            failures.append("SaveGameData schema must be version 6 after NPC relationship-memory persistence changes.")
+        if "CurrentSchemaVersion = 7" not in save_source:
+            failures.append("SaveGameData schema must be version 7 after regional chart discovery persistence changes.")
 
         if "case 4:" not in save_source or "data.schemaVersion = 5;" not in save_source:
             failures.append("SaveGameData is missing the schema 4 to 5 atmosphere-state migration.")
         if "case 5:" not in save_source or "data.schemaVersion = 6;" not in save_source:
             failures.append("SaveGameData is missing the schema 5 to 6 NPC relationship-memory migration.")
+        if "case 6:" not in save_source or "data.schemaVersion = 7;" not in save_source or "visitedRegionIds" not in save_source:
+            failures.append("SaveGameData is missing the schema 6 to 7 regional chart discovery migration.")
 
         for required_text in (
             "weatherRemainingGameSeconds", "weatherShiftCooldownGameSeconds",
@@ -170,6 +176,24 @@ def main() -> int:
         for required_text in ("SoundingPulse", "discoveredPhenomenonSiteIds", "evaluatedSurveyOpportunityIds", "AcousticEventBus.Publish", "IsIndependentLayerObservation", "CalculateSiteSignalConfidence"):
             if required_text not in survey_source:
                 failures.append(f"SoundingRigController is missing expected survey feature: {required_text}")
+
+        chart_policy_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/RegionalChartPolicy.cs").read_text(encoding="utf-8")
+        for required_text in ("IsRegionKnown", "ShouldRevealSite", "TryRecordVisit"):
+            if required_text not in chart_policy_source:
+                failures.append(f"RegionalChartPolicy is missing discovery rule: {required_text}")
+
+        chart_controller_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/RegionalChartController.cs").read_text(encoding="utf-8")
+        for required_text in ("visitedRegionIds", "unlockedRegionIds", "GetKnownSitesForCurrentRegion", "ISaveParticipant", "ISaveDataValidator", "TryRecordVisit"):
+            if required_text not in chart_controller_source:
+                failures.append(f"RegionalChartController is missing chart feature: {required_text}")
+        if "RegionalChartController" not in (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8"):
+            failures.append("Greyhaven builder does not attach regional chart discovery to the persistent vessel.")
+        if "RegionalChartController" not in (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8"):
+            failures.append("Deep-ocean survey sandboxes do not attach regional chart discovery.")
+        chart_ui_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs").read_text(encoding="utf-8")
+        for required_text in ("BuildChartPanel", "ToggleChart", "NO MARKS  /  NO BEARINGS", "GetKnownSitesForCurrentRegion"):
+            if required_text not in chart_ui_source:
+                failures.append(f"GreyhavenRuntimeUI is missing fog-of-war chart presentation: {required_text}")
 
         site_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonSite.cs").read_text(encoding="utf-8")
         if "DeepOceanPhenomenonRules.IsAllowed" not in site_source:
