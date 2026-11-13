@@ -434,6 +434,7 @@ namespace WhereTheSoundingsEnd.World
 
             ChangePopulation(hookedFish, activeHabitat, -1);
             totalCatches++;
+            if (equipment != null) equipment.WearRodForCatch();
             string grade = quality >= 0.9f ? "PRISTINE" : quality >= 0.75f ? "GOOD" : quality >= 0.55f ? "FAIR" : "POOR";
             string species = hookedFish.DisplayName;
             status = "LANDED: " + species + " · " + size.ToString("0.0") + " kg · " + grade +
