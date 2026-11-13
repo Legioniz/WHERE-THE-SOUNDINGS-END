@@ -238,8 +238,8 @@ Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOM
 | ID | Priority | Task | Dependencies | Status |
 |---|---|---|---|---|
 | ECO-01 | P1 | Add sale-unit/quantity and base-price data to cargo definitions using the existing schedule; preserve stable item IDs | Existing cargo catalog and price schedule | Partial — authored fields and persisted catch quantity; price catalog authoring remains open |
-| ECO-02 | P1 | Add economy save DTO, integer-cent wallet, schema migration and legacy currency conversion | Save schema v7, save migration tests | Partial — schema v8 cents wallet DTO and v7 migration; runtime wallet binding/tests remain open |
-| ECO-03 | P1 | Implement deterministic sale, demand, repair, fuel-cost and affordability policies | ECO-01, ECO-02 | Partial — pure deterministic policies and Edit Mode test source; Unity execution and service integration remain open |
+| ECO-02 | P1 | Add economy save DTO, integer-cent wallet, schema migration and legacy currency conversion | Save schema v7, save migration tests | Partial — schema v8 cents wallet DTO, v7 migration and generated-vessel wallet component; Unity migration/wallet tests remain open |
+| ECO-03 | P1 | Implement deterministic sale, demand, repair, fuel-cost and affordability policies | ECO-01, ECO-02 | Partial — deterministic policies, idempotent wallet runtime and Edit Mode test source; Unity execution and service integration remain open |
 | ECO-04 | P1 | Implement vendor profiles, item acceptance, buyer stock, demand refresh and atomic cargo sales | ECO-03, SpatialCargoHold | Open |
 | ECO-05 | P1 | Implement purchases, vendor stock, bait/supply consumption and hold/equipment capacity checks | ECO-04, cargo/equipment definitions | Open |
 | ECO-06 | P1 | Integrate fuel consumption with propulsion/engine load; expose range and refuel quotes | ECO-03, BoatPrototypeController, VesselConditionController | Open |
@@ -271,4 +271,4 @@ Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOM
 - Added per-instance sale quantity to cargo placements and save records. `FishingSystemDirector` now passes the landed catch weight into the cargo placement instead of losing the calculated kilogram value.
 - Advanced save schema from v7 to v8 with an integer-cent wallet field and bounded transaction-id ledger. Existing whole-dollar `PlayerSaveData.currency` values migrate at 100 cents per unit; the legacy field is retained for backward compatibility.
 - Added `EconomyPolicy` for sale-line math, demand bounds, repair/fuel quotes and safe wallet delta calculation, plus Edit Mode test source.
-- Remaining: populate each ScriptableObject from the authoritative schedule; decide and implement the runtime wallet owner; add migration tests; connect buyer stock, transactions, vendor/NPC gates and UI.
+- Remaining: populate each ScriptableObject from the authoritative schedule; connect buyer stock, atomic sales/purchases, fuel/repairs, vendor/NPC gates and UI.
