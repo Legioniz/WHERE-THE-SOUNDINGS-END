@@ -742,7 +742,7 @@ namespace WhereTheSoundingsEnd.Interaction
                 furnitureDetail.text = message;
                 RenderHarbourmasterContracts(harbourmaster);
             });
-            submitResearch.SetEnabled(harbourmasterResearch.DiscoveryCount > 0);
+            submitResearch.SetEnabled(harbourmasterResearch.CanSubmitNext);
             vendorActions.Add(submitResearch);
         }
 
