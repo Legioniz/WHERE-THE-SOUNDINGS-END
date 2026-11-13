@@ -74,7 +74,7 @@ Do not repurpose an existing field with a new meaning. Add a new field, migrate,
 
 ## NPC relationship persistence
 
-Save schema v7 is the current save contract and extends each NPC state record with `relationshipMemoryIds`, a per-resident list capped at 128 stable event IDs. Validation rejects null/oversized ledgers, duplicate or malformed IDs, and more than 4096 remembered events across the save.
+Save schema v8 is the current save contract and extends each NPC state record with `relationshipMemoryIds`, a per-resident list capped at 128 stable event IDs. Validation rejects null/oversized ledgers, duplicate or malformed IDs, and more than 4096 remembered events across the save.
 
 Schema 5 NPC relationship scores were not modified by gameplay and used zero as their original default. The v5-to-v6 migration maps an empty or zero legacy score to neutral 50, initializes each memory list, and preserves any non-zero score. Later saves store the score and event ledger together.
 
