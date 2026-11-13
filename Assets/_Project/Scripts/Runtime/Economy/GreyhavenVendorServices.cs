@@ -24,6 +24,7 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private VesselFuelController fuel;
         [SerializeField] private NpcAgent tomas;
         [SerializeField] private NpcAgent inez;
+        [SerializeField] private SeaStateDirector seaState;
         [SerializeField] private List<MarketStockSaveData> supplyStock = new List<MarketStockSaveData>();
         [SerializeField, Min(0f)] private float hullRepairUsdPerPoint = 0.22f;
         [SerializeField, Min(0f)] private float engineRepairUsdPerPoint = 0.30f;
@@ -53,6 +54,7 @@ namespace WhereTheSoundingsEnd.Economy
                     else if (residents[i].NpcId == InezId) inez = residents[i];
                 }
             }
+            if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             if (supplyStock == null) supplyStock = new List<MarketStockSaveData>();
         }
 
@@ -201,7 +203,8 @@ namespace WhereTheSoundingsEnd.Economy
                 data.economy.marketStocks.Add(new MarketStockSaveData
                 {
                     vendorId = InezId, itemId = entry.itemId,
-                    currentStock = entry.currentStock, targetStock = entry.targetStock
+                    currentStock = entry.currentStock, targetStock = entry.targetStock,
+                    lastRestockDay = entry.lastRestockDay
                 });
             }
         }
@@ -238,7 +241,8 @@ namespace WhereTheSoundingsEnd.Economy
                 restored.Add(new MarketStockSaveData
                 {
                     vendorId = InezId, itemId = entry.itemId,
-                    currentStock = entry.currentStock, targetStock = entry.targetStock
+                    currentStock = entry.currentStock, targetStock = entry.targetStock,
+                    lastRestockDay = entry.lastRestockDay
                 });
             }
             supplyStock = restored;
@@ -261,6 +265,19 @@ namespace WhereTheSoundingsEnd.Economy
             };
             supplyStock.Add(created);
             return created;
+        }
+
+        private void RefreshStock(MarketStockSaveData entry)
+        {
+            if (entry == null || seaState == null) return;
+            int currentDay = Math.Max(1, seaState.DayNumber);
+            if (entry.lastRestockDay <= 0) entry.lastRestockDay = currentDay;
+            int elapsedDays = currentDay - entry.lastRestockDay;
+            if (elapsedDays <= 0) return;
+            int dailyRestock = Math.Max(1, Mathf.CeilToInt(entry.targetStock * 0.25f));
+            long restored = (long)entry.currentStock + (long)dailyRestock * elapsedDays;
+            entry.currentStock = (int)Math.Min(entry.targetStock, Math.Min(MaximumStock, restored));
+            entry.lastRestockDay = currentDay;
         }
 
         private static bool TryGetSupplyPrice(string itemId, out decimal price)
