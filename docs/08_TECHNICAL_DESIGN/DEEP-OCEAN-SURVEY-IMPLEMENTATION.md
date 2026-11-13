@@ -41,7 +41,8 @@ Functions:
 - GetNightWeight: smooth 24-hour day/night weighting.
 - GetScatteringLayerDepth: interpolates authored day and night depths.
 - IsDistinctMidwaterReturn: checks whether the biological return is sufficiently separated from the seabed.
-- CalculateReturnConfidence: combines signal quality, biological-layer density and acoustic attenuation.\n- CalculateSiteSignalConfidence: combines authored site signal strength, signal quality and attenuation.
+- CalculateReturnConfidence: combines signal quality, biological-layer density and acoustic attenuation.
+- CalculateSiteSignalConfidence: combines authored site signal strength, signal quality and attenuation.
 - StableKey: FNV-1a hash for repeatable opportunity seeding.
 - NormalizeHour: wraps hour values safely.
 
@@ -97,7 +98,13 @@ The rules prevent obviously misplaced content from becoming discoverable. Exampl
 
 **Known limitation:** The allowed depth bands are authored game constraints, not an exhaustive scientific occurrence database. They do not replace a geologist-reviewed placement map.
 
-### 3.5 SoundingRigController.cs
+### 3.6 RegionalChartController.cs
+
+**Role:** Physical region-visit discovery and chart data access. It is attached to the persistent vessel, resolves the active DeepOceanSurveyRegion at a throttled interval, records first visits, and exposes only Sounding Rig-discovered sites in the active visited region. It persists visited region IDs in SaveGameData schema v7 and preserves the existing unlockedRegionIds progression collection.
+
+The chart is a local normalised survey plot, not a GPS, calibrated nautical chart or inter-region route map. Unknown regions and undiscovered sites do not produce map marks, names, bearings or compass guidance.
+
+### 3.7 SoundingRigController.cs
 
 **Role:** Player-facing orchestration.
 
