@@ -98,13 +98,13 @@ The rules prevent obviously misplaced content from becoming discoverable. Exampl
 
 **Known limitation:** The allowed depth bands are authored game constraints, not an exhaustive scientific occurrence database. They do not replace a geologist-reviewed placement map.
 
-### 3.6 RegionalChartController.cs
+### 3.5 RegionalChartController.cs
 
 **Role:** Physical region-visit discovery and chart data access. It is attached to the persistent vessel, resolves the active DeepOceanSurveyRegion at a throttled interval, records first visits, and exposes only Sounding Rig-discovered sites in the active visited region. It persists visited region IDs in SaveGameData schema v7 and preserves the existing unlockedRegionIds progression collection.
 
 The chart is a local normalised survey plot, not a GPS, calibrated nautical chart or inter-region route map. Unknown regions and undiscovered sites do not produce map marks, names, bearings or compass guidance.
 
-### 3.7 SoundingRigController.cs
+### 3.6 SoundingRigController.cs
 
 **Role:** Player-facing orchestration.
 
@@ -128,9 +128,9 @@ Owns:
 - Ping sound is synthesized placeholder audio.
 - The survey does not model beam angle, transducer frequency, acoustic ray paths, multipath, target aspect, bottom composition or thermoclines.
 - The repeated-heading rule is a gameplay verification mechanic, not a claim about real sonar calibration.
-- The current site scan selects the nearest discoverable marker; it does not yet render multiple contacts or a chart overlay. Site markers are checked against DeepOceanPhenomenonRules, and the return reports marker depth plus signal confidence. Greyhaven's generated outer-channel wreck field carries the first valid marker (greyhaven.outer_channel_wreck). Greyhaven's generated outer-channel wreck field now carries the first marker (greyhaven.outer_channel_wreck), so the current playable scene has one real survey-discovery target without inventing deep-water geology in the harbor.
+- The current site scan selects the nearest discoverable marker; it does not yet render a multi-contact sonar screen. The separate regional chart overlay plots only sites already discovered by the Sounding Rig. Site markers are checked against DeepOceanPhenomenonRules, and the return reports marker depth plus signal confidence. Greyhaven's generated outer-channel wreck field carries the first valid marker (greyhaven.outer_channel_wreck). Greyhaven's generated outer-channel wreck field now carries the first marker (greyhaven.outer_channel_wreck), so the current playable scene has one real survey-discovery target without inventing deep-water geology in the harbor.
 
-### 3.6 AcousticEventBus.cs
+### 3.7 AcousticEventBus.cs
 
 **Role:** Typed gameplay signal metadata.
 
@@ -140,7 +140,7 @@ An AcousticSignal carries event ID, kind, region, position, loudness, nominal ra
 
 **Current limitation:** AcousticWorldListener is now a connected world-level receiver. It applies hearing-score and disturbance response and exposes SignalHeard for species-specific adapters. Creature, radio and acoustic-navigation AI are still not connected. The radius is an authored gameplay reach, not a physical sound-pressure contour.
 
-### 3.7 SeaStateDirector.cs
+### 3.8 SeaStateDirector.cs
 
 **Role:** Owns action-driven world time and environmental pressure.
 
@@ -148,16 +148,16 @@ The survey action is included with harvesting as a valid reason for the clock to
 
 **Risk to watch:** Every future action that advances time must be explicitly registered and must release its active flag on completion, cancellation, disable and scene unload. A stuck active flag would make the sea clock run indefinitely.
 
-### 3.8 SaveGameData.cs
+### 3.9 SaveGameData.cs
 
 **Role:** Data-only persistence contract.
 
-Schema v5 adds:
+Schema v5 originally introduced:
 - soundingPulseCount;
 - discoveredPhenomenonSiteIds;
 - evaluatedSurveyOpportunityIds.
 
-The migration path advances schemas 0–4 to 5. Schema 4 saves receive safe weather defaults, no pending bird event, and empty acoustic/inspection history. Old campaign saves remain loadable without inventing player discoveries.
+The survey fields remain in current schema v7. Schema v7 additionally adds WorldSaveData.visitedRegionIds for physical chart discovery; the v6-to-v7 migration starts with no invented visits and preserves existing unlockedRegionIds. Schema 4 saves receive safe weather defaults, no pending bird event, and empty acoustic/inspection history. Old campaign saves remain loadable without inventing player discoveries.
 
 **Persistence rule:** Discovery and evaluated opportunities are durable campaign state. UI captions, audio clips, temporary echoes and presentation objects are transient and must not be saved.
 
@@ -204,7 +204,7 @@ The current survey opportunity list is bounded to 256 entries because the monoto
 
 ## 7. Performance and lifecycle considerations
 
-- Region and site arrays are cached at Awake; dynamic scene streaming must refresh or register/unregister profiles explicitly.
+- SoundingRigController caches region and site arrays at Awake. RegionalChartController refreshes its scene references on a throttled 0.5-second interval so additive scene changes can update chart context; the sonar controller's own cached arrays still need explicit refresh/registration if authored survey markers are streamed dynamically.
 - A survey performs a bounded linear scan over region profiles and site markers. This is acceptable for the current small prototype but should become a spatial query when many sites are active.
 - The acoustic bus is event-driven; subscribers should not allocate large per-event collections or run expensive perception for distant inactive regions.
 - Runtime-created AudioClip must be destroyed with the component. The current controller does this in OnDestroy.
