@@ -372,7 +372,7 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 - Added authored sale price, unit label and explicit ordinary-sale eligibility to cargo definitions; unconfigured items remain unsellable.
 - Persisted per-instance sale quantity in cargo placements/save records and connected the fishing catch's calculated kilogram weight to its cargo instance.
 - Advanced save schema to v8 with integer-cent wallet storage and transaction-id ledger; schema-v7 legacy whole-dollar currency is converted to cents without deleting the legacy field.
-- Added deterministic sale, demand, repair/fuel quote and overflow-safe wallet policies with Edit Mode test source.
+- Added deterministic sale, demand, repair/fuel quote and overflow-safe wallet policies, plus an idempotent `EconomyWalletController` attached to the generated vessel and Edit Mode test source.
 - Static validator now requires the policy and tests.
 
 **Boundary:** This is a cohesive data/policy foundation, not the completed economy. Authored schedule values on assets, vendor transactions, market stock, purchases, fuel consumption, repairs, NPC trade gates and UI remain outstanding. Unity compile/Test Runner execution has not been performed in this environment.
