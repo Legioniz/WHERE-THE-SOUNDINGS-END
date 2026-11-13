@@ -759,7 +759,7 @@ namespace WhereTheSoundingsEnd.Interaction
                 furnitureDetail.text = statusLabel.text;
                 RenderTomasServices();
             });
-            repair.SetEnabled(repairQuote > 0L);
+            repair.SetEnabled(repairQuote > 0L && vendorServices.WalletCents >= repairQuote);
             vendorActions.Add(repair);
 
             long fuelQuote = vendorServices.GetRefuelQuoteCents(25f);
@@ -778,7 +778,7 @@ namespace WhereTheSoundingsEnd.Interaction
                 furnitureDetail.text = statusLabel.text;
                 RenderTomasServices();
             });
-            refuel.SetEnabled(fuelQuote > 0L);
+            refuel.SetEnabled(fuelQuote > 0L && vendorServices.WalletCents >= fuelQuote);
             vendorActions.Add(refuel);
 
             if (cargoHold != null)
@@ -911,7 +911,7 @@ namespace WhereTheSoundingsEnd.Interaction
                     furnitureDetail.text = statusLabel.text;
                     RenderInezServices();
                 });
-                purchase.SetEnabled(quote > 0L);
+                purchase.SetEnabled(quote > 0L && vendorServices.WalletCents >= quote);
                 vendorActions.Add(purchase);
             }
         }
