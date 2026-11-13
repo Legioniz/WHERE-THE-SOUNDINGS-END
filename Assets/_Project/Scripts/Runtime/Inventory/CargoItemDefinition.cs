@@ -3,6 +3,17 @@ using UnityEngine;
 
 namespace WhereTheSoundingsEnd.Inventory
 {
+    public enum CargoItemCategory
+    {
+        Fish,
+        Shellfish,
+        Cephalopod,
+        Salvage,
+        Quest,
+        Equipment,
+        DamagedCargo
+    }
+
     [Flags]
     public enum FishHabitat
     {
