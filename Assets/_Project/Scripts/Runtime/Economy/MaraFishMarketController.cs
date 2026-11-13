@@ -105,6 +105,7 @@ namespace WhereTheSoundingsEnd.Economy
                 { error = "Mara does not accept this cargo as ordinary seafood."; return false; }
 
                 MarketStockSaveData itemStock = GetOrCreateStock(definition.ItemId);
+                RefreshStock(itemStock);
                 decimal demand = EconomyPolicy.CalculateDemandFactor(
                     itemStock.targetStock, itemStock.currentStock, (decimal)scarcityResponse);
 
