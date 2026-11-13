@@ -15,7 +15,7 @@ Before starting a task, inspect the current repository state and read:
 7. `docs/13_PRODUCTION_MANAGEMENT/AI-ASSISTED-DEVELOPMENT.md` — AI/human responsibilities and implementation workflow.
 8. `docs/DOCUMENTATION-STANDARD.md` — documentation and evidence requirements.
 
-Then read the relevant feature specification, technical design, data contract, and tests. For NPC tasks, also read `docs/12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md`. Do not rely on a previous chat summary in place of the current repository.
+Then read the relevant feature specification, technical design, data contract, and tests. For economy/trading tasks, read `docs/08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md`, `docs/07_GAME_RULES_AND_BALANCING/ECONOMY-MATHEMATICS.md`, and `docs/07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md`. For NPC tasks, also read `docs/12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md`. Do not rely on a previous chat summary in place of the current repository.
 
 ## Project baseline
 
@@ -35,7 +35,7 @@ Do not change engine/package versions, platform assumptions, game mode, or archi
 
 The repository is a connected gameplay prototype, not a finished commercial game. Existing foundations include boat movement and four-point spring buoyancy, an action-driven sea clock, fishing/dredging minigames, cargo geometry, vessel condition, maritime atmosphere incidents, the Sounding Rig and acoustic events, four Greyhaven NPC residents with schedules and relationship-reactive Yarn dialogue, a boat-operated seven-location dockside hub, six-scene static-area streaming, and manual/autosave foundations with a title/pause save UI.
 
-Important known boundaries include incomplete creature AI and population simulation, incomplete market/economy and quest campaign, incomplete regional travel, no walkable on-foot character controller or physical 3D interiors, and no cross-scene restore flow. The title/pause UI provides five manual save slots and a separate autosave path, but it is not a complete cross-scene campaign browser. Dockside interiors are menu presentations with read/inspect/checkpoint actions, not walkable rooms. Unity runtime verification and Windows build evidence remain pending. Read the README and owning specifications for the current list.
+Important known boundaries include incomplete creature AI and population simulation, market/economy is specified but runtime transactions are not implemented; quest campaign, incomplete regional travel, no walkable on-foot character controller or physical 3D interiors, and no cross-scene restore flow. The title/pause UI provides five manual save slots and a separate autosave path, but it is not a complete cross-scene campaign browser. Dockside interiors are menu presentations with read/inspect/checkpoint actions, not walkable rooms. Unity runtime verification and Windows build evidence remain pending. Read the README and owning specifications for the current list.
 
 A design document, catalog entry, planned milestone, generated scene name, or static validator passing does not prove a feature is implemented. Never upgrade a status from planned/proposed to implemented without inspecting code/assets and verifying the behaviour.
 
