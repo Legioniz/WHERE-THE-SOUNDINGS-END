@@ -82,7 +82,7 @@ namespace WhereTheSoundingsEnd.Inventory
         {
             instanceId = null;
             CargoItemDefinition definition = FindDefinition(itemId);
-            if (definition == null || quantity < 1) return false;
+            if (definition == null || quantity < 1 || !IsFinite(saleQuantity) || saleQuantity <= 0f) return false;
 
             bool[,] occupied = BuildOccupiedGrid(null);
             bool[,] blocked = CargoGridGeometry.BuildBlockedGrid(width, height, blockedCells);
@@ -171,7 +171,8 @@ namespace WhereTheSoundingsEnd.Inventory
             int quantity,
             float quality,
             float freshness,
-            out string instanceId)
+            out string instanceId,
+            float saleQuantity = 1f)
         {
             instanceId = null;
             if (FindDefinition(itemId) == null || quantity < 1 || !IsFinite(saleQuantity) || saleQuantity <= 0f) return false;
