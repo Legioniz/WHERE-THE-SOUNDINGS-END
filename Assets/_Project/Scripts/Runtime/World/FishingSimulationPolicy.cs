@@ -12,6 +12,29 @@ namespace WhereTheSoundingsEnd.World
                    (int)preferred == (int)actual + 1;
         }
 
+        /// <summary>
+        /// Converts a per-second event rate into a frame-duration probability using the
+        /// exponential survival model. Splitting a time interval across frames preserves
+        /// the same cumulative event probability.
+        /// </summary>
+        public static float CalculateEventChance(float eventsPerSecond, float deltaSeconds)
+        {
+            if (eventsPerSecond <= 0f || deltaSeconds <= 0f) return 0f;
+            return Mathf.Clamp01(1f - Mathf.Exp(-eventsPerSecond * deltaSeconds));
+        }
+
+        /// <summary>Returns a relative candidate weight, not an absolute percentage.</summary>
+        public static float CalculateCandidateWeight(
+            float population, bool techniqueMatches, bool baitMatches, bool isAberrant)
+        {
+            if (population <= 0f) return 0f;
+            float weight = population;
+            if (!techniqueMatches) weight *= 0.35f;
+            if (!baitMatches) weight *= 0.28f;
+            if (isAberrant) weight *= 0.15f;
+            return weight;
+        }
+
         public static float CalculateTimingWindow(float baseWindow, float resistance, float tackleControl)
         {
             float difficultyPenalty = Mathf.Clamp(resistance, 0f, 3f) * 0.025f;
