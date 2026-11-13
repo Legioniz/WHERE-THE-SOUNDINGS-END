@@ -436,6 +436,9 @@ namespace WhereTheSoundingsEnd.Editor
             DeepOceanSiteInteractionController siteInteractions =
                 boat.gameObject.AddComponent<DeepOceanSiteInteractionController>();
             siteInteractions.Configure(controls, seaState);
+
+            // Persistent chart discovery belongs to the vessel, not streamed scenery roots.
+            boat.gameObject.AddComponent<RegionalChartController>();
         }
 
         private static void BuildHarbourmaster(
