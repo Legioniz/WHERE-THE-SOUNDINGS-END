@@ -241,3 +241,8 @@ The subsystem is not complete until:
 - acoustic threat responses use the existing Threat Director and warning/escape rules;
 - Unity Edit Mode and Play Mode tests pass in the pinned editor;
 - representative scene performance has been profiled.
+
+
+## Current save-schema note — 2026-11-13
+
+The survey, weather, horror, acoustic-history and temporary-atmosphere fields described here were introduced in schema v5 and remain part of current schema v6. Schema v6 subsequently adds bounded per-NPC relationship-event memory; it does not change the survey field ownership or stable site/opportunity IDs. See SAVE-DATA-STRUCTURE.md for the current migration contract.
