@@ -1,0 +1,671 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using WhereTheSoundingsEnd.Inventory;
+using WhereTheSoundingsEnd.Persistence;
+
+namespace WhereTheSoundingsEnd.World
+{
+    public enum FishingTechnique
+    {
+        StillFishing,
+        BottomFishing,
+        FloatFishing,
+        Jigging,
+        Trolling,
+        Drifting,
+        Handlining
+    }
+
+    public enum FishingEncounterPhase
+    {
+        Idle,
+        WaitingForBite,
+        HookWindow,
+        Fighting
+    }
+
+    /// <summary>
+    /// Owns the fishing encounter lifecycle, equipment loadout, catch resolution and
+    /// aggregate regional fish stocks. Dredging remains owned by HarvestingMinigameController.
+    /// </summary>
+    [DisallowMultipleComponent]
+    public sealed class FishingSystemDirector : MonoBehaviour, ISaveParticipant
+    {
+        [Serializable]
+        private sealed class GearChoice
+        {
+            public string id;
+            public string label;
+            public float castMultiplier;
+            public float tensionLimit;
+            public float control;
+            public float retrieveSpeed = 1f;
+            public int unlockAtCatches;
+        }
+
+        private static readonly GearChoice[] Rods =
+        {
+            new GearChoice { id = "shore-rod", label = "Shore rod", castMultiplier = 1f, tensionLimit = 0.85f, control = 0.9f, unlockAtCatches = 0 },
+            new GearChoice { id = "carbon-rod", label = "Carbon rod", castMultiplier = 1.25f, tensionLimit = 1.05f, control = 1.05f, unlockAtCatches = 5 },
+            new GearChoice { id = "deepwater-rod", label = "Deepwater rod", castMultiplier = 1.1f, tensionLimit = 1.35f, control = 0.85f, unlockAtCatches = 12 }
+        };
+
+        private static readonly GearChoice[] Lines =
+        {
+            new GearChoice { id = "monofilament", label = "Monofilament", castMultiplier = 1f, tensionLimit = 0.9f, control = 1f, unlockAtCatches = 0 },
+            new GearChoice { id = "braided-line", label = "Braided line", castMultiplier = 1.05f, tensionLimit = 1.2f, control = 0.95f, unlockAtCatches = 5 },
+            new GearChoice { id = "heavy-leader", label = "Heavy leader", castMultiplier = 0.9f, tensionLimit = 1.45f, control = 0.8f, unlockAtCatches = 12 }
+        };
+
+        private static readonly GearChoice[] Hooks =
+        {
+            new GearChoice { id = "standard-hook", label = "Standard hook", castMultiplier = 1f, tensionLimit = 1f, control = 1f, unlockAtCatches = 0 },
+            new GearChoice { id = "circle-hook", label = "Circle hook", castMultiplier = 0.95f, tensionLimit = 1.05f, control = 1.15f, unlockAtCatches = 5 },
+            new GearChoice { id = "heavy-hook", label = "Heavy hook", castMultiplier = 0.9f, tensionLimit = 1.2f, control = 0.9f, unlockAtCatches = 12 }
+        };
+
+        private static readonly GearChoice[] Reels =
+        {
+            new GearChoice { id = "standard-reel", label = "Standard reel", tensionLimit = 1f, control = 0.95f, retrieveSpeed = 1f, unlockAtCatches = 0 },
+            new GearChoice { id = "sealed-reel", label = "Sealed reel", tensionLimit = 1.2f, control = 1.05f, retrieveSpeed = 1.15f, unlockAtCatches = 5 },
+            new GearChoice { id = "deep-drag-reel", label = "Deep-drag reel", tensionLimit = 1.45f, control = 0.9f, retrieveSpeed = 1.25f, unlockAtCatches = 12 }
+        };
+
+        private static readonly string[] Baits = { "worm", "small-fish", "shellfish", "lure" };
+        private static readonly string[] BaitLabels = { "Worm", "Small fish", "Shellfish", "Lure" };
+        private static readonly FishingTechnique[] Techniques = (FishingTechnique[])Enum.GetValues(typeof(FishingTechnique));
+
+        [SerializeField] private InputActionAsset controls;
+        [SerializeField] private SpatialCargoHold cargoHold;
+        [SerializeField] private SeaStateDirector seaState;
+        [SerializeField, Min(1f)] private float baseCastDistance = 24f;
+        [SerializeField, Min(0.2f)] private float biteWaitMinimum = 3.5f;
+        [SerializeField, Min(0.2f)] private float biteWaitMaximum = 8f;
+        [SerializeField, Min(0.2f)] private float fightBeatDuration = 1.35f;
+        [SerializeField, Range(0.02f, 0.4f)] private float strikeWindow = 0.16f;
+
+        private InputAction harvestBeatAction;
+        private FishingEncounterPhase phase;
+        private FishingTechnique technique = FishingTechnique.StillFishing;
+        private int rodIndex;
+        private int lineIndex;
+        private int hookIndex;
+        private int reelIndex;
+        private int baitIndex;
+        private int totalCatches;
+        private float waitTimer;
+        private float phaseTimer;
+        private float targetPhase;
+        private float tension;
+        private float fatigue;
+        private float fightProgress;
+        private int fightBeats;
+        private int successfulBeats;
+        private float selectedCastDistance;
+        private float estimatedDepth;
+        private double lastMigrationGameSeconds;
+        private FishHabitat activeHabitat;
+        private CargoItemDefinition hookedFish;
+        private string status = "F: prepare and cast";
+        private readonly Dictionary<string, int> populations = new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly Dictionary<string, double> populationTimes = new Dictionary<string, double>(StringComparer.Ordinal);
+
+        public FishingEncounterPhase Phase { get { return phase; } }
+        public FishingTechnique Technique { get { return technique; } }
+        public string Status { get { return status; } }
+        public float FightProgress { get { return fightProgress; } }
+        public float LineTension { get { return tension; } }
+
+        public void Configure(InputActionAsset input, SpatialCargoHold hold, SeaStateDirector director)
+        {
+            controls = input;
+            cargoHold = hold;
+            seaState = director;
+            harvestBeatAction = controls != null ? controls.FindAction("HarvestBeat", false) : null;
+        }
+
+        private void Awake()
+        {
+            if (cargoHold == null) cargoHold = GetComponent<SpatialCargoHold>();
+            if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
+            if (harvestBeatAction == null && controls != null)
+                harvestBeatAction = controls.FindAction("HarvestBeat", false);
+        }
+
+        public bool TryStartFishing()
+        {
+            if (phase != FishingEncounterPhase.Idle || cargoHold == null ||
+                Time.timeScale <= 0.0001f || (seaState != null && seaState.PanicLevel > 0.98f))
+                return false;
+
+            if (seaState != null && !seaState.TryClaimInteraction())
+            {
+                status = "Finish the current interaction first.";
+                return false;
+            }
+
+            Rigidbody vessel = GetComponent<Rigidbody>();
+            float speed = vessel != null ? new Vector2(vessel.linearVelocity.x, vessel.linearVelocity.z).magnitude : 0f;
+            if ((technique == FishingTechnique.Trolling && speed < 1.5f) ||
+                (technique != FishingTechnique.Trolling && technique != FishingTechnique.Drifting && speed > 1.5f))
+            {
+                status = technique == FishingTechnique.Trolling
+                    ? "Trolling requires the vessel to be moving."
+                    : "Slow the vessel before setting the line.";
+                return false;
+            }
+
+            EnsurePopulationStocks();
+            selectedCastDistance = baseCastDistance * Rods[rodIndex].castMultiplier *
+                                   Lines[lineIndex].castMultiplier * TechniqueCastMultiplier(technique);
+            Vector3 castPoint = transform.position + transform.forward * selectedCastDistance;
+            activeHabitat = DetermineHabitat(castPoint);
+            estimatedDepth = EstimateDepth(activeHabitat);
+            hookedFish = null;
+            tension = 0.35f;
+            fatigue = 0f;
+            fightProgress = 0f;
+            fightBeats = 0;
+            successfulBeats = 0;
+            waitTimer = UnityEngine.Random.Range(biteWaitMinimum, Mathf.Max(biteWaitMinimum, biteWaitMaximum));
+            phase = FishingEncounterPhase.WaitingForBite;
+            status = "LINE DEPLOYED — " + technique + " · " + activeHabitat + " · " +
+                     Mathf.RoundToInt(selectedCastDistance) + " m cast. Watch for a bite.";
+            if (seaState != null) seaState.SetHarvesting(true);
+            return true;
+        }
+
+        private void Update()
+        {
+            AdvanceMigration();
+            if (phase == FishingEncounterPhase.Idle) return;
+            if (Time.timeScale <= 0.0001f || (seaState != null && seaState.IsDialogueActive))
+            {
+                CancelFishing("FISHING INTERRUPTED. The line has been retrieved.");
+                return;
+            }
+
+            Rigidbody vessel = GetComponent<Rigidbody>();
+            if (vessel != null && technique != FishingTechnique.Trolling && technique != FishingTechnique.Drifting &&
+                new Vector2(vessel.linearVelocity.x, vessel.linearVelocity.z).magnitude > 1.5f)
+            {
+                CancelFishing("THE VESSEL MOVED — retrieve the line before changing grounds.");
+                return;
+            }
+
+            if (phase == FishingEncounterPhase.WaitingForBite)
+            {
+                waitTimer -= Time.deltaTime;
+                if (waitTimer <= 0f) PresentBite();
+                return;
+            }
+
+            phaseTimer += Time.deltaTime;
+            if (phase == FishingEncounterPhase.HookWindow)
+            {
+                if (harvestBeatAction != null && harvestBeatAction.WasPressedThisFrame())
+                {
+                    if (phaseTimer <= 1.2f)
+                        BeginFight();
+                    else
+                        MissedBite();
+                }
+                else if (phaseTimer >= 1.25f)
+                    MissedBite();
+                return;
+            }
+
+            UpdateFightTension();
+            if (harvestBeatAction != null && harvestBeatAction.WasPressedThisFrame())
+                RegisterFightBeat();
+
+            if (phaseTimer >= fightBeatDuration)
+                ResolveFightBeat(false);
+        }
+
+        private void PresentBite()
+        {
+            hookedFish = SelectFish();
+            if (hookedFish == null)
+            {
+                status = "NO BITE — the water is quiet here. Try another ground or technique.";
+                waitTimer = UnityEngine.Random.Range(biteWaitMinimum * 0.7f, biteWaitMaximum * 1.1f);
+                return;
+            }
+
+            phase = FishingEncounterPhase.HookWindow;
+            phaseTimer = 0f;
+            status = "BITE! " + hookedFish.DisplayName + " is testing the bait — STRIKE now.";
+        }
+
+        private void BeginFight()
+        {
+            phase = FishingEncounterPhase.Fighting;
+            phaseTimer = 0f;
+            fightBeats = Mathf.Clamp(Mathf.RoundToInt(5f + hookedFish.Resistance * 2f), 5, 9);
+            targetPhase = UnityEngine.Random.Range(0.2f, 0.8f);
+            tension = Mathf.Clamp(0.3f + hookedFish.Resistance * 0.12f, 0.2f, 0.65f);
+            status = hookedFish.DisplayName.ToUpperInvariant() + " HOOKED — manage tension and tire it out. SPACE / ENTER at the marked moment.";
+        }
+
+        private void UpdateFightTension()
+        {
+            float burst = UnityEngine.Random.value < hookedFish.BurstFrequency * Time.deltaTime * 0.75f
+                ? 1.8f : 1f;
+            float resistance = hookedFish.Resistance;
+            float rodLimit = Rods[rodIndex].tensionLimit;
+            float lineLimit = Lines[lineIndex].tensionLimit;
+            tension += resistance * burst * Time.deltaTime * 0.075f;
+            tension = Mathf.Clamp(tension, 0f, 1.5f);
+
+            float safeLimit = Mathf.Min(1.4f, (rodLimit + lineLimit + Reels[reelIndex].tensionLimit) / 3f);
+            if (tension > safeLimit)
+            {
+                CancelFishing("LINE SNAPPED — " + hookedFish.DisplayName + " escaped. Choose stronger tackle.");
+                return;
+            }
+
+            if (tension < 0.08f && fightProgress < 0.5f)
+            {
+                fatigue = Mathf.Max(0f, fatigue - Time.deltaTime * 0.05f);
+                fightProgress = Mathf.Max(0f, fightProgress - Time.deltaTime * 0.015f);
+            }
+        }
+
+        private void RegisterFightBeat()
+        {
+            float phasePosition = Mathf.Clamp01(phaseTimer / fightBeatDuration);
+            bool timed = Mathf.Abs(phasePosition - targetPhase) <= strikeWindow;
+            ResolveFightBeat(timed);
+        }
+
+        private void ResolveFightBeat(bool successful)
+        {
+            if (phase != FishingEncounterPhase.Fighting) return;
+            if (successful)
+            {
+                successfulBeats++;
+                fatigue += 0.18f * Hooks[hookIndex].control * Rods[rodIndex].control;
+                fightProgress += 0.18f * Hooks[hookIndex].control * Reels[reelIndex].retrieveSpeed;
+                tension = Mathf.Max(0.12f, tension - 0.13f * Lines[lineIndex].control);
+                status = "GOOD CONTROL — the fish is tiring. Keep the line steady.";
+            }
+            else
+            {
+                tension += 0.14f * hookedFish.Resistance;
+                fightProgress = Mathf.Max(0f, fightProgress - 0.055f);
+                fatigue = Mathf.Max(0f, fatigue - 0.035f);
+                status = "MISSED THE PULL — tension rises and the fish regains strength.";
+            }
+
+            fightBeats++;
+            if (fightProgress >= 0.98f || fatigue >= 0.95f)
+            {
+                LandCatch();
+                return;
+            }
+
+            if (fightBeats >= 9)
+            {
+                CancelFishing("THE FISH GOT AWAY — it outlasted the tackle.");
+                return;
+            }
+
+            phaseTimer = 0f;
+            targetPhase = UnityEngine.Random.Range(0.18f, 0.82f);
+        }
+
+        private void MissedBite()
+        {
+            phase = FishingEncounterPhase.WaitingForBite;
+            hookedFish = null;
+            waitTimer = UnityEngine.Random.Range(biteWaitMinimum * 0.8f, biteWaitMaximum);
+            status = "THE BITE WAS MISSED — the bait is still out. Wait for another chance.";
+        }
+
+        private CargoItemDefinition SelectFish()
+        {
+            List<CargoItemDefinition> candidates = new List<CargoItemDefinition>();
+            List<float> weights = new List<float>();
+            float total = 0f;
+            IReadOnlyList<CargoItemDefinition> definitions = cargoHold.ItemDefinitions;
+
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                CargoItemDefinition fish = definitions[i];
+                if (fish == null || fish.Category != CargoItemCategory.Fish) continue;
+                if ((fish.Habitats & activeHabitat) == 0) continue;
+                if (estimatedDepth < fish.MinimumDepthMetres || estimatedDepth > fish.MaximumDepthMetres) continue;
+
+                float stock = GetPopulation(fish, activeHabitat);
+                if (stock <= 0f) continue;
+                float weight = stock;
+                if (fish.PreferredTechnique != FishPreferredTechnique.Any &&
+                    !TechniqueMatches(fish.PreferredTechnique, technique))
+                    weight *= 0.35f;
+                if (fish.PreferredBaitId != "any" && fish.PreferredBaitId != Baits[baitIndex])
+                    weight *= 0.28f;
+                if (fish.IsAberrant && (seaState == null || !seaState.RollAberration()))
+                    continue;
+                if (fish.IsAberrant) weight *= 0.15f;
+
+                candidates.Add(fish);
+                weights.Add(weight);
+                total += weight;
+            }
+
+            if (candidates.Count == 0 || total <= 0f) return null;
+            float roll = UnityEngine.Random.value * total;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                roll -= weights[i];
+                if (roll <= 0f) return candidates[i];
+            }
+            return candidates[candidates.Count - 1];
+        }
+
+        private void LandCatch()
+        {
+            float quality = FishingSimulationPolicy.CalculateCatchQuality(successfulBeats, tension);
+            float size = Mathf.Lerp(hookedFish.BaseCatchSize, hookedFish.MaximumCatchSize,
+                                    Mathf.Clamp01(quality * UnityEngine.Random.Range(0.65f, 1.05f)));
+            string instanceId;
+            if (!cargoHold.TryPlaceFirstFit(hookedFish.ItemId, 1, quality, 1f, out instanceId))
+            {
+                CancelFishing("HOLD FULL — the fish slips away before it can be secured.");
+                return;
+            }
+
+            ChangePopulation(hookedFish, activeHabitat, -1);
+            totalCatches++;
+            string grade = quality >= 0.9f ? "PRISTINE" : quality >= 0.75f ? "GOOD" : quality >= 0.55f ? "FAIR" : "POOR";
+            string species = hookedFish.DisplayName;
+            status = "LANDED: " + species + " · " + size.ToString("0.0") + " kg · " + grade +
+                     " · " + Mathf.RoundToInt(quality * 100f) + "%";
+            FinishFishing();
+            hookedFish = null;
+        }
+
+        private void FinishFishing()
+        {
+            phase = FishingEncounterPhase.Idle;
+            if (seaState != null)
+            {
+                seaState.SetHarvesting(false);
+                seaState.AddDisturbance(0.035f);
+                seaState.AddPanic(0.004f);
+            }
+        }
+
+        private void CancelFishing(string message)
+        {
+            if (phase == FishingEncounterPhase.Idle) return;
+            status = message;
+            FinishFishing();
+            hookedFish = null;
+        }
+
+        private FishHabitat DetermineHabitat(Vector3 castPoint)
+        {
+            if (castPoint.x < -35f && castPoint.z < -18f) return FishHabitat.Estuary;
+            float distance = new Vector2(castPoint.x, castPoint.z).magnitude;
+            if (distance > 105f) return FishHabitat.DeepWater;
+            if (distance > 48f) return FishHabitat.OpenWater;
+            if (castPoint.z > 20f && castPoint.z < 70f) return FishHabitat.Kelp;
+            return FishHabitat.Nearshore;
+        }
+
+        private static float EstimateDepth(FishHabitat habitat)
+        {
+            switch (habitat)
+            {
+                case FishHabitat.Estuary: return 3f;
+                case FishHabitat.Nearshore: return 7f;
+                case FishHabitat.Kelp: return 14f;
+                case FishHabitat.OpenWater: return 48f;
+                case FishHabitat.DeepWater: return 125f;
+                default: return 8f;
+            }
+        }
+
+        private static float TechniqueCastMultiplier(FishingTechnique value)
+        {
+            switch (value)
+            {
+                case FishingTechnique.BottomFishing: return 0.8f;
+                case FishingTechnique.FloatFishing: return 0.9f;
+                case FishingTechnique.Jigging: return 0.85f;
+                case FishingTechnique.Trolling: return 1.35f;
+                case FishingTechnique.Drifting: return 1.1f;
+                case FishingTechnique.Handlining: return 0.65f;
+                default: return 1f;
+            }
+        }
+
+        private static bool TechniqueMatches(FishPreferredTechnique preferred, FishingTechnique actual)
+        {
+            return FishingSimulationPolicy.IsTechniqueCompatible(preferred, actual);
+        }
+
+        private float GetPopulation(CargoItemDefinition fish, FishHabitat habitat)
+        {
+            string key = PopulationKey(fish.ItemId, habitat);
+            int population;
+            if (!populations.TryGetValue(key, out population))
+            {
+                population = fish.InitialPopulation;
+                populations[key] = population;
+                populationTimes[key] = seaState != null ? seaState.ElapsedGameSeconds : 0d;
+            }
+            SimulatePopulation(fish, habitat, key);
+            return populations[key];
+        }
+
+        private void SimulatePopulation(CargoItemDefinition fish, FishHabitat habitat, string key)
+        {
+            double now = seaState != null ? seaState.ElapsedGameSeconds : 0d;
+            double previous;
+            if (!populationTimes.TryGetValue(key, out previous))
+            {
+                populationTimes[key] = now;
+                return;
+            }
+
+            double elapsedDays = Math.Max(0d, now - previous) / 86400d;
+            if (elapsedDays < 1d) return;
+            int recovery = Mathf.RoundToInt((float)(fish.DailyPopulationRecovery * elapsedDays));
+            populations[key] = Mathf.Clamp(populations[key] + recovery, 0, fish.InitialPopulation * 2);
+            populationTimes[key] = now;
+        }
+
+        private void ChangePopulation(CargoItemDefinition fish, FishHabitat habitat, int delta)
+        {
+            string key = PopulationKey(fish.ItemId, habitat);
+            GetPopulation(fish, habitat);
+            populations[key] = Mathf.Max(0, populations[key] + delta);
+        }
+
+        private static string PopulationKey(string speciesId, FishHabitat habitat)
+        {
+            return speciesId + "|" + habitat;
+        }
+
+        private void OnDisable()
+        {
+            if (phase != FishingEncounterPhase.Idle)
+                CancelFishing("FISHING INTERRUPTED — the line has been retrieved.");
+        }
+
+        private void OnGUI()
+        {
+            GUIStyle style = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 13,
+                normal = { textColor = Color.white }
+            };
+
+            if (phase == FishingEncounterPhase.Idle)
+            {
+                float panelX = Screen.width - 348f;
+                GUI.Box(new Rect(panelX, Screen.height - 142, 330, 120), GUIContent.none);
+                GUI.Label(new Rect(panelX + 10, Screen.height - 136, 310, 20), "FISHING LOADOUT", style);
+                if (GUI.Button(new Rect(panelX + 10, Screen.height - 112, 150, 22), "Rod: " + Rods[rodIndex].label + "  ‹"))
+                    rodIndex = NextUnlocked(Rods, rodIndex, totalCatches);
+                if (GUI.Button(new Rect(panelX + 170, Screen.height - 112, 150, 22), "Line: " + Lines[lineIndex].label + "  ‹"))
+                    lineIndex = NextUnlocked(Lines, lineIndex, totalCatches);
+                if (GUI.Button(new Rect(panelX + 10, Screen.height - 86, 150, 22), "Hook: " + Hooks[hookIndex].label + "  ‹"))
+                    hookIndex = NextUnlocked(Hooks, hookIndex, totalCatches);
+                if (GUI.Button(new Rect(panelX + 170, Screen.height - 86, 150, 22), "Reel: " + Reels[reelIndex].label + "  ‹"))
+                    reelIndex = NextUnlocked(Reels, reelIndex, totalCatches);
+                if (GUI.Button(new Rect(panelX + 10, Screen.height - 60, 150, 22), "Bait: " + BaitLabels[baitIndex] + "  ‹"))
+                    baitIndex = (baitIndex + 1) % Baits.Length;
+                if (GUI.Button(new Rect(panelX + 170, Screen.height - 60, 150, 22), "Method: " + technique + "  ‹"))
+                    technique = Techniques[(Array.IndexOf(Techniques, technique) + 1) % Techniques.Length];
+            }
+            else
+            {
+                GUI.Box(new Rect(Screen.width * 0.5f - 190, Screen.height - 170, 380, 126), GUIContent.none);
+                GUI.Label(new Rect(Screen.width * 0.5f - 178, Screen.height - 162, 356, 24), status, style);
+                if (phase == FishingEncounterPhase.Fighting)
+                {
+                    GUI.Label(new Rect(Screen.width * 0.5f - 178, Screen.height - 132, 356, 20),
+                        "FIGHT " + (fightBeats + 1) + "/9  ·  PROGRESS " + Mathf.RoundToInt(fightProgress * 100f) + "%", style);
+                    GUI.Label(new Rect(Screen.width * 0.5f - 178, Screen.height - 108, 356, 20),
+                        "LINE TENSION " + Mathf.RoundToInt(tension * 100f) + "%  ·  TIME THE PULL", style);
+                    Rect bar = new Rect(Screen.width * 0.5f - 170, Screen.height - 82, 340, 12);
+                    GUI.Box(bar, GUIContent.none);
+                    GUI.Box(new Rect(bar.x, bar.y, bar.width * Mathf.Clamp01(fightProgress), bar.height), GUIContent.none);
+                    float markerX = bar.x + bar.width * targetPhase;
+                    GUI.Box(new Rect(markerX - 2f, bar.y - 5f, 4f, bar.height + 10f), GUIContent.none);
+                    float needleX = bar.x + bar.width * Mathf.Clamp01(phaseTimer / fightBeatDuration);
+                    GUI.Box(new Rect(needleX - 1f, bar.y - 8f, 2f, bar.height + 16f), GUIContent.none);
+                }
+                else if (phase == FishingEncounterPhase.HookWindow)
+                    GUI.Label(new Rect(Screen.width * 0.5f - 178, Screen.height - 132, 356, 20), "SPACE / ENTER — STRIKE", style);
+                else
+                    GUI.Label(new Rect(Screen.width * 0.5f - 178, Screen.height - 132, 356, 20), "WAITING FOR A BITE…", style);
+
+                if (GUI.Button(new Rect(Screen.width * 0.5f + 65, Screen.height - 66, 105, 24), "RETRIEVE LINE"))
+                    CancelFishing("LINE RETRIEVED — no catch secured.");
+            }
+        }
+
+        private static int NextUnlocked(GearChoice[] choices, int current, int catches)
+        {
+            for (int offset = 1; offset <= choices.Length; offset++)
+            {
+                int candidate = (current + offset) % choices.Length;
+                if (choices[candidate].unlockAtCatches <= catches) return candidate;
+            }
+            return current;
+        }
+
+        public void CaptureSaveData(SaveGameData data)
+        {
+            if (data == null || data.progress == null) return;
+            for (int i = 0; i < data.progress.regionalStocks.Count; i++)
+            {
+                RegionalStockSaveData existing = data.progress.regionalStocks[i];
+                if (existing != null && existing.regionId != null && existing.regionId.StartsWith("greyhaven-fishing/", StringComparison.Ordinal))
+                    data.progress.regionalStocks.RemoveAt(i--);
+            }
+
+            foreach (KeyValuePair<string, int> pair in populations)
+            {
+                string[] parts = pair.Key.Split('|');
+                if (parts.Length != 2) continue;
+                data.progress.regionalStocks.Add(new RegionalStockSaveData
+                {
+                    regionId = "greyhaven-fishing/" + parts[1],
+                    speciesId = parts[0],
+                    population = pair.Value,
+                    lastSimulatedGameSeconds = populationTimes.ContainsKey(pair.Key) ? populationTimes[pair.Key] : 0d
+                });
+            }
+
+            data.progress.worldFlags.RemoveAll(flag => flag != null &&
+                (flag.flagId == "fishing.total-catches" || flag.flagId == "fishing.technique" ||
+                 flag.flagId == "fishing.rod" || flag.flagId == "fishing.line" ||
+                 flag.flagId == "fishing.hook" || flag.flagId == "fishing.reel" || flag.flagId == "fishing.bait" ||
+                 flag.flagId == "fishing.migration-time"));
+            AddFlag(data, "fishing.total-catches", totalCatches.ToString());
+            AddFlag(data, "fishing.technique", technique.ToString());
+            AddFlag(data, "fishing.rod", Rods[rodIndex].id);
+            AddFlag(data, "fishing.line", Lines[lineIndex].id);
+            AddFlag(data, "fishing.hook", Hooks[hookIndex].id);
+            AddFlag(data, "fishing.reel", Reels[reelIndex].id);
+            AddFlag(data, "fishing.bait", Baits[baitIndex]);
+            AddFlag(data, "fishing.migration-time", lastMigrationGameSeconds.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        public void RestoreSaveData(SaveGameData data)
+        {
+            if (data == null || data.progress == null) return;
+            populations.Clear();
+            populationTimes.Clear();
+            for (int i = 0; i < data.progress.regionalStocks.Count; i++)
+            {
+                RegionalStockSaveData stock = data.progress.regionalStocks[i];
+                if (stock == null || stock.regionId == null ||
+                    !stock.regionId.StartsWith("greyhaven-fishing/", StringComparison.Ordinal) ||
+                    string.IsNullOrWhiteSpace(stock.speciesId)) continue;
+                string habitatName = stock.regionId.Substring("greyhaven-fishing/".Length);
+                FishHabitat habitat;
+                if (!Enum.TryParse(habitatName, out habitat)) continue;
+                string key = PopulationKey(stock.speciesId, habitat);
+                populations[key] = Mathf.Max(0, stock.population);
+                populationTimes[key] = Math.Max(0d, stock.lastSimulatedGameSeconds);
+            }
+
+            totalCatches = Mathf.Max(0, ReadIntFlag(data, "fishing.total-catches"));
+            technique = ReadEnumFlag(data, "fishing.technique", FishingTechnique.StillFishing);
+            rodIndex = FindChoice(Rods, ReadFlag(data, "fishing.rod", "shore-rod"));
+            lineIndex = FindChoice(Lines, ReadFlag(data, "fishing.line", "monofilament"));
+            hookIndex = FindChoice(Hooks, ReadFlag(data, "fishing.hook", "standard-hook"));
+            reelIndex = FindChoice(Reels, ReadFlag(data, "fishing.reel", "standard-reel"));
+            if (Rods[rodIndex].unlockAtCatches > totalCatches) rodIndex = 0;
+            if (Lines[lineIndex].unlockAtCatches > totalCatches) lineIndex = 0;
+            if (Hooks[hookIndex].unlockAtCatches > totalCatches) hookIndex = 0;
+            if (Reels[reelIndex].unlockAtCatches > totalCatches) reelIndex = 0;
+            baitIndex = Array.IndexOf(Baits, ReadFlag(data, "fishing.bait", "worm"));
+            if (baitIndex < 0) baitIndex = 0;
+            double.TryParse(ReadFlag(data, "fishing.migration-time", "0"), System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out lastMigrationGameSeconds);
+            UnlockProgression();
+        }
+
+        private static void AddFlag(SaveGameData data, string id, string value)
+        {
+            data.progress.worldFlags.Add(new WorldFlagSaveData { flagId = id, value = true, stringValue = value });
+        }
+
+        private static string ReadFlag(SaveGameData data, string id, string fallback)
+        {
+            for (int i = 0; i < data.progress.worldFlags.Count; i++)
+                if (data.progress.worldFlags[i] != null && data.progress.worldFlags[i].flagId == id)
+                    return data.progress.worldFlags[i].stringValue ?? fallback;
+            return fallback;
+        }
+
+        private static int ReadIntFlag(SaveGameData data, string id)
+        {
+            int value;
+            return int.TryParse(ReadFlag(data, id, "0"), out value) ? value : 0;
+        }
+
+        private static T ReadEnumFlag<T>(SaveGameData data, string id, T fallback) where T : struct
+        {
+            T value;
+            return Enum.TryParse(ReadFlag(data, id, fallback.ToString()), out value) ? value : fallback;
+        }
+
+        private static int FindChoice(GearChoice[] choices, string id)
+        {
+            for (int i = 0; i < choices.Length; i++)
+                if (choices[i].id == id) return i;
+            return 0;
+        }
+    }
+}

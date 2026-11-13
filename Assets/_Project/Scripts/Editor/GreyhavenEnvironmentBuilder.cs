@@ -313,7 +313,72 @@ namespace WhereTheSoundingsEnd.Editor
                     new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f)
             };
 
+            ConfigureFishEcology(definitions);
             return definitions;
+        }
+
+        private static void ConfigureFishEcology(List<CargoItemDefinition> definitions)
+        {
+            SetFishEcology(definitions, "FSH-001",
+                (int)(FishHabitat.Estuary | FishHabitat.Nearshore), FishPreferredTechnique.Drifting,
+                "worm", 0f, 12f, 0.75f, 0.22f, 55, 4, 0.08f, 0.6f, 4f);
+            SetFishEcology(definitions, "FSH-002",
+                (int)(FishHabitat.Estuary | FishHabitat.Nearshore), FishPreferredTechnique.FloatFishing,
+                "worm", 0f, 10f, 0.65f, 0.18f, 70, 5, 0.12f, 0.5f, 2.5f);
+            SetFishEcology(definitions, "FSH-003",
+                (int)(FishHabitat.Nearshore | FishHabitat.Kelp | FishHabitat.OpenWater), FishPreferredTechnique.Trolling,
+                "small-fish", 5f, 65f, 1.45f, 0.72f, 28, 2, 0.25f, 1.2f, 15f);
+            SetFishEcology(definitions, "FSH-005",
+                (int)(FishHabitat.Nearshore | FishHabitat.Estuary), FishPreferredTechnique.BottomFishing,
+                "worm", 1f, 18f, 0.5f, 0.12f, 80, 7, 0.05f, 0.2f, 1.2f);
+            SetFishEcology(definitions, "FSH-007",
+                (int)(FishHabitat.Nearshore | FishHabitat.Kelp), FishPreferredTechnique.FloatFishing,
+                "shellfish", 2f, 20f, 0.35f, 0.08f, 90, 8, 0.06f, 0.1f, 0.6f);
+
+            SetFishEcology(definitions, "ABR-FSH-001",
+                (int)(FishHabitat.Estuary | FishHabitat.Nearshore), FishPreferredTechnique.Drifting,
+                "worm", 0f, 18f, 1.35f, 0.62f, 4, 0, 0.02f, 0.8f, 5f);
+            SetFishEcology(definitions, "ABR-FSH-003",
+                (int)(FishHabitat.Nearshore | FishHabitat.Kelp | FishHabitat.OpenWater), FishPreferredTechnique.Trolling,
+                "small-fish", 5f, 90f, 1.8f, 0.85f, 2, 0, 0.03f, 2f, 18f);
+            SetFishEcology(definitions, "ABR-FSH-005",
+                (int)(FishHabitat.Nearshore | FishHabitat.Kelp), FishPreferredTechnique.Jigging,
+                "lure", 8f, 35f, 1.2f, 0.55f, 3, 0, 0.04f, 0.4f, 1.8f);
+        }
+
+        private static void SetFishEcology(
+            List<CargoItemDefinition> definitions,
+            string itemId,
+            int habitats,
+            FishPreferredTechnique technique,
+            string bait,
+            float minimumDepth,
+            float maximumDepth,
+            float resistance,
+            float burstFrequency,
+            int initialPopulation,
+            int dailyRecovery,
+            float migrationRate,
+            float minimumSize,
+            float maximumSize)
+        {
+            CargoItemDefinition definition = definitions.Find(item => item != null && item.ItemId == itemId);
+            if (definition == null) return;
+            SerializedObject serialized = new SerializedObject(definition);
+            serialized.FindProperty("habitats").intValue = habitats;
+            serialized.FindProperty("preferredTechnique").enumValueIndex = (int)technique;
+            serialized.FindProperty("preferredBaitId").stringValue = bait;
+            serialized.FindProperty("minimumDepthMetres").floatValue = minimumDepth;
+            serialized.FindProperty("maximumDepthMetres").floatValue = maximumDepth;
+            serialized.FindProperty("resistance").floatValue = resistance;
+            serialized.FindProperty("burstFrequency").floatValue = burstFrequency;
+            serialized.FindProperty("initialPopulation").intValue = initialPopulation;
+            serialized.FindProperty("dailyPopulationRecovery").intValue = dailyRecovery;
+            serialized.FindProperty("migrationRate").floatValue = migrationRate;
+            serialized.FindProperty("baseCatchSize").floatValue = minimumSize;
+            serialized.FindProperty("maximumCatchSize").floatValue = maximumSize;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(definition);
         }
 
         private static CargoItemDefinition CreateCargoDefinition(

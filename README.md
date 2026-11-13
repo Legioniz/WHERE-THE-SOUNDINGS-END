@@ -46,19 +46,19 @@ Use **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment** after ch
 | Start fishing | F | West face button |
 | Start dredging | G | Right trigger |
 | Sounding pulse | Q | Right shoulder |
-| Harvest timing beat | Space / Enter | East face button |
+| Fishing hook/fight / salvage pull | Space / Enter | East face button |
 | Pause | Esc | Start |
 | Inventory | I | North face button |
 | Regional chart | M | HUD button / pointer |
 
-The harvesting timing action now uses one shared Input System action for keyboard and gamepad input. At a stationary shore approach, Interact opens the Greyhaven dockside hub: select a location, inspect its furniture, and speak with its assigned resident without leaving the vessel. Escape or gamepad Start closes the dockside menu; inventory, chart, dialogue, pause and dockside panels are mutually exclusive. The regional chart opens with M after the vessel physically visits a region; unknown regions and undiscovered sites have no map marks, labels, bearings or compass guidance. Boat movement now uses inertia and water forces instead of direct velocity changes; its buoyancy is a lightweight four-point approximation, not a full fluid simulation.
+The shared Harvest Beat Input System action handles fishing strikes/fight pulls and dredging beats for keyboard and gamepad. The fishing loadout is selected through the on-screen panel; tiered tackle unlocks after five and twelve landed fish. The current Greyhaven habitat/depth resolver is a local-coordinate prototype approximation, not live bathymetry. At a stationary shore approach, Interact opens the Greyhaven dockside hub: select a location, inspect its furniture, and speak with its assigned resident without leaving the vessel. Escape or gamepad Start closes the dockside menu; inventory, chart, dialogue, pause and dockside panels are mutually exclusive. The regional chart opens with M after the vessel physically visits a region; unknown regions and undiscovered sites have no map marks, labels, bearings or compass guidance. Boat movement now uses inertia and water forces instead of direct velocity changes; its buoyancy is a lightweight four-point approximation, not a full fluid simulation.
 
 ## Implemented runtime foundations
 
 - Force-driven Rigidbody workboat movement with forward/reverse thrust, braking, speed-dependent rudder, prop wash, lateral resistance, and quadratic drag.
 - Four-point spring buoyancy sampled from the same moving ocean surface used by rendering and the velocity-aware orthographic follow camera.
 - Movement/action-driven sea time: the day advances while the boat is genuinely moving or the player is performing a supported harvesting or survey action.
-- Timed fishing and dredging minigames using spatial cargo placement.
+- Multi-stage fishing encounters with selectable rod, line, hook, reel, bait and seven techniques; cast/deployment, variable bite waits, hook windows, multi-beat fish fights, tension/line failure, species-specific resistance and burst behavior, catch grading/size and spatial cargo storage.\n- Greyhaven fish profiles with habitat/depth eligibility, bait and technique preferences, per-habitat aggregate populations, catch depletion, daily recovery and six-hour habitat migration; loadout, lifetime catches and fish stocks use existing save data. Dredging remains a separate reservation-based minigame.
 - Cargo hold geometry, blocked/damaged cells, item placement, salvage-site depletion, and vessel hull/engine condition.
 - Day/night lighting and fog response, panic pressure, dead-calm and wrong-way-swell incidents, distant hull knocks, false navigation lights, and other restrained maritime omens.
 - Rare unexplained warning flashes: a brief, non-directional broken-corner indicator with no text, sound, map mark, journal note, or gameplay effect.
