@@ -31,6 +31,8 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Economy/MaraFishMarketController.cs",
     "Assets/_Project/Scripts/Runtime/Economy/VesselFuelController.cs",
     "Assets/_Project/Scripts/Runtime/Economy/GreyhavenVendorServices.cs",
+    "Assets/_Project/Scripts/Runtime/Economy/HarbourmasterContractController.cs",
+    "Assets/_Project/Tests/EditMode/HarbourmasterContractSaveTests.cs",
     "Assets/_Project/Tests/EditMode/EconomyPolicyTests.cs",
     "Assets/_Project/Tests/EditMode/MaraMarketTransactionTests.cs",
     "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs",
