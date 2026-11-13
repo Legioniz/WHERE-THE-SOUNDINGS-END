@@ -150,6 +150,7 @@ namespace WhereTheSoundingsEnd.Economy
             decimal unitPrice;
             if (definition == null || !TryGetSupplyPrice(itemId, out unitPrice)) return 0L;
             MarketStockSaveData entry = GetOrCreateStock(itemId);
+            RefreshStock(entry);
             if (entry.currentStock < quantity) return 0L;
             decimal discount = GetRelationshipDiscount(inez.RelationshipScore);
             decimal totalUsd = unitPrice * quantity * (1m - discount);
