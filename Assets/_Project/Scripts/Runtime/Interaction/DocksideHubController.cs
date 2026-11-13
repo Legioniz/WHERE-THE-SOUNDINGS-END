@@ -9,6 +9,7 @@ using WhereTheSoundingsEnd.Narrative;
 using WhereTheSoundingsEnd.NPC;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.World;
+using WhereTheSoundingsEnd.Economy;
 
 namespace WhereTheSoundingsEnd.Interaction
 {
@@ -193,6 +194,9 @@ namespace WhereTheSoundingsEnd.Interaction
         private VisualElement overlay;
         private VisualElement locationList;
         private VisualElement furnitureList;
+        private VisualElement vendorActions;
+        private MaraFishMarketController maraMarket;
+        private GreyhavenVendorServices vendorServices;
         private Label locationTitle;
         private Label locationSubtitle;
         private Label interiorDescription;
@@ -229,6 +233,8 @@ namespace WhereTheSoundingsEnd.Interaction
             controls = input;
             cargoHold = hold;
             vesselCondition = condition;
+            maraMarket = boatBody != null ? boatBody.GetComponent<MaraFishMarketController>() : null;
+            vendorServices = boatBody != null ? boatBody.GetComponent<GreyhavenVendorServices>() : null;
             seaState = clock;
             saveCoordinator = saves;
             locations = definitions == null
@@ -467,6 +473,20 @@ namespace WhereTheSoundingsEnd.Interaction
             furnitureList.style.minHeight = 110;
             interior.Add(furnitureList);
 
+            Label servicesHeading = new Label("RESIDENT SERVICES");
+            servicesHeading.style.color = new Color(0.82f, 0.78f, 0.66f);
+            servicesHeading.style.fontSize = 11;
+            servicesHeading.style.unityFontStyleAndWeight = FontStyle.Bold;
+            servicesHeading.style.marginTop = 10;
+            servicesHeading.style.marginBottom = 5;
+            interior.Add(servicesHeading);
+
+            vendorActions = new ScrollView(ScrollViewMode.Vertical);
+            vendorActions.style.maxHeight = 170;
+            vendorActions.style.minHeight = 42;
+            vendorActions.style.flexShrink = 0f;
+            interior.Add(vendorActions);
+
             VisualElement detail = new VisualElement();
             detail.style.marginTop = 12;
             detail.style.paddingLeft = 14;
@@ -601,6 +621,8 @@ namespace WhereTheSoundingsEnd.Interaction
                 furnitureList.Add(button);
             }
 
+            RenderVendorServices(location);
+
             bool hasResident = location.Resident != null &&
                                !string.IsNullOrWhiteSpace(location.DialogueNode);
             residentButton.style.display = hasResident ? DisplayStyle.Flex : DisplayStyle.None;
@@ -611,6 +633,202 @@ namespace WhereTheSoundingsEnd.Interaction
                     : location.Resident.DisplayName.ToUpperInvariant() + "  /  REFUSES TO SPEAK";
                 residentButton.SetEnabled(location.Resident.CanTalk);
             }
+        }
+
+        private void RenderVendorServices(DocksideLocationDefinition location)
+        {
+            if (vendorActions == null) return;
+            vendorActions.Clear();
+            if (location == null || location.Resident == null) return;
+
+            string residentId = location.Resident.NpcId;
+            if (residentId == MaraFishMarketController.VendorId)
+            {
+                RenderMaraServices();
+                return;
+            }
+            if (residentId == GreyhavenVendorServices.TomasId)
+            {
+                RenderTomasServices();
+                return;
+            }
+            if (residentId == GreyhavenVendorServices.InezId)
+                RenderInezServices();
+        }
+
+        private void RenderMaraServices()
+        {
+            if (maraMarket == null || cargoHold == null)
+            {
+                vendorActions.Add(new Label("The fish market service is not connected to this vessel."));
+                return;
+            }
+
+            List<string> eligibleIds = new List<string>();
+            for (int i = 0; i < cargoHold.Placements.Count; i++)
+            {
+                CargoPlacement placement = cargoHold.Placements[i];
+                CargoItemDefinition definition = placement != null
+                    ? cargoHold.GetItemDefinition(placement.itemId) : null;
+                if (definition != null && definition.OrdinarySaleEligible)
+                    eligibleIds.Add(placement.instanceId);
+            }
+
+            List<MarketSaleLine> offer;
+            long total;
+            string error;
+            bool canQuote = eligibleIds.Count > 0 &&
+                maraMarket.TryBuildOffer(eligibleIds, out offer, out total, out error);
+            Label summary = new Label(canQuote
+                ? "SEAFOOD OFFER  /  " + FormatMoney(total) + " USD  /  " + offer.Count + " CARGO LOTS"
+                : (eligibleIds.Count == 0 ? "No eligible seafood in the hold." : (error ?? "Market offer unavailable.")));
+            summary.style.whiteSpace = WhiteSpace.Normal;
+            summary.style.color = new Color(0.82f, 0.78f, 0.66f);
+            vendorActions.Add(summary);
+
+            if (canQuote)
+            {
+                Button sell = MakeButton("SELL ALL ELIGIBLE SEAFOOD  /  " + FormatMoney(total), () =>
+                {
+                    List<MarketSaleLine> receipt;
+                    long paid;
+                    string failure;
+                    bool success = maraMarket.TrySell(eligibleIds,
+                        "dockside.mara.sale." + Guid.NewGuid().ToString("N"),
+                        out receipt, out paid, out failure);
+                    statusLabel.text = success
+                        ? "SALE COMPLETE  /  +" + FormatMoney(paid) + " USD  /  " + receipt.Count + " LOTS SOLD."
+                        : "SALE NOT COMPLETED  /  " + failure;
+                    furnitureTitle.text = "MARA'S FISH MARKET";
+                    furnitureDetail.text = statusLabel.text;
+                    RenderMaraServices();
+                });
+                vendorActions.Add(sell);
+            }
+            else
+            {
+                Button refresh = MakeButton("RECHECK MARKET OFFER", RenderMaraServices);
+                vendorActions.Add(refresh);
+            }
+        }
+
+        private void RenderTomasServices()
+        {
+            if (vendorServices == null)
+            {
+                vendorActions.Add(new Label("Tomas's service counter is not connected to this vessel."));
+                return;
+            }
+
+            long repairQuote = vendorServices.GetRepairQuoteCents();
+            Button repair = MakeButton("REPAIR HULL + ENGINE  /  " + FormatMoney(repairQuote), () =>
+            {
+                long charged;
+                string error;
+                bool success = vendorServices.TryRepairAll(
+                    "dockside.tomas.repair." + Guid.NewGuid().ToString("N"), out charged, out error);
+                statusLabel.text = success
+                    ? "REPAIRS COMPLETE  /  -" + FormatMoney(charged) + " USD."
+                    : "REPAIR DECLINED  /  " + error;
+                furnitureTitle.text = "TOMAS'S REPAIR SHED";
+                furnitureDetail.text = statusLabel.text;
+                RenderTomasServices();
+            });
+            repair.SetEnabled(repairQuote > 0L);
+            vendorActions.Add(repair);
+
+            long fuelQuote = vendorServices.GetRefuelQuoteCents(25f);
+            Button refuel = MakeButton("REFUEL UP TO 25 UNITS  /  " + FormatMoney(fuelQuote), () =>
+            {
+                float added;
+                long charged;
+                string error;
+                bool success = vendorServices.TryRefuel(25f,
+                    "dockside.tomas.fuel." + Guid.NewGuid().ToString("N"),
+                    out added, out charged, out error);
+                statusLabel.text = success
+                    ? "REFUELLED  /  +" + added.ToString("0.0") + " UNITS  /  -" + FormatMoney(charged) + " USD."
+                    : "REFUEL DECLINED  /  " + error;
+                furnitureTitle.text = "TOMAS'S FUEL PUMP";
+                furnitureDetail.text = statusLabel.text;
+                RenderTomasServices();
+            });
+            refuel.SetEnabled(fuelQuote > 0L);
+            vendorActions.Add(refuel);
+
+            if (cargoHold != null)
+            {
+                for (int y = 0; y < cargoHold.Height; y++)
+                {
+                    for (int x = 0; x < cargoHold.Width; x++)
+                    {
+                        if (!cargoHold.IsCellBlocked(x, y)) continue;
+                        int cellX = x;
+                        int cellY = y;
+                        Button cellRepair = MakeButton("REPAIR HOLD CELL " + (x + 1) + "-" + (y + 1) + "  /  $1.25",
+                            () =>
+                            {
+                                long charged;
+                                string error;
+                                bool success = vendorServices.TryRepairHoldCell(cellX, cellY,
+                                    "dockside.tomas.hold." + Guid.NewGuid().ToString("N"),
+                                    out charged, out error);
+                                statusLabel.text = success
+                                    ? "HOLD CELL REPAIRED  /  -" + FormatMoney(charged) + " USD."
+                                    : "HOLD REPAIR DECLINED  /  " + error;
+                                RenderTomasServices();
+                            });
+                        vendorActions.Add(cellRepair);
+                    }
+                }
+            }
+        }
+
+        private void RenderInezServices()
+        {
+            if (vendorServices == null)
+            {
+                vendorActions.Add(new Label("Inez's supply counter is not connected to this vessel."));
+                return;
+            }
+
+            string[] itemIds =
+            {
+                "SUP-BAIT-WORM", "SUP-BAIT-FISH", "SUP-BAIT-SHELLFISH", "SUP-BAIT-LURE",
+                "GEAR-ROD-01", "GEAR-LAMP-01", "GEAR-ENGINE-01"
+            };
+            for (int i = 0; i < itemIds.Length; i++)
+            {
+                string itemId = itemIds[i];
+                CargoItemDefinition definition = cargoHold != null ? cargoHold.GetItemDefinition(itemId) : null;
+                if (definition == null) continue;
+                int quantity = itemId.StartsWith("SUP-BAIT-", StringComparison.Ordinal) ? 5 : 1;
+                long quote = vendorServices.GetPurchaseQuoteCents(itemId, quantity);
+                int stock = vendorServices.GetStock(itemId);
+                Button purchase = MakeButton("BUY " + definition.DisplayName.ToUpperInvariant() +
+                    " x" + quantity + "  /  " + FormatMoney(quote) + "  /  STOCK " + stock, () =>
+                {
+                    long charged;
+                    string error;
+                    bool success = vendorServices.TryPurchase(itemId, quantity,
+                        "dockside.inez.purchase." + Guid.NewGuid().ToString("N"),
+                        out charged, out error);
+                    statusLabel.text = success
+                        ? "PURCHASE COMPLETE  /  " + definition.DisplayName + " x" + quantity +
+                          "  /  -" + FormatMoney(charged) + " USD."
+                        : "PURCHASE DECLINED  /  " + error;
+                    furnitureTitle.text = "INEZ'S NET AND SUPPLY SHED";
+                    furnitureDetail.text = statusLabel.text;
+                    RenderInezServices();
+                });
+                purchase.SetEnabled(quote > 0L);
+                vendorActions.Add(purchase);
+            }
+        }
+
+        private static string FormatMoney(long cents)
+        {
+            return (cents / 100m).ToString("0.00");
         }
 
         private void SelectFurniture(DocksideFurnitureOption option)
