@@ -128,7 +128,9 @@ namespace WhereTheSoundingsEnd.Economy
         {
             if (!TomasAvailable) return 0L;
             VesselEquipmentController equipment = GetComponent<VesselEquipmentController>();
-            return equipment != null ? equipment.GetRepairQuoteCents(slotId) : 0L;
+            if (equipment == null) return 0L;
+            long baseQuote = equipment.GetRepairQuoteCents(slotId);
+            return ApplyDiscount(baseQuote, GetRelationshipDiscount(tomas != null ? tomas.RelationshipScore : 0));
         }
 
         public bool TryRepairEquipmentSlot(string slotId, string transactionId,
@@ -146,7 +148,9 @@ namespace WhereTheSoundingsEnd.Economy
                 error = "The vessel has no installed-equipment controller.";
                 return false;
             }
-            return equipment.TryRepairSlot(slotId, wallet, transactionId, out chargedCents, out error);
+            long discountedQuote = GetEquipmentRepairQuoteCents(slotId);
+            return equipment.TryRepairSlot(slotId, wallet, transactionId, discountedQuote,
+                out chargedCents, out error);
         }
 
         public long GetHoldRepairQuoteCents()
