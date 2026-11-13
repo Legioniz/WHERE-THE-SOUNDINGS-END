@@ -163,8 +163,8 @@ def main() -> int:
                 failures.append("Input action/binding identifiers must be unique.")
 
         save_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs").read_text(encoding="utf-8")
-        if "CurrentSchemaVersion = 7" not in save_source:
-            failures.append("SaveGameData schema must be version 7 after regional chart discovery persistence changes.")
+        if "CurrentSchemaVersion = 8" not in save_source:
+            failures.append("SaveGameData schema must be version 8 after economy wallet persistence changes.")
 
         if "case 4:" not in save_source or "data.schemaVersion = 5;" not in save_source:
             failures.append("SaveGameData is missing the schema 4 to 5 atmosphere-state migration.")
