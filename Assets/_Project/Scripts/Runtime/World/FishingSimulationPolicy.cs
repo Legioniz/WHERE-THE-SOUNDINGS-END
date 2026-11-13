@@ -42,11 +42,13 @@ namespace WhereTheSoundingsEnd.World
             return Mathf.Clamp(baseWindow - difficultyPenalty + equipmentBonus, 0.055f, 0.18f);
         }
 
-        public static int CalculateMigrationAmount(int population, float migrationRate)
+        public static int CalculateMigrationAmount(int population, float migrationRate, float roll)
         {
             if (population <= 1 || migrationRate <= 0f) return 0;
-            int amount = Mathf.FloorToInt(population * Mathf.Clamp01(migrationRate));
-            if (amount == 0 && population >= 8) amount = 1;
+            float expectedAmount = population * Mathf.Clamp01(migrationRate);
+            int amount = Mathf.FloorToInt(expectedAmount);
+            float fractionalPart = expectedAmount - amount;
+            if (roll < fractionalPart) amount++;
             return Mathf.Clamp(amount, 0, population / 3);
         }
 
