@@ -1047,7 +1047,8 @@ namespace WhereTheSoundingsEnd.Interaction
                    "%\nFUEL  /  " +
                    (fuelController != null
                        ? fuelController.FuelUnits.ToString("0.0") + " / " + fuelController.Capacity.ToString("0.0") +
-                         " UNITS  /  EMERGENCY RESERVE " + fuelController.EmergencyFuelUnits.ToString("0.0")
+                         " UNITS  /  EMERGENCY RESERVE " + fuelController.EmergencyFuelUnits.ToString("0.0") +
+                         "  /  FULL-LOAD ESTIMATE " + fuelController.EstimatedFullLoadMinutes.ToString("0") + " MIN"
                        : "UNAVAILABLE") +
                    "\nLAST DAMAGE REPORT  /  " +
                    (string.IsNullOrWhiteSpace(vesselCondition.LastDamageReport)
