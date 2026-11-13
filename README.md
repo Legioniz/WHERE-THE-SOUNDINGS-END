@@ -50,7 +50,7 @@ Use **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment** after ch
 | Pause | Esc | Start |
 | Inventory | I | North face button |
 
-The harvesting timing action now uses one shared Input System action for keyboard and gamepad input. At a stationary shore approach, Interact opens the Greyhaven dockside hub: select a location, inspect its furniture, and speak with its assigned resident without leaving the vessel. Boat movement now uses inertia and water forces instead of direct velocity changes; its buoyancy is a lightweight four-point approximation, not a full fluid simulation.
+The harvesting timing action now uses one shared Input System action for keyboard and gamepad input. At a stationary shore approach, Interact opens the Greyhaven dockside hub: select a location, inspect its furniture, and speak with its assigned resident without leaving the vessel. Escape or gamepad Start closes the dockside menu; inventory, dialogue, pause and dockside panels are mutually exclusive. Boat movement now uses inertia and water forces instead of direct velocity changes; its buoyancy is a lightweight four-point approximation, not a full fluid simulation.
 
 ## Implemented runtime foundations
 
@@ -76,9 +76,9 @@ Runtime saves are stored outside the project in `Application.persistentDataPath/
 - `autosave.json`
 - corresponding `.bak` recovery files
 
-The versioned schema now preserves boat transform/velocity, cargo, vessel condition, daily salvage depletion, sea time, weather intensity and remaining duration, weather cooldown, hallucination cooldown, pending seabird events, the latest omen, maritime incident countdown/caption/hush/false-light state, Sounding Rig discoveries and opportunities, acoustic hearing history, and inspected site IDs. Save participants are discovered by the scene coordinator.
+Save schema v6 preserves boat transform/velocity, cargo, vessel condition, daily salvage depletion, sea time, weather intensity and remaining duration, weather cooldown, hallucination cooldown, pending seabird events, the latest omen, maritime incident countdown/caption/hush/false-light state, Sounding Rig discoveries and opportunities, acoustic hearing history, inspected site IDs, and bounded per-NPC relationship-event memory. Save participants are discovered by the scene coordinator.
 
-This remains a runtime foundation. A full player-facing save/load menu, cross-scene restore flow, and persistence adapters for future creature/population/quest/economy systems are not complete.
+The title/pause front end includes a player-facing manual save/load screen for five slots plus the separate autosave. Cross-scene restore, mid-dialogue resume, and persistence adapters for future creature/population/quest/economy systems are not complete.
 
 ## Project status and verification boundary
 
