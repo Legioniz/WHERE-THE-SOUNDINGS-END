@@ -9,7 +9,7 @@
 | 05_WORLD_AND_LEVEL_DESIGN | Regions, locations, exploration, ecology |
 | 06_GAMEPLAY_SYSTEMS | Player-facing mechanics |
 | 07_GAME_RULES_AND_BALANCING | Probability, ecology, economy, tuning |
-| 08_TECHNICAL_DESIGN | Unity/C# architecture, data, scenes, saves |
+| 08_TECHNICAL_DESIGN | Unity/C# architecture, data, scenes, saves; [Economy and Trading System](08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md) |
 | 09_ART_AND_VISUAL_DIRECTION | Visual design and asset rules |
 | 10_AUDIO_AND_SOUND_DESIGN | Audio language and acoustic gameplay |
 | 11_UI_UX_DESIGN | HUD, interfaces, accessibility |
