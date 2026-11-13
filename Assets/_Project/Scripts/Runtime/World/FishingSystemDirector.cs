@@ -340,7 +340,7 @@ namespace WhereTheSoundingsEnd.World
                 CargoItemDefinition fish = definitions[i];
                 if (fish == null || fish.Category != CargoItemCategory.Fish) continue;
                 if ((fish.Habitats & activeHabitat) == 0) continue;
-                if (estimatedDepth < fish.MinimumDepthMetres || estimatedDepth > fish.MaximumDepthMetres) continue;
+                if (!FishingSimulationPolicy.IsWithinDepth(estimatedDepth, fish.MinimumDepthMetres, fish.MaximumDepthMetres)) continue;
 
                 float stock = GetPopulation(fish, activeHabitat);
                 if (stock <= 0f) continue;
@@ -372,8 +372,8 @@ namespace WhereTheSoundingsEnd.World
         private void LandCatch()
         {
             float quality = FishingSimulationPolicy.CalculateCatchQuality(successfulBeats, tension);
-            float size = Mathf.Lerp(hookedFish.BaseCatchSize, hookedFish.MaximumCatchSize,
-                                    Mathf.Clamp01(quality * UnityEngine.Random.Range(0.65f, 1.05f)));
+            float size = FishingSimulationPolicy.CalculateCatchSize(hookedFish.BaseCatchSize,
+                hookedFish.MaximumCatchSize, quality, UnityEngine.Random.Range(0.65f, 1.05f));
             string instanceId;
             if (!cargoHold.TryPlaceFirstFit(hookedFish.ItemId, 1, quality, 1f, out instanceId))
             {
@@ -663,7 +663,6 @@ namespace WhereTheSoundingsEnd.World
             if (baitIndex < 0) baitIndex = 0;
             double.TryParse(ReadFlag(data, "fishing.migration-time", "0"), System.Globalization.NumberStyles.Float,
                 System.Globalization.CultureInfo.InvariantCulture, out lastMigrationGameSeconds);
-            UnlockProgression();
         }
 
         private static void AddFlag(SaveGameData data, string id, string value)
