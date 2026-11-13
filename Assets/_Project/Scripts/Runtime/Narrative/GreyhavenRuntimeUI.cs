@@ -450,6 +450,8 @@ namespace WhereTheSoundingsEnd.Narrative
         {
             if (_chartSurface == null || chartController == null) return;
             _chartSurface.Clear();
+            _chartSiteList.Clear();
+            _chartVisitedList.Clear();
 
             Label surfaceHeading = new Label("FIELD PLOT  /  LOCAL SURVEY EXTENT");
             surfaceHeading.style.position = Position.Absolute;
