@@ -227,3 +227,39 @@ A new player can start the slice and complete this sequence without developer co
 - [ ] Run the new artifact Edit Mode tests and all existing Edit Mode tests in Unity 6000.3.28f1.
 - [ ] Verify the artifact groups stream with their owning area and create no colliders, runtime components, lights, rigidbodies or save changes.
 - [ ] Replace highest-visibility greybox props with original/licensed production meshes only after asset provenance and performance review.
+
+
+## Economy and trading integration — researched design baseline, 2026-11-14
+
+**Source status:** Integrated technical design authored; runtime implementation remains open. Do not mark this feature complete from documentation alone.
+
+Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md). It extends, rather than replaces, the existing [Economy Mathematics](../07_GAME_RULES_AND_BALANCING/ECONOMY-MATHEMATICS.md) and [Seafood Selling Price Schedule](../07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md).
+
+| ID | Priority | Task | Dependencies | Status |
+|---|---|---|---|---|
+| ECO-01 | P1 | Add sale-unit/quantity and base-price data to cargo definitions using the existing schedule; preserve stable item IDs | Existing cargo catalog and price schedule | Open |
+| ECO-02 | P1 | Add economy save DTO, integer-cent wallet, schema migration and legacy currency conversion | Save schema v7, save migration tests | Open |
+| ECO-03 | P1 | Implement deterministic sale, demand, repair, fuel-cost and affordability policies | ECO-01, ECO-02 | Open |
+| ECO-04 | P1 | Implement vendor profiles, item acceptance, buyer stock, demand refresh and atomic cargo sales | ECO-03, SpatialCargoHold | Open |
+| ECO-05 | P1 | Implement purchases, vendor stock, bait/supply consumption and hold/equipment capacity checks | ECO-04, cargo/equipment definitions | Open |
+| ECO-06 | P1 | Integrate fuel consumption with propulsion/engine load; expose range and refuel quotes | ECO-03, BoatPrototypeController, VesselConditionController | Open |
+| ECO-07 | P1 | Implement paid hull, engine and damaged-hold repairs with itemized quotes | ECO-03, VesselConditionController, SpatialCargoHold | Open |
+| ECO-08 | P1 | Bind Mara, Tomas, Inez and Harbourmaster to specialised services and existing relationship gates | ECO-04–07, NpcAgent | Open |
+| ECO-09 | P1 | Add market/repair/supply panels within existing dockside modal ownership | ECO-04–08, DocksideHubController | Open |
+| ECO-10 | P1 | Add transaction integrity, anti-duplication, save/load, vendor schedule and controller tests | ECO-01–09 | Open |
+| ECO-11 | P1 | Balance starter/average/optimized expeditions using gross, net and net-income-per-hour measurements | ECO-01–10, vertical slice playtests | Open |
+
+### Economy acceptance gates
+
+- No item sells without an authored legal eligibility rule, sale unit and base price.
+- Destination market factors apply once, at the buyer; catch origin does not silently apply a second regional factor.
+- Quality, freshness, demand and live-condition modifiers use the existing documented ranges.
+- Demand is visible, buyer/item-specific, bounded and persisted; reloads cannot reset stock or duplicate payouts.
+- Sales and purchases are atomic and preserve the cargo hold's physical placement rules.
+- Quest-critical, protected, illegal, quarantined and unsupported items are rejected by ordinary buyers.
+- NPC trade gates use the existing relationship score and idempotent relationship event ledger.
+- Fuel burns only under actual propulsion load; paused/docked/idle states do not consume fuel.
+- Repairs charge only for actual damage and cannot restore a component above 100%.
+- A zero-fuel state has a disclosed recovery path and cannot permanently softlock the campaign.
+- Wallet, market state, fuel, cargo condition and transaction/reward idempotency survive save/load and schema migration.
+- The economy is not complete until Unity compilation, Edit Mode tests, Play Mode integration and vertical-slice playtests pass.
