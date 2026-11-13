@@ -17,6 +17,7 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField, Min(0f)] private float emergencyFuelUnits = 2f;
         [SerializeField, Min(0f)] private float emergencyReserveCapacity = 2f;
         [SerializeField, Min(0f)] private float unitsPerSecondAtFullLoad = 0.0065f;
+        private VesselEquipmentController equipment;
 
         public float Capacity => capacity;
         public float FuelUnits => fuelUnits;
@@ -25,6 +26,11 @@ namespace WhereTheSoundingsEnd.Economy
         public bool CanPropel => fuelUnits > 0.0001f || emergencyFuelUnits > 0.0001f;
         public float EstimatedFullLoadMinutes => unitsPerSecondAtFullLoad > 0f
             ? fuelUnits / unitsPerSecondAtFullLoad / 60f : float.PositiveInfinity;
+
+        private void Awake()
+        {
+            equipment = GetComponent<VesselEquipmentController>();
+        }
 
         private void OnValidate()
         {
@@ -46,7 +52,10 @@ namespace WhereTheSoundingsEnd.Economy
 
             float load = Mathf.Clamp01(engineLoad);
             if (load <= 0.01f) return 0f;
-            float requested = unitsPerSecondAtFullLoad * load * Mathf.Clamp01(Mathf.Abs(throttle)) * deltaTime;
+            if (equipment == null) equipment = GetComponent<VesselEquipmentController>();
+            float efficiency = equipment != null ? equipment.FuelUseMultiplier : 1.25f;
+            float requested = unitsPerSecondAtFullLoad * efficiency * load * Mathf.Clamp01(Mathf.Abs(throttle)) * deltaTime;
+            if (equipment != null) equipment.WearEngine(deltaTime * load * Mathf.Clamp01(Mathf.Abs(throttle)));
             if (fuelUnits > 0f)
             {
                 float consumed = Mathf.Min(fuelUnits, requested);
