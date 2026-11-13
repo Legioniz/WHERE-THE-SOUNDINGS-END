@@ -35,6 +35,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Inventory/CargoGridGeometry.cs",
     "Assets/_Project/Scripts/Runtime/Inventory/SpatialCargoHold.cs",
     "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs",
+    "Assets/_Project/Scripts/Runtime/World/UnexplainedWarningPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingDirector.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/StreamedAreaSceneRoot.cs",
@@ -171,6 +172,17 @@ def main() -> int:
         ):
             if required_text not in save_source:
                 failures.append(f"WorldSaveData is missing persistent state: {required_text}")
+
+        warning_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishermanAtmosphereDirector.cs").read_text(encoding="utf-8")
+        for required_text in ("UnexplainedWarningPolicy.ShouldTrigger", "TriggerUnexplainedWarning", "DrawUnexplainedIndicator"):
+            if required_text not in warning_source:
+                failures.append(f"FishermanAtmosphereDirector is missing unexplained warning behavior: {required_text}")
+        warning_policy_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/UnexplainedWarningPolicy.cs").read_text(encoding="utf-8")
+        if "Probability = 0.055f" not in warning_policy_source or "RemapIncidentRoll" not in warning_policy_source:
+            failures.append("UnexplainedWarningPolicy is missing its rare trigger band or incident remapping.")
+        warning_tests = (ROOT / "Assets/_Project/Tests/EditMode/SeaStateAndCargoDamageTests.cs").read_text(encoding="utf-8")
+        if "UnexplainedWarningPolicy_UsesRareBoundedTriggerBand" not in warning_tests or "UnexplainedWarningPolicy_RemapsRemainingIncidentRange" not in warning_tests:
+            failures.append("Unexplained warning policy regression tests are missing.")
 
         survey_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SoundingRigController.cs").read_text(encoding="utf-8")
         for required_text in ("SoundingPulse", "discoveredPhenomenonSiteIds", "evaluatedSurveyOpportunityIds", "AcousticEventBus.Publish", "IsIndependentLayerObservation", "CalculateSiteSignalConfidence"):
