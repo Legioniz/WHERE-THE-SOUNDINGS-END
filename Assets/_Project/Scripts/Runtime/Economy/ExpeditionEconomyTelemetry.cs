@@ -35,7 +35,7 @@ namespace WhereTheSoundingsEnd.Economy
         private bool docksideSessionObserved;
         private long tripGrossCents;
         private long tripExpenseCents;
-        private float tripStartFuel;
+        private float tripFuelConsumed;
         private double tripStartGameSeconds;
         private double tripStartRealtime;
         private long lastTripGrossCents;
@@ -57,17 +57,20 @@ namespace WhereTheSoundingsEnd.Economy
         private void OnEnable()
         {
             SubscribeWallet();
+            SubscribeFuel();
         }
 
         private void OnDisable()
         {
             if (wallet != null) wallet.TransactionApplied -= OnTransactionApplied;
+            if (fuel != null) fuel.FuelConsumed -= OnFuelConsumed;
         }
 
         private void Update()
         {
             ResolveReferences();
             SubscribeWallet();
+            SubscribeFuel();
             if (tripActive && dockside != null)
             {
                 if (dockside.IsMenuOpen) docksideSessionObserved = true;
@@ -96,6 +99,19 @@ namespace WhereTheSoundingsEnd.Economy
             wallet.TransactionApplied += OnTransactionApplied;
         }
 
+        private void SubscribeFuel()
+        {
+            if (fuel == null) return;
+            fuel.FuelConsumed -= OnFuelConsumed;
+            fuel.FuelConsumed += OnFuelConsumed;
+        }
+
+        private void OnFuelConsumed(float units)
+        {
+            if (tripActive && IsFinite(units) && units > 0f)
+                tripFuelConsumed = Mathf.Min(float.MaxValue, tripFuelConsumed + units);
+        }
+
         public void ObservePropulsion(float throttle)
         {
             if (tripActive || Time.timeScale <= 0.0001f || !IsFinite(throttle) || Mathf.Abs(throttle) < 0.05f)
@@ -105,7 +121,7 @@ namespace WhereTheSoundingsEnd.Economy
             tripActive = true;
             tripGrossCents = 0L;
             tripExpenseCents = 0L;
-            tripStartFuel = fuel.FuelUnits;
+            tripFuelConsumed = 0f;
             tripStartGameSeconds = seaState != null ? seaState.ElapsedGameSeconds : 0d;
             tripStartRealtime = Time.unscaledTimeAsDouble;
         }
@@ -125,12 +141,11 @@ namespace WhereTheSoundingsEnd.Economy
             double now = seaState != null ? seaState.ElapsedGameSeconds : tripStartGameSeconds;
             double duration = Math.Max(0d, now - tripStartGameSeconds);
             if (duration < 0.01d) duration = Math.Max(0d, Time.unscaledTimeAsDouble - tripStartRealtime);
-            float fuelNow = fuel != null ? fuel.FuelUnits : tripStartFuel;
 
             lastTripGrossCents = tripGrossCents;
             lastTripExpenseCents = tripExpenseCents;
             lastTripSeconds = duration;
-            lastTripFuel = Mathf.Max(0f, tripStartFuel - fuelNow);
+            lastTripFuel = Mathf.Max(0f, tripFuelConsumed);
             completedTrips = completedTrips == int.MaxValue ? int.MaxValue : completedTrips + 1;
             lifetimeGrossCents = SafeAdd(lifetimeGrossCents, lastTripGrossCents);
             lifetimeExpenseCents = SafeAdd(lifetimeExpenseCents, lastTripExpenseCents);
