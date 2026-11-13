@@ -63,6 +63,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public string itemId;
         public int currentStock;
         public int targetStock;
+        public int lastRestockDay;
     }
 
     [Serializable]
