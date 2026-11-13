@@ -32,6 +32,7 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField, Min(0f)] private float rodWearPerCatch = 0.0025f;
         [SerializeField, Min(0f)] private float lanternWearPerNightSecond = 0.000015f;
         [SerializeField] private Light lanternLight;
+        private SeaStateDirector seaState;
 
         public string EngineItemId => GetItemId(EngineSlot);
         public string RodItemId => GetItemId(RodSlot);
@@ -55,7 +56,7 @@ namespace WhereTheSoundingsEnd.Economy
         {
             ResolveReferences();
             EnsureSlots();
-            ResolveLantern();
+            seaState = FindFirstObjectByType<SeaStateDirector>();
             ApplyLantern();
         }
 
@@ -63,8 +64,7 @@ namespace WhereTheSoundingsEnd.Economy
         {
             if (HasLantern && LanternCondition > 0.01f)
             {
-                SeaStateDirector clock = FindFirstObjectByType<SeaStateDirector>();
-                if (clock != null && clock.IsNight)
+                if (seaState != null && seaState.IsNight)
                     DamageSlot(LanternSlot, lanternWearPerNightSecond * Time.deltaTime);
             }
             ApplyLantern();
@@ -150,20 +150,25 @@ namespace WhereTheSoundingsEnd.Economy
 
             string oldItem = slot.itemId;
             float oldCondition = slot.condition;
-            string returnedInstance = null;
-            if (!string.IsNullOrEmpty(oldItem) &&
-                !cargo.TryPlaceFirstFit(oldItem, 1, oldCondition, 1f, out returnedInstance))
-            {
-                message = "The hold has no free space to store the currently installed equipment.";
-                return false;
-            }
-
             CargoPlacement removed;
             if (!cargo.TryRemove(incoming.instanceId, out removed))
             {
-                if (!string.IsNullOrEmpty(returnedInstance)) cargo.TryRemove(returnedInstance, out removed);
                 message = "The cargo placement changed before installation. Nothing was equipped.";
                 return false;
+            }
+
+            if (!string.IsNullOrEmpty(oldItem))
+            {
+                string returnedInstance;
+                if (!cargo.TryPlaceFirstFit(oldItem, 1, oldCondition, 1f, out returnedInstance))
+                {
+                    string rollbackInstance;
+                    if (!cargo.TryPlaceFirstFit(itemId, 1, removed.quality, removed.freshness,
+                        out rollbackInstance, removed.saleQuantity))
+                        Debug.LogError("Equipment swap rollback failed; inspect vessel cargo immediately.", this);
+                    message = "The hold cannot store the replaced equipment. The installation was cancelled.";
+                    return false;
+                }
             }
 
             slot.itemId = itemId;
@@ -270,6 +275,7 @@ namespace WhereTheSoundingsEnd.Economy
 
         private void ApplyLantern()
         {
+            if (lanternLight == null && HasLantern) ResolveLantern();
             if (lanternLight == null) return;
             bool equipped = HasLantern && LanternCondition > 0.01f;
             lanternLight.enabled = equipped;
