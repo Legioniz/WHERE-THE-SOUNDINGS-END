@@ -78,7 +78,7 @@
 
 ## Current automated coverage
 
-The Edit Mode assembly contains deterministic suites for the following policies and regressions, including dockside access/modal exclusivity and maritime-surface transitions:
+The Edit Mode assembly contains deterministic suites for the following policies and regressions, including dockside access/modal exclusivity, regional chart discovery/save migration and maritime-surface transitions:
 - action-driven clock policy;
 - cargo damage / repair / quest-cargo protection;
 - save migration to schema v4;
@@ -98,7 +98,7 @@ The Edit Mode assembly contains deterministic suites for the following policies 
 - Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
 - Fixed-step surface-velocity estimation and normalized interpolation between previous/current wave snapshots.
 
-The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v6 and ordered v4-to-v5/v5-to-v6 migrations, dockside modal wiring, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
+The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v7 and ordered v4-to-v5/v5-to-v6/v6-to-v7 migrations, dockside modal wiring, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 
 ## Verification boundary
 
