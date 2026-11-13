@@ -257,7 +257,6 @@ def main() -> int:
             "BuildCatchInspection",
             "BuildVesselInspection",
             "DocksideModalPolicy.CanOpenDocksideMenu",
-            "DocksideModalPolicy.CanOpenPauseMenu",
             "pauseAction.WasPressedThisFrame()",
             "private void OnDisable()",
         ):
