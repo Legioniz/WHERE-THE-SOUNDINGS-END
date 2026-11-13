@@ -989,6 +989,8 @@ def main() -> int:
         for required_text in (
             "wallet.TransactionApplied", "fuel.FuelConsumed",
             "ObservePropulsion", "OnTransactionApplied", "OnFuelConsumed",
+            "subscribedWallet", "subscribedFuel",
+            "if (subscribedWallet == wallet) return;", "if (subscribedFuel == fuel) return;",
             "dockside.IsMenuOpen", "CompleteTrip", "CaptureSaveData", "RestoreSaveData",
         ):
             if required_text not in telemetry_source:
