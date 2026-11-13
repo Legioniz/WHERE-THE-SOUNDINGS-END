@@ -78,10 +78,11 @@ namespace WhereTheSoundingsEnd.Inventory
             float quality,
             float freshness,
             out string instanceId,
-            float saleQuantity = 1f)
+            float saleQuantity = -1f)
         {
             instanceId = null;
             CargoItemDefinition definition = FindDefinition(itemId);
+            if (saleQuantity == -1f) saleQuantity = quantity;
             if (definition == null || quantity < 1 || !IsFinite(saleQuantity) || saleQuantity <= 0f) return false;
 
             bool[,] occupied = BuildOccupiedGrid(null);
@@ -175,6 +176,7 @@ namespace WhereTheSoundingsEnd.Inventory
             float saleQuantity = 1f)
         {
             instanceId = null;
+            if (saleQuantity == -1f) saleQuantity = quantity;
             if (FindDefinition(itemId) == null || quantity < 1 || !IsFinite(saleQuantity) || saleQuantity <= 0f) return false;
 
             for (int rotation = 0; rotation < 4; rotation++)
