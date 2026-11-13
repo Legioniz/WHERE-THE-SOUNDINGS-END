@@ -12,6 +12,13 @@ namespace WhereTheSoundingsEnd.World
                    (int)preferred == (int)actual + 1;
         }
 
+        public static float CalculateTimingWindow(float baseWindow, float resistance, float tackleControl)
+        {
+            float difficultyPenalty = Mathf.Clamp(resistance, 0f, 3f) * 0.025f;
+            float equipmentBonus = (Mathf.Clamp(tackleControl, 0.5f, 1.5f) - 1f) * 0.035f;
+            return Mathf.Clamp(baseWindow - difficultyPenalty + equipmentBonus, 0.055f, 0.18f);
+        }
+
         public static int CalculateMigrationAmount(int population, float migrationRate)
         {
             if (population <= 1 || migrationRate <= 0f) return 0;
