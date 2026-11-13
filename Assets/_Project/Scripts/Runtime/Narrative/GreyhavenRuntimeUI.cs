@@ -53,6 +53,7 @@ namespace WhereTheSoundingsEnd.Narrative
         private bool _ownsInventoryAction;
         private bool _inventoryOpen;
         private bool _chartOpen;
+        private string _lastChartNotice = string.Empty;
         private RegionalChartController chartController;
         private bool _lineWaiting;
         private bool _pauseOwned;
@@ -98,6 +99,13 @@ namespace WhereTheSoundingsEnd.Narrative
 
         private void Update()
         {
+            if (chartController != null && !string.IsNullOrWhiteSpace(chartController.LatestDiscovery) &&
+                !string.Equals(_lastChartNotice, chartController.LatestDiscovery, StringComparison.Ordinal))
+            {
+                _lastChartNotice = chartController.LatestDiscovery;
+                SetInteractionPrompt(_lastChartNotice);
+            }
+
             Keyboard keyboard = Keyboard.current;
             if (_inventoryAction != null && _inventoryAction.WasPressedThisFrame())
                 ToggleInventory();
