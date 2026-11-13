@@ -574,7 +574,7 @@ namespace WhereTheSoundingsEnd.World
                         if (destination < 0) continue;
 
                         int stock = Mathf.RoundToInt(GetPopulation(fish, sourceHabitat));
-                        int amount = FishingSimulationPolicy.CalculateMigrationAmount(stock, fish.MigrationRate);
+                        int amount = FishingSimulationPolicy.CalculateMigrationAmount(stock, fish.MigrationRate, UnityEngine.Random.value);
                         transfers[source] -= amount;
                         transfers[destination] += amount;
                     }
