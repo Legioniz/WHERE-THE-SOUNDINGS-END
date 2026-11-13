@@ -142,7 +142,7 @@ Schema v5 also records:
 - acoustic pressure, latest heard event/region/position/timestamp, and a bounded 128-event duplicate guard;
 - maritime incident countdown, caption/hush durations, hush blend, and active false-navigation-light position/remaining duration.
 
-Schema 4 saves migrate with weather defaults derived from their old weather label, a safe weather-shift delay, no pending bird event, and empty acoustic/inspection history. Existing schema 0–3 migrations remain ordered and preserved. The current v5-to-v6 migration separately initializes NPC relationship-memory ledgers and maps legacy zero relationship values to neutral 50.
+Schema 4 saves migrate with weather defaults derived from their old weather label, a safe weather-shift delay, no pending bird event, and empty acoustic/inspection history. Existing schema 0–3 migrations remain ordered and preserved. The v5-to-v6 migration separately initializes NPC relationship-memory ledgers and maps legacy zero relationship values to neutral 50; v7-to-v8 migrates the legacy whole-dollar currency field into the integer-cent economy wallet.
 
 Generated scenes include an AcousticWorldListener. It subscribes to AcousticEventBus, scores audibility by range/loudness/sensitivity/background noise, deduplicates heard IDs, applies a small disturbance response, and exposes a scored SignalHeard event for future creature or navigation listeners. It does not poll AudioSources.
 
