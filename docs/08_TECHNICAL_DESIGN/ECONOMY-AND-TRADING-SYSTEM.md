@@ -46,9 +46,9 @@ Greyhaven's current residents are retained; do not introduce duplicate shopkeepe
 
 | Vendor / resident | Role | Buys | Sells / services |
 |---|---|---|---|
-| Mara Venn — Fish Market | Primary seafood buyer | Legal fish, shellfish and cephalopods; special accepted specimens only when configured | Bait and basic fishing consumables when stock is authored |
-| Tomas Vale — Boat Repair Shed | Mechanic / shipwright | Selected salvage parts only when a purchase order exists | Hull, engine and hold repairs; fuel; vessel/equipment upgrades |
-| Inez Sarmiento — Net Mender Shed | Gear and materials specialist | Net-related salvage and approved recovered materials | Lines, hooks, nets, tackle and net-repair supplies |
+| Mara Venn — Fish Market | Primary seafood buyer | Configured ordinary seafood | No supply sales in the current Greyhaven runtime |
+| Tomas Vale — Boat Repair Shed | Mechanic / shipwright | No unrestricted salvage buying yet | Paid hull, engine and damaged-hold repairs; fuel |
+| Inez Sarmiento — Net Mender Shed | Gear and materials specialist | Configured recovered salvage materials | Starter equipment and four bait types; further tackle catalogue remains open |
 | Harbourmaster — Harbour Office | Authority / research broker | No unrestricted commodity buying | Explicit salvage contracts, research submissions, permits and one-time evidence rewards |
 
 Vendor acceptance is a hard gate. A vendor must not buy an item simply because it has a price. Quest-critical cargo, protected wildlife, closed-area catches, undersized catches and quarantined specimens cannot be sold through ordinary commodity transactions.
