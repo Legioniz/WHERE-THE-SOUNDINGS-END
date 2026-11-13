@@ -10,11 +10,14 @@
 
 GreyhavenRuntimeUI builds the starter Greyhaven HUD with Unity UI Toolkit:
 - A compact top strip labelled GREYHAVEN / FIELD LOG.
-- A Chart [M] toggle that opens the regional field chart.\n- A Cargo Hold [I] toggle.
+- A Chart [M] toggle that opens the regional field chart.
+- A Cargo Hold [I] toggle.
 - A shared interaction prompt beneath the strip. The dockside hub owns the generated Greyhaven location prompt; hand-authored resident/site interactions can use the same presenter API.
 - Contextual status and feedback within inventory and dialogue panels.
 
-The chart overlay shows only physically visited regions and Sounding Rig-discovered site marks. Unknown regions and sites receive no names, pins, bearings or compass guidance. It uses a local survey plot, not a calibrated nautical map.\n\nThe HUD is a functional greybox. It is not a final production HUD or a complete expedition instrument suite.
+The chart overlay shows only physically visited regions and Sounding Rig-discovered site marks. Unknown regions and sites receive no names, pins, bearings or compass guidance. It uses a local survey plot, not a calibrated nautical map.
+
+The HUD is a functional greybox. It is not a final production HUD or a complete expedition instrument suite.
 
 ## Dockside hub overlay
 
@@ -40,7 +43,8 @@ Only one of the following gameplay-facing modal states may own the screen at a t
 
 DocksideModalPolicy supplies deterministic guards used by the runtime UI:
 - Dockside cannot open over inventory, dialogue, an active gameplay action, a front-end overlay or a paused time scale.
-- Inventory cannot open over dockside, dialogue, the regional chart or front-end overlays.\n- The regional chart cannot open over inventory, dialogue, dockside, front-end overlays, a paused state or an active gameplay action.
+- Inventory cannot open over dockside, dialogue, the regional chart or front-end overlays.
+- The regional chart cannot open over inventory, dialogue, dockside, front-end overlays, a paused state or an active gameplay action.
 - Pause cannot open over dockside, inventory or dialogue.
 - Esc / Start closes the active dockside menu; it must not also open the pause page.
 
