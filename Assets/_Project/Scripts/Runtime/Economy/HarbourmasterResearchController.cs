@@ -62,6 +62,7 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private SpatialCargoHold cargo;
         [SerializeField] private EconomyWalletController wallet;
         [SerializeField] private SoundingRigController soundingRig;
+        [SerializeField] private RegionalChartController regionalChart;
         [SerializeField] private int submittedMask;
 
         public int DiscoveryCount => soundingRig != null ? soundingRig.DiscoveredSiteIds.Count : 0;
@@ -72,6 +73,7 @@ namespace WhereTheSoundingsEnd.Economy
             if (wallet == null) wallet = GetComponent<EconomyWalletController>();
             if (soundingRig == null) soundingRig = GetComponent<SoundingRigController>();
             if (soundingRig == null) soundingRig = FindFirstObjectByType<SoundingRigController>();
+            if (regionalChart == null) regionalChart = FindFirstObjectByType<RegionalChartController>();
         }
 
         public bool IsSubmitted(int index)
@@ -144,6 +146,7 @@ namespace WhereTheSoundingsEnd.Economy
             }
 
             submittedMask |= 1 << index;
+            if (regionalChart != null) regionalChart.GrantChartPermit(item.permitRegionId);
             message = "RESEARCH ACCEPTED  /  " + item.title + "  /  +" +
                 (item.rewardCents / 100m).ToString("0.00") + " USD  /  " + item.permitName + " recorded.";
             return true;
