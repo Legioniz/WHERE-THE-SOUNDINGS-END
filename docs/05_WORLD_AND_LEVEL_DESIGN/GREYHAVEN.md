@@ -4,7 +4,7 @@
 > Status: Working baseline — generated greybox, boat-operated dockside menus and additive static-area streaming; Unity verification pending  
 > Owner: Project lead  
 > Version: 0.6  
-> Last reviewed: 2026-11-13
+> Last reviewed: 2026-11-14
 
 ## 1. Purpose
 
@@ -109,7 +109,11 @@ The visual target is restrained, weathered and maritime: dark blue-green water, 
 
 The generated island now uses a deterministic multi-scale heightfield with irregular shoreline sampling, distinct west/east headlands, an inland ridge, a rear terrace and smaller ridged surface variation. Its higher-resolution land mesh is split into soil, sand, grass and basalt submeshes using elevation, slope and shoreline distance. The sand band conforms to the mesh edge rather than using disconnected rectangular beach pieces. Static basalt outcrops use faceted, deterministic rock geometry.
 
-These are improved procedural greybox forms, not final production models or texture work. The existing material palette is reused; authored texture sets, erosion decals, shoreline foam, vegetation variety, animated water, particles and final environment assets remain separate work. See [Greyhaven Procedural Island Terrain](../08_TECHNICAL_DESIGN/GREYHAVEN-TERRAIN.md) for the terrain profile and validation requirements.
+These are improved procedural greybox forms, not final production models or texture work. The existing material palette is reused; authored texture sets, erosion decals, shoreline foam, vegetation variety, animated water, particles and final environment assets remain separate work.
+
+The latest generated art pass adds a district-aware dressing layer through `GreyhavenMaritimeAssetBuilder`. The harbour now has recognizable mooring bollards, cleats, glass lanterns, anchors, lobster pots, float lines and rope/fender wear. Village work areas use stave barrels, slatted fish crates, a hand winch, propeller, net-drying rack, wash tub and work-worn ground patches. The estuary has four varied mangrove silhouettes with exposed prop roots, reed and salt-grass clumps, storm driftwood, a collapsed crab pot, abandoned float line and tide-line silt. The lighthouse headland receives a keeper weather station, storm lantern and wind-felled debris.
+
+These are assembled, deterministic, project-authored procedural meshes rather than final sculpted models or texture sets. The new details are assigned to the existing harbour, village, estuary and landmark roots; they add no gameplay components or collision. Streamed-area revision 3 requires all six generated Greyhaven area scenes to be rebuilt. See [Environment Assets and Set Dressing](../09_ART_AND_VISUAL_DIRECTION/ENVIRONMENT-ASSETS.md) for the asset families, ownership and verification criteria. See [Greyhaven Procedural Island Terrain](../08_TECHNICAL_DESIGN/GREYHAVEN-TERRAIN.md) for the terrain profile and validation requirements.
 
 ## 7. Scene generation and controls
 

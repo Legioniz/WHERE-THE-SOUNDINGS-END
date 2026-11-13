@@ -25,6 +25,7 @@
 - [Development Roadmap](13_PRODUCTION_MANAGEMENT/DEVELOPMENT-ROADMAP.md) — 24-month commercial production baseline, phase windows, weekly capacity, scope controls.
 - [Production Plan](13_PRODUCTION_MANAGEMENT/PRODUCTION-PLAN.md) — two-week work cycles, capacity model, workflow, quality gates.
 - [Project Milestones](13_PRODUCTION_MANAGEMENT/PROJECT-MILESTONES.md) — evidence-based exit criteria.
+- [Environment Assets and Set Dressing](09_ART_AND_VISUAL_DIRECTION/ENVIRONMENT-ASSETS.md) — material language, bespoke Greyhaven maritime asset families, regional dressing and verification rules.
 - [Implementation Audit](13_PRODUCTION_MANAGEMENT/IMPLEMENTATION-AUDIT.md) — evidence-based M0 source, project and verification audit.
 - [Task Backlog](13_PRODUCTION_MANAGEMENT/TASK-BACKLOG.md) — prioritized foundation and first vertical-slice work.
 - [Feature Priorities](13_PRODUCTION_MANAGEMENT/FEATURE-PRIORITIES.md) — P0–P3 sequencing and immediate blockers.

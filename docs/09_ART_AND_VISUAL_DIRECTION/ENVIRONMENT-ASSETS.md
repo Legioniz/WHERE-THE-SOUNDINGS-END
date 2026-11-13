@@ -1,16 +1,16 @@
 # Environment Assets and Set Dressing
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Working visual specification — Greyhaven generated artifact pass source-implemented; final art and Unity review pending  
+> Status: Working visual specification — bespoke Greyhaven maritime dressing source-implemented; final production meshes/textures and Unity review pending  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-13
+> Version: 0.3  
+> Last reviewed: 2026-11-14
 
 ## 1. Visual target
 
 The environment should read as a cold, isolated working coastline: weathered timber, dark basalt, stained concrete, oxidized metal, salt-faded canvas, cloudy glass, wet sediment, and restrained warm practical lights. The 2.5D elevated camera must preserve strong silhouettes and useful negative space.
 
-The current Greyhaven builder remains a deterministic greybox/set-dressing generator. Primitive geometry and generated materials are layout and composition placeholders, not final production art.
+The Greyhaven builder remains a deterministic generated environment system. The latest pass replaces the most visible repeated blockout silhouettes with assembled maritime forms, varied vegetation and region-specific wear. These are project-authored procedural assets, not final sculpted production meshes or authored texture sets.
 
 ## 2. Material language
 
@@ -52,7 +52,20 @@ The pass uses generated primitive meshes and four muted material variants (oxidi
 
 Artifact cylinders and spheres use parent-local transforms, including the offset wreck transform, so the cluster stays correctly attached when its streamed root moves. All dressing geometry is created without colliders, rigidbodies, lights, or runtime components. It does not become loot, an inspection target, a survey discovery, a map mark, or save data. The streamed-area revision is incremented so generated scene validation recognizes the new content revision.
 
-## 5. Performance and asset ownership
+## 5. Bespoke Greyhaven maritime pass
+
+`GreyhavenMaritimeAssetBuilder.Build` is called by the Greyhaven scene generator and owns four distinct dressing families:
+
+- **Harbour work zone:** paired mooring bollards with horns and rope lashings, deck cleats, framed glass lanterns, retired anchor, lobster pots, float line, rope coil, fender timber, and sparse salt/tar wear.
+- **Village work yards:** stave-and-hoop barrels, slatted fish crates, a hand-powered repair winch, three-blade propeller, net-drying rack, wash tub, oil/mud scuffs and doorstep wear.
+- **Estuary and tide line:** four irregular mangroves with bent trunks, exposed prop roots and layered crowns; several reed/salt-grass clumps; driftwood, collapsed crab pot, abandoned float line, half-buried anchor and silt/wrack patches.
+- **Lighthouse headland:** keeper weather station with tripod, wind vane and rain gauge, storm lantern, rope/float remnants, wind-felled branch and stone salt staining.
+
+The assets use assembled low-cost meshes from shared Unity primitive mesh resources, not single cubes scaled into every role. Their silhouettes and component detail are specific to the maritime object being represented. Wear is intentionally broad and sparse so it reads from the elevated camera without becoming noisy. District identity comes from different work patterns and ecology, not only color swaps.
+
+All generated children are static render-only dressing: colliders are removed immediately; no Rigidbody, MonoBehaviour, Light, interaction, loot, discovery, map, journal, save or economy behavior is added. The helper is deterministic and uses the owning harbour, village, estuary and landmark roots. Streamed area content revision is now 3 so the six generated area scenes must be rebuilt.
+
+## 6. Performance and asset ownership
 
 - Keep repeated primitive materials shared through the existing material factory and enable GPU instancing where supported.
 - Do not add per-prop lights, Update loops, rigidbodies, or scripts.
@@ -60,7 +73,7 @@ Artifact cylinders and spheres use parent-local transforms, including the offset
 - Avoid Resources.UnloadUnusedAssets on every transition; use the existing area-streaming ownership and telemetry.
 - The current builder does not establish a final draw-call, memory, GPU, or frame-time budget. Measure in a Windows Development Build on representative hardware before setting one.
 
-## 6. Provenance and final asset pipeline
+## 7. Provenance and final asset pipeline
 
 No third-party models, textures, audio, fonts, or code are introduced by this pass. Generated Unity primitives and project-authored materials are used.
 
@@ -70,11 +83,12 @@ Before replacing greybox pieces with external or generated production assets:
 - test collision separately from render meshes;
 - preserve stable object/area ownership and generated-scene rebuild behavior.
 
-## 7. Acceptance criteria
+## 8. Acceptance criteria
 
 - Readable at the target gameplay camera height and resolution.
 - No visual clutter obscures vessel navigation or service locations.
 - No visible floating/interpenetrating artifacts after Unity rebuild.
 - Static props do not create extra colliders, scripts, lights, rigidbodies, or save state.
+- Distinct maritime silhouettes and regional clusters remain readable from the target camera; vegetation does not obstruct navigation or service approaches.
 - Streamed ownership remains valid and the new revision is accepted by StreamedAreaSceneRoot.
 - Final material/mesh quality and performance are reviewed in Unity; repository syntax/static checks alone are insufficient.

@@ -4,7 +4,24 @@
 > Status: Active working log  
 > Owner: Project lead  
 > Version: 0.1  
-> Last reviewed: 2026-11-13
+> Last reviewed: 2026-11-14
+
+## 2026-11-14 — Greyhaven bespoke maritime assets and regional environment pass
+
+**Branch:** `art/greyhaven-bespoke-maritime-environments-20261114` (pending review and integration).
+
+### Implemented in source
+- Added `GreyhavenMaritimeAssetBuilder`, called by the deterministic Greyhaven scene generator.
+- Replaced generic prop language in key silhouettes with assembled mooring bollards, deck cleats, lanterns, anchors, lobster/crab pots, fish crates, stave barrels, a repair winch, propeller, net rack and keeper weather station.
+- Added mangrove variants with bent trunks, exposed prop roots and layered crowns, plus reeds/salt grass, storm driftwood, abandoned float lines, shoreline wrack and broad wear patches.
+- Established four visual identities—working harbour, village work yards, estuary/tide line and lighthouse headland—using the existing muted material palette.
+- Kept dressing deterministic and static; no colliders, rigidbodies, runtime scripts, lights, save data or gameplay interaction are added.
+- Incremented the streamed-area revision to 3 and added regression coverage for district ownership and static-only constraints.
+
+### Verification boundary
+- GitHub Actions must validate repository contracts and C# syntax after the pull request is opened.
+- Edit Mode tests, generated-scene rebuild, camera-height placement review, Play Mode streaming, profiling and Windows build remain Unity-only acceptance work.
+- The meshes are assembled procedural greybox-quality art, not final authored texture/UV/LOD production assets.
 
 ## 2026-11-13 — Cross-system modal ownership and repository documentation reconciliation
 

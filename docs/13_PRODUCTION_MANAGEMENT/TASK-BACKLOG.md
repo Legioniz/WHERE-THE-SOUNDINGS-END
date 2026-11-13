@@ -4,7 +4,7 @@
 > Status: Active M0 and first vertical-slice backlog  
 > Owner: Project lead  
 > Version: 0.4  
-> Last reviewed: 2026-11-13
+> Last reviewed: 2026-11-14
 
 This is the authoritative implementation backlog. The [Implementation Audit](IMPLEMENTATION-AUDIT.md) records what exists and what is still unverified. The [Development Roadmap](DEVELOPMENT-ROADMAP.md) owns the release forecast; this file owns work order, dependencies and acceptance criteria.
 
@@ -15,6 +15,14 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 - No task is complete because code was generated or a document exists. Complete means integrated, documented, tested at the appropriate layer, and evidence recorded.
 - Do not replace existing systems without an evidenced reason. Extend the current owners and preserve save IDs/schema compatibility.
 - Keep the first slice small. The six-region world and 20+ hour target are not M1 acceptance requirements.
+
+## P1 — Greyhaven environment art and readability
+
+| ID | Priority | Task | Size | Dependencies | Status |
+|---|---|---|---|---|---|
+| ENV-04 | P1 | Replace prominent Greyhaven primitive prop silhouettes; add regional vegetation, wear and shoreline debris | M | Generated scene rebuild and Unity visual review | Source implemented; Unity acceptance open |
+
+**ENV-04 acceptance:** rebuild all six streamed Greyhaven areas at revision 3; inspect the harbour work lane, village service approaches, estuary vegetation, shoreline tide line and lighthouse headland from the gameplay camera; confirm grounded placement, no prop overlap that obscures navigation, no collision/runtime/save side effects, and acceptable memory/draw-call impact in a Windows Development Build.
 
 ## M0 — Foundation stabilization and verification
 
