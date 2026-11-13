@@ -208,7 +208,8 @@ namespace WhereTheSoundingsEnd.World
             {
                 if (harvestBeatAction != null && harvestBeatAction.WasPressedThisFrame())
                 {
-                    if (phaseTimer <= 1.2f)
+                    float hookPosition = Mathf.Clamp01(phaseTimer / 1.25f);
+                    if (Mathf.Abs(hookPosition - targetPhase) <= strikeWindow * 1.5f)
                         BeginFight();
                     else
                         MissedBite();
@@ -239,7 +240,8 @@ namespace WhereTheSoundingsEnd.World
 
             phase = FishingEncounterPhase.HookWindow;
             phaseTimer = 0f;
-            status = "BITE! " + hookedFish.DisplayName + " is testing the bait — STRIKE now.";
+            targetPhase = UnityEngine.Random.Range(0.25f, 0.75f);
+            status = "BITE! " + hookedFish.DisplayName + " is testing the bait — strike at the marked moment.";
         }
 
         private void BeginFight()
@@ -539,8 +541,10 @@ namespace WhereTheSoundingsEnd.World
             if (phase == FishingEncounterPhase.Idle)
             {
                 float panelX = Screen.width - 348f;
-                GUI.Box(new Rect(panelX, Screen.height - 142, 330, 120), GUIContent.none);
-                GUI.Label(new Rect(panelX + 10, Screen.height - 136, 310, 20), "FISHING LOADOUT", style);
+                GUI.Box(new Rect(panelX, Screen.height - 168, 330, 146), GUIContent.none);
+                GUI.Label(new Rect(panelX + 10, Screen.height - 162, 310, 20), "FISHING LOADOUT", style);
+                GUIStyle statusStyle = new GUIStyle(style) { fontSize = 10 };
+                GUI.Label(new Rect(panelX + 10, Screen.height - 140, 310, 18), status, statusStyle);
                 if (GUI.Button(new Rect(panelX + 10, Screen.height - 112, 150, 22), "Rod: " + Rods[rodIndex].label + "  ‹"))
                     rodIndex = NextUnlocked(Rods, rodIndex, totalCatches);
                 if (GUI.Button(new Rect(panelX + 170, Screen.height - 112, 150, 22), "Line: " + Lines[lineIndex].label + "  ‹"))
@@ -573,9 +577,19 @@ namespace WhereTheSoundingsEnd.World
                     GUI.Box(new Rect(needleX - 1f, bar.y - 8f, 2f, bar.height + 16f), GUIContent.none);
                 }
                 else if (phase == FishingEncounterPhase.HookWindow)
-                    GUI.Label(new Rect(Screen.width * 0.5f - 178, Screen.height - 132, 356, 20), "SPACE / ENTER — STRIKE", style);
+                {
+                    GUI.Label(new Rect(Screen.width * 0.5f - 178, Screen.height - 132, 356, 20),
+                        "SPACE / ENTER — STRIKE IN THE MARKED WINDOW", style);
+                    Rect hookBar = new Rect(Screen.width * 0.5f - 170, Screen.height - 94, 340, 12);
+                    GUI.Box(hookBar, GUIContent.none);
+                    float hookTargetX = hookBar.x + hookBar.width * targetPhase;
+                    GUI.Box(new Rect(hookTargetX - 3f, hookBar.y - 5f, 6f, hookBar.height + 10f), GUIContent.none);
+                    float hookNeedleX = hookBar.x + hookBar.width * Mathf.Clamp01(phaseTimer / 1.25f);
+                    GUI.Box(new Rect(hookNeedleX - 1f, hookBar.y - 8f, 2f, hookBar.height + 16f), GUIContent.none);
+                }
                 else
-                    GUI.Label(new Rect(Screen.width * 0.5f - 178, Screen.height - 132, 356, 20), "WAITING FOR A BITE…", style);
+                    GUI.Label(new Rect(Screen.width * 0.5f - 178, Screen.height - 132, 356, 20),
+                        "WAITING FOR A BITE…", style);
 
                 if (GUI.Button(new Rect(Screen.width * 0.5f + 65, Screen.height - 66, 105, 24), "RETRIEVE LINE"))
                     CancelFishing("LINE RETRIEVED — no catch secured.");
