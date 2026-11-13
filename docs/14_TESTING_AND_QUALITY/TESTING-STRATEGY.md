@@ -1,10 +1,10 @@
 # Testing Strategy
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Working baseline with initial deep-ocean survey Edit Mode coverage  
+> Status: Working baseline with Edit Mode regression suites and authored Play Mode coverage; Unity execution pending  
 > Owner: Project lead  
-> Version: 0.2  
-> Last reviewed: 2026-11-12
+> Version: 0.3  
+> Last reviewed: 2026-11-13
 
 ## Test layers
 
@@ -16,7 +16,7 @@
 - Stable opportunity identity and idempotent event evaluation.
 - Acoustic signal construction, range/loudness/sensitivity/noise scoring, event deduplication and listener persistence.
 - NPC schedule resolution, overnight schedule boundaries, and NPC relationship save/restore.
-- Dockside access policy: stationary-speed threshold, horizontal approach radius, invalid numeric input and vertical-separation independence.
+- Dockside access and modal policy: stationary-speed threshold, horizontal approach radius, invalid numeric input, vertical-separation independence, and exclusive ownership across dockside, inventory, dialogue and front-end pause overlays.
 
 ### Play Mode
 - Load the generated Greyhaven persistent scene and verify the three startup areas become resident without replacing the gameplay scene.
@@ -24,7 +24,7 @@
 - Repeat area transitions and check that queued requests are cancelled when out of range, re-entry during unload is safely re-queued, and no area is left in a failed/loading/unloading state.
 - Confirm no visible one-frame gap, missing collision surface, duplicate static geometry, or player freeze occurs during repeated transitions.
 - Boat handling, speed gating and Sounding Rig input.
-- Dockside hub: access only inside a shore-approach radius at or below 0.85 m/s, no duplicate NPC trigger prompt, menu pause/restore, Escape close, correct resident Yarn handoff, cargo appraisal read-only behaviour, vessel diagnostics and guest-ledger autosave checkpoint.
+- Dockside hub: access only inside a shore-approach radius at or below 0.85 m/s, no duplicate NPC trigger prompt or shared-input ownership, menu pause/restore, Escape and gamepad Start close, no overlapping inventory/dialogue/pause panels, correct resident Yarn handoff, cargo appraisal read-only behaviour, vessel diagnostics and guest-ledger autosave checkpoint.
 - Verify all seven location menus and furniture actions at supported resolutions; confirm no menu opens while fishing, dredging, sounding, dialogue or inventory is active.
 - Hull contact against piers, breakwater rocks, terrain and wrecks; root-hull-only collision ownership; no visual collider seams; normal-impact damage; per-physics-step contact aggregation; collision acoustic event propagation.
 - Rigidbody buoyancy, wave following, heave/pitch/roll stability, forward/reverse thrust, opposing-throttle braking, speed taper, rudder flow, and lateral water resistance.
@@ -39,7 +39,7 @@
 
 ### Integration
 - Complete trip, fishing, salvage, survey, recovery and save/load.
-- Load schema 0, 1, 2 and 3 saves through schema 5 without inventing survey progress; migrate schema 4 weather labels into safe timer defaults.
+- Load supported schema 0–5 fixtures through current schema 6 without inventing survey progress; migrate schema 4 weather labels into safe timer defaults and verify the schema 5-to-6 NPC relationship-memory migration.
 - Survey multiple regions and verify opportunity IDs do not collide.
 - Confirm repeated pings from the same heading do not promote an uncertain return.
 - Confirm a second ping from a different heading in the same region and within the time window can promote the interpretation.
@@ -73,7 +73,7 @@
 
 ## Current automated coverage
 
-The Edit Mode test source includes eight suites, including deterministic maritime-surface transition coverage:
+The Edit Mode assembly contains deterministic suites for the following policies and regressions, including dockside access/modal exclusivity and maritime-surface transitions:
 - action-driven clock policy;
 - cargo damage / repair / quest-cargo protection;
 - save migration to schema v4;
@@ -85,17 +85,18 @@ The Edit Mode test source includes eight suites, including deterministic maritim
 - Separate confidence calculation for seabed and sparse biological-layer returns.
 - Site signal confidence from authored signal strength and acoustic attenuation.
 - NPC day/overnight schedule boundaries and missing-window behaviour.
-- NPC stable-ID relationship persistence.
+- NPC stable-ID relationship persistence and schema 5-to-6 memory-ledger migration.
+- Dockside menu, inventory and pause-overlay mutual exclusion, plus non-finite/paused-time rejection.
 - Contact-point relative velocity including angular motion; contact-normal impact speed, glancing-impact rejection, threshold/capped hull damage, disabled damage-rate tuning, invalid collision inputs and proportional engine damage.
 - Greyhaven shoreline determinism/envelope, bounded multi-scale heightfield, distinct headland and inland-spine elevations, beach/grass/basalt classification and invalid terrain-sample fallback.
 - Four-point buoyancy force and damping response, forward/reverse acceleration, braking behaviour, engine/hull condition effects, and flow-dependent rudder authority.
 - Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
 - Fixed-step surface-velocity estimation and normalized interpolation between previous/current wave snapshots.
 
-The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v5, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
+The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v6 and ordered v4-to-v5/v5-to-v6 migrations, dockside modal wiring, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files. A Tree-sitter C# parser checks syntax across all project C# files.
 
 ## Verification boundary
 
 The static validator checks repository structure and configuration; Tree-sitter checks C# syntax. Neither resolves C# symbols or compiles against Unity/package assemblies. These checks do not import the Unity project, run Edit Mode or Play Mode tests, or create a player build.
 
-A feature is not considered fully verified until Unity 6000.3.28f1 imports the project without compile errors, the relevant tests pass, and the generated Greyhaven scene has been exercised in Play Mode.
+The streaming transition Play Mode test and dockside access/modal Edit Mode tests are authored but have not been run in Unity. A feature is not considered fully verified until Unity 6000.3.28f1 imports the project without compile errors, the relevant tests pass, and the generated Greyhaven scene has been exercised in Play Mode.
