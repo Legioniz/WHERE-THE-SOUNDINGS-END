@@ -58,6 +58,10 @@ namespace WhereTheSoundingsEnd.Inventory
         [SerializeField] private bool isQuestCritical;
         [SerializeField] private bool isAberrant;
         [SerializeField, Min(1f)] private float sellValueMultiplier = 1f;
+        [Header("Economy")]
+        [SerializeField, Min(0f)] private float baseSalePriceUsd;
+        [SerializeField] private string saleUnitLabel = "unit";
+        [SerializeField] private bool ordinarySaleEligible;
 
         [Header("Fish ecology and encounter")]
         [SerializeField] private FishHabitat habitats = FishHabitat.All;
@@ -82,6 +86,9 @@ namespace WhereTheSoundingsEnd.Inventory
         public bool IsQuestCritical { get { return isQuestCritical; } }
         public bool IsAberrant { get { return isAberrant; } }
         public float SellValueMultiplier { get { return Mathf.Max(1f, sellValueMultiplier); } }
+        public float BaseSalePriceUsd { get { return Mathf.Max(0f, baseSalePriceUsd); } }
+        public string SaleUnitLabel { get { return string.IsNullOrWhiteSpace(saleUnitLabel) ? "unit" : saleUnitLabel.Trim(); } }
+        public bool OrdinarySaleEligible { get { return ordinarySaleEligible && !isQuestCritical && category != CargoItemCategory.Quest; } }
         public FishHabitat Habitats { get { return habitats == FishHabitat.None ? FishHabitat.All : habitats; } }
         public FishPreferredTechnique PreferredTechnique { get { return preferredTechnique; } }
         public string PreferredBaitId { get { return string.IsNullOrWhiteSpace(preferredBaitId) ? "any" : preferredBaitId; } }
@@ -99,6 +106,8 @@ namespace WhereTheSoundingsEnd.Inventory
         {
             if (occupiedCells == null || occupiedCells.Length == 0)
                 occupiedCells = new[] { Vector2Int.zero };
+
+            if (string.IsNullOrWhiteSpace(saleUnitLabel)) saleUnitLabel = "unit";
 
             if (string.IsNullOrWhiteSpace(itemId))
                 itemId = name.ToLowerInvariant().Replace(' ', '_');
