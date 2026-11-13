@@ -135,3 +135,6 @@ Population rules are authored per species and fishing ground. The simulation tra
 - [Legendary encounter visual, behaviour and discoverable lore dossiers](12_AI_AND_SIMULATION/LEGENDARY-ENCOUNTER-VISUAL-AND-LORE-DOSSIERS.md)
 
 Legend-inspired encounters are rare, location-bound events. They may be harmless sightings, environmental omens, dangerous contacts or lethal hazards with authored warnings and possible escape routes. They share the existing major-threat lock with The Sleeper.
+
+- [Environmental storytelling](02_LORE_AND_WORLD/ENVIRONMENTAL-STORYTELLING.md) — environmental clues, prop clusters, ambiguity and discovery boundaries.
+- [Environment assets and set dressing](09_ART_AND_VISUAL_DIRECTION/ENVIRONMENT-ASSETS.md) — Greyhaven material language, composition, asset provenance and performance constraints.
