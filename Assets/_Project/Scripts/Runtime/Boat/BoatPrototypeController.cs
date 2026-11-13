@@ -166,8 +166,6 @@ namespace WhereTheSoundingsEnd.Boat
             NormalizedEngineRpm = BoatMotorTelemetryMath.CalculateEngineRpmNormalized(
                 throttle, motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
 
-            if (economyTelemetry != null) economyTelemetry.ObservePropulsion(throttle);
-
             if (fuelController != null && Mathf.Abs(throttle) >= 0.05f)
             {
                 fuelController.ConsumePropulsion(throttle, CurrentEngineLoad, Time.fixedDeltaTime);
@@ -180,6 +178,8 @@ namespace WhereTheSoundingsEnd.Boat
                         0f, motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
                 }
             }
+
+            if (economyTelemetry != null) economyTelemetry.ObservePropulsion(throttle);
 
             float propulsion = BoatMovementMath.CalculatePropulsionAcceleration(
                 throttle, forwardSpeed, engineCondition, hullIntegrity,
