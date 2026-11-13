@@ -3,6 +3,7 @@ using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 using WhereTheSoundingsEnd.Economy;
 using WhereTheSoundingsEnd.Inventory;
 
@@ -69,7 +70,6 @@ namespace WhereTheSoundingsEnd.Tests
 
             Assert.AreEqual(2f, fuel.EmergencyFuelUnits, 0.0001f);
         }
-
 
         [Test]
         public void WalletListenerFailureDoesNotSuppressLaterListenersOrRollbackPayment()
