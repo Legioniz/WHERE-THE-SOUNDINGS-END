@@ -1034,7 +1034,7 @@ namespace WhereTheSoundingsEnd.Interaction
                     long charged;
                     string error;
                     bool success = vendorServices.TryPurchase(itemId, quantity,
-                        "dockside.inez.purchase." + Guid.NewGuid().ToString("N"),
+                        "dockside.inez.purchase." + itemId + "." + Guid.NewGuid().ToString("N"),
                         out charged, out error);
                     statusLabel.text = success
                         ? "PURCHASE COMPLETE  /  " + definition.DisplayName + " x" + quantity +
