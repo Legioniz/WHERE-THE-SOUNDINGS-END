@@ -12,6 +12,13 @@ namespace WhereTheSoundingsEnd.World
                    (int)preferred == (int)actual + 1;
         }
 
+        public static float CalculateAberrationChance(float panicLevel, float seaDisturbance)
+        {
+            float panic = Mathf.Clamp01(panicLevel);
+            float disturbance = Mathf.Clamp01(seaDisturbance);
+            return Mathf.Clamp(0.025f + panic * 0.22f + disturbance * 0.08f, 0.025f, 0.325f);
+        }
+
         /// <summary>
         /// Converts a per-second event rate into a frame-duration probability using the
         /// exponential survival model. Splitting a time interval across frames preserves
