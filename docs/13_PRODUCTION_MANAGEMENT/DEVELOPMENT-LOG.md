@@ -83,7 +83,7 @@
 ### Verification boundary
 - GitHub Actions [run #268](https://github.com/Legioniz/WHERE-THE-SOUNDINGS-END/actions/runs/43271865246) passed both the Unity project/C# syntax validation job and the repository safeguards job.
 - Unity `6000.3.28f1` semantic compilation, Editor scene regeneration, camera-scale visual review, Play Mode NPC route clearance, streamed-area transitions and Windows profiling remain unverified.
-- The furniture is visual set dressing only; no new furniture interaction, usable interior, inventory item, hobby progression or save data is claimed.
+- At the time of this PR, the furniture was visual set dressing only; no new furniture interaction, usable interior, inventory item, hobby progression or save data was claimed. PR #8 later added menu-based furniture actions without introducing walkable rooms or new save data.
 
 ## 2026-11-12 — Relationship-reactive Greyhaven dialogue expansion
 
