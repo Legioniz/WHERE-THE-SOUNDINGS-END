@@ -939,7 +939,7 @@ namespace WhereTheSoundingsEnd.Persistence
             {
                 CargoPlacementSaveData placement = data.inventory.placements[placementIndex];
                 if (placement != null && (placement.saleQuantity <= 0f || float.IsNaN(placement.saleQuantity) || float.IsInfinity(placement.saleQuantity)))
-                    placement.saleQuantity = 1f;
+                    placement.saleQuantity = Math.Max(1, placement.quantity);
             }
             if (data.inventory.holdWidth <= 0) data.inventory.holdWidth = 7;
             if (data.inventory.holdHeight <= 0) data.inventory.holdHeight = 9;
