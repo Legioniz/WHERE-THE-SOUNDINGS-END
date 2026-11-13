@@ -400,7 +400,7 @@ namespace WhereTheSoundingsEnd.Persistence
                         break;
 
                     default:
-                        error = "No migration path exists for save schema version " + data.schemaVersion + "."
+                        error = "No migration path exists for save schema version " + data.schemaVersion + ".";
                         return false;
                 }
             }
