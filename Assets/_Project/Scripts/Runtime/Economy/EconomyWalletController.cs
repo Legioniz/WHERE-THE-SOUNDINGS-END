@@ -64,8 +64,20 @@ namespace WhereTheSoundingsEnd.Economy
             Action<string, long, long> handler = TransactionApplied;
             if (handler != null)
             {
-                try { handler(transactionId, deltaCents, walletCents); }
-                catch (Exception exception) { Debug.LogException(exception, this); }
+                Delegate[] listeners = handler.GetInvocationList();
+                for (int i = 0; i < listeners.Length; i++)
+                {
+                    try
+                    {
+                        ((Action<string, long, long>)listeners[i])(transactionId, deltaCents, walletCents);
+                    }
+                    catch (Exception exception)
+                    {
+                        // Isolate each observer: one broken UI/telemetry listener must not
+                        // suppress later listeners after the wallet transaction has committed.
+                        Debug.LogWarning("Wallet transaction listener failed: " + exception.Message, this);
+                    }
+                }
             }
             return true;
         }
