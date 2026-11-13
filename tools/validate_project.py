@@ -980,8 +980,10 @@ def main() -> int:
             "HarbourmasterResearchController", "MaraFishMarketController",
             "GreyhavenVendorServices", "ExpeditionEconomyTelemetry", "RegionalChartController",
         ):
-            if f"AddComponent<WhereTheSoundingsEnd.Economy.{required_component}>()" not in economy_builder and \\
-                    f"AddComponent<{required_component}>()" not in economy_builder:
+            if (
+                f"AddComponent<WhereTheSoundingsEnd.Economy.{required_component}>()" not in economy_builder
+                and f"AddComponent<{required_component}>()" not in economy_builder
+            ):
                 failures.append(f"Greyhaven generated vessel is missing economy component: {required_component}")
 
         dockside_source = (ROOT / "Assets/_Project/Scripts/Runtime/Interaction/DocksideHubController.cs").read_text(encoding="utf-8")
