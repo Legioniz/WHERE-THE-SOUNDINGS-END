@@ -259,6 +259,7 @@ def main() -> int:
             "DocksideModalPolicy.CanOpenDocksideMenu",
             "DocksideModalPolicy.CanOpenPauseMenu",
             "pauseAction.WasPressedThisFrame()",
+            "private void OnDisable()",
         ):
             if required_text not in dockside_source:
                 failures.append(f"DocksideHubController is missing expected interaction feature: {required_text}")
