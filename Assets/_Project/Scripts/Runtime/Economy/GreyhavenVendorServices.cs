@@ -60,7 +60,7 @@ namespace WhereTheSoundingsEnd.Economy
 
         public long GetRepairQuoteCents()
         {
-            if (condition == null) return 0L;
+            if (!TomasAvailable || condition == null) return 0L;
             decimal hull = (decimal)Mathf.Max(0f, 100f - condition.HullIntegrity);
             decimal engine = (decimal)Mathf.Max(0f, 100f - condition.EngineCondition);
             long baseQuote = SafeAdd(
@@ -71,7 +71,7 @@ namespace WhereTheSoundingsEnd.Economy
 
         public long GetRefuelQuoteCents(float requestedUnits)
         {
-            if (fuel == null) return 0L;
+            if (!TomasAvailable || fuel == null) return 0L;
             float amount = fuel.GetRefuelAmount(requestedUnits);
             long baseQuote = EconomyPolicy.CalculateFuelCostCents((decimal)amount, (decimal)fuelUsdPerUnit);
             return ApplyDiscount(baseQuote, GetRelationshipDiscount(tomas != null ? tomas.RelationshipScore : 0));
@@ -169,7 +169,8 @@ namespace WhereTheSoundingsEnd.Economy
                 if (definition == null || definition.Category != CargoItemCategory.Salvage ||
                     !definition.OrdinarySaleEligible || definition.IsQuestCritical ||
                     !IsFinite(placement.saleQuantity) || placement.saleQuantity <= 0f ||
-                    !IsFinite(definition.BaseSalePriceUsd) || definition.BaseSalePriceUsd <= 0f)
+                    !IsFinite(definition.BaseSalePriceUsd) || definition.BaseSalePriceUsd <= 0f ||
+                    definition.BaseSalePriceUsd > 1000000f || placement.saleQuantity > 1000000f)
                 { error = "Inez cannot accept this salvage or its value is not authored."; return false; }
 
                 MarketStockSaveData itemStock = GetOrCreateStock(placement.itemId);
