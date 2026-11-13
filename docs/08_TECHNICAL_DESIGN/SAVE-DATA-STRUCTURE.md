@@ -112,6 +112,6 @@ The Greyhaven dockside hub does not add a separate save DTO or schema field. Its
 
 ## Schema v8 economy migration
 
-Schema v8 adds `EconomySaveData` with a USD wallet stored as integer cents and a processed-transaction ID ledger. The v7-to-v8 migration converts the legacy `PlayerSaveData.currency` whole-dollar integer to cents at 100 cents per unit while retaining the legacy field for compatibility. New cargo placement records also preserve sale quantity; legacy placements receive a safe default quantity of one until their item-specific unit is authored. `EconomyWalletController` owns the live wallet and idempotency ledger on the generated player vessel and participates in the existing save coordinator.
+Schema v8 adds `EconomySaveData` with a USD wallet stored as integer cents and a processed-transaction ID ledger. The v7-to-v8 migration converts the legacy `PlayerSaveData.currency` whole-dollar integer to cents at 100 cents per unit while retaining the legacy field for compatibility. New cargo placement records also preserve sale quantity; legacy placements receive a safe default quantity equal to their saved stack count until their item-specific unit is authored. `EconomyWalletController` owns the live wallet and idempotency ledger on the generated player vessel and participates in the existing save coordinator.
 
 The migration and wallet test source is authored but still requires Unity Edit Mode execution. No sale/purchase transaction flow is claimed complete by this schema change.
