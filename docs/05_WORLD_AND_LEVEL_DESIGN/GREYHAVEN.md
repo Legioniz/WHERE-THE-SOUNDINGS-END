@@ -1,10 +1,10 @@
 # Greyhaven — Environment and First-Hub Layout
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Working baseline — procedural greybox; geography and final art remain provisional  
+> Status: Working baseline — generated greybox, boat-operated dockside menus and additive static-area streaming; Unity verification pending  
 > Owner: Project lead  
-> Version: 0.5  
-> Last reviewed: 2026-11-12
+> Version: 0.6  
+> Last reviewed: 2026-11-13
 
 ## 1. Purpose
 
@@ -50,7 +50,7 @@ The shoreline is irregular rather than a straight wall. It pushes seaward near t
 
 The first pass places blockout buildings for the Greyhaven Fish Market, Harbour Office, Boat Repair Shed, Net Mender Shed, Harbour Inn, and four residential houses.
 
-Buildings are readable by silhouette and position. Four blockout residents are generated: the Harbourmaster beside the quay, Mara Venn at the fish market, Tomas Vale near the repair shed, and Inez Sarmiento near the net-mending shed. Each has a boat-proximity dialogue trigger, a stable NPC ID, a daily activity schedule and a simple waypoint destination. Their dialogue nodes and schedule state are saved through the existing Yarn and NPC persistence paths. Interior rooms, doors, shop transactions, and a full quest objective system remain unimplemented.
+Buildings are readable by silhouette and position. Four blockout residents are generated: the Harbourmaster beside the quay, Mara Venn at the fish market, Tomas Vale near the repair shed, and Inez Sarmiento near the net-mending shed. Each has a stable NPC ID, a daily activity schedule and a simple waypoint destination. From a stationary vessel at a shore approach, the player opens the dockside hub and selects Harbour Office, Fish Market, Boat Repair Shed or Net Mender Shed to speak with the assigned resident through the existing Yarn and NPC relationship systems. Generated resident triggers are externally managed so they do not compete for the shared Interact action. Menu-based interior presentations and furniture actions exist; walkable interior rooms, doors and on-foot movement do not. Shop transactions and a full quest objective system remain unimplemented.
 
 ### 3.4 East estuary edge
 
@@ -76,7 +76,7 @@ The east half of the T-pier carries a physical chart table. Its schematic land o
 
 ## 4. Water and navigation
 
-The starter water surface is an opaque greybox plane with a runtime procedural swell mesh. Its waves are visual only; there is no hydrodynamic buoyancy or current simulation. The water object carries a shallow Greyhaven survey profile (nominal 18 m depth) and deliberately has no deep scattering layer.
+The starter water surface is a procedural swell mesh driven by a shared analytic surface sampler. The workboat uses a lightweight four-point spring-buoyancy approximation against that same surface; this is not a full fluid solver and does not provide a current simulation. The water object carries a shallow Greyhaven survey profile (nominal 18 m depth) and deliberately has no deep scattering layer.
 
 Navigation readability is built around three cues: the lighthouse silhouette on the west headland, red/green channel markers at the harbor mouth, and a red outer-approach buoy beyond the inner piers.
 
@@ -120,7 +120,7 @@ The environment is generated in the Unity Editor by:
 
 Output scene: Assets/_Project/Scenes/Greyhaven_Blockout.unity.
 
-The prototype boat controller is active. W/A/S/D or the left gamepad stick apply throttle and steering. Q or gamepad right shoulder emits a Sounding Rig pulse when the boat is slow enough to survey. When the boat enters a resident's interaction radius, the HUD displays an E prompt naming that resident; press E to start their Yarn Spinner conversation. The initial cast and schedule rules are documented in [Greyhaven NPC System](../12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md). Press Space/Enter to advance lines and click a response or use keys 1–5 for choices. Press I to open the 7×9 cargo hold; select an item, click an empty cell to move it, press R to rotate, and use Esc to close. The interface's catalogue intake buttons are prototype test tools, not fishing. The fixed-angle orthographic camera follows the boat and is tuned to show the pier, village edge, and channel during initial testing.
+The prototype boat controller is active. W/A/S/D or the left gamepad stick apply throttle and steering. Q or gamepad right shoulder emits a Sounding Rig pulse when the boat is slow enough to survey. At a named dockside approach, the HUD displays an E prompt; press E while horizontal vessel speed is at or below 0.85 m/s to open the seven-location dockside hub. Choose Main Dock, Harbour Office, Fish Market, Boat Repair Shed, Net Mender Shed, Harbour Inn or Western Lighthouse, then select a furniture action. Escape or gamepad Start closes the hub. The menu pauses simulation and cannot overlap inventory, dialogue or the title/pause/save/settings overlays. Resident choices hand off to the existing Yarn Spinner nodes and relationship gates. Press Space/Enter to advance dialogue and click a response or use keys 1–5 for choices. Press I to open the 7×9 cargo hold; select an item, click an empty cell to move it, press R to rotate, and use Esc to close. The interface's catalogue intake buttons are prototype test tools, not fishing. The fixed-angle orthographic camera follows the boat and is tuned to show the pier, village edge, and channel during initial testing.
 
 ## 8. Acceptance checks
 
@@ -137,8 +137,10 @@ Before the greybox is promoted beyond working baseline, verify in Unity:
 - [ ] The boat does not collide with the dock at spawn.
 - [ ] Piers, breakwater rocks, and terrain have appropriate collision.
 - [ ] The harbor opening remains navigable at the prototype boat's turning radius.
-- [ ] The boat trigger can enter/exit all four resident interaction radii and each E prompt names the correct NPC.
-- [ ] The four Yarn dialogue nodes present the correct resident lines and branches.
+- [ ] The dockside hub prompt appears only inside a shore-approach radius while the vessel is stationary (0.85 m/s or below).
+- [ ] E opens each of the seven location menus; furniture actions display the correct read-only inspection or authored information.
+- [ ] Escape and gamepad Start close the hub and restore the previous time scale; inventory, dialogue and front-end pause cannot overlap it.
+- [ ] The four resident buttons hand off to the correct Yarn nodes and relationship gates.
 - [ ] NPC daily activities update from the action-driven sea clock and residents use only their authored short waypoints.
 - [ ] NPC relationship scores and Yarn dialogue variables survive manual save and autosave.
 - [ ] Accepting the Harbourmaster's buoy job writes a checkpoint autosave.
@@ -157,6 +159,6 @@ No Editor rendering, Play Mode, physics, or Windows build result is claimed by r
 
 ## 9. Implementation boundary
 
-Implemented by this pass: deterministic 144 × 96 multi-scale island heightfield, irregular mesh-conforming shoreline and sand band, slope/elevation-based soil/sand/grass/basalt submeshes, faceted basalt outcrops, service-specific building blockout details and signs, resident workplace placement, fixed schematic harbor chart table, visual-only procedural swell surface, blockout district geometry, piers, breakwater, navigation markers, lighthouse silhouette, village service and residential placeholders, mangrove/estuary props, starter boat, configurable 2.5D camera framing, a 7×9 spatial cargo hold with runtime interface, the first four Greyhaven NPC blockouts with schedules and separate Yarn dialogue nodes, a shallow regional survey profile, a Sounding Rig pulse loop, and a discoverable outer-channel wreck marker.
+Implemented runtime/editor foundations include: deterministic 144 × 96 multi-scale island heightfield, irregular mesh-conforming shoreline and sand band, slope/elevation-based soil/sand/grass/basalt submeshes, faceted basalt outcrops, service-specific building blockout details and signs, resident workplace placement, fixed schematic harbour chart table, procedural swell surface with four-point spring buoyancy, blockout district geometry, piers, breakwater, navigation markers, lighthouse silhouette, village service and residential placeholders, mangrove/estuary props, starter boat, configurable 2.5D camera framing, a 7×9 spatial cargo hold with runtime interface, four Greyhaven NPC blockouts with schedules and separate Yarn dialogue nodes, the persistent seven-location dockside hub and furniture actions, a shallow regional survey profile, a Sounding Rig pulse loop, a discoverable outer-channel wreck marker, and six additive static Greyhaven area scenes with transition telemetry and an authored Play Mode test.
 
-Not implemented: final environment art, optimized production meshes, animated or physically simulated water/tide/current/weather/waves, walkable character controller, interiors, advanced NPC pathfinding, interiors, shops and sale transactions, full quest objective/journal logic, fishing and real catch intake, fish populations, ordinary wildlife, creature AI, hostile threat logic, acoustic navigation, streaming, or region transitions. Cargo UI prototype intake controls are not a substitute for fishing.
+Not implemented: final environment art, optimized production meshes, physical tide/current simulation, walkable on-foot character controller and 3D interiors, advanced NPC pathfinding, shops and sale transactions, paid repairs, net crafting, full quest objective/journal logic, real catch intake, fish populations, ordinary wildlife, creature AI, hostile threat logic, full acoustic navigation, and inter-region travel. Greyhaven static scenery is split across six additive area scenes, but that is local area streaming, not regional travel. The dockside hub is a functional menu presentation with furniture actions, not walkable interior geometry. Cargo UI prototype intake controls are not a substitute for fishing.
