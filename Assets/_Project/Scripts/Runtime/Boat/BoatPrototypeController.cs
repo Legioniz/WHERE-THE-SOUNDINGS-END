@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.World;
+using WhereTheSoundingsEnd.Economy;
 
 namespace WhereTheSoundingsEnd.Boat
 {
@@ -38,6 +39,7 @@ namespace WhereTheSoundingsEnd.Boat
         private InputActionMap boatMap;
         private InputAction moveAction;
         private VesselConditionController vesselCondition;
+        private VesselFuelController fuelController;
         private HarvestingMinigameController harvestingController;
         private Vector2 moveInput;
 
@@ -64,6 +66,7 @@ namespace WhereTheSoundingsEnd.Boat
         {
             body = GetComponent<Rigidbody>();
             vesselCondition = GetComponent<VesselConditionController>();
+            fuelController = GetComponent<VesselFuelController>();
             body.useGravity = true;
             body.constraints = RigidbodyConstraints.None;
             body.interpolation = RigidbodyInterpolation.Interpolate;
@@ -115,6 +118,8 @@ namespace WhereTheSoundingsEnd.Boat
             // Resolve lazily so damage still affects thrust in every generated scene.
             if (vesselCondition == null)
                 vesselCondition = GetComponent<VesselConditionController>();
+            if (fuelController == null)
+                fuelController = GetComponent<VesselFuelController>();
             if (harvestingController == null)
                 harvestingController = GetComponent<HarvestingMinigameController>();
 
@@ -122,6 +127,7 @@ namespace WhereTheSoundingsEnd.Boat
             // away from the site while the reserved pull is in progress.
             bool movementLocked = harvestingController != null && harvestingController.IsDredging;
             float throttle = movementLocked ? 0f : Mathf.Clamp(moveInput.y, -1f, 1f);
+            if (fuelController != null && fuelController.FuelUnits <= 0.0001f) throttle = 0f;
             float steering = movementLocked ? 0f : Mathf.Clamp(moveInput.x, -1f, 1f);
             Vector3 forward = transform.forward;
             Vector3 right = transform.right;
@@ -147,6 +153,19 @@ namespace WhereTheSoundingsEnd.Boat
                 throttle, motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
             NormalizedEngineRpm = BoatMotorTelemetryMath.CalculateEngineRpmNormalized(
                 throttle, motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
+
+            if (fuelController != null && Mathf.Abs(throttle) >= 0.05f)
+            {
+                fuelController.ConsumePropulsion(throttle, CurrentEngineLoad, Time.fixedDeltaTime);
+                if (fuelController.FuelUnits <= 0.0001f)
+                {
+                    throttle = 0f;
+                    CurrentThrottle = 0f;
+                    CurrentEngineLoad = 0f;
+                    NormalizedEngineRpm = BoatMotorTelemetryMath.CalculateEngineRpmNormalized(
+                        0f, motorForwardSpeed, maximumForwardSpeed, maximumReverseSpeed);
+                }
+            }
 
             float propulsion = BoatMovementMath.CalculatePropulsionAcceleration(
                 throttle, forwardSpeed, engineCondition, hullIntegrity,
