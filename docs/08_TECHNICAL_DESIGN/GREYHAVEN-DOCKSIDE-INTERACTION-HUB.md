@@ -27,7 +27,7 @@ The access policy rejects NaN/infinite values, negative speed/radius and invalid
 
 Opening the menu claims the existing SeaStateDirector interaction gate and sets Time.timeScale to zero. Closing it restores the exact prior time scale. The menu also closes before starting Yarn dialogue, allowing the existing dialogue presenter to acquire its own pause and relationship state. The boat is therefore stationary while browsing; no movement or action-driven world time can continue behind the panel.
 
-The hub is the only input owner for the generated Greyhaven resident interactions. HarbourmasterInteraction remains available for hand-authored scenes, but the generated Greyhaven NPC triggers are marked as externally managed to prevent duplicate E-key prompts or simultaneous dialogue starts.
+The hub is the sole interaction router for generated Greyhaven residents. BoatPrototypeController enables the shared Boat action map; generated HarbourmasterInteraction components are marked as externally managed and do not independently enable/disable the Interact action or emit duplicate E-key prompts. HarbourmasterInteraction remains available for hand-authored scenes.
 
 ## 3. Locations and furniture
 
@@ -69,15 +69,20 @@ No save schema, stable ID, input action, package or generated-area-root contract
 
 ## 5. Verification and remaining work
 
-Automated Edit Mode tests cover stationary access, distance rejection, speed rejection, horizontal-only range, and invalid numeric input. Repository CI can check project contracts and C# syntax, but it cannot prove Unity semantic compilation, UI rendering, input focus, generated-scene wiring, or a playable dock interaction.
+Automated Edit Mode tests cover stationary access, distance rejection, speed rejection, horizontal-only range, invalid numeric input, non-finite/paused time-scale rejection, and dockside/inventory/dialogue/pause modal exclusivity. Repository CI can check project contracts and C# syntax, but it cannot prove Unity semantic compilation, UI rendering, input focus, generated-scene wiring, or a playable dock interaction.
 
 After pulling the branch, open Unity 6000.3.28f1, run **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment**, then verify:
 1. The generated Dockside_Interaction_Hub UIDocument is present in the persistent scene and renders above the field HUD.
 2. E opens the menu only while the vessel is stationary and within an access radius.
-3. Escape closes the menu and restores the prior time scale.
+3. Escape and gamepad Start close the menu and restore the prior time scale without also opening the pause overlay.
 4. Each location and furniture item renders without clipping at supported resolutions.
 5. Resident buttons start the correct Yarn node and display the correct relationship meter.
 6. Guest Ledger writes through the existing autosave coordinator.
-7. Inventory, fishing, dredging, sounding, dialogue and streaming continue to use their existing exclusive action and save rules.
+7. Inventory, dialogue and front-end pause overlays cannot overlap the hub; fishing, dredging, sounding and streaming continue to use their existing action and save rules.
 
 The menu is a functional greybox UI, not final interior art. Final illustrated/3D interiors, trade transactions, paid repairs, net equipment, sleep/time-skip, residential visits, accessibility review and controller-focused menu navigation remain future work.
+
+
+## 6. Modal ownership update — 2026-11-13
+
+DocksideModalPolicy is shared by DocksideHubController, GreyhavenRuntimeUI and GreyhavenFrontEndUI. Dockside cannot open over inventory, dialogue, active gameplay actions, front-end overlays or a non-positive/non-finite time scale. Inventory cannot open over dockside, dialogue or front-end overlays. The pause overlay cannot open over dockside, inventory or dialogue. Esc / gamepad Start closes the dockside menu, and OnDisable releases the hub's prompt and pause ownership. These source-level guards have Edit Mode tests but still require Unity runtime verification.
