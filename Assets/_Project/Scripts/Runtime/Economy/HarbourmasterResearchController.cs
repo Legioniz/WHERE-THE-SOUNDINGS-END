@@ -66,6 +66,15 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private int submittedMask;
 
         public int DiscoveryCount => soundingRig != null ? soundingRig.DiscoveredSiteIds.Count : 0;
+        public bool CanSubmitNext
+        {
+            get
+            {
+                int index = NextAvailableIndex();
+                return index >= 0 && DiscoveryCount >= Research[index].requiredDiscoveries &&
+                    cargo != null && cargo.GetAvailableQuantity(Research[index].itemId) > 0;
+            }
+        }
 
         private void Awake()
         {
@@ -146,11 +155,18 @@ namespace WhereTheSoundingsEnd.Economy
             }
 
             submittedMask |= 1 << index;
-            if (regionalChart == null) regionalChart = FindFirstObjectByType<RegionalChartController>();
-            if (regionalChart != null) regionalChart.GrantChartPermit(item.permitRegionId);
+            ApplyEarnedPermits();
             message = "RESEARCH ACCEPTED  /  " + item.title + "  /  +" +
                 (item.rewardCents / 100m).ToString("0.00") + " USD  /  " + item.permitName + " recorded.";
             return true;
+        }
+
+        private void ApplyEarnedPermits()
+        {
+            if (regionalChart == null) regionalChart = FindFirstObjectByType<RegionalChartController>();
+            if (regionalChart == null) return;
+            for (int i = 0; i < Research.Length; i++)
+                if (IsSubmitted(i)) regionalChart.GrantChartPermit(Research[i].permitRegionId);
         }
 
         private int NextAvailableIndex()
@@ -211,6 +227,7 @@ namespace WhereTheSoundingsEnd.Economy
                 if (int.TryParse(flag.stringValue, out mask) && mask >= 0 &&
                     (mask & ~((1 << Research.Length) - 1)) == 0)
                     submittedMask = mask;
+                ApplyEarnedPermits();
                 return;
             }
         }
