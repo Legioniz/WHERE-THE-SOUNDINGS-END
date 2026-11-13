@@ -4,7 +4,7 @@
 > Status: Planned milestone baseline — no future milestone is presumed complete  
 > Owner: Project lead  
 > Version: 0.2  
-> Last reviewed: 2026-11-11
+> Last reviewed: 2026-11-13
 
 Milestones are evidence gates, not calendar-only achievements. Dates are approximate and should be reforecast after the repository audit and each major playtest.
 
@@ -65,7 +65,7 @@ Milestones are evidence gates, not calendar-only achievements. Dates are approxi
 - Storefront, price, rating jurisdictions, localization, and release date are decisions to be recorded; none are assumed by this plan.
 - A release date is not approved until the release checklist passes.
 
-## Current checkpoint — M0, 2026-11-11
+## Current checkpoint — M0, 2026-11-13
 
 **State: In progress; do not mark M0 complete yet.**
 
@@ -74,6 +74,12 @@ Milestones are evidence gates, not calendar-only achievements. Dates are approxi
 - The pre-correction main baseline's repository integrity and safeguard workflows passed. This is static/configuration evidence only.
 - M0 blockers remain: clean Unity import, tracked package lock and stable `.meta` files, generated-scene/bootstrap verification, Edit Mode execution, Play Mode integration tests, save/restore validation and a clean Windows build.
 - The repository's rulesets endpoint reports a plan restriction for this private repository. Required remote approvals/status checks are therefore not recorded as active.
+
+- Greyhaven now has a persistent seven-location boat-operated dockside hub, resident Yarn handoff, furniture inspections, vessel/cargo diagnostics and a guest-ledger autosave checkpoint. Menu-based interior presentation is implemented; walkable 3D interiors are not.
+- Greyhaven static scenery is split into six additive scenes with load/unload safeguards and development profiling telemetry. A Play Mode transition test is authored but not yet executed.
+- Shared modal ownership now prevents dockside, inventory, dialogue and front-end pause overlays from overlapping. Edit Mode regression tests are authored but not yet executed.
+- PR #8 implementation and PR #9 documentation updates merged; GitHub Actions runs #274 and #275 passed repository/C# syntax validation and safeguards. These checks are not Unity compilation or runtime evidence.
+
 
 See [Implementation Audit](IMPLEMENTATION-AUDIT.md) and [Task Backlog](TASK-BACKLOG.md) for evidence and work order.
 
