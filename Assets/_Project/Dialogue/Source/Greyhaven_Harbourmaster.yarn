@@ -177,10 +177,10 @@ Harbourmaster: No. I have heard enough about the way you conduct yourself. The o
 -> Compare the records from the quay. <<if $gh_clue_bell_log or $gh_clue_cold_catch or $gh_clue_hull_marks or $gh_clue_net_return>>
     <<if $gh_clue_bell_log and $gh_clue_cold_catch and $gh_clue_hull_marks and $gh_clue_net_return>>
         Harbourmaster: Mara's market notes, Tomas's hull measurements, and Inez's preserved line are not the same kind of evidence. That's precisely why I take them seriously.
-        Harbourmaster: Four records, four different kinds of evidence. None proves a single cause. Together, they make it harder to dismiss every incident as one crew's mistake.
     <<else>>
         Harbourmaster: We have fragments, not a pattern. A log, a catch, a mark or a piece of line can tell us what happened to that one thing. It cannot explain the whole sea.
     <<endif>>
+<<endif>>
 <<set $gh_met_harbourmaster = true>>
 <<endif>>
 ===
@@ -335,10 +335,10 @@ Mara Venn: Not today. I won't weigh a thing for someone I cannot trust.
 -> Compare the records from the quay. <<if $gh_clue_bell_log or $gh_clue_cold_catch or $gh_clue_hull_marks or $gh_clue_net_return>>
     <<if $gh_clue_bell_log and $gh_clue_cold_catch and $gh_clue_hull_marks and $gh_clue_net_return>>
         Mara Venn: The Harbourmaster has dates. Tomas has measurements. Inez has the actual line. I have the catch notes. I won't turn four observations into one story just because a story would be easier to sell.
-        Mara Venn: Four records, four different kinds of evidence. None proves a single cause. Together, they make it harder to dismiss every incident as one crew's mistake.
     <<else>>
         Mara Venn: We have fragments, not a pattern. A log, a catch, a mark or a piece of line can tell us what happened to that one thing. It cannot explain the whole sea.
     <<endif>>
+<<endif>>
 <<set $gh_met_mara = true>>
 <<endif>>
 ===
@@ -465,10 +465,10 @@ Tomas Vale: Take the boat elsewhere. I won't put my tools near it, and I won't d
 -> Compare the records from the quay. <<if $gh_clue_bell_log or $gh_clue_cold_catch or $gh_clue_hull_marks or $gh_clue_net_return>>
     <<if $gh_clue_bell_log and $gh_clue_cold_catch and $gh_clue_hull_marks and $gh_clue_net_return>>
         Tomas Vale: A maintenance log, temperature notes, hull measurements and a piece of net. Different tools, different witnesses. If they point in the same direction, that is worth investigating. It still isn't proof of a monster.
-        Tomas Vale: Four records, four different kinds of evidence. None proves a single cause. Together, they make it harder to dismiss every incident as one crew's mistake.
     <<else>>
         Tomas Vale: We have fragments, not a pattern. A log, a catch, a mark or a piece of line can tell us what happened to that one thing. It cannot explain the whole sea.
     <<endif>>
+<<endif>>
 <<set $gh_met_tomas = true>>
 <<endif>>
 ===
@@ -611,10 +611,10 @@ Inez Sarmiento: I have no work for you. Please leave my tools alone.
 -> Compare the records from the quay. <<if $gh_clue_bell_log or $gh_clue_cold_catch or $gh_clue_hull_marks or $gh_clue_net_return>>
     <<if $gh_clue_bell_log and $gh_clue_cold_catch and $gh_clue_hull_marks and $gh_clue_net_return>>
         Inez Sarmiento: The records should stay separate until we know more. But the bell log, the cold catch, the hull marks and the empty net deserve to be kept together—not explained away one by one.
-        Inez Sarmiento: Four records, four different kinds of evidence. None proves a single cause. Together, they make it harder to dismiss every incident as one crew's mistake.
     <<else>>
         Inez Sarmiento: We have fragments, not a pattern. A log, a catch, a mark or a piece of line can tell us what happened to that one thing. It cannot explain the whole sea.
     <<endif>>
+<<endif>>
 <<set $gh_met_inez = true>>
 <<endif>>
 ===
