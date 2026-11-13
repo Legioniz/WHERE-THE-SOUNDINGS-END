@@ -66,7 +66,7 @@ namespace WhereTheSoundingsEnd.Economy
             if (HasLantern && LanternCondition > 0.01f)
             {
                 if (seaState != null && seaState.IsNight)
-                    DamageSlot(LanternSlot, lanternWearPerNightSecond * Time.deltaTime);
+                    DamageSlot(LanternSlot, lanternWearPerNightSecond * seaState.LastGameDeltaSeconds);
             }
             ApplyLantern();
         }
