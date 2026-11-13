@@ -26,7 +26,7 @@ namespace WhereTheSoundingsEnd.Economy
 
         private void OnValidate()
         {
-            walletCents = Math.Max(0L, walletCents);
+            walletCents = Math.Max(0L, Math.Min(1000000000000L, walletCents));
             if (processedTransactionIds == null)
                 processedTransactionIds = new List<string>();
         }
@@ -42,7 +42,7 @@ namespace WhereTheSoundingsEnd.Economy
         {
             if (string.IsNullOrWhiteSpace(transactionId) ||
                 !string.Equals(transactionId, transactionId.Trim(), StringComparison.Ordinal) ||
-                deltaCents == 0L || processedTransactionIds == null ||
+                deltaCents == 0L || transactionId.Length > 128 || processedTransactionIds == null ||
                 processedTransactionIds.Count >= SaveGameDataMigration.MaximumCollectionEntries)
                 return false;
 
@@ -50,7 +50,8 @@ namespace WhereTheSoundingsEnd.Economy
             if (transactionLookup.Contains(transactionId)) return false;
 
             long nextBalance;
-            if (!EconomyPolicy.TryApplyWalletDelta(walletCents, deltaCents, out nextBalance))
+            if (!EconomyPolicy.TryApplyWalletDelta(walletCents, deltaCents, out nextBalance) ||
+                nextBalance > 1000000000000L)
                 return false;
 
             // Both mutations happen only after every validation has passed.
