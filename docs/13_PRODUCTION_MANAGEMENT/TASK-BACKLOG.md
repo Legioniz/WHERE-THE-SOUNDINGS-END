@@ -3,7 +3,7 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Active M0 and first vertical-slice backlog  
 > Owner: Project lead  
-> Version: 0.3  
+> Version: 0.4  
 > Last reviewed: 2026-11-13
 
 This is the authoritative implementation backlog. The [Implementation Audit](IMPLEMENTATION-AUDIT.md) records what exists and what is still unverified. The [Development Roadmap](DEVELOPMENT-ROADMAP.md) owns the release forecast; this file owns work order, dependencies and acceptance criteria.
@@ -175,3 +175,13 @@ A new player can start the slice and complete this sequence without developer co
 - Available repository checks are run and their output recorded.
 - Unity compilation, gameplay tests and builds are reported only when actually executed.
 - Development log records material changes, test evidence, known gaps and next actions.
+
+## Greyhaven narrative content pass — 2026-11-13
+
+**Source status:** Dialogue and lore expansion authored; Unity/Yarn verification open.
+
+- Extend all four existing resident nodes rather than introducing replacement NPCs or duplicate dialogue infrastructure.
+- Add four shared Yarn bool discovery flags and a cross-witness comparison topic. Keep the synthesis cautious and avoid confirming the cause of the Choir.
+- Add occupation-specific personal details while keeping core evidence available at neutral-or-better trust.
+- Preserve stable NPC IDs, relationship event memory, Yarn command contracts, save schema v6 and dockside routing.
+- **Acceptance still required:** compile the Yarn project in Unity 6000.3.28f1; verify all four clue options and partial/complete comparison branches; save after each clue and confirm flags restore; test neutral/low-trust access and Familiar personal-topic gates; review line pacing and UI overflow in Play Mode.

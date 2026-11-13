@@ -137,3 +137,7 @@ Unity editor output and local machine state must stay outside version control. T
 Runtime saves are written under Unity's `Application.persistentDataPath/Saves/`, outside the project source tree. Do not commit player saves, local diagnostic logs, real credentials, signing certificates, private keys, or machine-specific path inventories.
 
 If a real credential is accidentally committed, revoke or rotate it and assess all affected history. A current-branch deletion alone does not remove earlier copies. Follow the destructive-operation safeguards in `AGENTS.md`; do not rewrite shared history without an explicit, carefully scoped procedure.
+
+### Greyhaven narrative content update — 2026-11-13
+
+The four resident conversations now contain a connected but deliberately unresolved evidence thread: the silent bell's log history, unusual cold-centred catches, unexplained hull scoring, and an empty but untorn net. Each clue is recorded in Yarn state and can be compared through resident dialogue. Personal details further distinguish the Harbourmaster, Mara, Tomas and Inez. This is authored dialogue content; it does not mean the full quest campaign or the Choir's cause is implemented. Yarn/Unity runtime verification remains pending.

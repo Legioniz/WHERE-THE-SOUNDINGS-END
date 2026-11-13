@@ -3,7 +3,7 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Four relationship-reactive resident conversations and dockside hub handoff implemented; Unity/Yarn runtime verification pending  
 > Owner: Project lead  
-> Version: 0.5  
+> Version: 0.6  
 > Last reviewed: 2026-11-13
 
 ## Runtime stack
@@ -82,3 +82,11 @@ The Yarn project declares English as its base language and uses Yarn's line IDs/
 - `Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs`
 - `Assets/_Project/Scripts/Runtime/Narrative/HarbourmasterInteraction.cs`
 - `Assets/_Project/Scripts/Runtime/Narrative/YarnDialogueSaveParticipant.cs`
+
+## Greyhaven lore and cross-witness dialogue expansion
+
+The current Yarn source extends all four resident nodes with occupation-specific testimony and personal texture. Four persistent Yarn bools record whether the player has heard the Harbourmaster's bell-log account, Mara's cold-centred catch observations, Tomas's returned-hull measurements, and Inez's account of the empty but untorn net. A comparison topic is conditionally offered after any clue is discovered; it gives a partial response until all four records are known, then carefully distinguishes corroborating observations from proof of a shared cause.
+
+Core evidence is available at neutral-or-better trust and does not award relationship points. Additional personal details remain trust-gated: the Harbourmaster's chart practice, Mara's market philosophy, Tomas's radio-receiver hobby, and Inez's woven-line birds. No new C# command, quest service, NPC identity, save field or schema migration is introduced. The existing Yarn save participant persists the new typed bool variables through the current dialogue save document.
+
+**Verification boundary:** source-level declarations, node placement and flag use are implemented. Yarn compilation, conditional-option behaviour, save/load restoration and in-game dialogue presentation have not yet been tested in Unity 6000.3.28f1.

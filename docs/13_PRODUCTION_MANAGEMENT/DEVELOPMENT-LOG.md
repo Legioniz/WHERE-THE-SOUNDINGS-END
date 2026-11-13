@@ -246,3 +246,20 @@
 - No save schema or persisted identifiers changed.
 - Orthographic projection, camera pitch, initial offset, boat Rigidbody ownership, action-driven sea clock, and atmosphere incident scheduling remain unchanged.
 - Wave response is a presentation effect only; it does not imply physical buoyancy or wave forces on the prototype boat.
+
+## 2026-11-13 — Greyhaven dialogue and lore expansion
+
+**Source change:** Added a cross-witness evidence thread to the four existing Greyhaven Yarn conversations.
+
+### Implemented in source
+- Added four shared, saveable Yarn bool flags for the bell log, cold-centred catches, returned-hull scoring and empty/untorn net.
+- Expanded each resident's dialogue with an occupation-bounded observation and a comparison topic that changes from a partial summary to a four-record synthesis once all clues are found.
+- Added personal-life details at the existing Familiar relationship threshold: Harbourmaster chart habits, Mara's market philosophy, Tomas's radio restoration hobby and Inez's woven-line birds.
+- Kept clue discovery separate from relationship rewards; no repeatable trust farming was added.
+- Updated the World Bible, Main Story, Character Bible, NPC Relationships, Greyhaven NPC System, Dialogue System, README and Task Backlog.
+
+### Compatibility and verification
+- No C# runtime code, NPC stable ID, Yarn node ID, relationship event ID, quest service, input binding, save DTO or schema version changed.
+- The four flags use the existing Yarn typed-variable persistence path through YarnDialogueSaveParticipant and SaveGameData.dialogue.
+- Repository validation and C# syntax checks are the next automated gates. Yarn compilation, conditional-option filtering, save/load restoration, Unity presentation, Edit Mode/Play Mode tests and Windows build remain unverified until executed in Unity 6000.3.28f1.
+- The Choir's cause and the new witness synthesis remain unresolved; this is narrative evidence, not a canonical supernatural explanation.

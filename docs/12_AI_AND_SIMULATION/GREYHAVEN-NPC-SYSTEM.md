@@ -2,7 +2,7 @@
 
 > Project: WHERE THE SOUNDINGS END  
 > Status: Relationship-reactive dialogue and dockside resident handoff implemented; market transactions and Unity verification remain open  
-> Version: 0.3  
+> Version: 0.4  
 > Last reviewed: 2026-11-13
 
 ## Design goals
@@ -179,3 +179,11 @@ Not yet implemented:
 12. Confirm no NPC interaction can start a second conversation while another dialogue is active.
 
 Unity scene generation, Yarn compilation, runtime movement and save/load behaviour still require verification in Unity 6000.3.28f1. Static repository checks do not establish those runtime results.
+
+## Narrative evidence memory and character voice expansion
+
+The Yarn source now declares four shared Greyhaven evidence flags: bell-log history, cold-centred catch observations, returned-hull scoring and the empty/untorn net. The player can discover each through the resident whose occupation supports that observation, then compare the records through any resident conversation. The comparison is deliberately epistemically limited: it recognises unresolved similarities without claiming a common cause or explaining the Choir.
+
+These flags are Yarn bool variables and are captured by the existing YarnDialogueSaveParticipant through SaveGameData.dialogue. They do not add fields to NpcAgent, the NPC relationship-memory ledger or save schema v6. Evidence discovery does not award relationship points. High-trust optional dialogue adds personal context—chart habits, market resilience, radio restoration and Inez's line-weaving hobby—without changing stable identities, schedules or knowledge boundaries.
+
+The dialogue source and documentation are updated, but Yarn compilation, conditional-option filtering, persistence across a real save/load, and presentation in Unity remain unverified until the project is opened in Unity 6000.3.28f1.

@@ -14,6 +14,10 @@
 <<declare $gh_tomas_trust = 0>>
 <<declare $gh_met_inez = false>>
 <<declare $gh_inez_trust = 0>>
+<<declare $gh_clue_bell_log = false>>
+<<declare $gh_clue_cold_catch = false>>
+<<declare $gh_clue_hull_marks = false>>
+<<declare $gh_clue_net_return = false>>
 
 title: Greyhaven_Harbourmaster
 ---
@@ -154,6 +158,29 @@ Harbourmaster: No. I have heard enough about the way you conduct yourself. The o
 -> Ask what he has written in the log about you. <<if $npc_relationship >= 90>>
     Harbourmaster: That you came back when you said you would. That you listened when I warned you. I don't write praise often, but I write what I see.
     Harbourmaster: Keep giving me reasons to leave that entry unchanged.
+
+-> Ask what the lighthouse log says about the bell.
+    <<if not $gh_clue_bell_log>>
+        Harbourmaster: The last confirmed ringing is eleven years back. After that, the book records inspections, not a single sounding.
+        Harbourmaster: No entry explains the survivor's question. The log can tell you when the bell stopped. It cannot tell you what he heard.
+        <<set $gh_clue_bell_log = true>>
+    <<else>>
+        Harbourmaster: Eleven years since the last confirmed ring. The inspections continue; the soundings do not.
+    <<endif>>
+
+-> Ask how Greyhaven's old channel charts changed. <<if $npc_relationship >= 60>>
+    Harbourmaster: The older charts disagree around the outer shoal. Sand shifts, storms move markers, and a line that was safe for one season can be a poor guide the next.
+    Harbourmaster: That's why I trust a chart as a record, not a promise. You still have to read the water.
+<<endif>>
+
+
+-> Compare the records from the quay. <<if $gh_clue_bell_log or $gh_clue_cold_catch or $gh_clue_hull_marks or $gh_clue_net_return>>
+    <<if $gh_clue_bell_log and $gh_clue_cold_catch and $gh_clue_hull_marks and $gh_clue_net_return>>
+        Harbourmaster: Mara's market notes, Tomas's hull measurements, and Inez's preserved line are not the same kind of evidence. That's precisely why I take them seriously.
+    <<else>>
+        Harbourmaster: We have fragments, not a pattern. A log, a catch, a mark or a piece of line can tell us what happened to that one thing. It cannot explain the whole sea.
+    <<endif>>
+<<endif>>
 <<set $gh_met_harbourmaster = true>>
 <<endif>>
 ===
@@ -289,6 +316,29 @@ Mara Venn: Not today. I won't weigh a thing for someone I cannot trust.
 -> Ask to see the notes she keeps about strange catches. <<if $npc_relationship >= 90>>
     Mara Venn: Only the observations, not the names of the people who brought them in. I won't put a neighbour's fear on display.
     Mara Venn: Here. Dates, storage conditions, and where each catch was found. That's all I know for certain.
+
+-> Ask why some catches arrive cold in the middle.
+    <<if not $gh_clue_cold_catch>>
+        Mara Venn: It isn't the ice. I've checked the storage and asked different crews how long the catch was aboard.
+        Mara Venn: The cold sits inside the fish, not across the surface. It has happened on separate boats. I can record that much; I cannot tell you why.
+        <<set $gh_clue_cold_catch = true>>
+    <<else>>
+        Mara Venn: Different boats, same odd cold centre. I still have no honest explanation for it.
+    <<endif>>
+
+-> Ask what she does with the market after a bad season. <<if $npc_relationship >= 60>>
+    Mara Venn: I buy less, waste less, and make sure the smaller crews aren't pushed out by one poor week. A market survives by keeping people able to return.
+    Mara Venn: My mother taught me that an empty stall is not always a failed business. Sometimes it means someone is still out working.
+<<endif>>
+
+
+-> Compare the records from the quay. <<if $gh_clue_bell_log or $gh_clue_cold_catch or $gh_clue_hull_marks or $gh_clue_net_return>>
+    <<if $gh_clue_bell_log and $gh_clue_cold_catch and $gh_clue_hull_marks and $gh_clue_net_return>>
+        Mara Venn: The Harbourmaster has dates. Tomas has measurements. Inez has the actual line. I have the catch notes. I won't turn four observations into one story just because a story would be easier to sell.
+    <<else>>
+        Mara Venn: We have fragments, not a pattern. A log, a catch, a mark or a piece of line can tell us what happened to that one thing. It cannot explain the whole sea.
+    <<endif>>
+<<endif>>
 <<set $gh_met_mara = true>>
 <<endif>>
 ===
@@ -396,6 +446,29 @@ Tomas Vale: Take the boat elsewhere. I won't put my tools near it, and I won't d
 
 -> Leave.
     Tomas Vale: Don't ignore a change in engine pitch. The boat usually tells you before it quits.
+
+-> Ask him to compare the returned hull's marks with a rock strike.
+    <<if not $gh_clue_hull_marks>>
+        Tomas Vale: The scoring runs along the hull. I found no matching stone transfer and no single impact point that explains the whole length.
+        Tomas Vale: That rules out one easy explanation. It does not tell me what made the marks.
+        <<set $gh_clue_hull_marks = true>>
+    <<else>>
+        Tomas Vale: Long scoring, no matching transfer, no clean impact point. Still an unknown cause.
+    <<endif>>
+
+-> Ask why he keeps old radio parts on the workbench. <<if $npc_relationship >= 60>>
+    Tomas Vale: I repair receivers when the engines are quiet. Mostly weather bands and harbour traffic. I like knowing which part of a signal is equipment and which part is interference.
+    Tomas Vale: A radio can make a poor voice sound convincing. It can also make a perfectly ordinary voice sound like someone calling from the bottom of a well.
+<<endif>>
+
+
+-> Compare the records from the quay. <<if $gh_clue_bell_log or $gh_clue_cold_catch or $gh_clue_hull_marks or $gh_clue_net_return>>
+    <<if $gh_clue_bell_log and $gh_clue_cold_catch and $gh_clue_hull_marks and $gh_clue_net_return>>
+        Tomas Vale: A maintenance log, temperature notes, hull measurements and a piece of net. Different tools, different witnesses. If they point in the same direction, that is worth investigating. It still isn't proof of a monster.
+    <<else>>
+        Tomas Vale: We have fragments, not a pattern. A log, a catch, a mark or a piece of line can tell us what happened to that one thing. It cannot explain the whole sea.
+    <<endif>>
+<<endif>>
 <<set $gh_met_tomas = true>>
 <<endif>>
 ===
@@ -519,6 +592,29 @@ Inez Sarmiento: I have no work for you. Please leave my tools alone.
 
 -> Leave.
     Inez Sarmiento: Bring the damaged line back. Don't throw away evidence just because it frightens you.
+
+-> Ask what the missing crew's returned net tells her.
+    <<if not $gh_clue_net_return>>
+        Inez Sarmiento: The net came back empty, but the knots were still fastened and the mesh was not torn. That is what I can show you.
+        Inez Sarmiento: Three turns on the float line was their habit. It was a practical securing knot, not a charm. I will not pretend the empty net tells me where the catch went.
+        <<set $gh_clue_net_return = true>>
+    <<else>>
+        Inez Sarmiento: Empty, not torn, knots still set. I have not found a better description, and I won't invent one.
+    <<endif>>
+
+-> Ask what she makes when she is not mending nets. <<if $npc_relationship >= 60>>
+    Inez Sarmiento: Little woven birds from short pieces of sound line. My mother taught me. They are no use for fishing, which is why I like making them.
+    Inez Sarmiento: Not every useful thing has to earn its place by surviving a storm.
+<<endif>>
+
+
+-> Compare the records from the quay. <<if $gh_clue_bell_log or $gh_clue_cold_catch or $gh_clue_hull_marks or $gh_clue_net_return>>
+    <<if $gh_clue_bell_log and $gh_clue_cold_catch and $gh_clue_hull_marks and $gh_clue_net_return>>
+        Inez Sarmiento: The records should stay separate until we know more. But the bell log, the cold catch, the hull marks and the empty net deserve to be kept together—not explained away one by one.
+    <<else>>
+        Inez Sarmiento: We have fragments, not a pattern. A log, a catch, a mark or a piece of line can tell us what happened to that one thing. It cannot explain the whole sea.
+    <<endif>>
+<<endif>>
 <<set $gh_met_inez = true>>
 <<endif>>
 ===
