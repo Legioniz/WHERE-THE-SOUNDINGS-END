@@ -1,9 +1,9 @@
 # Save Data Structure
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime schema v6 implemented  
+> Status: Runtime schema v7 implemented; Unity verification pending  
 > Owner: Project lead  
-> Version: 0.3  
+> Version: 0.4  
 > Last reviewed: 2026-11-13
 
 ## Storage layout
@@ -26,7 +26,7 @@ Root DTO: SaveGameData.
 
 | Field | Purpose |
 |---|---|
-| schemaVersion | Migration version; currently 6 |
+| schemaVersion | Migration version; currently 7 |
 | slotNumber | Slot identity, assigned by the file service |
 | saveId | Stable unique identifier for this save record |
 | savedAtUtc | UTC ISO-8601 timestamp |
@@ -62,7 +62,8 @@ All content relationships use stable string IDs. Random stream state and increme
 SaveGameData.CurrentSchemaVersion is authoritative.
 
 - Versions 0 through 5 are migrated in ordered steps. The v5-to-v6 migration initializes NPC memory ledgers and maps the old unused zero relationship baseline to neutral 50.
-- Version 6 is current.
+- The v6-to-v7 migration initializes WorldSaveData.visitedRegionIds as an empty collection. It preserves existing ProgressSaveData.unlockedRegionIds; no legacy save is granted a region visit it did not record.
+- Version 7 is current.
 - A version greater than the running build's current version is rejected. It must never be loaded and rewritten by an older executable.
 - Each future schema increase must add an explicit migration step and an Edit Mode test that loads a fixture from the previous version.
 
@@ -70,11 +71,11 @@ Do not repurpose an existing field with a new meaning. Add a new field, migrate,
 
 ## NPC relationship persistence
 
-Save schema v6 is the current save contract and extends each NPC state record with `relationshipMemoryIds`, a per-resident list capped at 128 stable event IDs. Validation rejects null/oversized ledgers, duplicate or malformed IDs, and more than 4096 remembered events across the save.
+Save schema v7 is the current save contract and extends each NPC state record with `relationshipMemoryIds`, a per-resident list capped at 128 stable event IDs. Validation rejects null/oversized ledgers, duplicate or malformed IDs, and more than 4096 remembered events across the save.
 
 Schema 5 NPC relationship scores were not modified by gameplay and used zero as their original default. The v5-to-v6 migration maps an empty or zero legacy score to neutral 50, initializes each memory list, and preserves any non-zero score. Later saves store the score and event ledger together.
 
-## Runtime API
+## Regional chart persistence\n\nSchema v7 adds WorldSaveData.visitedRegionIds. RegionalChartController records a region only after the vessel physically enters that region's DeepOceanSurveyRegion bounds. The same stable ID is added to the existing ProgressSaveData.unlockedRegionIds collection. A visit unlocks the chart record, not an inter-region travel route. The chart lists only visited regions and shows a phenomenon-site mark only when SoundingRigController has already discovered that stable site ID. Unknown regions and sites remain absent.\n\n## Runtime API
 
 - SaveFileService.Save(slot, data)
 - SaveFileService.TryLoad(slot, out data)
