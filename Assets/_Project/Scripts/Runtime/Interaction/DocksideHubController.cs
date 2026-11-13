@@ -1147,7 +1147,7 @@ namespace WhereTheSoundingsEnd.Interaction
                                : seaState.LatestOmen);
 
                 case DocksideFurnitureAction.ReadHarbourChart:
-                    return "LOCAL BEARINGS\nD — Main dock\nH — Harbour Office / Harbourmaster\nM — Fish Market / Mara Venn\nT — Boat Repair / Tomas Vale\nI — Net Mender / Inez Sarmiento\nL — Western lighthouse\nW — Outer Channel Wreck Field\n\nThis is a schematic settlement reference, not a calibrated navigation chart.";
+                    return BuildHarbourChartSummary();
 
                 case DocksideFurnitureAction.ReadNoticeboard:
                     return "HARBOUR NOTICE\nKeep the inner quay clear during the morning catch. Report damaged channel markers to the Harbourmaster. Unusual sounds offshore should be logged with their time and bearing.";
@@ -1233,6 +1233,19 @@ namespace WhereTheSoundingsEnd.Interaction
 
             builder.Append("\n\nInspection only. No goods are removed and no sale is performed.");
             return builder.ToString();
+        }
+
+        private string BuildHarbourChartSummary()
+        {
+            string summary = "LOCAL BEARINGS\nD — Main dock\nH — Harbour Office / Harbourmaster\nM — Fish Market / Mara Venn\nT — Boat Repair / Tomas Vale\nI — Net Mender / Inez Sarmiento\nL — Western lighthouse\nW — Outer Channel Wreck Field\n\nThis is a schematic settlement reference, not a calibrated navigation chart.";
+            RegionalChartController chart = vesselBody != null
+                ? vesselBody.GetComponent<RegionalChartController>() : null;
+            if (chart == null) return summary;
+            List<string> permits = chart.GetPermittedRegionNames();
+            summary += "\n\nCHART PERMITS  /  " +
+                (permits.Count == 0 ? "None recorded." : string.Join(", ", permits.ToArray()));
+            summary += "\nPermit names are recorded; unvisited waters remain unmarked and unlocated.";
+            return summary;
         }
 
         private string BuildVesselInspection()
