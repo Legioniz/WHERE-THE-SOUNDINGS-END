@@ -42,6 +42,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Tests/EditMode/EconomyPolicyTests.cs",
     "Assets/_Project/Tests/EditMode/MaraMarketTransactionTests.cs",
     "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs",
+    "docs/13_PRODUCTION_MANAGEMENT/ECONOMY-INTEGRATION-AUDIT.md",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
@@ -890,6 +891,147 @@ def main() -> int:
         for required_text in ("journalEntries.Count", "randomStreams.Count", "worldFlags.ConvertAll", "eventCooldowns.ConvertAll"):
             if required_text not in save_source:
                 failures.append(f"SaveGameData is missing malformed collection validation: {required_text}")
+
+        # Cross-system economy wiring: these checks protect the actual vessel -> service ->
+        # transaction -> save path, not merely the presence of individual controller files.
+        wallet_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/EconomyWalletController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "TransactionApplied", "Delegate[] listeners = handler.GetInvocationList()",
+            "((Action<string, long, long>)listeners[i])",
+            "Wallet transaction listener failed:",
+            "HasProcessedTransaction", "ISaveParticipant", "ISaveDataValidator",
+        ):
+            if required_text not in wallet_source:
+                failures.append(f"EconomyWalletController is missing transaction integration safeguard: {required_text}")
+
+        fuel_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/VesselFuelController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "FuelConsumed", "Delegate[] listeners = handler.GetInvocationList()",
+            "((Action<float>)listeners[i])", "Fuel-consumption listener failed:",
+            "equipment.FuelUseMultiplier", "equipment.WearEngine",
+            "emergencyFuelUnits", "ISaveParticipant", "ISaveDataValidator",
+        ):
+            if required_text not in fuel_source:
+                failures.append(f"VesselFuelController is missing fuel/equipment event integration: {required_text}")
+
+        equipment_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/VesselEquipmentController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "TryEquip", "TryUnequip", "TryRepairSlot", "EnginePowerMultiplier",
+            "RodCastMultiplier", "RodControlMultiplier", "WearRodForCatch",
+            "CaptureSaveData", "RestoreSaveData", "TryValidateSaveData",
+        ):
+            if required_text not in equipment_source:
+                failures.append(f"VesselEquipmentController is missing loadout integration: {required_text}")
+
+        boat_source = (ROOT / "Assets/_Project/Scripts/Runtime/Boat/BoatPrototypeController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "economyTelemetry.ObservePropulsion(throttle)",
+            "fuelController.ConsumePropulsion(throttle, CurrentEngineLoad, Time.fixedDeltaTime)",
+            "equipmentController.EnginePowerMultiplier",
+        ):
+            if required_text not in boat_source:
+                failures.append(f"BoatPrototypeController is disconnected from expedition economy: {required_text}")
+
+        fishing_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishingSystemDirector.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "equipment.RodCastMultiplier", "equipment.RodControlMultiplier",
+            "equipment.WearRodForCatch",
+        ):
+            if required_text not in fishing_source:
+                failures.append(f"FishingSystemDirector is disconnected from installed rod equipment: {required_text}")
+
+        harvest_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/HarvestingMinigameController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "GetComponent<FishingSystemDirector>()",
+            "gameObject.AddComponent<FishingSystemDirector>()",
+            "fishingSystem.Configure(input, hold, director)",
+            "fishingSystem.TryStartFishing()",
+        ):
+            if required_text not in harvest_source:
+                failures.append(f"HarvestingMinigameController is disconnected from fishing runtime: {required_text}")
+
+        market_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/MaraFishMarketController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "OrdinarySaleEligible", "IsAberrant", "CalculateDemandFactor",
+            "TryCommitRemoval", "wallet.TryApplyTransaction", "RefreshStock",
+        ):
+            if required_text not in market_source:
+                failures.append(f"MaraFishMarketController is missing buyer/cargo/wallet integration: {required_text}")
+
+        vendor_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/GreyhavenVendorServices.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "TryPurchase", "TrySellSalvage", "TryRefuel", "TryRepairAll",
+            "TryRepairEquipmentSlot", "TryPlaceFirstFit", "wallet.TryApplyTransaction",
+            "cargo.TryRemove", "supplyStock",
+        ):
+            if required_text not in vendor_source:
+                failures.append(f"GreyhavenVendorServices is missing purchase/service integration: {required_text}")
+
+        contract_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/HarbourmasterContractController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "TryAcceptNext", "TryCompleteActive", "TryCommitRemoval",
+            "wallet.TryApplyTransaction", "CaptureSaveData", "RestoreSaveData",
+            "ISaveParticipant", "ISaveDataValidator",
+        ):
+            if required_text not in contract_source:
+                failures.append(f"HarbourmasterContractController is missing delivery/save integration: {required_text}")
+
+        research_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/HarbourmasterResearchController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "DiscoveredSiteIds", "TryCommitRemoval", "wallet.TryApplyTransaction",
+            "ApplyEarnedPermits", "GrantChartPermit", "unlockedRegionIds",
+            "ISaveParticipant", "ISaveDataValidator",
+        ):
+            if required_text not in research_source:
+                failures.append(f"HarbourmasterResearchController is missing evidence/permit/save integration: {required_text}")
+
+        telemetry_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/ExpeditionEconomyTelemetry.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "subscribedWallet.TransactionApplied", "subscribedFuel.FuelConsumed",
+            "ObservePropulsion", "OnTransactionApplied", "OnFuelConsumed",
+            "subscribedWallet", "subscribedFuel",
+            "if (subscribedWallet == wallet) return;", "if (subscribedFuel == fuel) return;",
+            "dockside.IsMenuOpen", "CompleteTrip", "CaptureSaveData", "RestoreSaveData",
+        ):
+            if required_text not in telemetry_source:
+                failures.append(f"ExpeditionEconomyTelemetry is missing trip accounting integration: {required_text}")
+
+        economy_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
+        for required_component in (
+            "EconomyWalletController", "VesselFuelController", "VesselEquipmentController",
+            "HarbourmasterResearchController", "MaraFishMarketController",
+            "GreyhavenVendorServices", "ExpeditionEconomyTelemetry", "RegionalChartController",
+        ):
+            if (
+                f"AddComponent<WhereTheSoundingsEnd.Economy.{required_component}>()" not in economy_builder
+                and f"AddComponent<{required_component}>()" not in economy_builder
+            ):
+                failures.append(f"Greyhaven generated vessel is missing economy component: {required_component}")
+
+        dockside_source = (ROOT / "Assets/_Project/Scripts/Runtime/Interaction/DocksideHubController.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "GetComponent<MaraFishMarketController>()",
+            "GetComponent<GreyhavenVendorServices>()",
+            "GetComponent<HarbourmasterContractController>()",
+            "AddComponent<HarbourmasterContractController>()",
+            "TryAcceptNext", "TryCompleteActive",
+            "GetComponent<HarbourmasterResearchController>()",
+            "GetComponent<VesselEquipmentController>()",
+            "TrySubmitNext", "TrySell", "TryPurchase",
+            "TryRepairEquipmentSlot", "TryEquip", "TryUnequip",
+            "ExpeditionEconomyTelemetry",
+        ):
+            if required_text not in dockside_source:
+                failures.append(f"DocksideHubController is missing economy service wiring: {required_text}")
+
+        economy_tests = (ROOT / "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "WalletListenerFailureDoesNotSuppressLaterListenersOrRollbackPayment",
+            "FuelListenerFailureDoesNotSuppressLaterListenersOrChangeConsumedAmount",
+            "WalletRejectsDuplicateTransactionWithoutEmittingSecondEvent",
+        ):
+            if f"void {required_test}()" not in economy_tests:
+                failures.append(f"EconomyRuntimeIntegrationTests is missing integration regression: {required_test}")
 
     except (ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         failures.append(str(error))

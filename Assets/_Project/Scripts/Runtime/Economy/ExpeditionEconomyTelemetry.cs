@@ -29,6 +29,8 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private double lifetimeGameSeconds;
         [SerializeField] private float lifetimeFuelUsed;
 
+        private EconomyWalletController subscribedWallet;
+        private VesselFuelController subscribedFuel;
         private bool tripActive;
         private bool docksideSessionObserved;
         private long tripGrossCents;
@@ -63,8 +65,12 @@ namespace WhereTheSoundingsEnd.Economy
 
         private void OnDisable()
         {
-            if (wallet != null) wallet.TransactionApplied -= OnTransactionApplied;
-            if (fuel != null) fuel.FuelConsumed -= OnFuelConsumed;
+            if (subscribedWallet != null)
+                subscribedWallet.TransactionApplied -= OnTransactionApplied;
+            if (subscribedFuel != null)
+                subscribedFuel.FuelConsumed -= OnFuelConsumed;
+            subscribedWallet = null;
+            subscribedFuel = null;
         }
 
         private void Update()
@@ -94,16 +100,22 @@ namespace WhereTheSoundingsEnd.Economy
 
         private void SubscribeWallet()
         {
-            if (wallet == null) return;
-            wallet.TransactionApplied -= OnTransactionApplied;
-            wallet.TransactionApplied += OnTransactionApplied;
+            if (subscribedWallet == wallet) return;
+            if (subscribedWallet != null)
+                subscribedWallet.TransactionApplied -= OnTransactionApplied;
+            subscribedWallet = wallet;
+            if (subscribedWallet != null)
+                subscribedWallet.TransactionApplied += OnTransactionApplied;
         }
 
         private void SubscribeFuel()
         {
-            if (fuel == null) return;
-            fuel.FuelConsumed -= OnFuelConsumed;
-            fuel.FuelConsumed += OnFuelConsumed;
+            if (subscribedFuel == fuel) return;
+            if (subscribedFuel != null)
+                subscribedFuel.FuelConsumed -= OnFuelConsumed;
+            subscribedFuel = fuel;
+            if (subscribedFuel != null)
+                subscribedFuel.FuelConsumed += OnFuelConsumed;
         }
 
         private void OnFuelConsumed(float units)

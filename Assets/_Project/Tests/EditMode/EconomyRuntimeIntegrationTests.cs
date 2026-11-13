@@ -1,6 +1,9 @@
+using System;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 using WhereTheSoundingsEnd.Economy;
 using WhereTheSoundingsEnd.Inventory;
 
@@ -66,6 +69,62 @@ namespace WhereTheSoundingsEnd.Tests
             fuel.AddFuel(1f);
 
             Assert.AreEqual(2f, fuel.EmergencyFuelUnits, 0.0001f);
+        }
+
+        [Test]
+        public void WalletListenerFailureDoesNotSuppressLaterListenersOrRollbackPayment()
+        {
+            EconomyWalletController wallet = owner.AddComponent<EconomyWalletController>();
+            int laterListenerCalls = 0;
+            wallet.TransactionApplied += (id, delta, balance) =>
+                throw new InvalidOperationException("deliberate wallet listener failure");
+            wallet.TransactionApplied += (id, delta, balance) => laterListenerCalls++;
+
+            LogAssert.Expect(LogType.Warning,
+                "Wallet transaction listener failed: deliberate wallet listener failure");
+
+            Assert.IsTrue(wallet.TryApplyTransaction("test.wallet.listener-isolation", -100L));
+            Assert.AreEqual(1, laterListenerCalls);
+            Assert.AreEqual(2400L, wallet.WalletCents);
+            Assert.IsTrue(wallet.HasProcessedTransaction("test.wallet.listener-isolation"));
+        }
+
+        [Test]
+        public void FuelListenerFailureDoesNotSuppressLaterListenersOrChangeConsumedAmount()
+        {
+            VesselFuelController fuel = owner.AddComponent<VesselFuelController>();
+            int laterListenerCalls = 0;
+            float observedFuel = 0f;
+            fuel.FuelConsumed += amount =>
+                throw new InvalidOperationException("deliberate fuel listener failure");
+            fuel.FuelConsumed += amount =>
+            {
+                laterListenerCalls++;
+                observedFuel += amount;
+            };
+
+            LogAssert.Expect(LogType.Warning,
+                "Fuel-consumption listener failed: deliberate fuel listener failure");
+
+            float consumed = fuel.ConsumePropulsion(1f, 1f, 10f);
+
+            Assert.Greater(consumed, 0f);
+            Assert.AreEqual(1, laterListenerCalls);
+            Assert.AreEqual(consumed, observedFuel, 0.000001f);
+        }
+
+        [Test]
+        public void WalletRejectsDuplicateTransactionWithoutEmittingSecondEvent()
+        {
+            EconomyWalletController wallet = owner.AddComponent<EconomyWalletController>();
+            int eventCount = 0;
+            wallet.TransactionApplied += (id, delta, balance) => eventCount++;
+
+            Assert.IsTrue(wallet.TryApplyTransaction("test.wallet.once", -100L));
+            Assert.IsFalse(wallet.TryApplyTransaction("test.wallet.once", -100L));
+
+            Assert.AreEqual(1, eventCount);
+            Assert.AreEqual(2400L, wallet.WalletCents);
         }
 
         [Test]
