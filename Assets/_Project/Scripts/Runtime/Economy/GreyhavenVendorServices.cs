@@ -139,6 +139,96 @@ namespace WhereTheSoundingsEnd.Economy
             return true;
         }
 
+        public bool TryBuildSalvageOffer(IList<string> instanceIds,
+            out List<MarketSaleLine> lines, out long totalCents, out string error)
+        {
+            lines = new List<MarketSaleLine>();
+            totalCents = 0L;
+            error = null;
+            if (!InezAvailable) { error = "Inez is not available to buy salvage right now."; return false; }
+            if (cargo == null || instanceIds == null || instanceIds.Count == 0)
+            { error = "Select salvage cargo to appraise."; return false; }
+
+            HashSet<string> seen = new HashSet<string>(StringComparer.Ordinal);
+            for (int i = 0; i < instanceIds.Count; i++)
+            {
+                string id = instanceIds[i];
+                if (string.IsNullOrWhiteSpace(id) || !seen.Add(id))
+                { error = "The salvage selection contains a duplicate or invalid reference."; return false; }
+
+                CargoPlacement placement = null;
+                for (int j = 0; j < cargo.Placements.Count; j++)
+                    if (cargo.Placements[j] != null && cargo.Placements[j].instanceId == id)
+                    { placement = cargo.Placements[j]; break; }
+                if (placement == null)
+                { error = "A selected salvage item is no longer aboard."; return false; }
+
+                CargoItemDefinition definition = cargo.GetItemDefinition(placement.itemId);
+                if (definition == null || definition.Category != CargoItemCategory.Salvage ||
+                    !definition.OrdinarySaleEligible || definition.IsQuestCritical ||
+                    !IsFinite(placement.saleQuantity) || placement.saleQuantity <= 0f ||
+                    !IsFinite(definition.BaseSalePriceUsd) || definition.BaseSalePriceUsd <= 0f)
+                { error = "Inez cannot accept this salvage or its value is not authored."; return false; }
+
+                MarketStockSaveData itemStock = GetOrCreateStock(placement.itemId);
+                RefreshStock(itemStock);
+                decimal demand = EconomyPolicy.CalculateDemandFactor(
+                    itemStock.targetStock, itemStock.currentStock, 0.25m);
+                decimal quality = 0.60m + 0.60m * (decimal)Mathf.Clamp01(placement.quality);
+                decimal freshness = 0.35m + 0.65m * (decimal)Mathf.Clamp01(placement.freshness);
+                decimal relationshipFactor = 1m + GetRelationshipDiscount(inez.RelationshipScore);
+                long lineCents = EconomyPolicy.CalculateSaleLineCents(
+                    (decimal)placement.saleQuantity, (decimal)definition.BaseSalePriceUsd,
+                    relationshipFactor, quality, freshness, demand, 1m, true);
+                if (lineCents <= 0L || long.MaxValue - totalCents < lineCents)
+                { error = "The salvage offer exceeds the supported transaction range."; return false; }
+
+                totalCents += lineCents;
+                lines.Add(new MarketSaleLine
+                {
+                    instanceId = placement.instanceId,
+                    itemId = placement.itemId,
+                    displayName = definition.DisplayName,
+                    saleQuantity = placement.saleQuantity,
+                    unitLabel = definition.SaleUnitLabel,
+                    demandFactor = demand,
+                    lineTotalCents = lineCents
+                });
+            }
+            return totalCents > 0L;
+        }
+
+        public bool TrySellSalvage(IList<string> instanceIds, string transactionId,
+            out List<MarketSaleLine> receipt, out long paidCents, out string error)
+        {
+            receipt = null;
+            paidCents = 0L;
+            if (!IsValidTransactionId(transactionId) || wallet == null ||
+                wallet.HasProcessedTransaction(transactionId))
+            { error = "The salvage transaction reference is invalid or already used."; return false; }
+
+            List<MarketSaleLine> offer;
+            long total;
+            if (!TryBuildSalvageOffer(instanceIds, out offer, out total, out error)) return false;
+            if (wallet.WalletCents > 1000000000000L - total)
+            { error = "The wallet cannot accept this transaction."; return false; }
+
+            List<CargoPlacement> removed;
+            if (!cargo.TryCommitRemoval(instanceIds, () => wallet.TryApplyTransaction(transactionId, total), out removed))
+            { error = "The salvage sale could not be committed. Cargo and wallet remain unchanged."; return false; }
+
+            for (int i = 0; i < removed.Count; i++)
+            {
+                MarketStockSaveData entry = GetOrCreateStock(removed[i].itemId);
+                entry.currentStock = (int)Math.Min(MaximumStock,
+                    (long)entry.currentStock + Math.Max(1, removed[i].quantity));
+            }
+            receipt = offer;
+            paidCents = total;
+            error = null;
+            return true;
+        }
+
         public int GetStock(string itemId)
         {
             MarketStockSaveData entry = FindStock(itemId);
@@ -318,6 +408,11 @@ namespace WhereTheSoundingsEnd.Economy
         {
             if (long.MaxValue - a < b) return long.MaxValue;
             return a + b;
+        }
+
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
         }
 
         private static bool IsValidTransactionId(string value)
