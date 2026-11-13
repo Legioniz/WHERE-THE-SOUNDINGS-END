@@ -168,7 +168,7 @@ Every transaction displays item, quantity/unit, base price, destination factor, 
 
 `EconomyPolicy` implements deterministic sale-line rounding, bounded quality/freshness/demand/live modifiers, stock-driven demand, repair/fuel quote arithmetic and overflow-safe wallet deltas. `SaveGameData` is schema v8 with a cents wallet and transaction-id ledger; v7 whole-dollar balances migrate to cents. Cargo instances now retain sale quantity, and fishing records the already-calculated landed weight rather than discarding it. Item definitions expose authored price/unit/ordinary-sale eligibility fields; existing assets still require reviewed schedule values before they can be sold.
 
-This does not yet implement a live wallet component, vendor stock/demand persistence, sales/purchases, fuel burn, repairs, NPC service bindings or dockside economy UI. Those remain explicit follow-on work; do not treat data contracts and pure policies as a playable economy.
+`EconomyWalletController` now owns the live integer-cent wallet and bounded idempotency ledger on the generated vessel and participates in the existing save coordinator. This does not yet implement vendor stock/demand persistence, sales/purchases, fuel burn, paid repairs, NPC service bindings or dockside economy UI. Do not treat the wallet and pure policies as a playable trading loop.
 
 
 
