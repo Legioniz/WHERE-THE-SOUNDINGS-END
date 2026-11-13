@@ -49,6 +49,18 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(amount, Is.LessThan(population));
         }
 
+        [TestCase(0f, 0f, 0.025f)]
+        [TestCase(1f, 0f, 0.245f)]
+        [TestCase(0f, 1f, 0.105f)]
+        [TestCase(1f, 1f, 0.325f)]
+        [TestCase(2f, 2f, 0.325f)]
+        public void AberrationChance_IsBoundedAndMatchesItsActualMaximum(
+            float panic, float disturbance, float expected)
+        {
+            Assert.That(FishingSimulationPolicy.CalculateAberrationChance(panic, disturbance),
+                Is.EqualTo(expected).Within(0.00001f));
+        }
+
         [Test]
         public void EventChance_IsFrameRateIndependent()
         {
