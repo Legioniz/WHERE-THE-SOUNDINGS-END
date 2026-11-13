@@ -674,9 +674,9 @@ namespace WhereTheSoundingsEnd.Interaction
                     eligibleIds.Add(placement.instanceId);
             }
 
-            List<MarketSaleLine> offer;
-            long total;
-            string error;
+            List<MarketSaleLine> offer = null;
+            long total = 0L;
+            string error = null;
             bool canQuote = eligibleIds.Count > 0 &&
                 maraMarket.TryBuildOffer(eligibleIds, out offer, out total, out error);
             Label summary = new Label(canQuote
@@ -685,6 +685,29 @@ namespace WhereTheSoundingsEnd.Interaction
             summary.style.whiteSpace = WhiteSpace.Normal;
             summary.style.color = new Color(0.82f, 0.78f, 0.66f);
             vendorActions.Add(summary);
+            if (canQuote)
+            {
+                System.Text.StringBuilder itemized = new System.Text.StringBuilder();
+                for (int lineIndex = 0; lineIndex < offer.Count; lineIndex++)
+                {
+                    MarketSaleLine line = offer[lineIndex];
+                    itemized.Append(line.displayName);
+                    itemized.Append("  /  ");
+                    itemized.Append(line.saleQuantity.ToString("0.00"));
+                    itemized.Append(" ");
+                    itemized.Append(line.unitLabel);
+                    itemized.Append("  /  ");
+                    itemized.Append(FormatMoney(line.lineTotalCents));
+                    itemized.Append(" USD  /  DEMAND ");
+                    itemized.Append(line.demandFactor.ToString("0.00"));
+                    if (lineIndex < offer.Count - 1) itemized.Append("\\n");
+                }
+                Label details = new Label(itemized.ToString());
+                details.style.whiteSpace = WhiteSpace.Normal;
+                details.style.color = new Color(0.73f, 0.79f, 0.73f);
+                details.style.fontSize = 11;
+                vendorActions.Add(details);
+            }
 
             if (canQuote)
             {
