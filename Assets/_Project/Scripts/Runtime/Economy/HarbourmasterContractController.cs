@@ -185,6 +185,8 @@ namespace WhereTheSoundingsEnd.Economy
         public void CaptureSaveData(SaveGameData data)
         {
             if (data == null || data.progress == null) return;
+            if (data.progress.worldFlags == null)
+                data.progress.worldFlags = new List<WorldFlagSaveData>();
             data.progress.worldFlags.RemoveAll(flag => flag != null && flag.flagId == SaveFlagId);
             data.progress.worldFlags.Add(new WorldFlagSaveData
             {
