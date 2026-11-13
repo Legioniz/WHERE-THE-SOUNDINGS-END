@@ -83,7 +83,9 @@ namespace WhereTheSoundingsEnd.Economy
 
                 CargoItemDefinition definition = cargoHold.GetItemDefinition(placement.itemId);
                 if (definition == null || !definition.OrdinarySaleEligible ||
-                    definition.BaseSalePriceUsd <= 0f ||
+                    !IsFinite(placement.saleQuantity) || placement.saleQuantity <= 0f ||
+                    placement.saleQuantity > 1000000f ||
+                    !IsFinite(definition.BaseSalePriceUsd) || definition.BaseSalePriceUsd <= 0f ||
                     (definition.Category != CargoItemCategory.Fish &&
                      definition.Category != CargoItemCategory.Shellfish &&
                      definition.Category != CargoItemCategory.Cephalopod))
@@ -154,8 +156,8 @@ namespace WhereTheSoundingsEnd.Economy
             {
                 CargoPlacement placement = removed[i];
                 MarketStockSaveData itemStock = GetOrCreateStock(placement.itemId);
-                itemStock.currentStock = Math.Min(MaximumStockPerItem,
-                    itemStock.currentStock + Math.Max(1, placement.quantity));
+                long nextStock = (long)itemStock.currentStock + Math.Max(1, placement.quantity);
+                itemStock.currentStock = (int)Math.Min(MaximumStockPerItem, nextStock);
             }
 
             receipt = offer;
@@ -227,6 +229,11 @@ namespace WhereTheSoundingsEnd.Economy
                 });
             }
             stock = restored;
+        }
+
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
         }
 
         private CargoPlacement FindPlacement(string instanceId)
