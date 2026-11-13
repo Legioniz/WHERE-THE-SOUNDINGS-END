@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Working baseline with proposed narrative additions  
 > Owner: Project lead  
-> Version: 0.3  
-> Last reviewed: 2026-11-12
+> Version: 0.4  
+> Last reviewed: 2026-11-13
 
 An isolated island community depends on surrounding fishing waters. A number of fishing boats have disappeared or returned under unexplained circumstances. The protagonist takes work connected to these incidents and discovers signs of an older, poorly understood relationship between village and sea. The ocean is a connected system of ecology, physical spaces, memory, acoustic signals and entities; extraction and disturbance can change what is encountered.
 
@@ -58,3 +58,14 @@ Exact geography, chronology, climate, species composition, supernatural ontology
 - [Endings](../03_STORY_AND_NARRATIVE/ENDINGS.md)
 - [Maritime Myths and Motifs](MARITIME-MYTHS-CATALOG.md)
 - [Deep-Ocean Phenomena and Mariner Experiences](../06_GAMEPLAY_SYSTEMS/DEEP-OCEAN-PHENOMENA-AND-MARINER-EXPERIENCES.md)
+
+## Greyhaven's four-record thread — proposed narrative content
+
+The current Greyhaven dialogue prototype now lets the player assemble four independent observations without presenting them as a confirmed supernatural explanation:
+
+- **Harbourmaster — bell log:** the last confirmed lighthouse bell sounding was eleven years ago; later entries record inspections, not further rings. The log does not explain the returned skipper's question.
+- **Mara Venn — cold-centred catch:** separate boats have brought in fish cold at the centre despite ordinary storage checks. She records the observation but cannot identify its cause.
+- **Tomas Vale — returned hull:** long scoring has no matching stone transfer or single impact point that accounts for the full mark.
+- **Inez Sarmiento — returned net:** the net was empty but not torn; its knots remained set. The three-turn float-line knot was a practical securing habit, not a confirmed ritual.
+
+These are deliberately separate witness records. When the player compares all four, the dialogue recognises a pattern of unresolved evidence but does not assert that one event, creature or intelligence caused it. The Choir remains a working human label for acoustic anomalies, not an established ontology. This evidence thread is implemented in the Greyhaven Yarn source as a narrative prototype; the larger campaign, the cause of the events and final canon remain proposed pending owner review and Unity/Yarn verification.
