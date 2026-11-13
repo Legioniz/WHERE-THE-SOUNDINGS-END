@@ -34,7 +34,8 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - FishermanAtmosphereDirector persists its incident countdown, caption/hush timers and active false-navigation-light position/remaining duration.
 - AcousticWorldListener persists hearing pressure, last heard signal metadata and a bounded event-ID deduplication ledger.
 - DeepOceanSiteInteractionController persists inspected phenomenon-site IDs.
-- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.\n- RegionalChartController persists physically visited region IDs and records corresponding chart unlocks; map marks remain derived from SoundingRigController discoveries.
+- SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.
+- RegionalChartController persists physically visited region IDs and records corresponding chart unlocks; map marks remain derived from SoundingRigController discoveries.
 - VesselConditionController persists hull and engine condition.
 - SpatialCargoHold persists cargo placements and damaged-cell coordinates.
 - SalvageSite persists committed daily pulls by stable site ID; transient reservations are refunded when actions do not complete.
