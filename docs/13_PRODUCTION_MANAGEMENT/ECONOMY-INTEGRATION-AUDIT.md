@@ -29,6 +29,7 @@ The audit found one cross-system reliability defect: wallet and fuel events used
 
 - Wallet transaction listeners are invoked individually. An exception from one listener is reported as a warning and cannot prevent later listeners from receiving the committed transaction.
 - Fuel-consumption listeners are invoked individually for the same reason; the amount already consumed is not rolled back or re-applied.
+- Expedition telemetry tracks the wallet/fuel instances it is subscribed to and only changes subscriptions when those references change, avoiding delegate remove/add allocations every rendered frame.
 - Edit Mode regression coverage was added for listener isolation and idempotent wallet transactions.
 - `tools/validate_project.py` now checks the cross-system links above, including builder attachment, dockside access, propulsion/fishing modifiers, transactional market/vendor/research paths, telemetry subscriptions, and the new regression tests.
 
