@@ -184,6 +184,11 @@ namespace WhereTheSoundingsEnd.Persistence
         public float quality = 1.0f;
         public float freshness = 1.0f;
         public float saleQuantity = 1.0f;
+        public string catchRegionId = string.Empty;
+        public string catchTechniqueId = string.Empty;
+        public bool catchLegal = true;
+        public string catchLegalityReason = string.Empty;
+        public float catchSizeKg;
     }
 
     [Serializable]
