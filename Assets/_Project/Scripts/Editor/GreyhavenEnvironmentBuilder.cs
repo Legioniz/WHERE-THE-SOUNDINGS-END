@@ -2419,9 +2419,12 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                 new Vector3(8.02f, repairGround + 0.37f, -46.8f), new Vector3(0.035f, 0.04f, 0.48f), metal, -31f);
 
             Transform westernRoot = estuary.Find("Estuary_Environmental_Artifacts");
-            if (westernRoot == null)
-                throw new InvalidOperationException("Western estuary historical artifacts require the western environmental root.");
-            Transform lowerLanding = Group("Lower_Landing_Historical_Artifacts", westernRoot);
+            Transform westernDebris = westernRoot != null
+                ? westernRoot.Find("Western_Mudflat_Debris_Artifacts")
+                : null;
+            if (westernDebris == null)
+                throw new InvalidOperationException("Western estuary historical artifacts require the western debris root.");
+            Transform lowerLanding = Group("Lower_Landing_Historical_Artifacts", westernDebris);
             ArtifactCube(lowerLanding, "Unposted_Letter_Envelope",
                 new Vector3(4.3f, HeightAt(-71.7f, -25.8f) + 0.16f, 1.2f),
                 new Vector3(0.42f, 0.035f, 0.28f), ceramic, 17f);
