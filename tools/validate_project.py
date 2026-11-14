@@ -350,6 +350,9 @@ def main() -> int:
                 failures.append(f"GreyhavenEnvironmentalArtifactTests is missing coverage: {required_text}")
 
         dockside_source = (ROOT / "Assets/_Project/Scripts/Runtime/Interaction/DocksideHubController.cs").read_text(encoding="utf-8")
+        for required_text in ("RELEASE FLAGGED CATCHES", "line.destinationFactor", "line.contractOnlySale", "BuildBalanceReport"):
+            if required_text not in dockside_source:
+                failures.append(f"DocksideHubController is missing seafood/telemetry presentation: {required_text}")
         for required_text in (
             "DocksideAccessPolicy.IsAccessible",
             "MaximumDockingSpeed = 0.85f",
@@ -1063,6 +1066,8 @@ def main() -> int:
             "CatchLegalityPolicy.Evaluate", "TrySetCatchLegality", "economyTelemetry.RecordCatch",
             "fish.IsAvailableInRegion(regionId)", "FishingTechnique.SeaweedHarvesting",
             "fish.Category == CargoItemCategory.Seaweed",
+            'float saleQuantity = hookedFish.ItemId == "INV-019" ? 1f : size;',
+            "FINE NOT COLLECTED", "FINE PAID",
         ):
             if required_text not in fishing_source:
                 failures.append(f"FishingSystemDirector is missing seafood/legality integration: {required_text}")
