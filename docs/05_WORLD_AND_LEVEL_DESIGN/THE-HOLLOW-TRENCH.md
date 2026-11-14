@@ -72,8 +72,8 @@ The player must understand the preparation cost and retain the option to turn ba
 
 ## Related documents
 
-- [World Bible](../../02_LORE_AND_WORLD/WORLD-BIBLE.md)
-- [Supernatural Lore](../../02_LORE_AND_WORLD/SUPERNATURAL-LORE.md)
+- [World Bible](../02_LORE_AND_WORLD/WORLD-BIBLE.md)
+- [Supernatural Lore](../02_LORE_AND_WORLD/SUPERNATURAL-LORE.md)
 - [Regional Ecology](REGIONAL-ECOLOGY-AND-CREATURES.md)
 - [Deep-Ocean Survey Implementation](../08_TECHNICAL_DESIGN/DEEP-OCEAN-SURVEY-IMPLEMENTATION.md)
-- [Endings](../../03_STORY_AND_NARRATIVE/ENDINGS.md)
+- [Endings](../03_STORY_AND_NARRATIVE/ENDINGS.md)

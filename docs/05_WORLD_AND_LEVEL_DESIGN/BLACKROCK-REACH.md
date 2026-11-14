@@ -66,6 +66,6 @@ Blackrock Reach belongs to Act II. It demonstrates that some strange returns hav
 
 ## Related documents
 
-- [World Bible](../../02_LORE_AND_WORLD/WORLD-BIBLE.md)
+- [World Bible](../02_LORE_AND_WORLD/WORLD-BIBLE.md)
 - [Regional Ecology](REGIONAL-ECOLOGY-AND-CREATURES.md)
 - [Exploration Design](EXPLORATION-DESIGN.md)

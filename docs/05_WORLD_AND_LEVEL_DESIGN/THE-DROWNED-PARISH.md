@@ -71,7 +71,7 @@ Any diving, pressure, current or entanglement hazard requires its own equipment,
 
 ## Related documents
 
-- [World Bible](../../02_LORE_AND_WORLD/WORLD-BIBLE.md)
-- [Island History](../../02_LORE_AND_WORLD/ISLAND-HISTORY.md)
-- [Ocean Mythology](../../02_LORE_AND_WORLD/OCEAN-MYTHOLOGY.md)
+- [World Bible](../02_LORE_AND_WORLD/WORLD-BIBLE.md)
+- [Island History](../02_LORE_AND_WORLD/ISLAND-HISTORY.md)
+- [Ocean Mythology](../02_LORE_AND_WORLD/OCEAN-MYTHOLOGY.md)
 - [Regional Ecology](REGIONAL-ECOLOGY-AND-CREATURES.md)

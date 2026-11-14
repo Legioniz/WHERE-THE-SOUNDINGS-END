@@ -91,5 +91,5 @@ The runtime chart remains fog-of-war: a region is unlocked by physical entry, an
 
 - [World Map](WORLD-MAP.md)
 - [Exploration Design](EXPLORATION-DESIGN.md)
-- [World Bible](../../02_LORE_AND_WORLD/WORLD-BIBLE.md)
+- [World Bible](../02_LORE_AND_WORLD/WORLD-BIBLE.md)
 - [Greyhaven](GREYHAVEN.md)

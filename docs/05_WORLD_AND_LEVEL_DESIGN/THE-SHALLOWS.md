@@ -58,6 +58,6 @@ The primary hazards are shallow clearance, reef contact, weather exposure and ro
 
 ## Related documents
 
-- [World Bible](../../02_LORE_AND_WORLD/WORLD-BIBLE.md)
+- [World Bible](../02_LORE_AND_WORLD/WORLD-BIBLE.md)
 - [Regional Ecology](REGIONAL-ECOLOGY-AND-CREATURES.md)
 - [Exploration Design](EXPLORATION-DESIGN.md)
