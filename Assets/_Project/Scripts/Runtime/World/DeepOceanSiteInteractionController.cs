@@ -142,6 +142,10 @@ namespace WhereTheSoundingsEnd.World
         {
             if (data == null || data.world == null)
                 throw new ArgumentNullException(nameof(data), "Save data must contain world state.");
+            if (data.world.inspectedPhenomenonSiteIds == null)
+                data.world.inspectedPhenomenonSiteIds = new List<string>();
+            if (data.world.inspectedHistoricalArtifactIds == null)
+                data.world.inspectedHistoricalArtifactIds = new List<string>();
             data.world.inspectedPhenomenonSiteIds.Clear();
             data.world.inspectedPhenomenonSiteIds.AddRange(inspectedSiteIds);
             data.world.inspectedHistoricalArtifactIds.Clear();
@@ -152,18 +156,23 @@ namespace WhereTheSoundingsEnd.World
         {
             if (data == null || data.world == null) return;
             inspectedSiteIds.Clear();
-            if (data.world.inspectedPhenomenonSiteIds == null) return;
-            for (int index = 0; index < data.world.inspectedPhenomenonSiteIds.Count; index++)
+            if (data.world.inspectedPhenomenonSiteIds != null)
             {
-                string id = data.world.inspectedPhenomenonSiteIds[index];
-                if (!string.IsNullOrWhiteSpace(id)) inspectedSiteIds.Add(id);
+                for (int index = 0; index < data.world.inspectedPhenomenonSiteIds.Count; index++)
+                {
+                    string id = data.world.inspectedPhenomenonSiteIds[index];
+                    if (!string.IsNullOrWhiteSpace(id)) inspectedSiteIds.Add(id);
+                }
             }
+
             inspectedHistoricalArtifactIds.Clear();
-            if (data.world.inspectedHistoricalArtifactIds == null) return;
-            for (int index = 0; index < data.world.inspectedHistoricalArtifactIds.Count; index++)
+            if (data.world.inspectedHistoricalArtifactIds != null)
             {
-                string id = data.world.inspectedHistoricalArtifactIds[index];
-                if (!string.IsNullOrWhiteSpace(id)) inspectedHistoricalArtifactIds.Add(id);
+                for (int index = 0; index < data.world.inspectedHistoricalArtifactIds.Count; index++)
+                {
+                    string id = data.world.inspectedHistoricalArtifactIds[index];
+                    if (!string.IsNullOrWhiteSpace(id)) inspectedHistoricalArtifactIds.Add(id);
+                }
             }
         }
 
