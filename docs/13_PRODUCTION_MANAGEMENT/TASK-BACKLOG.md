@@ -231,9 +231,9 @@ A new player can start the slice and complete this sequence without developer co
 
 ## Historical artifact inspection — 2026-11-14
 
-**Source status:** Six Greyhaven artifact anchors, the existing boat Interact inspection path, separate inspected-artifact save ledger and schema v8-to-v9 migration are implemented in source. Unity verification remains open.
+**Source status:** Six Greyhaven artifact anchors, dockside archive entries plus direct vessel inspection, a separate inspected-artifact save ledger and schema v8-to-v9 migration are implemented in source. Unity verification remains open.
 
-- [ ] Rebuild Greyhaven and inspect the working chart, tool roll, unposted letter, keeper's weather ledger, glass-plate photograph and recovered bottom recorder from the boat.
+- [ ] Rebuild Greyhaven and inspect the working chart, tool roll, keeper's weather ledger and photograph through dockside archive entries; inspect the unposted letter and recovered bottom recorder directly from the boat.
 - [ ] Verify first read/re-read feedback and that the inspected-artifact ledger survives save/load without modifying inspected phenomenon-site IDs.
 - [ ] Confirm the metadata anchors remain in the persistent scene while estuary/lighthouse visual props unload/reload with their static streamed areas.
 - [ ] Confirm archive reads do not cause site disturbance, sonar discoveries, regional chart marks, visited-region unlocks, quest flags or NPC relationship changes.
