@@ -110,6 +110,49 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void BuildHistoricalArtifacts_CreatesSixTypedAnchorsAndStaticEvidenceClusters()
+        {
+            GreyhavenEnvironmentBuilder.BuildEnvironmentalArtifacts(
+                roots[0].transform, roots[1].transform, roots[2].transform,
+                roots[3].transform, roots[4].transform,
+                materials[0], materials[1], materials[2], materials[3], materials[4],
+                materials[5], materials[6], materials[7], materials[8]);
+            GreyhavenEnvironmentBuilder.BuildHistoricalArtifacts(
+                roots[0].transform, roots[1].transform, roots[2].transform,
+                roots[3].transform, roots[4].transform,
+                materials[0], materials[1], materials[2], materials[3], materials[4],
+                materials[5], materials[6], materials[7], materials[8]);
+
+            Transform anchors = roots[4].transform.Find("Historical_Artifact_Inspection_Anchors");
+            Assert.That(anchors, Is.Not.Null);
+            HistoricalArtifact[] artifacts = anchors.GetComponentsInChildren<HistoricalArtifact>(true);
+            Assert.That(artifacts.Length, Is.EqualTo(6));
+            System.Collections.Generic.HashSet<string> ids = new System.Collections.Generic.HashSet<string>();
+            System.Collections.Generic.HashSet<HistoricalArtifactType> types = new System.Collections.Generic.HashSet<HistoricalArtifactType>();
+            foreach (HistoricalArtifact artifact in artifacts)
+            {
+                Assert.That(artifact, Is.Not.Null);
+                Assert.That(artifact.IsValid, Is.True);
+                Assert.That(ids.Add(artifact.ArtifactId), Is.True, "Artifact IDs must be unique.");
+                types.Add(artifact.ArtifactType);
+            }
+            Assert.That(types.Count, Is.EqualTo(6));
+            Assert.That(roots[0].transform.Find("Harbour_Historical_Archive_Artifacts/Quay_Chart_Parchment"), Is.Not.Null);
+            Assert.That(roots[1].transform.Find("Village_Historical_Artifacts/Repair_Tool_Roll"), Is.Not.Null);
+            Assert.That(roots[2].transform.Find("Estuary_Environmental_Artifacts/Western_Mudflat_Debris_Artifacts/Lower_Landing_Historical_Artifacts/Unposted_Letter_Envelope"), Is.Not.Null);
+            Assert.That(roots[3].transform.Find("Lighthouse_Historical_Artifacts/Keeper_Logbook_Cover"), Is.Not.Null);
+            Assert.That(roots[4].transform.Find("Greyhaven_Outer_Channel_Wreck_Field/Wreck_Historical_Artifacts/Recovered_Recorder_Housing"), Is.Not.Null);
+
+            // Inspection anchors stay in the persistent scene, not inside static stream candidates.
+            for (int area = 0; area < 4; area++)
+            {
+                Assert.That(roots[area].GetComponentsInChildren<MonoBehaviour>(true), Is.Empty);
+                Assert.That(roots[area].GetComponentsInChildren<Collider>(true), Is.Empty);
+                Assert.That(roots[area].GetComponentsInChildren<Rigidbody>(true), Is.Empty);
+            }
+        }
+
+        [Test]
         public void BuildEnvironmentalArtifacts_CreatesDistrictDressingWithoutGameplayComponents()
         {
             GreyhavenEnvironmentBuilder.BuildEnvironmentalArtifacts(
