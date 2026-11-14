@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -321,9 +322,289 @@ namespace WhereTheSoundingsEnd.Editor
                     new[] { Vector2Int.zero, Vector2Int.right }, 0f)
             };
 
+            AddExpandedSeafoodCatalog(definitions);
             ConfigureFishEcology(definitions);
             ConfigureEconomy(definitions);
             return definitions;
+        }
+
+        private static void AddExpandedSeafoodCatalog(List<CargoItemDefinition> definitions)
+        {
+            // This embedded table mirrors the authored seafood price schedule. It is deliberately
+            // data-driven so the generated Greyhaven catalog cannot silently stop at five fish.
+            const string rows = @"FSH-001|Milkfish|2.30|INSHORE|greyhaven,the_drowned_parish|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-002|Flathead grey mullet|1.98|INSHORE|greyhaven,the_drowned_parish|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-003|Asian seabass / barramundi|3.49|INSHORE|greyhaven,the_drowned_parish|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-004|Fourfinger threadfin|3.81|INSHORE|greyhaven,the_drowned_parish|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-005|Silver sillago|2.14|INSHORE|greyhaven,the_shallows,the_drowned_parish|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-006|Whipfin silverbiddy|1.03|INSHORE|greyhaven,the_shallows,the_drowned_parish|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-007|Splendid ponyfish / slipmouth|0.95|INSHORE|greyhaven,the_drowned_parish|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-008|Spotted scat|1.51|INSHORE|greyhaven,the_drowned_parish|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-009|Indian anchovy|1.27|INSHORE|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-010|Commerson's anchovy|1.19|INSHORE|greyhaven,the_shallows|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-011|Goldstripe sardinella|1.19|INSHORE|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-012|Bali sardinella|1.35|INSHORE|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-013|Fringescale sardinella|1.19|INSHORE|greyhaven,the_shallows|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-014|Tigertooth croaker|2.14|INSHORE|greyhaven,the_drowned_parish,the_shallows|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-015|Brushtooth lizardfish|1.74|INSHORE|the_shallows,blackrock_reach,the_drowned_parish|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-016|Indian halibut|2.85|REEF|the_shallows,the_drowned_parish,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-017|White-spotted spinefoot / rabbitfish|1.98|REEF|the_shallows,greyhaven|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-018|Little spinefoot|1.67|REEF|the_shallows,blackrock_reach|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-019|Ornate threadfin bream|2.30|REEF|the_shallows,the_drowned_parish,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-020|Japanese threadfin bream|2.14|REEF|the_shallows,the_drowned_parish,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-021|Goldband goatfish|1.98|REEF|the_shallows,blackrock_reach|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-022|Whitesaddle goatfish|2.93|REEF|the_shallows,blackrock_reach|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-023|Mangrove red snapper|4.60|REEF|greyhaven,the_drowned_parish,the_shallows|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-024|Russell's snapper|3.33|REEF|the_shallows,blackrock_reach,the_drowned_parish|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-025|John's snapper|3.25|REEF|greyhaven,the_shallows,the_drowned_parish|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-026|Thumbprint emperor|2.14|REEF|the_shallows,blackrock_reach|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-027|Pinkear emperor|2.93|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-028|Spangled emperor|4.12|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-029|Orange-spotted grouper|4.44|REEF|greyhaven,the_shallows,the_drowned_parish|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-030|Honeycomb grouper|2.85|REEF|the_shallows,blackrock_reach|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-031|Leopard coral grouper|5.71|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-032|Giant trevally|3.49|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-033|Bluefin trevally|3.65|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-034|Golden trevally|2.70|REEF|the_shallows,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-035|Java parrotfish|1.59|REEF|the_shallows,blackrock_reach|Fish|1|kg|0.15|0.60|1|reef_stewardship|64|T2
+FSH-036|Shortfin scad|1.19|PELAGIC|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-037|Japanese scad|1.27|PELAGIC|the_shallows,the_outer_shoals|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-038|Yellowstripe scad|1.35|PELAGIC|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-039|Bigeye scad|1.67|PELAGIC|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-040|Indian mackerel|2.22|PELAGIC|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-041|Short-bodied mackerel|1.90|PELAGIC|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-042|Narrow-barred Spanish mackerel|4.76|PELAGIC|blackrock_reach,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-043|Talang queenfish|3.09|PELAGIC|blackrock_reach,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-044|Great barracuda|2.85|PELAGIC|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-045|Frigate tuna|2.22|PELAGIC|the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-046|Kawakawa|2.54|PELAGIC|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-047|Skipjack tuna|3.33|PELAGIC|the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-048|Yellowfin tuna|5.23|PELAGIC|the_outer_shoals|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-049|Bigeye tuna|5.71|PELAGIC|the_outer_shoals,the_hollow_trench|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-050|Dolphinfish / mahi-mahi|3.49|PELAGIC|the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-051|Wahoo|5.87|PELAGIC|the_outer_shoals|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-052|Rainbow runner|2.78|PELAGIC|blackrock_reach,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-053|Black pomfret|3.01|PELAGIC|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-054|Silver pomfret|4.12|PELAGIC|greyhaven,the_drowned_parish,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-055|Largehead hairtail|2.46|PELAGIC|greyhaven,the_drowned_parish,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-056|Flying fish group|1.35|PELAGIC|the_shallows,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-057|Redbelly yellowtail fusilier|1.51|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-058|Blue-and-gold fusilier|1.74|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-059|Paddletail snapper|3.49|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-060|Blackspot snapper|2.30|REEF|greyhaven,the_drowned_parish,the_shallows|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-061|Red emperor|4.92|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-062|Malabar grouper|4.76|REEF|greyhaven,the_drowned_parish,the_shallows|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-063|Brown-marbled grouper|6.18|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-064|Wire-netting cod|4.44|REEF|blackrock_reach,the_outer_shoals,the_hollow_trench|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-065|Lunar-tail grouper|4.12|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-066|Painted sweetlips|2.54|REEF|the_shallows,blackrock_reach,the_drowned_parish|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-067|Blackspotted rubberlip|1.82|REEF|the_shallows,blackrock_reach|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-068|Iodine bream|4.60|REEF|the_outer_shoals,the_hollow_trench|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-069|Large-eyed sea bream|4.28|REEF|the_outer_shoals,the_hollow_trench|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-070|Orange-spotted spinefoot|2.06|REEF|greyhaven,the_drowned_parish,the_shallows|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-071|Blue-spotted cornetfish|1.35|PELAGIC|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-072|Hound needlefish|1.27|PELAGIC|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-073|Black-barred halfbeak|1.03|PELAGIC|greyhaven,the_shallows,the_outer_shoals|Fish|1|kg|0.08|0.32|0||0|T1
+FSH-074|Bartail flathead|2.62|INSHORE|greyhaven,the_drowned_parish,the_shallows|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-075|Large-scale tonguesole|1.82|INSHORE|greyhaven,the_drowned_parish|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-076|Bigeye bream|2.93|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-077|Black jack|3.96|PELAGIC|blackrock_reach,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-078|Almaco jack|4.28|PELAGIC|the_outer_shoals,the_hollow_trench|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-079|Dogtooth tuna|6.66|PELAGIC|blackrock_reach,the_outer_shoals|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-080|Dorab wolf-herring|2.30|PELAGIC|greyhaven,the_drowned_parish,the_outer_shoals|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-081|Redtail scad|1.43|PELAGIC|the_shallows,the_outer_shoals|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-082|Picnic seabream|2.38|INSHORE|greyhaven,the_drowned_parish|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-083|Goldlined seabream|2.78|INSHORE|greyhaven,the_shallows,the_drowned_parish|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-084|Yellowstripe goatfish|1.98|REEF|the_shallows,blackrock_reach|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-085|Dash-and-dot goatfish|2.78|REEF|the_shallows,blackrock_reach|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-086|Goldsaddle goatfish|3.96|REEF|the_shallows,blackrock_reach,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-087|Ruby snapper|7.14|DEEPWATER|the_outer_shoals,the_hollow_trench|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-088|Longtail red snapper|7.45|DEEPWATER|the_outer_shoals,the_hollow_trench|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-089|Small-tooth jobfish|4.12|DEEPWATER|the_outer_shoals,the_hollow_trench|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-090|Green jobfish|3.89|DEEPWATER|blackrock_reach,the_outer_shoals|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-091|Rosy jobfish|6.18|DEEPWATER|the_outer_shoals,the_hollow_trench|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-092|Purple-cheek jobfish|5.87|DEEPWATER|the_outer_shoals,the_hollow_trench|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-093|Banded flower snapper|7.29|DEEPWATER|the_outer_shoals,the_hollow_trench|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-094|Yellow-finned jobfish|4.44|DEEPWATER|the_outer_shoals,the_hollow_trench|Fish|1|kg|0.60|2.40|0||0|T4
+FSH-095|Kalikali / pink snapper|5.71|DEEPWATER|the_outer_shoals,the_hollow_trench|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-096|Flower snapper|6.03|DEEPWATER|the_outer_shoals,the_hollow_trench|Fish|1|kg|1.00|4.00|0||0|T5
+FSH-097|Asian swamp eel|2.06|INSHORE|greyhaven|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-098|Striped snakehead|2.38|INSHORE|greyhaven|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-099|Climbing perch|1.35|INSHORE|greyhaven|Fish|1|kg|0.15|0.60|0||0|T2
+FSH-100|Philippine broadhead catfish|1.82|INSHORE|greyhaven|Fish|1|kg|0.30|1.20|0||0|T3
+INV-001|Small shrimp / alamang group|1.43|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.03|0.09|0||0|T1
+INV-002|Giant tiger prawn|6.66|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-003|Banana prawn|3.96|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-004|Greasyback shrimp|2.38|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.06|0.18|0||0|T2
+INV-005|Blue swimming crab|3.65|INVERTEBRATE|greyhaven,the_shallows,the_drowned_parish|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-006|Giant mud crab|5.71|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-007|Spanner crab|5.39|INVERTEBRATE|blackrock_reach,the_outer_shoals|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-008|Ornate spiny lobster|11.10|INVERTEBRATE|blackrock_reach,the_outer_shoals|Shellfish|1|kg|0.30|0.90|0||0|T5
+INV-009|Painted spiny lobster|8.25|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-010|Slipper lobster|5.23|INVERTEBRATE|the_shallows,the_outer_shoals|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-011|Bigfin reef squid|3.17|INVERTEBRATE|the_shallows,blackrock_reach|Cephalopod|1|kg|0.10|0.30|0||0|T3
+INV-012|Indian squid|2.78|INVERTEBRATE|the_shallows,the_drowned_parish,the_outer_shoals|Cephalopod|1|kg|0.10|0.30|0||0|T3
+INV-013|Pharaoh cuttlefish|4.12|INVERTEBRATE|the_shallows,blackrock_reach,the_drowned_parish|Cephalopod|1|kg|0.18|0.54|0||0|T4
+INV-014|Day octopus|4.44|INVERTEBRATE|the_shallows,blackrock_reach|Cephalopod|1|kg|0.18|0.54|0||0|T4
+INV-015|Asian green mussel|1.27|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.06|0.18|0||0|T2
+INV-016|Tropical cupped oyster|1.59|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.06|0.18|0||0|T2
+INV-017|Blood cockle|2.06|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-018|Undulated surf clam|1.43|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.06|0.18|0||0|T2
+INV-019|Collector sea urchin|0.71|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|1|individual|0.10|0.30|0||0|T3
+INV-020|Mantis shrimp / spearer group|3.81|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-021|Giant river prawn|5.71|INVERTEBRATE|greyhaven|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-022|Orange mud crab|4.76|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-023|Purple mud crab|5.55|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-024|Crucifix crab|3.81|INVERTEBRATE|greyhaven,the_shallows,the_drowned_parish|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-025|Three-spot swimming crab|3.33|INVERTEBRATE|greyhaven,the_shallows,the_drowned_parish|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-026|Long-eyed swimming crab|2.78|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-027|Crenate swimming crab|1.98|INVERTEBRATE|the_shallows,the_drowned_parish|Shellfish|1|kg|0.06|0.18|0||0|T2
+INV-028|Common banded mantis shrimp|4.76|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-029|Sculptured mitten lobster|7.14|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-030|Longleg spiny lobster|8.56|INVERTEBRATE|blackrock_reach,the_shallows,the_outer_shoals|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-031|Donkey's ear abalone|11.10|INVERTEBRATE|blackrock_reach,the_shallows|Shellfish|0|kg|0.30|0.90|0|managed_harvest|0|T5
+INV-032|Asian hard clam|2.06|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-033|Razor clams|2.22|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-034|Pen shell|2.22|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-035|Dog conch|1.90|INVERTEBRATE|greyhaven,the_shallows,the_drowned_parish|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-036|Spider conch|3.01|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|1|kg|0.18|0.54|0||0|T4
+INV-037|Sandfish sea cucumber|1.51|INVERTEBRATE|greyhaven,the_shallows,the_drowned_parish|Shellfish|0|kg|0.30|0.90|0|licensed_sea_cucumber|0|T5
+INV-038|Warty sea cucumber|1.19|INVERTEBRATE|the_shallows,the_drowned_parish|Shellfish|0|kg|0.18|0.54|0|licensed_sea_cucumber|0|T4
+INV-039|Deepwater redfish sea cucumber|1.35|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|0|kg|0.18|0.54|0|licensed_sea_cucumber|0|T4
+INV-040|Lollyfish sea cucumber|0.95|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|0|kg|0.10|0.30|0|licensed_sea_cucumber|0|T3
+INV-041|Leopardfish sea cucumber|1.27|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|0|kg|0.18|0.54|0|licensed_sea_cucumber|0|T4
+INV-042|Edible jellyfish|1.27|INVERTEBRATE|greyhaven,the_shallows,the_outer_shoals|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-043|Edible squid / lokos|3.01|INVERTEBRATE|the_shallows,the_drowned_parish,the_outer_shoals|Cephalopod|1|kg|0.10|0.30|0||0|T3
+INV-044|Spineless cuttlefish|3.73|INVERTEBRATE|the_shallows,the_drowned_parish,the_outer_shoals|Cephalopod|1|kg|0.18|0.54|0||0|T4
+INV-045|Western king prawn|3.89|INVERTEBRATE|the_drowned_parish,the_shallows,the_outer_shoals|Shellfish|1|kg|0.10|0.30|0||0|T3
+INV-046|Palm shrimp|1.98|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.06|0.18|0||0|T2
+INV-047|Asian moon scallop|3.49|INVERTEBRATE|the_drowned_parish,the_shallows,the_outer_shoals|Shellfish|1|kg|0.18|0.54|0||0|T4
+ALG-001|Cottonii / carrageenan seaweed|0.29|SEAWEED|greyhaven,the_shallows,the_drowned_parish|Seaweed|1|kg wet|0.00|0|0||0|T3
+ALG-002|Spinosum seaweed|0.32|SEAWEED|greyhaven,the_shallows,the_drowned_parish|Seaweed|1|kg wet|0.00|0|0||0|T3
+ALG-003|Gracilaria seaweed|0.38|SEAWEED|greyhaven,the_shallows,the_drowned_parish|Seaweed|1|kg wet|0.00|0|0||0|T3
+ALG-004|Sea grapes / lato|2.22|SEAWEED|greyhaven,the_shallows,the_drowned_parish|Seaweed|1|kg wet|0.00|0|0||0|T3
+ALG-005|Spinosum seaweed|0.32|SEAWEED|greyhaven,the_shallows,the_drowned_parish|Seaweed|1|kg wet|0.00|0|0||0|T3
+ALG-006|Cottonii seaweed|0.29|SEAWEED|greyhaven,the_shallows,the_drowned_parish|Seaweed|1|kg wet|0.00|0|0||0|T3
+ALG-007|Edible red agar seaweed|0.40|SEAWEED|greyhaven,the_shallows,the_drowned_parish|Seaweed|1|kg wet|0.00|0|0||0|T3
+ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_parish|Seaweed|1|kg wet|0.00|0|0||0|T3";
+            string[] entries = rows.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < entries.Length; i++)
+            {
+                string[] fields = entries[i].Split('|');
+                if (fields.Length != 14) throw new InvalidOperationException("Malformed seafood catalog row: " + entries[i]);
+                string id = fields[0];
+                string displayName = fields[1];
+                SeafoodMarketClass marketClass = (SeafoodMarketClass)Enum.Parse(typeof(SeafoodMarketClass), ToEnumName(fields[3]));
+                CargoItemCategory category = (CargoItemCategory)Enum.Parse(typeof(CargoItemCategory), fields[5]);
+                float price = float.Parse(fields[2], CultureInfo.InvariantCulture);
+                float minimumWeight = float.Parse(fields[8], CultureInfo.InvariantCulture);
+                float maximumWeight = float.Parse(fields[9], CultureInfo.InvariantCulture);
+                int tier = int.Parse(fields[13], CultureInfo.InvariantCulture);
+                CargoItemDefinition definition = definitions.Find(item => item != null && item.ItemId == id);
+                if (definition == null)
+                {
+                    Vector2Int[] shape = category == CargoItemCategory.Fish
+                        ? new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.right * 2 }
+                        : category == CargoItemCategory.Cephalopod
+                            ? new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up }
+                            : category == CargoItemCategory.Seaweed
+                                ? new[] { Vector2Int.zero }
+                                : new[] { Vector2Int.zero, Vector2Int.right };
+                    float freshnessLoss = category == CargoItemCategory.Fish ? 0.006f :
+                        category == CargoItemCategory.Seaweed ? 0.004f : 0.009f;
+                    definition = CreateCargoDefinition(id, displayName, category, shape, freshnessLoss);
+                    definitions.Add(definition);
+                }
+
+                string[] regionIds = fields[4].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                int habitatMask;
+                FishPreferredTechnique technique;
+                float maxDepth;
+                switch (marketClass)
+                {
+                    case SeafoodMarketClass.Inshore:
+                        habitatMask = (int)(FishHabitat.Estuary | FishHabitat.Nearshore);
+                        technique = FishPreferredTechnique.FloatFishing;
+                        maxDepth = 24f;
+                        break;
+                    case SeafoodMarketClass.Reef:
+                        habitatMask = (int)(FishHabitat.Kelp | FishHabitat.Nearshore);
+                        technique = FishPreferredTechnique.BottomFishing;
+                        maxDepth = 90f;
+                        break;
+                    case SeafoodMarketClass.Pelagic:
+                        habitatMask = (int)(FishHabitat.OpenWater | FishHabitat.Nearshore);
+                        technique = FishPreferredTechnique.Trolling;
+                        maxDepth = 180f;
+                        break;
+                    case SeafoodMarketClass.Deepwater:
+                        habitatMask = (int)FishHabitat.DeepWater;
+                        technique = FishPreferredTechnique.Handlining;
+                        maxDepth = 420f;
+                        break;
+                    case SeafoodMarketClass.Invertebrate:
+                        habitatMask = (int)(FishHabitat.Estuary | FishHabitat.Nearshore | FishHabitat.Kelp);
+                        technique = category == CargoItemCategory.Cephalopod
+                            ? FishPreferredTechnique.Jigging : FishPreferredTechnique.BottomFishing;
+                        maxDepth = 60f;
+                        break;
+                    default:
+                        habitatMask = (int)(FishHabitat.Kelp | FishHabitat.Estuary);
+                        technique = FishPreferredTechnique.Handlining;
+                        maxDepth = 8f;
+                        break;
+                }
+
+                int initialPopulation = tier == 1 ? 65 : tier == 2 ? 48 : tier == 3 ? 32 : tier == 4 ? 18 : 9;
+                int dailyRecovery = tier == 1 ? 5 : tier == 2 ? 4 : tier == 3 ? 2 : tier == 4 ? 1 : 0;
+                float migration = marketClass == SeafoodMarketClass.Pelagic ? 0.22f :
+                    marketClass == SeafoodMarketClass.Deepwater ? 0.04f : 0.08f;
+                float resistance = 0.35f + tier * 0.18f;
+                float burst = 0.10f + tier * 0.075f;
+
+                SerializedObject serialized = new SerializedObject(definition);
+                serialized.FindProperty("marketClass").enumValueIndex = (int)marketClass;
+                SerializedProperty regions = serialized.FindProperty("availableRegionIds");
+                regions.arraySize = regionIds.Length;
+                for (int regionIndex = 0; regionIndex < regionIds.Length; regionIndex++)
+                    regions.GetArrayElementAtIndex(regionIndex).stringValue = regionIds[regionIndex].Trim().ToLowerInvariant();
+                serialized.FindProperty("minimumLegalCatchWeightKg").floatValue = minimumWeight;
+                serialized.FindProperty("protectedCatch").boolValue = fields[10] == "1";
+                serialized.FindProperty("requiredPermitId").stringValue = fields[11];
+                serialized.FindProperty("allowedTechniqueMask").intValue = int.Parse(fields[12], CultureInfo.InvariantCulture);
+                serialized.FindProperty("baseSalePriceUsd").floatValue = price;
+                serialized.FindProperty("saleUnitLabel").stringValue = fields[7];
+                serialized.FindProperty("ordinarySaleEligible").boolValue = fields[6] == "1";
+                serialized.FindProperty("habitats").intValue = habitatMask;
+                serialized.FindProperty("preferredTechnique").enumValueIndex = (int)technique;
+                serialized.FindProperty("preferredBaitId").stringValue = "any";
+                serialized.FindProperty("minimumDepthMetres").floatValue =
+                    marketClass == SeafoodMarketClass.Deepwater ? 80f : marketClass == SeafoodMarketClass.Pelagic ? 5f : 0f;
+                serialized.FindProperty("maximumDepthMetres").floatValue = maxDepth;
+                serialized.FindProperty("resistance").floatValue = resistance;
+                serialized.FindProperty("burstFrequency").floatValue = burst;
+                serialized.FindProperty("initialPopulation").intValue = initialPopulation;
+                serialized.FindProperty("dailyPopulationRecovery").intValue = dailyRecovery;
+                serialized.FindProperty("migrationRate").floatValue = migration;
+                serialized.FindProperty("baseCatchSize").floatValue = Mathf.Max(0.1f, minimumWeight);
+                serialized.FindProperty("maximumCatchSize").floatValue = Mathf.Max(0.1f, maximumWeight);
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(definition);
+            }
+        }
+
+        private static string ToEnumName(string marketClass)
+        {
+            switch (marketClass)
+            {
+                case "INSHORE": return "Inshore";
+                case "REEF": return "Reef";
+                case "PELAGIC": return "Pelagic";
+                case "DEEPWATER": return "Deepwater";
+                case "INVERTEBRATE": return "Invertebrate";
+                case "SEAWEED": return "Seaweed";
+                default: throw new ArgumentOutOfRangeException(nameof(marketClass), marketClass, "Unknown seafood market class.");
+            }
         }
 
         private static void ConfigureEconomy(List<CargoItemDefinition> definitions)
