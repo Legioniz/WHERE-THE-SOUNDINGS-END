@@ -53,8 +53,11 @@ namespace WhereTheSoundingsEnd.Tests
         {
             ExpeditionEconomyTelemetry telemetry = owner.AddComponent<ExpeditionEconomyTelemetry>();
             telemetry.ObservePropulsion(0.5f);
+            telemetry.RecordCatch("FSH-001", 1.25f, true);
+            telemetry.RecordCatch("FSH-035", 0.20f, false);
             owner.GetComponent<EconomyWalletController>().TryApplyTransaction("trip.reward", 500L);
             telemetry.CompleteTrip();
+            StringAssert.Contains("LEGAL CATCH 50%", telemetry.BuildBalanceReport());
 
             SaveGameData data = SaveGameData.CreateNew(1, "greyhaven");
             telemetry.CaptureSaveData(data);
@@ -67,6 +70,8 @@ namespace WhereTheSoundingsEnd.Tests
                 restored.RestoreSaveData(data);
                 Assert.AreEqual(1, restored.CompletedTrips);
                 Assert.AreEqual(500L, restored.LastTripNetCents);
+                StringAssert.Contains("LEGAL CATCH 50%", restored.BuildBalanceReport());
+                StringAssert.Contains("Greyhaven", restored.BuildBalanceReport());
             }
             finally
             {
