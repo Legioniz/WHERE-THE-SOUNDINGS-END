@@ -225,9 +225,19 @@ A new player can start the slice and complete this sequence without developer co
 - [ ] Inspect prop placement at gameplay camera height; correct floating, clipping, scale, density and occlusion.
 - [ ] Confirm central pier, service approaches, dock chart, lighthouse silhouette and wreck inspection radius remain clear.
 - [ ] Run the new artifact Edit Mode tests and all existing Edit Mode tests in Unity 6000.3.28f1.
-- [ ] Verify the artifact groups stream with their owning area and create no colliders, runtime components, lights, rigidbodies or save changes.
+- [ ] Verify decorative prop groups stream with their owning area and create no colliders, runtime components, lights or rigidbodies. HistoricalArtifact metadata anchors are a separate persistent-scene layer; verify they do not migrate with static area scenes and save only stable artifact IDs.
 - [ ] Replace highest-visibility greybox props with original/licensed production meshes only after asset provenance and performance review.
 
+
+## Historical artifact inspection — 2026-11-14
+
+**Source status:** Six Greyhaven artifact anchors, the existing boat Interact inspection path, separate inspected-artifact save ledger and schema v8-to-v9 migration are implemented in source. Unity verification remains open.
+
+- [ ] Rebuild Greyhaven and inspect the working chart, tool roll, unposted letter, keeper's weather ledger, glass-plate photograph and recovered bottom recorder from the boat.
+- [ ] Verify first read/re-read feedback and that the inspected-artifact ledger survives save/load without modifying inspected phenomenon-site IDs.
+- [ ] Confirm the metadata anchors remain in the persistent scene while estuary/lighthouse visual props unload/reload with their static streamed areas.
+- [ ] Confirm archive reads do not cause site disturbance, sonar discoveries, regional chart marks, visited-region unlocks, quest flags or NPC relationship changes.
+- [ ] The other five regional artifact families remain proposed until their locations, provenance, discovery gates and playable region scenes are authored.
 
 ## Economy and trading integration — researched design baseline, 2026-11-14
 
