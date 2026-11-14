@@ -376,9 +376,17 @@ def main() -> int:
             "DocksideModalPolicy.CanOpenDocksideMenu",
             "pauseAction.WasPressedThisFrame()",
             "private void OnDisable()",
+            "DefaultExecutionOrder(-100)",
+            "ReadHistoricalArtifact",
+            "HistoricalArtifactId",
+            "ResolveHistoricalArtifact",
         ):
             if required_text not in dockside_source:
                 failures.append(f"DocksideHubController is missing expected interaction feature: {required_text}")
+
+        archive_option_tests = (ROOT / "Assets/_Project/Tests/EditMode/SeaStateAndCargoDamageTests.cs").read_text(encoding="utf-8")
+        if "DocksideArchiveOption_RetainsStableHistoricalArtifactId" not in archive_option_tests:
+            failures.append("Historical artifact archive menu option regression test is missing.")
 
         dockside_tests = (ROOT / "Assets/_Project/Tests/EditMode/DocksideAccessPolicyTests.cs").read_text(encoding="utf-8")
         for required_test in (
