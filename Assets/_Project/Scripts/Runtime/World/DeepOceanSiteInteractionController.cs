@@ -138,48 +138,6 @@ namespace WhereTheSoundingsEnd.World
             latestInspection = artifact.BuildInspectionText(!firstInspection);
             return true;
         }
-            if (Time.timeScale <= 0.0001f ||
-                !DeepOceanInspectionPolicy.IsCooldownReady(Time.unscaledTime, nextInspectionAllowedAt))
-                return;
-
-            DeepOceanPhenomenonSite nearest = null;
-            float bestDistance = interactionDistance * interactionDistance;
-            Vector2 vesselPosition = new Vector2(vesselBody.position.x, vesselBody.position.z);
-            for (int index = 0; index < sites.Length; index++)
-            {
-                DeepOceanPhenomenonSite site = sites[index];
-                if (site == null || !site.IsValidForRegion) continue;
-                Vector2 sitePosition = new Vector2(site.transform.position.x, site.transform.position.z);
-                float distance = (sitePosition - vesselPosition).sqrMagnitude;
-                if (distance <= bestDistance)
-                {
-                    nearest = site;
-                    bestDistance = distance;
-                }
-            }
-
-            if (nearest == null)
-            {
-                latestInspection = "NO SURVEY SITE WITHIN SAFE INSPECTION RANGE.";
-                return;
-            }
-
-            // Claim only after a valid target is found; an empty interaction must not
-            // steal the same-frame input from a nearby harbour NPC.
-            if (seaState != null && !seaState.TryClaimInteraction())
-                return;
-
-            nextInspectionAllowedAt = DeepOceanInspectionPolicy.GetNextAllowedTime(
-                Time.unscaledTime, inspectionCooldownRealSeconds);
-
-            bool firstInspection = inspectedSiteIds.Add(nearest.SiteId);
-            latestInspection = (firstInspection ? "FIELD NOTE RECORDED: " : "KNOWN SITE: ") +
-                nearest.DisplayName + " [" + nearest.EvidenceLabel + "]\n" + nearest.FirstSurveyNote;
-            // A site's disturbance is a one-time discovery consequence, never a repeat-interaction farm.
-            if (seaState != null && firstInspection)
-                seaState.AddDisturbance(DeepOceanInspectionPolicy.GetDisturbance(firstInspection));
-        }
-
         public void CaptureSaveData(SaveGameData data)
         {
             if (data == null || data.world == null)
