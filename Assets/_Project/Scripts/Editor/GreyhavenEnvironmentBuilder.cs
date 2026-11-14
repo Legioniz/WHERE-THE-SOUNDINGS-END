@@ -549,18 +549,19 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                         maxDepth = 60f;
                         break;
                     default:
-                        habitatMask = (int)(FishHabitat.Kelp | FishHabitat.Estuary);
-                        technique = FishPreferredTechnique.Handlining;
+                        habitatMask = (int)FishHabitat.Kelp;
+                        technique = FishPreferredTechnique.SeaweedHarvesting;
                         maxDepth = 8f;
                         break;
                 }
 
-                int initialPopulation = tier == 1 ? 65 : tier == 2 ? 48 : tier == 3 ? 32 : tier == 4 ? 18 : 9;
-                int dailyRecovery = tier == 1 ? 5 : tier == 2 ? 4 : tier == 3 ? 2 : tier == 4 ? 1 : 0;
-                float migration = marketClass == SeafoodMarketClass.Pelagic ? 0.22f :
+                bool seaweed = category == CargoItemCategory.Seaweed;
+                int initialPopulation = seaweed ? 120 : tier == 1 ? 65 : tier == 2 ? 48 : tier == 3 ? 32 : tier == 4 ? 18 : 9;
+                int dailyRecovery = seaweed ? 12 : tier == 1 ? 5 : tier == 2 ? 4 : tier == 3 ? 2 : tier == 4 ? 1 : 0;
+                float migration = seaweed ? 0f : marketClass == SeafoodMarketClass.Pelagic ? 0.22f :
                     marketClass == SeafoodMarketClass.Deepwater ? 0.04f : 0.08f;
-                float resistance = 0.35f + tier * 0.18f;
-                float burst = 0.10f + tier * 0.075f;
+                float resistance = seaweed ? 0.2f : 0.35f + tier * 0.18f;
+                float burst = seaweed ? 0.01f : 0.10f + tier * 0.075f;
 
                 SerializedObject serialized = new SerializedObject(definition);
                 serialized.FindProperty("marketClass").enumValueIndex = (int)marketClass;
@@ -587,8 +588,10 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                 serialized.FindProperty("initialPopulation").intValue = initialPopulation;
                 serialized.FindProperty("dailyPopulationRecovery").intValue = dailyRecovery;
                 serialized.FindProperty("migrationRate").floatValue = migration;
-                serialized.FindProperty("baseCatchSize").floatValue = Mathf.Max(0.1f, minimumWeight * 0.55f);
-                serialized.FindProperty("maximumCatchSize").floatValue = Mathf.Max(0.1f, maximumWeight);
+                serialized.FindProperty("baseCatchSize").floatValue = seaweed
+                    ? 0.25f : Mathf.Max(0.1f, minimumWeight * 0.55f);
+                serialized.FindProperty("maximumCatchSize").floatValue = seaweed
+                    ? 1.5f : Mathf.Max(0.1f, maximumWeight);
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(definition);
             }
