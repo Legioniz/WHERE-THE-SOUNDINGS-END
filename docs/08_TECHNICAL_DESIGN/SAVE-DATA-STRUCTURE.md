@@ -1,7 +1,7 @@
 # Save Data Structure
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime schema v8 implemented; Unity verification pending  
+> Status: Runtime schema v9 implemented; Unity verification pending  
 > Owner: Project lead  
 > Version: 0.4  
 > Last reviewed: 2026-11-14
@@ -74,7 +74,7 @@ Do not repurpose an existing field with a new meaning. Add a new field, migrate,
 
 ## NPC relationship persistence
 
-Save schema v8 is the current save contract and extends each NPC state record with `relationshipMemoryIds`, a per-resident list capped at 128 stable event IDs. Validation rejects null/oversized ledgers, duplicate or malformed IDs, and more than 4096 remembered events across the save.
+Save schema v9 is the current save contract and retains schema v8 economy records while extending each NPC state record with `relationshipMemoryIds`, a per-resident list capped at 128 stable event IDs. Validation rejects null/oversized ledgers, duplicate or malformed IDs, and more than 4096 remembered events across the save.
 
 Schema 5 NPC relationship scores were not modified by gameplay and used zero as their original default. The v5-to-v6 migration maps an empty or zero legacy score to neutral 50, initializes each memory list, and preserves any non-zero score. Later saves store the score and event ledger together.
 
@@ -143,3 +143,10 @@ Regional market stock reuses the existing per-vendor/item market stock collectio
 The additional harvest permits (reef_stewardship, licensed_sea_cucumber, managed_harvest) reuse the existing unlockedRegionIds collection. RegionalChartController filters those permit IDs out of the region-name list, so a harvest permit cannot reveal an unvisited chart region or create a false map marker.
 
 Unity Editor compilation and actual save/load round-trip tests are still required. Static schema validation does not prove JsonUtility serialization or Unity runtime participant ordering.
+
+
+## Schema v9 historical artifact inspection
+
+Schema v9 adds `WorldSaveData.inspectedHistoricalArtifactIds`, a bounded, unique-ID list of historical records examined through the existing `DeepOceanSiteInteractionController`. It is independent from `inspectedPhenomenonSiteIds`, which continues to mean that a player has inspected a Sounding Rig site.
+
+The v8-to-v9 migration creates an empty artifact ledger for older saves. It does not copy existing site IDs, create artifact discoveries or modify the regional chart. The controller captures/restores the separate list transactionally with its existing save-participant contract. Artifact UI text and visual GameObjects remain transient/scene-authored; only stable artifact IDs are persisted.
