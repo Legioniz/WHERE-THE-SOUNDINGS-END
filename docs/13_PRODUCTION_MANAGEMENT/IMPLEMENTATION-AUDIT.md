@@ -162,6 +162,12 @@ Artifacts are collider-free and add no runtime scripts, rigidbodies, lights, sav
 
 **Status:** source implemented; Unity Editor import, tests, scene rebuild, visual inspection, Play Mode and Windows build remain unverified.
 
+### Historical artifact inspection — 2026-11-14
+
+Six Greyhaven artifact anchors (map, tool, letter, logbook, photograph and survey equipment) are generated beneath a persistent scene root; their greybox visual props remain beneath the correct environment/streamed-area roots. `HistoricalArtifact` is a standalone Unity MonoBehaviour with a stable script asset identity. The existing vessel Interact controller presents the record and stores a separate schema-v9 inspected-artifact ledger. The v8-to-v9 migration initializes this ledger empty and preserves inspected phenomenon-site IDs.
+
+The five non-Greyhaven artifact families are design proposals only. CI static validation and syntax parsing must pass, but Unity script import, regenerated scene persistence, Play Mode first/repeat read, save/load and area-unload review remain required.
+
 
 ## 5. Economy design integration — 2026-11-14
 
