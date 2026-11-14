@@ -26,8 +26,8 @@ The project remains Unity 6 LTS / C# / URP. The Greyhaven environment generator 
 8. It reports the seabed and mid-water returns separately. The first layer detection is explicitly uncertain; a second independent heading in the same region and within ten in-game minutes supports confirmation. Leaving a DSL habitat or receiving no distinct layer return resets that confirmation chain.
 9. Nearby authored phenomenon-site markers may be discovered and add a short evidence note.
 10. The controller publishes an AcousticSignal. AcousticWorldListener evaluates hearing score, deduplicates the event, adds the small sea-disturbance response and exposes SignalHeard to future creature/navigation adapters.
-11. DeepOceanSiteInteractionController allows close-range field-note inspection and saves inspected site IDs.
-12. Survey, weather, horror cooldowns, acoustic history and temporary maritime atmosphere state were introduced in SaveGameData schema v5 and remain preserved in current schema v6.
+11. DeepOceanSiteInteractionController allows close-range field-note inspection and saves inspected site IDs. The same controller can inspect Greyhaven historical artifacts through a separate stable-ID archive ledger.
+12. Survey, weather, horror cooldowns, acoustic history and temporary maritime atmosphere state were introduced in earlier schema migrations and remain preserved in current schema v9.
 
 A pulse takes approximately 1.25 real seconds and temporarily counts as an action for the action-driven sea clock. UI pause still prevents the world clock from advancing.
 
@@ -157,7 +157,7 @@ Schema v5 originally introduced:
 - discoveredPhenomenonSiteIds;
 - evaluatedSurveyOpportunityIds.
 
-The survey fields remain in current schema v8. Schema v7 added WorldSaveData.visitedRegionIds for physical chart discovery; the v6-to-v7 migration starts with no invented visits and preserves existing unlockedRegionIds. Schema 4 saves receive safe weather defaults, no pending bird event, and empty acoustic/inspection history. Old campaign saves remain loadable without inventing player discoveries.
+The survey fields remain in current schema v9. Schema v7 added WorldSaveData.visitedRegionIds for physical chart discovery; v8 adds the economy wallet; v9 adds inspectedHistoricalArtifactIds as a separate, initially empty archival ledger. Older saves do not inherit invented region visits, survey discoveries or artifact reads.
 
 **Persistence rule:** Discovery and evaluated opportunities are durable campaign state. UI captions, audio clips, temporary echoes and presentation objects are transient and must not be saved.
 
@@ -252,4 +252,4 @@ The subsystem is not complete until:
 
 ## Current save-schema note — 2026-11-13
 
-The survey, weather, horror, acoustic-history and temporary-atmosphere fields described here were introduced in schema v5 and remain part of current schema v6. Schema v6 subsequently adds bounded per-NPC relationship-event memory; it does not change the survey field ownership or stable site/opportunity IDs. See SAVE-DATA-STRUCTURE.md for the current migration contract.
+The survey, weather, horror and acoustic-history fields described here were introduced in schema v5 and remain part of current schema v9. Later migrations add relationship memory, regional visits, economy state and the separate v9 historical-artifact inspection ledger without changing survey site/opportunity IDs. See SAVE-DATA-STRUCTURE.md for the current migration contract.
