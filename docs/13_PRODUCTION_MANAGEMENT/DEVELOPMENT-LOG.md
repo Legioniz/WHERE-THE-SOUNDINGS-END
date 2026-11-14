@@ -482,3 +482,13 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 - The Choir remains a human label for an unresolved family of acoustic anomalies. Ordinary wildlife, natural ocean phenomena and legendary encounters are not automatically part of it.
 - No runtime code, quest state, dialogue, save schema, scene, asset, chart marker or gameplay mechanic was changed by this documentation pass.
 - The lore package remains **Proposed**. Unity compilation and runtime verification are not applicable to these documentation changes; repository validation and CI are still required.
+
+
+## 2026-11-14 — Regional physical remains and wreck structure
+
+- Extended the deterministic Greyhaven environment builder with a partial lower-inlet landing, a low former-settlement foundation outline, and exposed framing on the existing outer-channel wreck.
+- Corrected estuary streaming ownership: western and eastern mudflat dressing now sit beneath distinct top-level roots at their actual world-space X positions. Incremented the streamed-area content revision to 4 so generated area scenes are rebuilt.
+- Added Edit Mode regression coverage for regional root ownership, lower landing/foundation nodes and wreck framing; added corresponding static-validator contracts.
+- Added a six-region physical-remains specification covering reef markers, seasonal Blackrock camps, Outer Shoals survey debris, staged Drowned Parish relocation and sparse Hollow Trench expedition traces.
+- New objects remain deterministic render-only geometry: no new colliders, loot, interactions, discoveries, quest/save state or runtime scripts.
+- Unity Editor generation, streamed-scene transition review, camera visibility/grounding, Play Mode tests and performance profiling remain unverified. The other five regional treatments are proposed, not implemented.
