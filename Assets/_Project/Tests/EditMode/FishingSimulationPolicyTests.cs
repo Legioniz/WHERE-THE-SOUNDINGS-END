@@ -11,6 +11,8 @@ namespace WhereTheSoundingsEnd.Tests
         [TestCase(FishPreferredTechnique.BottomFishing, FishingTechnique.BottomFishing, true)]
         [TestCase(FishPreferredTechnique.BottomFishing, FishingTechnique.Trolling, false)]
         [TestCase(FishPreferredTechnique.FloatFishing, FishingTechnique.FloatFishing, true)]
+        [TestCase(FishPreferredTechnique.SeaweedHarvesting, FishingTechnique.SeaweedHarvesting, true)
+        ]
         public void TechniqueCompatibility_RespectsSpeciesPreference(
             FishPreferredTechnique preferred, FishingTechnique actual, bool expected)
         {
