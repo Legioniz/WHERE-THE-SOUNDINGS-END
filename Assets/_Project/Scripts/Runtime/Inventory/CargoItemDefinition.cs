@@ -46,7 +46,8 @@ namespace WhereTheSoundingsEnd.Inventory
         Jigging,
         Trolling,
         Drifting,
-        Handlining
+        Handlining,
+        SeaweedHarvesting
     }
 
     /// <summary>
