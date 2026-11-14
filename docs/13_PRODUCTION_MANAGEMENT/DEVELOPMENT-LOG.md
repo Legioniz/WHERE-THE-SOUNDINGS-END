@@ -463,3 +463,22 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 - Added Edit Mode test source for equipment installation/durability/repair/save validation, research permit persistence and expedition telemetry; updated the project validator.
 
 **Verification boundary:** source delimiter checks pass. Unity 6000.3.28f1 compilation, Edit Mode execution, Greyhaven scene regeneration, Play Mode tests and actual starter/average/optimized economy playtests remain unrun. The telemetry provides measured campaign data once played; it does not itself prove the current economy is balanced. Full seafood catalogue, complete per-catch legality and destination-market trading routes remain open.
+
+## 2026-11-14 — Lore foundation and six-region narrative continuity
+
+**Branch:** `lore/foundation-20261114`  
+**Source status:** Documentation-only narrative expansion. New historical details, regional names and character additions remain proposed pending project-lead review.
+
+### Lore work
+- Expanded the World Bible into the central reference for the island chain, six-region identity, the Choir, the Orison, Greyhaven's working community and open canon decisions.
+- Replaced lore placeholders with linked guides for evidence terminology, island history, relative chronology, supernatural consistency, social institutions, original local folklore and plural everyday belief.
+- Filled all five regional lore placeholders and the location catalogue, distinguishing named design concepts from implemented scenes and chart discoveries.
+- Added a character-arc specification that preserves existing NPC IDs, schedules, Yarn nodes, relationship contracts and the unresolved fate of Nell and the Orison crew.
+- Carried current resident details into their arcs: the Harbourmaster's records, Mara's kept crew crate, Tomas's radio-repair hobby and Inez's line craft. Proposed furniture motifs are explicitly not implementation claims.
+
+### Continuity and implementation boundary
+- Fixed story intervals remain eleven years from the lighthouse bell's last confirmed sounding to the present, and eight years from the Orison loss to the present; therefore the bell ceased sounding three years before the Orison incident.
+- The Drowned Parish bell tradition and the lighthouse bell are treated as separate objects unless future evidence establishes a connection.
+- The Choir remains a human label for an unresolved family of acoustic anomalies. Ordinary wildlife, natural ocean phenomena and legendary encounters are not automatically part of it.
+- No runtime code, quest state, dialogue, save schema, scene, asset, chart marker or gameplay mechanic was changed by this documentation pass.
+- The lore package remains **Proposed**. Unity compilation and runtime verification are not applicable to these documentation changes; repository validation and CI are still required.
