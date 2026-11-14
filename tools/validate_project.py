@@ -1076,7 +1076,7 @@ def main() -> int:
         for required_text in (
             "SamplesFlagId", "MaximumBalanceSamples", "RecordCatch", "BuildBalanceReport",
             "departureRegionId", "destinationRegionId", "legalCatchCount", "loadoutBand",
-            "GetLoadoutBandName", "IsValidActiveRecord", "JsonUtility.ToJson",
+            "GetLoadoutBandName", "IsValidActiveRecord", "EncodeBalanceSamples", "TryDecodeBalanceSamples",
         ):
             if required_text not in telemetry_source:
                 failures.append(f"ExpeditionEconomyTelemetry is missing measured balance sampling: {required_text}")
