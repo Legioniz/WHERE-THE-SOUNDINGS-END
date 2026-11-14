@@ -492,3 +492,14 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 - Added a six-region physical-remains specification covering reef markers, seasonal Blackrock camps, Outer Shoals survey debris, staged Drowned Parish relocation and sparse Hollow Trench expedition traces.
 - New objects remain deterministic render-only geometry: no new colliders, loot, interactions, discoveries, quest/save state or runtime scripts.
 - Unity Editor generation, streamed-scene transition review, camera visibility/grounding, Play Mode tests and performance profiling remain unverified. The other five regional treatments are proposed, not implemented.
+
+
+## 2026-11-14 — Historical artifacts and archival evidence
+
+- Added six stable-ID Greyhaven records: lower-inlet working chart, repair-yard tool roll, unposted letter from the lower landing, lighthouse keeper weather ledger, glass-plate photograph, and recovered bottom recorder from the outer-channel wreck.
+- Added static, collider-free visual representations beneath their owning harbour, village, estuary, lighthouse and wreck roots. Separate metadata anchors remain beneath a persistent scene root, outside the static streamed-area candidates.
+- Reused the existing boat Interact and DeepOceanSiteInteractionController path. Historical artifact inspection is distinct from phenomenon-site inspection: no sonar discovery, chart mark, quest flag, NPC relationship change or site-disturbance response is added.
+- Added the independent `inspectedHistoricalArtifactIds` save ledger and schema v8-to-v9 migration. Legacy saves start with an empty archive ledger; existing inspected site IDs remain unchanged.
+- Added Edit Mode source coverage for metadata validity, six distinct artifact types, first/repeat inspection, save/restore isolation and schema migration; extended repository validation.
+- Added a cross-region archival-content specification. The five non-Greyhaven regional artifact families remain proposals, not implemented interactables.
+- Unity-generated scene rebuild, visual grounding, camera readability, interaction range, Play Mode save/reload and Windows build remain unverified.
