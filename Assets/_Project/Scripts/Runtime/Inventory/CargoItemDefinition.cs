@@ -8,6 +8,7 @@ namespace WhereTheSoundingsEnd.Inventory
         Fish,
         Shellfish,
         Cephalopod,
+        Seaweed,
         Salvage,
         Quest,
         Equipment,
