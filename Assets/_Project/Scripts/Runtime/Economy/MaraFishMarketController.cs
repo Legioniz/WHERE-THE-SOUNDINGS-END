@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using WhereTheSoundingsEnd.Inventory;
+using WhereTheSoundingsEnd.Interaction;
 using WhereTheSoundingsEnd.NPC;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.World;
@@ -20,6 +21,10 @@ namespace WhereTheSoundingsEnd.Economy
         public int buyerStock;
         public int buyerTargetStock;
         public long lineTotalCents;
+        public string marketRegionId;
+        public string marketName;
+        public decimal destinationFactor;
+        public SeafoodMarketClass marketClass;
     }
 
     /// <summary>
@@ -39,13 +44,27 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private EconomyWalletController wallet;
         [SerializeField] private NpcAgent mara;
         [SerializeField] private SeaStateDirector seaState;
+        [SerializeField] private RegionalChartController regionalChart;
+        [SerializeField] private DocksideHubController dockside;
         [SerializeField, Min(0.01f)] private float destinationFactor = 1f;
         [SerializeField, Min(0f)] private float scarcityResponse = 0.35f;
         [SerializeField] private List<MarketStockSaveData> stock = new List<MarketStockSaveData>();
 
         public long WalletCents => wallet != null ? wallet.WalletCents : 0L;
-        public bool IsOpen => mara != null && mara.CanTrade &&
-                              string.Equals(mara.ActivityId, MarketShiftActivity, StringComparison.Ordinal);
+        public string ActiveMarketRegionId => ResolveMarketRegionId();
+        public string ActiveMarketName => SeafoodMarketPolicy.GetMarketName(ActiveMarketRegionId);
+        public bool IsOpen
+        {
+            get
+            {
+                string region = ResolveMarketRegionId();
+                if (region == "greyhaven")
+                    return mara != null && mara.CanTrade &&
+                           string.Equals(mara.ActivityId, MarketShiftActivity, StringComparison.Ordinal);
+                return dockside != null && dockside.IsMenuOpen &&
+                       SeafoodMarketPolicy.IsSupportedRegion(region);
+            }
+        }
 
         private void OnValidate()
         {
@@ -61,6 +80,8 @@ namespace WhereTheSoundingsEnd.Economy
         {
             if (cargoHold == null) cargoHold = GetComponent<SpatialCargoHold>();
             if (wallet == null) wallet = GetComponent<EconomyWalletController>();
+            if (regionalChart == null) regionalChart = GetComponent<RegionalChartController>();
+            if (dockside == null) dockside = GetComponent<DocksideHubController>();
             if (mara == null)
             {
                 NpcAgent[] residents = FindObjectsByType<NpcAgent>(FindObjectsSortMode.None);
@@ -81,7 +102,10 @@ namespace WhereTheSoundingsEnd.Economy
             totalCents = 0L;
             error = null;
 
-            if (!IsOpen) { error = "Mara is not available to trade right now."; return false; }
+            if (!IsOpen) { error = "No regional seafood buyer is available during this dockside session."; return false; }
+            string marketRegionId = ResolveMarketRegionId();
+            if (!SeafoodMarketPolicy.IsSupportedRegion(marketRegionId))
+            { error = "This destination has no authored seafood market."; return false; }
             if (cargoHold == null || wallet == null) { error = "The market cannot access the vessel's cargo or wallet."; return false; }
             if (instanceIds == null || instanceIds.Count == 0) { error = "Select at least one cargo item."; return false; }
 
@@ -97,6 +121,7 @@ namespace WhereTheSoundingsEnd.Economy
 
                 CargoItemDefinition definition = cargoHold.GetItemDefinition(placement.itemId);
                 if (definition == null || !definition.OrdinarySaleEligible || definition.IsAberrant ||
+                    (!string.IsNullOrWhiteSpace(placement.catchRegionId) && !placement.catchLegal) ||
                     !IsFinite(placement.saleQuantity) || placement.saleQuantity <= 0f ||
                     placement.saleQuantity > 1000000f ||
                     !IsFinite(definition.BaseSalePriceUsd) || definition.BaseSalePriceUsd <= 0f ||
@@ -108,6 +133,10 @@ namespace WhereTheSoundingsEnd.Economy
 
                 MarketStockSaveData itemStock = GetOrCreateStock(definition.ItemId);
                 RefreshStock(itemStock);
+                decimal destinationMarketFactor = SeafoodMarketPolicy.GetDestinationFactor(
+                    marketRegionId, definition.MarketClass);
+                if (destinationMarketFactor <= 0m)
+                { error = "This destination does not trade the selected seafood class."; return false; }
                 decimal demand = EconomyPolicy.CalculateDemandFactor(
                     itemStock.targetStock, itemStock.currentStock, (decimal)scarcityResponse);
 
@@ -116,7 +145,8 @@ namespace WhereTheSoundingsEnd.Economy
                 long lineTotal = EconomyPolicy.CalculateSaleLineCents(
                     (decimal)placement.saleQuantity,
                     (decimal)definition.BaseSalePriceUsd,
-                    (decimal)destinationFactor * GetRelationshipSaleFactor(mara.RelationshipScore),
+                    (decimal)destinationFactor * destinationMarketFactor *
+                    GetRelationshipSaleFactor(marketRegionId == "greyhaven" && mara != null ? mara.RelationshipScore : 0),
                     qualityFactor,
                     freshnessFactor,
                     demand,
@@ -138,7 +168,11 @@ namespace WhereTheSoundingsEnd.Economy
                     demandFactor = demand,
                     buyerStock = itemStock.currentStock,
                     buyerTargetStock = itemStock.targetStock,
-                    lineTotalCents = lineTotal
+                    lineTotalCents = lineTotal,
+                    marketRegionId = marketRegionId,
+                    marketName = SeafoodMarketPolicy.GetMarketName(marketRegionId),
+                    destinationFactor = destinationMarketFactor,
+                    marketClass = definition.MarketClass
                 });
             }
 
@@ -191,14 +225,16 @@ namespace WhereTheSoundingsEnd.Economy
             if (data.economy.marketStocks == null)
                 data.economy.marketStocks = new List<MarketStockSaveData>();
             // Preserve other vendors' market state when additional profiles are added.
-            data.economy.marketStocks.RemoveAll(entry => entry == null || entry.vendorId == VendorId);
+            data.economy.marketStocks.RemoveAll(entry => entry == null ||
+                entry.vendorId == VendorId ||
+                (entry.vendorId != null && entry.vendorId.StartsWith("regional_market.", StringComparison.Ordinal)));
             for (int i = 0; i < stock.Count; i++)
             {
                 MarketStockSaveData entry = stock[i];
                 if (entry == null) continue;
                 data.economy.marketStocks.Add(new MarketStockSaveData
                 {
-                    vendorId = VendorId,
+                    vendorId = entry.vendorId,
                     itemId = entry.itemId,
                     currentStock = entry.currentStock,
                     targetStock = entry.targetStock,
@@ -238,10 +274,12 @@ namespace WhereTheSoundingsEnd.Economy
             for (int i = 0; i < data.economy.marketStocks.Count; i++)
             {
                 MarketStockSaveData entry = data.economy.marketStocks[i];
-                if (entry.vendorId != VendorId) continue;
+                if (entry.vendorId != VendorId &&
+                    (entry.vendorId == null || !entry.vendorId.StartsWith("regional_market.", StringComparison.Ordinal)))
+                    continue;
                 restored.Add(new MarketStockSaveData
                 {
-                    vendorId = VendorId,
+                    vendorId = entry.vendorId == VendorId ? "regional_market.greyhaven" : entry.vendorId,
                     itemId = entry.itemId,
                     currentStock = entry.currentStock,
                     targetStock = entry.targetStock,
@@ -273,15 +311,32 @@ namespace WhereTheSoundingsEnd.Economy
             return null;
         }
 
+        private string ResolveMarketRegionId()
+        {
+            if (regionalChart == null) regionalChart = GetComponent<RegionalChartController>();
+            string region = regionalChart != null ? regionalChart.CurrentRegionId : string.Empty;
+            if (!string.IsNullOrWhiteSpace(region)) return region.Trim().ToLowerInvariant();
+            return mara != null ? "greyhaven" : string.Empty;
+        }
+
+        private string GetActiveVendorId()
+        {
+            string region = ResolveMarketRegionId();
+            return SeafoodMarketPolicy.IsSupportedRegion(region)
+                ? "regional_market." + region
+                : VendorId;
+        }
+
         private MarketStockSaveData GetOrCreateStock(string itemId)
         {
             for (int i = 0; i < stock.Count; i++)
-                if (stock[i] != null && stock[i].itemId == itemId)
+                if (stock[i] != null && stock[i].itemId == itemId &&
+                    stock[i].vendorId == GetActiveVendorId())
                     return stock[i];
 
             MarketStockSaveData created = new MarketStockSaveData
             {
-                vendorId = VendorId,
+                vendorId = GetActiveVendorId(),
                 itemId = itemId,
                 currentStock = DefaultTargetStock,
                 targetStock = DefaultTargetStock,
