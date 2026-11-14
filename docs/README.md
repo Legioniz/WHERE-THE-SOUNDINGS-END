@@ -71,6 +71,11 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 
 ## Creature roster, fishing, and trade
 
+- [Seafood selling price schedule](07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md) — 155 authored seafood records, destination market matrix, units and catch-eligibility overlays.
+- [Economy balancing and expedition measurement](07_GAME_RULES_AND_BALANCING/ECONOMY-BALANCING.md) — telemetry fields, starter/average/optimized loadout bands, controlled playtest protocol and provisional target envelopes.
+- [Economy and trading system](08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md) — connected vendors, regional markets, legality, equipment, research and expedition telemetry.
+- [Economy integration audit](13_PRODUCTION_MANAGEMENT/ECONOMY-INTEGRATION-AUDIT.md) — source integration paths and remaining Unity/scene verification.
+
 - [Fishing simulation runtime](08_TECHNICAL_DESIGN/FISHING-SIMULATION.md) — encounter state machine, equipment/progression, species profiles, population persistence, migration approximation and verification boundary.\n- [Catchable seafood and market species catalog](04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)
 - [Fish species index](04_CHARACTERS_AND_ENTITIES/FISH-SPECIES.md)
 - [Mutated and unnatural catchable specimens](04_CHARACTERS_AND_ENTITIES/MUTATED-AND-UNNATURAL-CATCHES.md)
