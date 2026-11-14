@@ -1045,7 +1045,7 @@ def main() -> int:
                 failures.append(f"CargoPlacementSaveData is missing catch provenance: {required_text}")
 
         cargo_source = (ROOT / "Assets/_Project/Scripts/Runtime/Inventory/SpatialCargoHold.cs").read_text(encoding="utf-8")
-        for required_text in ("TrySetCatchLegality", "catchRegionId = item.catchRegionId", "catchLegal = saved.catchLegal"):
+        for required_text in ("TrySetCatchLegality", "catchRegionId = item.catchRegionId", "catchLegal = string.IsNullOrWhiteSpace(saved.catchRegionId) || saved.catchLegal"):
             if required_text not in cargo_source:
                 failures.append(f"SpatialCargoHold is missing catch provenance persistence: {required_text}")
 
