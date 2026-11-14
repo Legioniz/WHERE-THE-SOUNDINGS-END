@@ -30,7 +30,7 @@ namespace WhereTheSoundingsEnd.Editor
         private const string MaterialsPath = "Assets/_Project/Art/Materials";
         private const string MeshesPath = "Assets/_Project/Art/Meshes";
         private const string StreamedSceneFolder = "Assets/_Project/Scenes";
-        private const string StreamedAreaRevision = "3";
+        private const string StreamedAreaRevision = "4";
         private static readonly string[] StreamedAreaScenePaths =
         {
             StreamedSceneFolder + "/Greyhaven_Terrain.unity",
@@ -2477,41 +2477,128 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
             Transform parent, Material wood, Material metal, Material glass,
             Material rust, Material ceramic, Material cloth, Material rope)
         {
-            Transform root = Group("Estuary_Environmental_Artifacts", parent);
-            Transform east = Group("Eastern_Mudflat_Debris_Artifacts", root);
+            // The streamer assigns immediate estuary children by world X. Keep the two mudflats
+            // separate at their actual positions instead of nesting both under an origin root.
+            Transform westRoot = Group("Estuary_Environmental_Artifacts", parent);
+            westRoot.localPosition = new Vector3(-76f, 0f, -27f);
+            Transform west = Group("Western_Mudflat_Debris_Artifacts", westRoot);
+            float westGround = HeightAt(-76f, -27f);
+            ArtifactCube(west, "Old_Tide_Stake", new Vector3(0f, westGround + 0.7f, 0f),
+                new Vector3(0.12f, 1.4f, 0.12f), wood, -8f);
+            ArtifactCube(west, "Tide_Stake_Broken_Cap", new Vector3(-0.08f, westGround + 1.36f, 0f),
+                new Vector3(0.22f, 0.12f, 0.22f), rust, -8f);
+            ArtifactCube(west, "Half_Buried_Boot", new Vector3(1.6f, westGround + 0.1f, -1f),
+                new Vector3(0.42f, 0.2f, 0.22f), cloth, 22f);
+            ArtifactSphere(west, "Mudflat_Ceramic_Shard_A", new Vector3(0.7f, westGround + 0.06f, 0.8f),
+                new Vector3(0.2f, 0.035f, 0.14f), ceramic);
+            ArtifactSphere(west, "Mudflat_Ceramic_Shard_B", new Vector3(1f, westGround + 0.05f, 0.65f),
+                new Vector3(0.12f, 0.03f, 0.1f), ceramic);
+            ArtifactCylinder(west, "Weathered_Rope_Bundle", new Vector3(2.2f, westGround + 0.08f, -0.2f),
+                new Vector3(0.48f, 0.12f, 0.48f), rope, Quaternion.Euler(90f, 0f, 0f));
+            BuildAbandonedLowerLandingRemains(west, wood, metal, rust, ceramic, cloth, rope);
+            BuildLowerSettlementFoundationRemains(west, wood, rust, ceramic);
+
+            Transform east = Group("Eastern_Mudflat_Debris_Artifacts", parent);
+            east.localPosition = new Vector3(68f, 0f, -27f);
             float eastGround = HeightAt(68f, -27f);
-            ArtifactCube(east, "Tidal_Fish_Trap_Frame_Base", new Vector3(68f, eastGround + 0.16f, -27f),
+            ArtifactCube(east, "Tidal_Fish_Trap_Frame_Base", new Vector3(0f, eastGround + 0.16f, 0f),
                 new Vector3(1.5f, 0.12f, 1.05f), wood, 13f);
             for (int i = 0; i < 5; i++)
-            {
-                ArtifactCube(east, "Fish_Trap_Rib_" + i, new Vector3(67.45f + i * 0.28f, eastGround + 0.45f, -27f),
+                ArtifactCube(east, "Fish_Trap_Rib_" + i,
+                    new Vector3(-0.55f + i * 0.28f, eastGround + 0.45f, 0f),
                     new Vector3(0.055f, 0.55f, 0.055f), rope, 13f);
-            }
-            ArtifactCube(east, "Fish_Trap_Broken_Top", new Vector3(68f, eastGround + 0.76f, -27.1f),
+            ArtifactCube(east, "Fish_Trap_Broken_Top", new Vector3(0f, eastGround + 0.76f, -0.1f),
                 new Vector3(1.35f, 0.07f, 0.08f), wood, 13f);
-            ArtifactSphere(east, "Mudflat_Glass_Float", new Vector3(69.1f, eastGround + 0.2f, -26.5f),
+            ArtifactSphere(east, "Mudflat_Glass_Float", new Vector3(1.1f, eastGround + 0.2f, 0.5f),
                 new Vector3(0.24f, 0.24f, 0.24f), glass);
-            ArtifactCube(east, "Mudflat_Driftwood", new Vector3(66.2f, eastGround + 0.16f, -28.4f),
+            ArtifactCube(east, "Mudflat_Driftwood", new Vector3(-1.8f, eastGround + 0.16f, -1.4f),
                 new Vector3(2.2f, 0.18f, 0.22f), wood, 31f);
-            ArtifactCube(east, "Mudflat_Driftwood_Splinter", new Vector3(65.9f, eastGround + 0.22f, -28.6f),
+            ArtifactCube(east, "Mudflat_Driftwood_Splinter", new Vector3(-2.1f, eastGround + 0.22f, -1.6f),
                 new Vector3(0.08f, 0.18f, 0.9f), rust, 38f);
-            ArtifactCube(east, "Salt_Bottle_Remnant", new Vector3(70.2f, eastGround + 0.12f, -27.8f),
+            ArtifactCube(east, "Salt_Bottle_Remnant", new Vector3(2.2f, eastGround + 0.12f, -0.8f),
                 new Vector3(0.12f, 0.3f, 0.12f), ceramic, 16f);
+        }
 
-            Transform west = Group("Western_Mudflat_Debris_Artifacts", root);
-            float westGround = HeightAt(-76f, -27f);
-            ArtifactCube(west, "Old_Tide_Stake", new Vector3(-76f, westGround + 0.7f, -27f),
-                new Vector3(0.12f, 1.4f, 0.12f), wood, -8f);
-            ArtifactCube(west, "Tide_Stake_Broken_Cap", new Vector3(-76.08f, westGround + 1.36f, -27f),
-                new Vector3(0.22f, 0.12f, 0.22f), rust, -8f);
-            ArtifactCube(west, "Half_Buried_Boot", new Vector3(-74.4f, westGround + 0.1f, -28f),
-                new Vector3(0.42f, 0.2f, 0.22f), cloth, 22f);
-            ArtifactSphere(west, "Mudflat_Ceramic_Shard_A", new Vector3(-75.3f, westGround + 0.06f, -26.2f),
-                new Vector3(0.2f, 0.035f, 0.14f), ceramic);
-            ArtifactSphere(west, "Mudflat_Ceramic_Shard_B", new Vector3(-75.0f, westGround + 0.05f, -26.35f),
-                new Vector3(0.12f, 0.03f, 0.1f), ceramic);
-            ArtifactCylinder(west, "Weathered_Rope_Bundle", new Vector3(-73.8f, westGround + 0.08f, -27.2f),
-                new Vector3(0.48f, 0.12f, 0.48f), rope, Quaternion.Euler(90f, 0f, 0f));
+        private static void BuildAbandonedLowerLandingRemains(
+            Transform parent, Material wood, Material metal, Material rust,
+            Material stone, Material cloth, Material rope)
+        {
+            Transform landing = Group("Lower_Inlet_Landing_Remains", parent);
+            for (int i = 0; i < 3; i++)
+            {
+                float worldX = -73f + i * 2f;
+                float ground = HeightAt(worldX, -27f);
+                float localX = 3f + i * 2f;
+                ArtifactCube(landing, "Landing_Stone_Footing_" + i,
+                    new Vector3(localX, ground + 0.16f, 0f),
+                    new Vector3(0.72f, 0.32f, 0.72f), stone, i * 3f);
+                ArtifactCylinder(landing, "Landing_Timber_Pile_" + i,
+                    new Vector3(localX, ground + 0.78f, 0f),
+                    new Vector3(0.16f, 0.62f, 0.16f), wood, Quaternion.identity);
+                ArtifactCube(landing, "Landing_Pile_Salt_Line_" + i,
+                    new Vector3(localX, ground + 0.42f, 0.085f),
+                    new Vector3(0.18f, 0.045f, 0.18f), cloth, 0f);
+            }
+            float deckGround = HeightAt(-69f, -27f);
+            ArtifactCube(landing, "Landing_Deck_Partial_Plank_A",
+                new Vector3(5f, deckGround + 1.39f, 0f),
+                new Vector3(4.3f, 0.12f, 0.18f), wood, -2f);
+            ArtifactCube(landing, "Landing_Deck_Partial_Plank_B",
+                new Vector3(4.65f, deckGround + 1.51f, 0.27f),
+                new Vector3(3.5f, 0.1f, 0.16f), wood, 3f);
+            ArtifactCube(landing, "Landing_Deck_Broken_End",
+                new Vector3(7.1f, deckGround + 1.44f, -0.12f),
+                new Vector3(0.9f, 0.1f, 0.16f), rust, -7f);
+            float winchGround = HeightAt(-75f, -28f);
+            ArtifactCube(landing, "Landing_Winch_Frame_Left",
+                new Vector3(1f, winchGround + 0.68f, -1f),
+                new Vector3(0.14f, 1.36f, 0.14f), wood, -3f);
+            ArtifactCube(landing, "Landing_Winch_Frame_Right_Broken",
+                new Vector3(2.2f, winchGround + 0.43f, -1f),
+                new Vector3(0.14f, 0.86f, 0.14f), wood, 5f);
+            ArtifactCube(landing, "Landing_Winch_Crossbeam",
+                new Vector3(1.58f, winchGround + 1.25f, -1f),
+                new Vector3(1.4f, 0.14f, 0.14f), rust, 0f);
+            ArtifactCylinder(landing, "Landing_Winch_Drum",
+                new Vector3(1.58f, winchGround + 0.98f, -1f),
+                new Vector3(0.34f, 0.16f, 0.34f), metal, Quaternion.Euler(90f, 0f, 0f));
+            ArtifactCylinder(landing, "Landing_Mooring_Ring",
+                new Vector3(7.8f, deckGround + 0.19f, 0.45f),
+                new Vector3(0.32f, 0.07f, 0.32f), rust, Quaternion.Euler(90f, 0f, 0f));
+            ArtifactCylinder(landing, "Landing_Abandoned_Line_Coil",
+                new Vector3(6.9f, deckGround + 0.18f, 0.72f),
+                new Vector3(0.46f, 0.1f, 0.46f), rope, Quaternion.Euler(90f, 0f, 0f));
+        }
+
+        private static void BuildLowerSettlementFoundationRemains(
+            Transform parent, Material wood, Material rust, Material stone)
+        {
+            Transform ruins = Group("Old_Lower_Settlement_Foundation_Remains", parent);
+            float ground = HeightAt(-67f, -26f);
+            ArtifactCube(ruins, "Storehouse_Foundation_North_Wall",
+                new Vector3(9f, ground + 0.2f, -0.1f),
+                new Vector3(2.8f, 0.38f, 0.28f), stone, 1f);
+            ArtifactCube(ruins, "Storehouse_Foundation_South_Wall",
+                new Vector3(9f, ground + 0.17f, 2f),
+                new Vector3(2.3f, 0.32f, 0.24f), stone, -2f);
+            ArtifactCube(ruins, "Storehouse_Foundation_West_Return",
+                new Vector3(7.65f, ground + 0.19f, 0.95f),
+                new Vector3(0.25f, 0.36f, 2f), stone, 0f);
+            ArtifactCube(ruins, "Storehouse_Foundation_East_Stub",
+                new Vector3(10.35f, ground + 0.15f, 0.35f),
+                new Vector3(0.22f, 0.28f, 0.72f), stone, 0f);
+            ArtifactCube(ruins, "Storehouse_Door_Threshold",
+                new Vector3(9.15f, ground + 0.09f, 1.42f),
+                new Vector3(0.86f, 0.16f, 0.34f), stone, 0f);
+            ArtifactCube(ruins, "Storehouse_Reused_Timber_Sill",
+                new Vector3(9f, ground + 0.34f, -0.18f),
+                new Vector3(2.2f, 0.13f, 0.15f), wood, 3f);
+            ArtifactCube(ruins, "Storehouse_Collapsed_Rafter",
+                new Vector3(10.4f, ground + 0.3f, 2.18f),
+                new Vector3(1.65f, 0.14f, 0.16f), rust, 24f);
+            ArtifactCube(ruins, "Storehouse_Foundation_Sediment_Patch",
+                new Vector3(9f, ground + 0.025f, 0.95f),
+                new Vector3(1.45f, 0.05f, 1.05f), stone, 0f);
         }
 
         private static void BuildLighthouseArtifactCluster(
@@ -2549,6 +2636,23 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
             Transform wreck = parent.Find("Greyhaven_Outer_Channel_Wreck_Field");
             if (wreck == null) throw new InvalidOperationException("Greyhaven wreck field must exist before its artifact dressing is built.");
             Transform cluster = Group("Wreck_Environmental_Artifacts", wreck);
+
+            // Exposed keel and broken frames show the vessel's structure without new gameplay components.
+            ArtifactCube(cluster, "Wreck_Keel_Spine_Fragment", new Vector3(0f, 0.04f, 0f),
+                new Vector3(0.2f, 0.16f, 2.7f), wood, 0f);
+            ArtifactCube(cluster, "Wreck_Broken_Rib_Port_A", new Vector3(-1.05f, 0.18f, -0.66f),
+                new Vector3(0.15f, 0.58f, 0.15f), wood, -5f);
+            ArtifactCube(cluster, "Wreck_Broken_Rib_Starboard_A", new Vector3(1.05f, 0.18f, -0.66f),
+                new Vector3(0.15f, 0.58f, 0.15f), wood, 5f);
+            ArtifactCube(cluster, "Wreck_Deck_Crossmember_A", new Vector3(0f, 0.27f, -0.66f),
+                new Vector3(2.25f, 0.14f, 0.16f), rust, 0f);
+            ArtifactCube(cluster, "Wreck_Broken_Rib_Port_B", new Vector3(-0.98f, 0.14f, 0.34f),
+                new Vector3(0.14f, 0.48f, 0.14f), wood, -8f);
+            ArtifactCube(cluster, "Wreck_Deck_Crossmember_B", new Vector3(-0.04f, 0.22f, 0.34f),
+                new Vector3(1.8f, 0.12f, 0.15f), wood, 4f);
+            ArtifactCylinder(cluster, "Wreck_Sheared_Mast_Spar",
+                new Vector3(-2.1f, 0.12f, 0.08f), new Vector3(0.1f, 0.9f, 0.1f),
+                wood, Quaternion.Euler(0f, 0f, 78f));
 
             ArtifactCylinder(cluster, "Wreck_Bell_Rim", new Vector3(-1.35f, -0.62f, 0.55f),
                 new Vector3(0.52f, 0.16f, 0.52f), rust, Quaternion.identity);
