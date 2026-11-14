@@ -167,6 +167,9 @@ namespace WhereTheSoundingsEnd.Economy
             if (regionalChart == null) return;
             for (int i = 0; i < Research.Length; i++)
                 if (IsSubmitted(i)) regionalChart.GrantChartPermit(Research[i].permitRegionId);
+            if (IsSubmitted(0)) regionalChart.GrantChartPermit("reef_stewardship");
+            if (IsSubmitted(1)) regionalChart.GrantChartPermit("licensed_sea_cucumber");
+            if (IsSubmitted(2)) regionalChart.GrantChartPermit("managed_harvest");
         }
 
         private int NextAvailableIndex()
@@ -189,6 +192,12 @@ namespace WhereTheSoundingsEnd.Economy
             for (int i = 0; i < Research.Length; i++)
                 if (IsSubmitted(i) && !data.progress.unlockedRegionIds.Contains(Research[i].permitRegionId))
                     data.progress.unlockedRegionIds.Add(Research[i].permitRegionId);
+            if (IsSubmitted(0) && !data.progress.unlockedRegionIds.Contains("reef_stewardship"))
+                data.progress.unlockedRegionIds.Add("reef_stewardship");
+            if (IsSubmitted(1) && !data.progress.unlockedRegionIds.Contains("licensed_sea_cucumber"))
+                data.progress.unlockedRegionIds.Add("licensed_sea_cucumber");
+            if (IsSubmitted(2) && !data.progress.unlockedRegionIds.Contains("managed_harvest"))
+                data.progress.unlockedRegionIds.Add("managed_harvest");
         }
 
         public bool TryValidateSaveData(SaveGameData data, out string error)
