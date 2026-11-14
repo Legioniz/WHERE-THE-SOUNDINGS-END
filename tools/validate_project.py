@@ -1035,7 +1035,7 @@ def main() -> int:
             "CatchViolation.ClosedArea", "CatchViolation.OutsideSpeciesRange",
             "CatchViolation.Undersized", "CatchViolation.ProtectedSpecies",
             "CatchViolation.MissingHarvestPermit", "CatchViolation.ProhibitedGear", "CatchViolation.ProhibitedTechnique",
-            "MinimumLegalCatchWeightKg", "HasPermit", "the_outer_shoals",
+            "MinimumLegalCatchWeightKg", "RequiredHookId", "HasPermit", "the_outer_shoals",
         ):
             if required_text not in legality_policy:
                 failures.append(f"CatchLegalityPolicy is missing an authored legality rule: {required_text}")
@@ -1168,6 +1168,7 @@ def main() -> int:
             "StandardCatchInsideAuthoredRangeIsLegal", "UndersizedCatchIsFlaggedWithAuthoredFine",
             "SpeciesOutsideItsAuthoredRegionIsFlagged", "HollowTrenchRequiresOuterShoalsResearchPermit",
             "ProtectedSpeciesRequiresPermitAndAuthorizedTechnique", "ContractOnlyHarvestRequiresItsSpecificPermit",
+            "CatchViolation.ProhibitedGear", "circle-hook",
         ):
             if f"void {required_test}()" not in legality_tests:
                 failures.append(f"CatchLegalityPolicyTests is missing: {required_test}")
