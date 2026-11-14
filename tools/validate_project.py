@@ -1016,6 +1016,7 @@ def main() -> int:
             "AddExpandedSeafoodCatalog(definitions)", "SeaweedHarvesting",
             'FindProperty("minimumLegalCatchWeightKg")',
             'FindProperty("availableRegionIds")', 'FindProperty("contractOnlySale")',
+            'FindProperty("requiredHookId")',
         ):
             if required_text not in seafood_builder:
                 failures.append(f"GreyhavenEnvironmentBuilder is missing seafood catalog integration: {required_text}")
@@ -1033,7 +1034,7 @@ def main() -> int:
         for required_text in (
             "CatchViolation.ClosedArea", "CatchViolation.OutsideSpeciesRange",
             "CatchViolation.Undersized", "CatchViolation.ProtectedSpecies",
-            "CatchViolation.MissingHarvestPermit", "CatchViolation.ProhibitedTechnique",
+            "CatchViolation.MissingHarvestPermit", "CatchViolation.ProhibitedGear", "CatchViolation.ProhibitedTechnique",
             "MinimumLegalCatchWeightKg", "HasPermit", "the_outer_shoals",
         ):
             if required_text not in legality_policy:
@@ -1066,6 +1067,7 @@ def main() -> int:
             "CatchLegalityPolicy.Evaluate", "TrySetCatchLegality", "economyTelemetry.RecordCatch",
             "fish.IsAvailableInRegion(regionId)", "FishingTechnique.SeaweedHarvesting",
             "fish.Category == CargoItemCategory.Seaweed",
+            "Hooks[hookIndex].id",
             'float saleQuantity = hookedFish.ItemId == "INV-019" ? 1f : size;',
             "FINE NOT COLLECTED", "FINE PAID",
         ):
