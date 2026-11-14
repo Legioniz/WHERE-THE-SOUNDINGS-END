@@ -104,6 +104,37 @@ namespace WhereTheSoundingsEnd.Tests
             StringAssert.Contains("COST $2.00", restored.BuildSummary());
         }
 
+
+        [Test]
+        public void CompletedBalanceSamplesStayWithinSaveFlagLimit()
+        {
+            ExpeditionEconomyTelemetry telemetry = owner.GetComponent<ExpeditionEconomyTelemetry>();
+            EconomyWalletController wallet = owner.GetComponent<EconomyWalletController>();
+            Assert.IsNotNull(telemetry);
+            Assert.IsNotNull(wallet);
+
+            for (int i = 0; i < 50; i++)
+            {
+                telemetry.ObservePropulsion(0.5f);
+                telemetry.RecordCatch("FSH-001", 0.75f, true);
+                wallet.TryApplyTransaction("balance.sample." + i, 25L);
+                telemetry.CompleteTrip();
+            }
+
+            SaveGameData data = SaveGameData.CreateNew(1, "greyhaven");
+            telemetry.CaptureSaveData(data);
+            WorldFlagSaveData samples = data.progress.worldFlags.Find(
+                flag => flag != null && flag.flagId == "economy.expedition-balance-samples");
+
+            Assert.IsNotNull(samples);
+            Assert.LessOrEqual(samples.stringValue.Length, SaveGameData.MaximumStringLength);
+
+            string error;
+            Assert.IsTrue(telemetry.TryValidateSaveData(data, out error), error);
+            telemetry.RestoreSaveData(data);
+            StringAssert.Contains("RECENT TRIPS", telemetry.BuildBalanceReport());
+        }
+
         [Test]
         public void TelemetryRejectsMalformedSaveRecord()
         {
