@@ -33,16 +33,20 @@
 - Rigidbody buoyancy, wave following, heave/pitch/roll stability, forward/reverse thrust, opposing-throttle braking, speed taper, rudder flow, and lateral water resistance.
 - Water-wave simulation advances on the fixed physics timestep before buoyancy; rendered wave interpolation remains smooth and does not alter physics sampling at 30, 60 and 120 FPS.
 - Survey action advances the sea clock for its configured duration.
+- Interact selects the nearest valid phenomenon site or historical artifact within the existing safe inspection range; empty interactions do not steal an NPC/dockside interaction claim.
+- Artifact metadata anchors remain available when static estuary/lighthouse area scenes unload and reload; their physical render props stream with the correct area.
 - Pausing or opening dialogue / inventory still freezes sea time.
 - Greyhaven profile returns shallow bathymetry and never reports a deep scattering layer.
 - Missing regional profile produces a clear coverage message.
 - A site marker can be discovered once and remains discovered after save/load.
+- A historical artifact can be inspected once, reports previously examined on repeat inspection, and persists independently from inspected phenomenon-site IDs after save/load.
+- Archive inspection does not add a chart mark, visited region, survey discovery, quest flag, relationship event or sea disturbance.
 - A survey pulse publishes one AcousticSignal.
 - The survey layer never creates a collider or modifies seabed collision.
 
 ### Integration
 - Complete trip, fishing, salvage, survey, recovery and save/load.
-- Load supported schema 0–7 fixtures through current schema 8 without inventing survey progress; migrate schema 4 weather labels into safe timer defaults, schema 5-to-6 NPC relationship memory, schema 6-to-7 empty regional visits, and schema 7-to-8 whole-dollar currency into integer cents.
+- Load supported schema 0–8 fixtures through current schema 9 without inventing survey progress or archive reads; migrate schema 4 weather labels, schema 5-to-6 NPC relationship memory, schema 6-to-7 empty regional visits, schema 7-to-8 whole-dollar currency, and schema 8-to-9 empty historical-artifact inspection ledger.
 - Survey multiple regions and verify opportunity IDs do not collide.
 - Confirm repeated pings from the same heading do not promote an uncertain return.
 - Confirm a second ping from a different heading in the same region and within the time window can promote the interpretation.
@@ -99,7 +103,7 @@ The Edit Mode assembly contains deterministic suites for the following policies 
 - Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
 - Fixed-step surface-velocity estimation and normalized interpolation between previous/current wave snapshots.
 
-The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v8 and ordered v4-to-v5/v5-to-v6/v6-to-v7/v7-to-v8 migrations, dockside modal wiring, Sounding Rig persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
+The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v9 and ordered v4-to-v5/v5-to-v6/v6-to-v7/v7-to-v8/v8-to-v9 migrations, dockside modal wiring, Sounding Rig and historical-artifact persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 
 ## Verification boundary
 
