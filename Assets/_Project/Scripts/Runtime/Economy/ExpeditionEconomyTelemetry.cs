@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using WhereTheSoundingsEnd.Interaction;
 using WhereTheSoundingsEnd.Persistence;
@@ -34,12 +35,6 @@ namespace WhereTheSoundingsEnd.Economy
             public int legalCatchCount;
             public int illegalCatchCount;
             public float catchWeightKg;
-        }
-
-        [Serializable]
-        private sealed class BalanceSampleCollection
-        {
-            public List<BalanceSample> samples = new List<BalanceSample>();
         }
 
         [SerializeField] private EconomyWalletController wallet;
@@ -374,7 +369,7 @@ namespace WhereTheSoundingsEnd.Economy
             {
                 flagId = SamplesFlagId,
                 value = true,
-                stringValue = JsonUtility.ToJson(new BalanceSampleCollection { samples = balanceSamples })
+                stringValue = EncodeBalanceSamples()
             });
         }
 
@@ -392,26 +387,10 @@ namespace WhereTheSoundingsEnd.Economy
                 if (flag == null) continue;
                 if (flag.flagId == SamplesFlagId)
                 {
-                    BalanceSampleCollection collection = null;
-                    try { collection = JsonUtility.FromJson<BalanceSampleCollection>(flag.stringValue ?? string.Empty); }
-                    catch (Exception) { }
-                    if (collection == null || collection.samples == null || collection.samples.Count > MaximumBalanceSamples)
+                    List<BalanceSample> decodedSamples;
+                    if (!TryDecodeBalanceSamples(flag.stringValue, out decodedSamples) ||
+                        decodedSamples.Count > MaximumBalanceSamples)
                     { error = "The save contains malformed expedition balance samples."; return false; }
-                    for (int sampleIndex = 0; sampleIndex < collection.samples.Count; sampleIndex++)
-                    {
-                        BalanceSample sample = collection.samples[sampleIndex];
-                        if (sample == null || string.IsNullOrWhiteSpace(sample.departureRegionId) ||
-                            string.IsNullOrWhiteSpace(sample.destinationRegionId) ||
-                            sample.departureRegionId.Length > 128 || sample.destinationRegionId.Length > 128 ||
-                            sample.grossCents < 0 || sample.expenseCents < 0 ||
-                            !IsFinite(sample.fuelConsumed) || sample.fuelConsumed < 0f ||
-                            !IsFinite(sample.durationSeconds) || sample.durationSeconds < 0d ||
-                            sample.loadoutBand < 0 || sample.loadoutBand > 2 ||
-                            sample.catchCount < 0 || sample.legalCatchCount < 0 || sample.illegalCatchCount < 0 ||
-                            sample.legalCatchCount + sample.illegalCatchCount > sample.catchCount ||
-                            !IsFinite(sample.catchWeightKg) || sample.catchWeightKg < 0f)
-                        { error = "The save contains an invalid expedition balance sample."; return false; }
-                    }
                     continue;
                 }
                 if (flag.flagId != SaveFlagId) continue;
@@ -473,13 +452,11 @@ namespace WhereTheSoundingsEnd.Economy
                 if (flag == null) continue;
                 if (flag.flagId == SamplesFlagId)
                 {
-                    BalanceSampleCollection collection = null;
-                    try { collection = JsonUtility.FromJson<BalanceSampleCollection>(flag.stringValue ?? string.Empty); }
-                    catch (Exception) { }
-                    if (collection != null && collection.samples != null)
+                    List<BalanceSample> decodedSamples;
+                    if (TryDecodeBalanceSamples(flag.stringValue, out decodedSamples))
                     {
                         balanceSamples.Clear();
-                        balanceSamples.AddRange(collection.samples);
+                        balanceSamples.AddRange(decodedSamples);
                         if (balanceSamples.Count > 0)
                         {
                             BalanceSample latest = balanceSamples[balanceSamples.Count - 1];
@@ -526,6 +503,114 @@ namespace WhereTheSoundingsEnd.Economy
                     docksideSessionObserved = false;
                 }
                 return;
+            }
+        }
+
+        private string EncodeBalanceSamples()
+        {
+            // Compact bounded format keeps 50 samples safely below the save flag string limit.
+            while (balanceSamples.Count > 0)
+            {
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < balanceSamples.Count; i++)
+                {
+                    BalanceSample sample = balanceSamples[i];
+                    if (sample == null) continue;
+                    if (builder.Length > 0) builder.Append(';');
+                    builder.Append(EncodeRegionCode(sample.departureRegionId)).Append(',')
+                        .Append(EncodeRegionCode(sample.destinationRegionId)).Append(',')
+                        .Append(sample.loadoutBand.ToString(CultureInfo.InvariantCulture)).Append(',')
+                        .Append(sample.grossCents.ToString(CultureInfo.InvariantCulture)).Append(',')
+                        .Append(sample.expenseCents.ToString(CultureInfo.InvariantCulture)).Append(',')
+                        .Append(sample.fuelConsumed.ToString("R", CultureInfo.InvariantCulture)).Append(',')
+                        .Append(sample.durationSeconds.ToString("R", CultureInfo.InvariantCulture)).Append(',')
+                        .Append(sample.catchCount.ToString(CultureInfo.InvariantCulture)).Append(',')
+                        .Append(sample.legalCatchCount.ToString(CultureInfo.InvariantCulture)).Append(',')
+                        .Append(sample.illegalCatchCount.ToString(CultureInfo.InvariantCulture)).Append(',')
+                        .Append(sample.catchWeightKg.ToString("R", CultureInfo.InvariantCulture));
+                }
+                string encoded = builder.ToString();
+                if (encoded.Length <= SaveGameData.MaximumStringLength)
+                    return encoded;
+                balanceSamples.RemoveAt(0);
+            }
+            return string.Empty;
+        }
+
+        private static bool TryDecodeBalanceSamples(string encoded, out List<BalanceSample> samples)
+        {
+            samples = new List<BalanceSample>();
+            if (string.IsNullOrWhiteSpace(encoded)) return true;
+            string[] records = encoded.Split(';');
+            if (records.Length > MaximumBalanceSamples) return false;
+            for (int i = 0; i < records.Length; i++)
+            {
+                string[] fields = records[i].Split(',');
+                if (fields.Length != 11) return false;
+                string departure = DecodeRegionCode(fields[0]);
+                string destination = DecodeRegionCode(fields[1]);
+                int band, catches, legal, illegal;
+                long gross, expenses;
+                float fuel, catchWeight;
+                double duration;
+                if (departure.Length == 0 || destination.Length == 0 ||
+                    !int.TryParse(fields[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out band) ||
+                    band < 0 || band > 2 ||
+                    !long.TryParse(fields[3], NumberStyles.Integer, CultureInfo.InvariantCulture, out gross) || gross < 0 ||
+                    !long.TryParse(fields[4], NumberStyles.Integer, CultureInfo.InvariantCulture, out expenses) || expenses < 0 ||
+                    !float.TryParse(fields[5], NumberStyles.Float, CultureInfo.InvariantCulture, out fuel) || !IsFinite(fuel) || fuel < 0f ||
+                    !double.TryParse(fields[6], NumberStyles.Float, CultureInfo.InvariantCulture, out duration) || !IsFinite(duration) || duration < 0d ||
+                    !int.TryParse(fields[7], NumberStyles.Integer, CultureInfo.InvariantCulture, out catches) || catches < 0 ||
+                    !int.TryParse(fields[8], NumberStyles.Integer, CultureInfo.InvariantCulture, out legal) || legal < 0 ||
+                    !int.TryParse(fields[9], NumberStyles.Integer, CultureInfo.InvariantCulture, out illegal) || illegal < 0 ||
+                    legal + illegal > catches ||
+                    !float.TryParse(fields[10], NumberStyles.Float, CultureInfo.InvariantCulture, out catchWeight) ||
+                    !IsFinite(catchWeight) || catchWeight < 0f)
+                    return false;
+                samples.Add(new BalanceSample
+                {
+                    departureRegionId = departure,
+                    destinationRegionId = destination,
+                    loadoutBand = band,
+                    grossCents = gross,
+                    expenseCents = expenses,
+                    fuelConsumed = fuel,
+                    durationSeconds = duration,
+                    catchCount = catches,
+                    legalCatchCount = legal,
+                    illegalCatchCount = illegal,
+                    catchWeightKg = catchWeight
+                });
+            }
+            return true;
+        }
+
+        private static string EncodeRegionCode(string regionId)
+        {
+            switch (regionId)
+            {
+                case "greyhaven": return "G";
+                case "the_shallows": return "S";
+                case "blackrock_reach": return "B";
+                case "the_drowned_parish": return "D";
+                case "the_outer_shoals": return "O";
+                case "the_hollow_trench": return "H";
+                default: return "U";
+            }
+        }
+
+        private static string DecodeRegionCode(string code)
+        {
+            switch (code)
+            {
+                case "G": return "greyhaven";
+                case "S": return "the_shallows";
+                case "B": return "blackrock_reach";
+                case "D": return "the_drowned_parish";
+                case "O": return "the_outer_shoals";
+                case "H": return "the_hollow_trench";
+                case "U": return "unknown";
+                default: return string.Empty;
             }
         }
 
