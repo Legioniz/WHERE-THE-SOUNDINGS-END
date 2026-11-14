@@ -85,18 +85,23 @@ namespace WhereTheSoundingsEnd.Tests
             SetPrivateField(definition, "protectedCatch", true);
             SetPrivateField(definition, "requiredPermitId", "reef_stewardship");
             SetPrivateField(definition, "allowedTechniqueMask", 1 << (int)FishingTechnique.Handlining);
+            SetPrivateField(definition, "requiredHookId", "circle-hook");
 
             CatchLegalityResult missingPermit = CatchLegalityPolicy.Evaluate(
                 definition, "greyhaven", FishingTechnique.Handlining, 0.4f, chart);
             Assert.AreEqual(CatchViolation.ProtectedSpecies, missingPermit.Violation);
 
             chart.GrantChartPermit("reef_stewardship");
+            CatchLegalityResult wrongGear = CatchLegalityPolicy.Evaluate(
+                definition, "greyhaven", FishingTechnique.Handlining, 0.4f, chart, "standard-hook");
+            Assert.AreEqual(CatchViolation.ProhibitedGear, wrongGear.Violation);
+
             CatchLegalityResult wrongTechnique = CatchLegalityPolicy.Evaluate(
-                definition, "greyhaven", FishingTechnique.Trolling, 0.4f, chart);
+                definition, "greyhaven", FishingTechnique.Trolling, 0.4f, chart, "circle-hook");
             Assert.AreEqual(CatchViolation.ProhibitedTechnique, wrongTechnique.Violation);
 
             CatchLegalityResult authorized = CatchLegalityPolicy.Evaluate(
-                definition, "greyhaven", FishingTechnique.Handlining, 0.4f, chart);
+                definition, "greyhaven", FishingTechnique.Handlining, 0.4f, chart, "circle-hook");
             Assert.IsTrue(authorized.IsLegal);
         }
 
