@@ -764,15 +764,22 @@ namespace WhereTheSoundingsEnd.Interaction
             }
 
             List<string> eligibleIds = new List<string>();
+            int flaggedCatchCount = 0;
             for (int i = 0; i < cargoHold.Placements.Count; i++)
             {
                 CargoPlacement placement = cargoHold.Placements[i];
                 CargoItemDefinition definition = placement != null
                     ? cargoHold.GetItemDefinition(placement.itemId) : null;
+                if (placement != null && !string.IsNullOrWhiteSpace(placement.catchRegionId) && !placement.catchLegal)
+                {
+                    flaggedCatchCount++;
+                    continue;
+                }
                 if (definition != null && definition.OrdinarySaleEligible && !definition.IsAberrant &&
                     (definition.Category == CargoItemCategory.Fish ||
                      definition.Category == CargoItemCategory.Shellfish ||
-                     definition.Category == CargoItemCategory.Cephalopod))
+                     definition.Category == CargoItemCategory.Cephalopod ||
+                     definition.Category == CargoItemCategory.Seaweed))
                     eligibleIds.Add(placement.instanceId);
             }
 
@@ -783,7 +790,9 @@ namespace WhereTheSoundingsEnd.Interaction
                 maraMarket.TryBuildOffer(eligibleIds, out offer, out total, out error);
             Label summary = new Label(canQuote
                 ? maraMarket.ActiveMarketName.ToUpperInvariant() + " SEAFOOD OFFER  /  " + FormatMoney(total) + " USD  /  " + offer.Count + " CARGO LOTS"
-                : (eligibleIds.Count == 0 ? "No eligible seafood in the hold." : (error ?? "Market offer unavailable.")));
+                : (eligibleIds.Count == 0 ? (flaggedCatchCount > 0
+                    ? "No legal saleable seafood. " + flaggedCatchCount + " flagged catch lot(s) are excluded."
+                    : "No eligible seafood in the hold.") : (error ?? "Market offer unavailable.")));
             summary.style.whiteSpace = WhiteSpace.Normal;
             summary.style.color = new Color(0.82f, 0.78f, 0.66f);
             vendorActions.Add(summary);
@@ -800,7 +809,9 @@ namespace WhereTheSoundingsEnd.Interaction
                     itemized.Append(line.unitLabel);
                     itemized.Append("  /  ");
                     itemized.Append(FormatMoney(line.lineTotalCents));
-                    itemized.Append(" USD  /  DEMAND ");
+                    itemized.Append(" USD  /  MARKET x");
+                    itemized.Append(line.destinationFactor.ToString("0.00"));
+                    itemized.Append("  /  DEMAND ");
                     itemized.Append(line.demandFactor.ToString("0.00"));
                     if (lineIndex < offer.Count - 1) itemized.Append("\\n");
                 }
@@ -809,6 +820,15 @@ namespace WhereTheSoundingsEnd.Interaction
                 details.style.color = new Color(0.73f, 0.79f, 0.73f);
                 details.style.fontSize = 11;
                 vendorActions.Add(details);
+            }
+            if (flaggedCatchCount > 0)
+            {
+                Label flagged = new Label(flaggedCatchCount + " FLAGGED CATCH LOT(S)  /  NOT ACCEPTED BY ORDINARY BUYERS. " +
+                    "Review the catch record and use a licensed route where available.");
+                flagged.style.whiteSpace = WhiteSpace.Normal;
+                flagged.style.color = new Color(0.88f, 0.62f, 0.48f);
+                flagged.style.fontSize = 10;
+                vendorActions.Add(flagged);
             }
 
             if (canQuote)
@@ -1116,7 +1136,7 @@ namespace WhereTheSoundingsEnd.Interaction
                 ? vesselBody.GetComponent<ExpeditionEconomyTelemetry>() : null;
             if (telemetry != null)
             {
-                Label expedition = new Label(telemetry.BuildSummary());
+                Label expedition = new Label(telemetry.BuildSummary() + "\\n" + telemetry.BuildBalanceReport());
                 expedition.style.whiteSpace = WhiteSpace.Normal;
                 expedition.style.fontSize = 10;
                 expedition.style.color = new Color(0.72f, 0.78f, 0.73f);
