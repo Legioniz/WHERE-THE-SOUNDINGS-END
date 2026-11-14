@@ -713,7 +713,7 @@ namespace WhereTheSoundingsEnd.Persistence
                 !ValidateUniqueIds(data.world.evaluatedSurveyOpportunityIds, "survey opportunity", out error) ||
                 !ValidateUniqueIds(data.world.inspectedPhenomenonSiteIds, "inspected site", out error) ||
                 !ValidateUniqueIds(data.world.inspectedHistoricalArtifactIds, "inspected historical artifact", out error) ||
-                !ValidateUniqueIds(data.world.heardAcousticEventIds, "acoustic event", out error)
+                !ValidateUniqueIds(data.world.heardAcousticEventIds, "acoustic event", out error) ||
                 !ValidateUniqueIds(data.dialogue.completedNodeIds, "completed dialogue node", out error))
                 return false;
 
