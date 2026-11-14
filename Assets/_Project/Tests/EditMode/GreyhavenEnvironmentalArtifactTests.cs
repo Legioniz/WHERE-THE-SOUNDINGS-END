@@ -49,6 +49,8 @@ namespace WhereTheSoundingsEnd.Tests
                 materials[5], materials[6], materials[7], materials[8]);
 
             Transform wreck = roots[4].transform.Find("Greyhaven_Outer_Channel_Wreck_Field");
+            Assert.That(wreck.Find("Wreck_Environmental_Artifacts/Wreck_Keel_Spine_Fragment"), Is.Not.Null);
+            Assert.That(wreck.Find("Wreck_Environmental_Artifacts/Wreck_Broken_Rib_Port_A"), Is.Not.Null);
             wreck.position = new Vector3(30f, -0.25f, 55f);
             Transform bell = wreck.Find("Wreck_Environmental_Artifacts/Wreck_Bell_Rim");
             Assert.That(bell, Is.Not.Null);
@@ -84,6 +86,27 @@ namespace WhereTheSoundingsEnd.Tests
                 Assert.That(roots[i].GetComponentsInChildren<Light>(true), Is.Empty);
             }
             Assert.That(rendererCount, Is.GreaterThanOrEqualTo(250), "The art pass should create a substantial but static set of assembled assets.");
+        }
+
+        [Test]
+        public void EstuaryRemains_AreSplitAcrossStreamingOwnershipRoots()
+        {
+            GreyhavenEnvironmentBuilder.BuildEnvironmentalArtifacts(
+                roots[0].transform, roots[1].transform, roots[2].transform,
+                roots[3].transform, roots[4].transform,
+                materials[0], materials[1], materials[2], materials[3], materials[4],
+                materials[5], materials[6], materials[7], materials[8]);
+
+            Transform west = roots[2].transform.Find("Estuary_Environmental_Artifacts");
+            Transform east = roots[2].transform.Find("Eastern_Mudflat_Debris_Artifacts");
+            Assert.That(west, Is.Not.Null);
+            Assert.That(east, Is.Not.Null);
+            Assert.That(west.parent, Is.SameAs(roots[2].transform));
+            Assert.That(east.parent, Is.SameAs(roots[2].transform));
+            Assert.That(west.position.x, Is.LessThan(0f));
+            Assert.That(east.position.x, Is.GreaterThan(0f));
+            Assert.That(west.Find("Western_Mudflat_Debris_Artifacts/Lower_Inlet_Landing_Remains/Landing_Stone_Footing_0"), Is.Not.Null);
+            Assert.That(west.Find("Western_Mudflat_Debris_Artifacts/Old_Lower_Settlement_Foundation_Remains/Storehouse_Foundation_North_Wall"), Is.Not.Null);
         }
 
         [Test]
