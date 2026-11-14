@@ -1010,6 +1010,8 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                             "Read the latest action-clock time, day, sea disturbance and recorded omen.", DocksideFurnitureAction.ReadTideLog),
                         new DocksideFurnitureOption("dock.harbour-chart", "Harbour Chart",
                             "Review the fixed settlement bearings and named service locations.", DocksideFurnitureAction.ReadHarbourChart),
+                        new DocksideFurnitureOption("dock.archive-chart", "Copied Inlet Chart",
+                            "Inspect the older working chart and its later pencil corrections; it is not a safe route.", DocksideFurnitureAction.ReadHistoricalArtifact, "greyhaven.quay.working-chart"),
                         new DocksideFurnitureOption("dock.cargo-hatch", "Cargo Hatch",
                             "Inspect the catch and salvage currently carried aboard.", DocksideFurnitureAction.InspectCatch)
                     }),
@@ -1050,7 +1052,9 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                         new DocksideFurnitureOption("repair.tool-wall", "Tool Wall",
                             "Review the current vessel diagnosis before deciding whether to continue an expedition.", DocksideFurnitureAction.InspectVessel),
                         new DocksideFurnitureOption("repair.propeller", "Spare Propeller",
-                            "Read Tomas's engine-load and propeller inspection notes.", DocksideFurnitureAction.ReadEngineNotes)
+                            "Read Tomas's engine-load and propeller inspection notes.", DocksideFurnitureAction.ReadEngineNotes),
+                        new DocksideFurnitureOption("repair.archive-tools", "Repair Yard Tool Roll",
+                            "Examine the worn tools, mismatched fasteners and replacement handles.", DocksideFurnitureAction.ReadHistoricalArtifact, "greyhaven.repair.tool-roll")
                     }),
                 new DocksideLocationDefinition(
                     "greyhaven.net-mender", "Net Mender Shed", "Network and Inez Sarmiento",
@@ -1087,7 +1091,11 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                         new DocksideFurnitureOption("lighthouse.beacon", "Beacon Mechanism",
                             "Inspect the lighthouse's current presentation-only beacon status.", DocksideFurnitureAction.InspectBeacon),
                         new DocksideFurnitureOption("lighthouse.logbook", "Keeper's Log",
-                            "Read a short local navigation note from the lighthouse log.", DocksideFurnitureAction.ReadLighthouseLog)
+                            "Read the keeper's short navigation notes.", DocksideFurnitureAction.ReadLighthouseLog),
+                        new DocksideFurnitureOption("lighthouse.archive-logbook", "Keeper's Weather Ledger",
+                            "Inspect the surviving original entries and replacement pages in the keeper's ledger.", DocksideFurnitureAction.ReadHistoricalArtifact, "greyhaven.lighthouse.keeper-logbook"),
+                        new DocksideFurnitureOption("lighthouse.archive-photograph", "Glass-Plate Photograph",
+                            "Examine the damaged photograph and distinguish the later annotation from the image.", DocksideFurnitureAction.ReadHistoricalArtifact, "greyhaven.lighthouse.keeper-photograph")
                     })
             };
 
