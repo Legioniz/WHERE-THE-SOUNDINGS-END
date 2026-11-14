@@ -296,10 +296,11 @@ namespace WhereTheSoundingsEnd.Economy
                 BalanceSample sample = balanceSamples[i];
                 if (sample == null) continue;
                 List<BalanceSample> group;
-                if (!grouped.TryGetValue(sample.destinationRegionId ?? string.Empty, out group))
+                string groupKey = (sample.destinationRegionId ?? string.Empty) + "|" + sample.loadoutBand;
+                if (!grouped.TryGetValue(groupKey, out group))
                 {
                     group = new List<BalanceSample>();
-                    grouped.Add(sample.destinationRegionId ?? string.Empty, group);
+                    grouped.Add(groupKey, group);
                 }
                 group.Add(sample);
             }
