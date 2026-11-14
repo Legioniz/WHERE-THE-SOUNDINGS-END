@@ -29,6 +29,7 @@ namespace WhereTheSoundingsEnd.Economy
             public long expenseCents;
             public float fuelConsumed;
             public double durationSeconds;
+            public int loadoutBand;
             public int catchCount;
             public int legalCatchCount;
             public int illegalCatchCount;
@@ -46,6 +47,7 @@ namespace WhereTheSoundingsEnd.Economy
         [SerializeField] private SeaStateDirector seaState;
         [SerializeField] private DocksideHubController dockside;
         [SerializeField] private RegionalChartController regionalChart;
+        [SerializeField] private VesselEquipmentController equipment;
 
         [SerializeField] private int completedTrips;
         [SerializeField] private long lifetimeGrossCents;
@@ -63,6 +65,8 @@ namespace WhereTheSoundingsEnd.Economy
         private int tripLegalCatchCount;
         private int tripIllegalCatchCount;
         private float tripCatchWeightKg;
+        private int tripLoadoutBand;
+        private int lastTripLoadoutBand;
         private string lastTripStartRegionId = "greyhaven";
         private string lastTripDestinationRegionId = "greyhaven";
         private long tripGrossCents;
@@ -129,6 +133,7 @@ namespace WhereTheSoundingsEnd.Economy
             if (dockside == null) dockside = GetComponent<DocksideHubController>();
             if (dockside == null) dockside = FindFirstObjectByType<DocksideHubController>();
             if (regionalChart == null) regionalChart = GetComponent<RegionalChartController>();
+            if (equipment == null) equipment = GetComponent<VesselEquipmentController>();
         }
 
         private void SubscribeWallet()
@@ -172,6 +177,7 @@ namespace WhereTheSoundingsEnd.Economy
             tripIllegalCatchCount = 0;
             tripCatchWeightKg = 0f;
             tripStartRegionId = GetCurrentRegionId();
+            tripLoadoutBand = GetLoadoutBand();
             tripStartGameSeconds = seaState != null ? seaState.ElapsedGameSeconds : 0d;
             tripStartRealtime = Time.unscaledTimeAsDouble;
         }
@@ -221,6 +227,7 @@ namespace WhereTheSoundingsEnd.Economy
             lastTripFuel = Mathf.Max(0f, tripFuelConsumed);
             lastTripStartRegionId = tripStartRegionId;
             lastTripDestinationRegionId = GetCurrentRegionId();
+            lastTripLoadoutBand = tripLoadoutBand;
             BalanceSample sample = new BalanceSample
             {
                 departureRegionId = lastTripStartRegionId,
@@ -229,6 +236,7 @@ namespace WhereTheSoundingsEnd.Economy
                 expenseCents = lastTripExpenseCents,
                 fuelConsumed = lastTripFuel,
                 durationSeconds = lastTripSeconds,
+                loadoutBand = tripLoadoutBand,
                 catchCount = tripCatchCount,
                 legalCatchCount = tripLegalCatchCount,
                 illegalCatchCount = tripIllegalCatchCount,
@@ -259,6 +267,7 @@ namespace WhereTheSoundingsEnd.Economy
                     "  /  COST $" + (tripExpenseCents / 100m).ToString("0.00") +
                     "  /  NET $" + ((tripGrossCents - tripExpenseCents) / 100m).ToString("0.00") +
                     "  /  FUEL " + tripFuelConsumed.ToString("0.0") +
+                    "  /  LOADOUT " + GetLoadoutBandName(tripLoadoutBand) +
                     "  /  CATCHES " + tripCatchCount + " (LEGAL " + tripLegalCatchCount +
                     ", FLAGGED " + tripIllegalCatchCount + ")";
             if (completedTrips == 0)
@@ -271,6 +280,7 @@ namespace WhereTheSoundingsEnd.Economy
                 "  /  LIFETIME NET $" + (LifetimeNetCents / 100m).ToString("0.00") +
                 "  /  AVG NET PER HOUR $" + LifetimeNetPerHourUsd.ToString("0.00") +
                 "  /  " + completedTrips + " TRIPS" +
+                "  /  " + GetLoadoutBandName(lastTripLoadoutBand) +
                 "  /  " + SeafoodMarketPolicy.GetMarketName(lastTripDestinationRegionId);
         }
 
@@ -314,7 +324,11 @@ namespace WhereTheSoundingsEnd.Economy
                 int count = pair.Value.Count;
                 double netPerHour = hours > 0.0001d ? (double)(netTotal / 100m) / hours : 0d;
                 double legalRate = catches > 0 ? (double)legal / catches * 100d : 0d;
-                lines.Add(SeafoodMarketPolicy.GetMarketName(pair.Key) + "  /  " + count +
+                string[] keyParts = pair.Key.Split('|');
+                int loadoutBand;
+                int.TryParse(keyParts.Length > 1 ? keyParts[1] : "0", out loadoutBand);
+                lines.Add(SeafoodMarketPolicy.GetMarketName(keyParts[0]) + "  /  " +
+                    GetLoadoutBandName(loadoutBand) + "  /  " + count +
                     " TRIPS  /  AVG NET $" + (netTotal / 100m / count).ToString("0.00") +
                     "  /  AVG NET-HR $" + netPerHour.ToString("0.00", CultureInfo.InvariantCulture) +
                     "  /  AVG FUEL " + (fuelTotal / count).ToString("0.0", CultureInfo.InvariantCulture) +
@@ -352,7 +366,8 @@ namespace WhereTheSoundingsEnd.Economy
                     tripCatchCount.ToString(CultureInfo.InvariantCulture),
                     tripLegalCatchCount.ToString(CultureInfo.InvariantCulture),
                     tripIllegalCatchCount.ToString(CultureInfo.InvariantCulture),
-                    tripCatchWeightKg.ToString("R", CultureInfo.InvariantCulture))
+                    tripCatchWeightKg.ToString("R", CultureInfo.InvariantCulture),
+                    tripLoadoutBand.ToString(CultureInfo.InvariantCulture))
             });
             data.progress.worldFlags.Add(new WorldFlagSaveData
             {
@@ -390,6 +405,7 @@ namespace WhereTheSoundingsEnd.Economy
                             sample.grossCents < 0 || sample.expenseCents < 0 ||
                             !IsFinite(sample.fuelConsumed) || sample.fuelConsumed < 0f ||
                             !IsFinite(sample.durationSeconds) || sample.durationSeconds < 0d ||
+                            sample.loadoutBand < 0 || sample.loadoutBand > 2 ||
                             sample.catchCount < 0 || sample.legalCatchCount < 0 || sample.illegalCatchCount < 0 ||
                             sample.legalCatchCount + sample.illegalCatchCount > sample.catchCount ||
                             !IsFinite(sample.catchWeightKg) || sample.catchWeightKg < 0f)
@@ -408,24 +424,7 @@ namespace WhereTheSoundingsEnd.Economy
                 long activeExpenses = 0L;
                 float activeFuel = 0f;
                 double activeStart = 0d;
-                bool legacyRecord = p.Length == 9;
-                bool previousRecord = p.Length == 14;
-                bool activeRecordValid = legacyRecord ||
-                    ((previousRecord || p.Length == 19) &&
-                     int.TryParse(p[9], NumberStyles.Integer, CultureInfo.InvariantCulture, out active) &&
-                     (active == 0 || active == 1) &&
-                     long.TryParse(p[10], NumberStyles.Integer, CultureInfo.InvariantCulture, out activeGross) && activeGross >= 0 &&
-                     long.TryParse(p[11], NumberStyles.Integer, CultureInfo.InvariantCulture, out activeExpenses) && activeExpenses >= 0 &&
-                     float.TryParse(p[12], NumberStyles.Float, CultureInfo.InvariantCulture, out activeFuel) && IsFinite(activeFuel) && activeFuel >= 0f &&
-                     double.TryParse(p[13], NumberStyles.Float, CultureInfo.InvariantCulture, out activeStart) && IsFinite(activeStart) && activeStart >= 0d &&
-                     (previousRecord || (!string.IsNullOrWhiteSpace(p[14]) && p[14].Length <= 128 &&
-                     int.TryParse(p[15], NumberStyles.Integer, CultureInfo.InvariantCulture, out int savedCatchCount) && savedCatchCount >= 0 &&
-                     int.TryParse(p[16], NumberStyles.Integer, CultureInfo.InvariantCulture, out int savedLegalCount) && savedLegalCount >= 0 &&
-                     int.TryParse(p[17], NumberStyles.Integer, CultureInfo.InvariantCulture, out int savedIllegalCount) && savedIllegalCount >= 0 &&
-                     savedLegalCount + savedIllegalCount <= savedCatchCount &&
-                     float.TryParse(p[18], NumberStyles.Float, CultureInfo.InvariantCulture, out float savedCatchWeight) &&
-                     IsFinite(savedCatchWeight) && savedCatchWeight >= 0f)));
-                if ((!legacyRecord && !previousRecord && p.Length != 19) || !activeRecordValid ||
+                if (!IsValidActiveRecord(p) ||
                     !int.TryParse(p[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out trips) || trips < 0 ||
                     !long.TryParse(p[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out gross) || gross < 0 ||
                     !long.TryParse(p[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out expenses) || expenses < 0 ||
@@ -449,6 +448,8 @@ namespace WhereTheSoundingsEnd.Economy
             tripStartRegionId = "greyhaven";
             lastTripStartRegionId = "greyhaven";
             lastTripDestinationRegionId = "greyhaven";
+            tripLoadoutBand = 0;
+            lastTripLoadoutBand = 0;
             tripCatchCount = 0;
             tripLegalCatchCount = 0;
             tripIllegalCatchCount = 0;
@@ -483,13 +484,14 @@ namespace WhereTheSoundingsEnd.Economy
                             BalanceSample latest = balanceSamples[balanceSamples.Count - 1];
                             lastTripStartRegionId = latest.departureRegionId;
                             lastTripDestinationRegionId = latest.destinationRegionId;
+                            lastTripLoadoutBand = latest.loadoutBand;
                         }
                     }
                     continue;
                 }
                 if (flag.flagId != SaveFlagId) continue;
                 string[] p = (flag.stringValue ?? string.Empty).Split('|');
-                if (p.Length != 9 && p.Length != 14 && p.Length != 19) return;
+                if (p.Length != 9 && p.Length != 14 && p.Length != 19 && p.Length != 20) return;
                 int.TryParse(p[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out completedTrips);
                 long.TryParse(p[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out lifetimeGrossCents);
                 long.TryParse(p[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out lifetimeExpenseCents);
@@ -499,7 +501,7 @@ namespace WhereTheSoundingsEnd.Economy
                 long.TryParse(p[6], NumberStyles.Integer, CultureInfo.InvariantCulture, out lastTripExpenseCents);
                 double.TryParse(p[7], NumberStyles.Float, CultureInfo.InvariantCulture, out lastTripSeconds);
                 float.TryParse(p[8], NumberStyles.Float, CultureInfo.InvariantCulture, out lastTripFuel);
-                if (p.Length == 14 || p.Length == 19)
+                if (p.Length == 14 || p.Length == 19 || p.Length == 20)
                 {
                     int active;
                     int.TryParse(p[9], NumberStyles.Integer, CultureInfo.InvariantCulture, out active);
@@ -508,7 +510,7 @@ namespace WhereTheSoundingsEnd.Economy
                     long.TryParse(p[11], NumberStyles.Integer, CultureInfo.InvariantCulture, out tripExpenseCents);
                     float.TryParse(p[12], NumberStyles.Float, CultureInfo.InvariantCulture, out tripFuelConsumed);
                     double.TryParse(p[13], NumberStyles.Float, CultureInfo.InvariantCulture, out tripStartGameSeconds);
-                    if (p.Length == 19)
+                    if (p.Length >= 19)
                     {
                         tripStartRegionId = p[14];
                         int.TryParse(p[15], NumberStyles.Integer, CultureInfo.InvariantCulture, out tripCatchCount);
@@ -517,11 +519,66 @@ namespace WhereTheSoundingsEnd.Economy
                         float.TryParse(p[18], NumberStyles.Float, CultureInfo.InvariantCulture, out tripCatchWeightKg);
                     }
                     else tripStartRegionId = "greyhaven";
+                    if (p.Length == 20)
+                        int.TryParse(p[19], NumberStyles.Integer, CultureInfo.InvariantCulture, out tripLoadoutBand);
                     tripStartRealtime = Time.unscaledTimeAsDouble;
                     docksideSessionObserved = false;
                 }
                 return;
             }
+        }
+
+        private int GetLoadoutBand()
+        {
+            if (equipment == null) equipment = GetComponent<VesselEquipmentController>();
+            if (equipment == null) return 0;
+            float combinedCapability = equipment.EnginePowerMultiplier * equipment.RodCastMultiplier;
+            if (combinedCapability >= 1.15f) return 2; // Optimized: upgraded engine and rod in strong condition.
+            if (combinedCapability >= 0.85f) return 1; // Average: serviceable mixed or upgraded loadout.
+            return 0; // Starter: baseline or worn equipment.
+        }
+
+        private static string GetLoadoutBandName(int band)
+        {
+            switch (band)
+            {
+                case 2: return "OPTIMIZED";
+                case 1: return "AVERAGE";
+                default: return "STARTER";
+            }
+        }
+
+        private static bool IsValidActiveRecord(string[] p)
+        {
+            if (p == null) return false;
+            if (p.Length == 9) return true;
+            if (p.Length != 14 && p.Length != 19 && p.Length != 20) return false;
+            int active;
+            long activeGross, activeExpenses;
+            float activeFuel;
+            double activeStart;
+            if (!int.TryParse(p[9], NumberStyles.Integer, CultureInfo.InvariantCulture, out active) ||
+                (active != 0 && active != 1) ||
+                !long.TryParse(p[10], NumberStyles.Integer, CultureInfo.InvariantCulture, out activeGross) || activeGross < 0 ||
+                !long.TryParse(p[11], NumberStyles.Integer, CultureInfo.InvariantCulture, out activeExpenses) || activeExpenses < 0 ||
+                !float.TryParse(p[12], NumberStyles.Float, CultureInfo.InvariantCulture, out activeFuel) || !IsFinite(activeFuel) || activeFuel < 0f ||
+                !double.TryParse(p[13], NumberStyles.Float, CultureInfo.InvariantCulture, out activeStart) || !IsFinite(activeStart) || activeStart < 0d)
+                return false;
+            if (p.Length == 14) return true;
+            int catches, legal, illegal;
+            float catchWeight;
+            if (string.IsNullOrWhiteSpace(p[14]) || p[14].Length > 128 ||
+                !int.TryParse(p[15], NumberStyles.Integer, CultureInfo.InvariantCulture, out catches) || catches < 0 ||
+                !int.TryParse(p[16], NumberStyles.Integer, CultureInfo.InvariantCulture, out legal) || legal < 0 ||
+                !int.TryParse(p[17], NumberStyles.Integer, CultureInfo.InvariantCulture, out illegal) || illegal < 0 ||
+                legal + illegal > catches ||
+                !float.TryParse(p[18], NumberStyles.Float, CultureInfo.InvariantCulture, out catchWeight) ||
+                !IsFinite(catchWeight) || catchWeight < 0f)
+                return false;
+            if (p.Length == 19) return true;
+            int loadoutBand;
+            return int.TryParse(p[19], NumberStyles.Integer, CultureInfo.InvariantCulture, out loadoutBand) &&
+                   loadoutBand >= 0 && loadoutBand <= 2;
         }
 
         private static long SafeAdd(long a, long b) => long.MaxValue - a < b ? long.MaxValue : a + b;
