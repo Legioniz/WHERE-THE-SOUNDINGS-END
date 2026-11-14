@@ -985,13 +985,13 @@ def main() -> int:
             price_doc = (ROOT / "docs/07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md").read_text(encoding="utf-8")
             scheduled = {}
             for line in price_doc.splitlines():
-                if not re.match(r"^\\|\\s*(FSH|INV|ALG)-", line):
+                if not re.match(r"^\|\s*(FSH|INV|ALG)-", line):
                     continue
                 fields = [part.strip() for part in line.split("|")]
                 if len(fields) < 6:
                     failures.append(f"Malformed seafood price schedule row: {line}")
                     continue
-                price_match = re.search(r"\\$([0-9.]+)", fields[5])
+                price_match = re.search(r"\$([0-9.]+)", fields[5])
                 if price_match:
                     scheduled[fields[1]] = (price_match.group(1), fields[4])
             if set(catalog_by_id) != set(scheduled):
