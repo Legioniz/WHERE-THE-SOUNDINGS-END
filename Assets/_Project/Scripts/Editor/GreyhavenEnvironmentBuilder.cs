@@ -586,7 +586,7 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                 serialized.FindProperty("initialPopulation").intValue = initialPopulation;
                 serialized.FindProperty("dailyPopulationRecovery").intValue = dailyRecovery;
                 serialized.FindProperty("migrationRate").floatValue = migration;
-                serialized.FindProperty("baseCatchSize").floatValue = Mathf.Max(0.1f, minimumWeight);
+                serialized.FindProperty("baseCatchSize").floatValue = Mathf.Max(0.1f, minimumWeight * 0.55f);
                 serialized.FindProperty("maximumCatchSize").floatValue = Mathf.Max(0.1f, maximumWeight);
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(definition);
@@ -609,18 +609,8 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
 
         private static void ConfigureEconomy(List<CargoItemDefinition> definitions)
         {
-            // Initial Greyhaven species use the authoritative schedule's USD/kg values.
-            // Unlisted seafood, aberrant specimens, quest cargo and equipment remain ineligible
-            // until their legal buyer contract and price unit are explicitly authored.
-            Dictionary<string, float> seafoodUsdPerKg = new Dictionary<string, float>(StringComparer.Ordinal)
-            {
-                { "FSH-001", 2.30f },
-                { "FSH-002", 1.98f },
-                { "FSH-003", 3.49f },
-                { "FSH-005", 2.14f },
-                { "FSH-007", 0.95f }
-            };
-            // Provisional salvage baseline: authored per recovered piece, not per kilogram.
+            // Seafood prices and sale eligibility are authored by AddExpandedSeafoodCatalog.
+            // Only the three provisional salvage records are configured here.
             Dictionary<string, float> salvageUsdPerUnit = new Dictionary<string, float>(StringComparer.Ordinal)
             {
                 { "SALVAGE-WOOD-01", 1.50f },
@@ -633,16 +623,16 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                 CargoItemDefinition definition = definitions[i];
                 if (definition == null) continue;
 
-                float price;
-                bool seafood = seafoodUsdPerKg.TryGetValue(definition.ItemId, out price);
-                bool salvage = !seafood && salvageUsdPerUnit.TryGetValue(definition.ItemId, out price);
-                bool eligible = seafood || salvage;
-                SerializedObject serialized = new SerializedObject(definition);
-                serialized.FindProperty("baseSalePriceUsd").floatValue = eligible ? price : 0f;
-                serialized.FindProperty("saleUnitLabel").stringValue = seafood ? "kg" : "unit";
-                serialized.FindProperty("ordinarySaleEligible").boolValue = eligible;
-                serialized.ApplyModifiedPropertiesWithoutUndo();
-                EditorUtility.SetDirty(definition);
+                float salvagePrice;
+                if (salvageUsdPerUnit.TryGetValue(definition.ItemId, out salvagePrice))
+                {
+                    SerializedObject serialized = new SerializedObject(definition);
+                    serialized.FindProperty("baseSalePriceUsd").floatValue = salvagePrice;
+                    serialized.FindProperty("saleUnitLabel").stringValue = "unit";
+                    serialized.FindProperty("ordinarySaleEligible").boolValue = true;
+                    serialized.ApplyModifiedPropertiesWithoutUndo();
+                    EditorUtility.SetDirty(definition);
+                }
             }
         }
 
