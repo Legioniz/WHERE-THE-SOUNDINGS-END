@@ -8,11 +8,11 @@ namespace WhereTheSoundingsEnd.Inventory
         Fish,
         Shellfish,
         Cephalopod,
-        Seaweed,
         Salvage,
         Quest,
         Equipment,
-        DamagedCargo
+        DamagedCargo,
+        Seaweed
     }
 
     [Flags]
