@@ -58,6 +58,7 @@ namespace WhereTheSoundingsEnd.Economy
             get
             {
                 string region = ResolveMarketRegionId();
+                if (dockside == null) dockside = GetComponent<DocksideHubController>();
                 if (region == "greyhaven")
                     return mara != null && mara.CanTrade &&
                            string.Equals(mara.ActivityId, MarketShiftActivity, StringComparison.Ordinal);
