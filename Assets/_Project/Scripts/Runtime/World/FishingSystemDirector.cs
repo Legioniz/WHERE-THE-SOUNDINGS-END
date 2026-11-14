@@ -95,6 +95,9 @@ namespace WhereTheSoundingsEnd.World
 
         private InputAction harvestBeatAction;
         private VesselEquipmentController equipment;
+        private RegionalChartController regionalChart;
+        private EconomyWalletController wallet;
+        private ExpeditionEconomyTelemetry economyTelemetry;
         private FishingEncounterPhase phase;
         private FishingTechnique technique = FishingTechnique.StillFishing;
         private int rodIndex;
@@ -141,6 +144,9 @@ namespace WhereTheSoundingsEnd.World
         {
             if (cargoHold == null) cargoHold = GetComponent<SpatialCargoHold>();
             equipment = GetComponent<VesselEquipmentController>();
+            regionalChart = GetComponent<RegionalChartController>();
+            wallet = GetComponent<EconomyWalletController>();
+            economyTelemetry = GetComponent<ExpeditionEconomyTelemetry>();
             if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             if (harvestBeatAction == null && controls != null)
                 harvestBeatAction = controls.FindAction("HarvestBeat", false);
@@ -369,6 +375,13 @@ namespace WhereTheSoundingsEnd.World
             status = "THE BITE WAS MISSED — the bait is still out. Wait for another chance.";
         }
 
+        private static bool IsCatchableSeafood(CargoItemCategory category)
+        {
+            return category == CargoItemCategory.Fish ||
+                   category == CargoItemCategory.Shellfish ||
+                   category == CargoItemCategory.Cephalopod;
+        }
+
         private CargoItemDefinition SelectFish()
         {
             List<CargoItemDefinition> candidates = new List<CargoItemDefinition>();
@@ -381,7 +394,10 @@ namespace WhereTheSoundingsEnd.World
             for (int i = 0; i < definitions.Count; i++)
             {
                 CargoItemDefinition fish = definitions[i];
-                if (fish == null || fish.Category != CargoItemCategory.Fish) continue;
+                if (fish == null || !IsCatchableSeafood(fish.Category)) continue;
+                string regionId = regionalChart != null && !string.IsNullOrWhiteSpace(regionalChart.CurrentRegionId)
+                    ? regionalChart.CurrentRegionId : "greyhaven";
+                if (!fish.IsAvailableInRegion(regionId)) continue;
                 if ((fish.Habitats & activeHabitat) == 0) continue;
                 if (!FishingSimulationPolicy.IsWithinDepth(estimatedDepth, fish.MinimumDepthMetres, fish.MaximumDepthMetres)) continue;
 
@@ -429,17 +445,34 @@ namespace WhereTheSoundingsEnd.World
             string instanceId;
             if (!cargoHold.TryPlaceFirstFit(hookedFish.ItemId, 1, quality, 1f, out instanceId, size))
             {
-                CancelFishing("HOLD FULL — the fish slips away before it can be secured.");
+                CancelFishing("HOLD FULL — the catch slips away before it can be secured.");
                 return;
             }
+
+            string regionId = regionalChart != null && !string.IsNullOrWhiteSpace(regionalChart.CurrentRegionId)
+                ? regionalChart.CurrentRegionId : "greyhaven";
+            CatchLegalityResult legality = CatchLegalityPolicy.Evaluate(
+                hookedFish, regionId, technique, size, regionalChart);
+            cargoHold.TrySetCatchLegality(instanceId, regionId, technique.ToString(),
+                size, legality.IsLegal, legality.Reason);
+
+            if (!legality.IsLegal && wallet != null && legality.FineCents > 0L)
+                wallet.TryApplyTransaction("catch.legality.fine." + Guid.NewGuid().ToString("N"),
+                    -legality.FineCents);
 
             ChangePopulation(hookedFish, activeHabitat, -1);
             totalCatches++;
             if (equipment != null) equipment.WearRodForCatch();
+            if (economyTelemetry != null)
+                economyTelemetry.RecordCatch(hookedFish.ItemId, size, legality.IsLegal);
             string grade = quality >= 0.9f ? "PRISTINE" : quality >= 0.75f ? "GOOD" : quality >= 0.55f ? "FAIR" : "POOR";
             string species = hookedFish.DisplayName;
-            status = "LANDED: " + species + " · " + size.ToString("0.0") + " kg · " + grade +
-                     " · " + Mathf.RoundToInt(quality * 100f) + "%";
+            status = legality.IsLegal
+                ? "LANDED: " + species + " · " + size.ToString("0.0") + " kg · " + grade +
+                  " · " + Mathf.RoundToInt(quality * 100f) + "%"
+                : "ILLEGAL LANDING: " + species + " · " + legality.Reason +
+                  " · FINE $" + (legality.FineCents / 100m).ToString("0.00") +
+                  " · THIS CATCH CANNOT BE SOLD.";
             FinishFishing();
             hookedFish = null;
         }
@@ -539,7 +572,7 @@ namespace WhereTheSoundingsEnd.World
             for (int i = 0; i < definitions.Count; i++)
             {
                 CargoItemDefinition fish = definitions[i];
-                if (fish == null || fish.Category != CargoItemCategory.Fish) continue;
+                if (fish == null || !IsCatchableSeafood(fish.Category)) continue;
                 for (int h = 0; h < HabitatOrder.Length; h++)
                 {
                     FishHabitat habitat = HabitatOrder[h];
@@ -573,7 +606,7 @@ namespace WhereTheSoundingsEnd.World
                 for (int i = 0; i < definitions.Count; i++)
                 {
                     CargoItemDefinition fish = definitions[i];
-                    if (fish == null || fish.Category != CargoItemCategory.Fish) continue;
+                    if (fish == null || !IsCatchableSeafood(fish.Category)) continue;
 
                     int[] transfers = new int[HabitatOrder.Length];
                     for (int source = 0; source < HabitatOrder.Length; source++)
