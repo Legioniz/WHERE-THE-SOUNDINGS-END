@@ -50,7 +50,7 @@ GreyhavenEnvironmentBuilder.BuildEnvironmentalArtifacts adds deterministic, coll
 
 The pass uses generated primitive meshes and four muted material variants (oxidized iron, chipped ceramic, salt-faded canvas, and tarred rope) alongside existing wood, metal, glass and paper materials. It is not a final bespoke model/texture/UV pass. The western estuary adds a collapsed lower-inlet landing and partial storehouse foundation; the outer-channel wreck adds exposed structural framing to its existing broken-hull mass.
 
-Artifact cylinders and spheres use parent-local transforms, including the offset wreck transform, so the cluster stays correctly attached when its streamed root moves. All dressing geometry is created without colliders, rigidbodies, lights, or runtime components. It does not become loot, an inspection target, a survey discovery, a map mark, or save data. The streamed-area revision is now 4. Western and eastern mudflat artifact roots are separate top-level estuary children positioned inside their respective streamed-area bounds; this prevents an origin-centred parent from sending both districts into only one streamed scene. All six generated area scenes must be rebuilt.
+Artifact cylinders and spheres use parent-local transforms, including the offset wreck transform, so each cluster stays attached to its owning streamed root. The visual props remain static, collider-free dressing and do not become loot, survey discoveries or chart marks. Six HistoricalArtifact metadata anchors are separate components beneath the persistent water root, outside static streamed candidates; the existing boat Interact/controller path owns inspection and save identity. The streamed-area revision is now 4. Western and eastern mudflat visual roots occupy their respective scene bounds. All six generated area scenes must be rebuilt.
 
 ## 5. Bespoke Greyhaven maritime pass
 
@@ -63,7 +63,7 @@ Artifact cylinders and spheres use parent-local transforms, including the offset
 
 The assets use assembled low-cost meshes from shared Unity primitive mesh resources, not single cubes scaled into every role. Their silhouettes and component detail are specific to the maritime object being represented. Wear is intentionally broad and sparse so it reads from the elevated camera without becoming noisy. District identity comes from different work patterns and ecology, not only color swaps.
 
-All generated children are static render-only dressing: colliders are removed immediately; no Rigidbody, MonoBehaviour, Light, interaction, loot, discovery, map, journal, save or economy behavior is added. The helper is deterministic and uses the owning harbour, village, estuary and landmark roots. Streamed area content revision is now 3 so the six generated area scenes must be rebuilt.
+All generated children in this bespoke maritime art helper are static render-only dressing: colliders are removed immediately; no Rigidbody, MonoBehaviour, Light, interaction, loot, discovery, map, journal, save or economy behavior is added. The separate HistoricalArtifact anchors are created by GreyhavenEnvironmentBuilder rather than this helper. The helper remains deterministic and uses the owning harbour, village, estuary and landmark roots. Streamed area content revision is now 4 so the six generated area scenes must be rebuilt.
 
 ## 6. Performance and asset ownership
 
@@ -92,3 +92,10 @@ Before replacing greybox pieces with external or generated production assets:
 - Distinct maritime silhouettes and regional clusters remain readable from the target camera; vegetation does not obstruct navigation or service approaches.
 - Streamed ownership remains valid and the new revision is accepted by StreamedAreaSceneRoot.
 - Final material/mesh quality and performance are reviewed in Unity; repository syntax/static checks alone are insufficient.
+
+
+## 9. Historical artifact visual layer
+
+The Greyhaven builder adds physical representations of a copied chart and folded letter on the T-pier chart table, a repaired tool roll at the repair yard, a damaged letter and sounding lead near the western lower landing, a keeper's ledger and glass-plate photograph on the lighthouse headland, and a recovered recorder at the outer-channel wreck.
+
+The physical meshes are static and collider-free. Their six metadata anchors sit beneath the persistent `Historical_Artifact_Inspection_Anchors` root, not beneath the visual props or streamed-area scene candidates. This preserves correct area streaming while the existing boat-only inspection controller owns archival reads. These are greybox forms, not final document textures, legible handwriting, photograph grain or bespoke tool models.
