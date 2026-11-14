@@ -1168,10 +1168,11 @@ def main() -> int:
             "StandardCatchInsideAuthoredRangeIsLegal", "UndersizedCatchIsFlaggedWithAuthoredFine",
             "SpeciesOutsideItsAuthoredRegionIsFlagged", "HollowTrenchRequiresOuterShoalsResearchPermit",
             "ProtectedSpeciesRequiresPermitAndAuthorizedTechnique", "ContractOnlyHarvestRequiresItsSpecificPermit",
-            "CatchViolation.ProhibitedGear", "circle-hook",
         ):
             if f"void {required_test}()" not in legality_tests:
                 failures.append(f"CatchLegalityPolicyTests is missing: {required_test}")
+        if "CatchViolation.ProhibitedGear" not in legality_tests or "circle-hook" not in legality_tests:
+            failures.append("CatchLegalityPolicyTests is missing the required-hook legality regression.")
 
         cargo_legality_tests = (ROOT / "Assets/_Project/Tests/EditMode/CatchLegalityCargoSaveTests.cs").read_text(encoding="utf-8")
         if "IllegalCatchProvenanceSurvivesSaveAndRestore" not in cargo_legality_tests:
