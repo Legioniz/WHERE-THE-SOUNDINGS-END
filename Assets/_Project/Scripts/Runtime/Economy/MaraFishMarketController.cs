@@ -120,15 +120,20 @@ namespace WhereTheSoundingsEnd.Economy
                 if (placement == null) { error = "A selected cargo item is no longer aboard."; return false; }
 
                 CargoItemDefinition definition = cargoHold.GetItemDefinition(placement.itemId);
+                if (!string.IsNullOrWhiteSpace(placement.catchRegionId) && !placement.catchLegal)
+                {
+                    error = "The catch is not legally saleable: " + placement.catchLegalityReason;
+                    return false;
+                }
                 if (definition == null || !definition.OrdinarySaleEligible || definition.IsAberrant ||
-                    (!string.IsNullOrWhiteSpace(placement.catchRegionId) && !placement.catchLegal) ||
                     !IsFinite(placement.saleQuantity) || placement.saleQuantity <= 0f ||
                     placement.saleQuantity > 1000000f ||
                     !IsFinite(definition.BaseSalePriceUsd) || definition.BaseSalePriceUsd <= 0f ||
                     definition.BaseSalePriceUsd > 1000000f ||
                     (definition.Category != CargoItemCategory.Fish &&
                      definition.Category != CargoItemCategory.Shellfish &&
-                     definition.Category != CargoItemCategory.Cephalopod))
+                     definition.Category != CargoItemCategory.Cephalopod &&
+                     definition.Category != CargoItemCategory.Seaweed))
                 { error = "Mara does not accept this cargo as ordinary seafood."; return false; }
 
                 MarketStockSaveData itemStock = GetOrCreateStock(definition.ItemId);
