@@ -182,6 +182,73 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void HistoricalArtifact_FormatsStableArchiveRecordAndRejectsMissingIdentity()
+        {
+            HistoricalArtifact artifact = root.AddComponent<HistoricalArtifact>();
+            artifact.Configure(
+                "greyhaven.lighthouse.keeper-logbook", "GREYHAVEN",
+                HistoricalArtifactType.Logbook, "Keeper's Weather Ledger",
+                "Year -11 onward", "Salt-stiff; replacement pages sewn into an older spine",
+                "Western lighthouse keeper's station; original source not fully verified",
+                "The last confirmed bell sounding is recorded in Year -11. Later entries describe lamp and shutter maintenance but do not confirm another sounding.");
+
+            Assert.IsTrue(artifact.IsValid);
+            Assert.AreEqual("greyhaven", artifact.RegionId);
+            Assert.That(artifact.BuildInspectionText(false), Does.Contain("HISTORICAL ARTIFACT RECORDED"));
+            Assert.That(artifact.BuildInspectionText(false), Does.Contain("last confirmed bell sounding"));
+            artifact.Configure("", "greyhaven", HistoricalArtifactType.Letter, "Unidentified letter",
+                "Unknown", "Water damaged", "Unknown", "No legible text remains.");
+            Assert.IsFalse(artifact.IsValid);
+        }
+
+        [Test]
+        public void HistoricalArtifactInspection_UsesIndependentPersistentLedger()
+        {
+            root.AddComponent<Rigidbody>();
+            GameObject artifactObject = new GameObject("HistoricalArtifact_Inspection_Test");
+            artifactObject.transform.SetParent(root.transform, false);
+            HistoricalArtifact artifact = artifactObject.AddComponent<HistoricalArtifact>();
+            artifact.Configure("greyhaven.wreck.recovered-recorder", "greyhaven",
+                HistoricalArtifactType.SurveyEquipment, "Recovered Bottom Recorder",
+                "Date uncertain", "Pressure-crushed housing; cable drum seized",
+                "Outer Channel salvage field; vessel attribution unverified",
+                "The serial plate is abraded. The casing confirms an instrument was recovered, not who carried it or why it was lost.");
+
+            DeepOceanSiteInteractionController controller = root.AddComponent<DeepOceanSiteInteractionController>();
+            bool firstInspection;
+            Assert.IsTrue(controller.TryRecordHistoricalArtifact(artifact, out firstInspection));
+            Assert.IsTrue(firstInspection);
+            Assert.That(controller.LatestInspection, Does.Contain("Recovered Bottom Recorder"));
+
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            controller.CaptureSaveData(data);
+            CollectionAssert.Contains(data.world.inspectedHistoricalArtifactIds, "greyhaven.wreck.recovered-recorder");
+            CollectionAssert.IsEmpty(data.world.inspectedPhenomenonSiteIds);
+
+            controller.RestoreSaveData(data);
+            Assert.IsTrue(controller.TryRecordHistoricalArtifact(artifact, out firstInspection));
+            Assert.IsFalse(firstInspection);
+            Assert.That(controller.LatestInspection, Does.Contain("PREVIOUSLY EXAMINED"));
+        }
+
+        [Test]
+        public void SaveMigration_VersionEightAddsEmptyHistoricalArtifactLedger()
+        {
+            SaveGameData data = SaveGameData.CreateNew(1, "Greyhaven_Blockout");
+            data.schemaVersion = 8;
+            data.world.inspectedPhenomenonSiteIds.Add("greyhaven.outer_channel_wreck");
+            data.world.inspectedHistoricalArtifactIds = null;
+
+            string error;
+            Assert.IsTrue(SaveGameDataMigration.TryPrepare(data, out error), error);
+
+            Assert.AreEqual(9, data.schemaVersion);
+            Assert.IsNotNull(data.world.inspectedHistoricalArtifactIds);
+            Assert.IsEmpty(data.world.inspectedHistoricalArtifactIds);
+            CollectionAssert.Contains(data.world.inspectedPhenomenonSiteIds, "greyhaven.outer_channel_wreck");
+        }
+
+        [Test]
         public void InspectionRateLimit_RejectsRepeatedAttemptsUntilCooldownExpires()
         {
             float nextAllowed = DeepOceanInspectionPolicy.GetNextAllowedTime(10f, 1.25f);
