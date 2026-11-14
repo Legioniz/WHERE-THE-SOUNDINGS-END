@@ -11,7 +11,8 @@ namespace WhereTheSoundingsEnd.Inventory
         Salvage,
         Quest,
         Equipment,
-        DamagedCargo
+        DamagedCargo,
+        Seaweed
     }
 
     [Flags]
@@ -26,6 +27,16 @@ namespace WhereTheSoundingsEnd.Inventory
         All = Nearshore | Kelp | OpenWater | DeepWater | Estuary
     }
 
+    public enum SeafoodMarketClass
+    {
+        Inshore,
+        Reef,
+        Pelagic,
+        Deepwater,
+        Invertebrate,
+        Seaweed
+    }
+
     public enum FishPreferredTechnique
     {
         Any,
@@ -35,7 +46,8 @@ namespace WhereTheSoundingsEnd.Inventory
         Jigging,
         Trolling,
         Drifting,
-        Handlining
+        Handlining,
+        SeaweedHarvesting
     }
 
     /// <summary>
@@ -62,6 +74,14 @@ namespace WhereTheSoundingsEnd.Inventory
         [SerializeField, Min(0f)] private float baseSalePriceUsd;
         [SerializeField] private string saleUnitLabel = "unit";
         [SerializeField] private bool ordinarySaleEligible;
+        [SerializeField] private SeafoodMarketClass marketClass = SeafoodMarketClass.Inshore;
+        [SerializeField] private string[] availableRegionIds = Array.Empty<string>();
+        [SerializeField, Min(0f)] private float minimumLegalCatchWeightKg = 0.05f;
+        [SerializeField] private bool protectedCatch;
+        [SerializeField] private bool contractOnlySale;
+        [SerializeField] private string requiredPermitId = string.Empty;
+        [SerializeField] private int allowedTechniqueMask;
+        [SerializeField] private string requiredHookId = string.Empty;
 
         [Header("Fish ecology and encounter")]
         [SerializeField] private FishHabitat habitats = FishHabitat.All;
@@ -89,6 +109,23 @@ namespace WhereTheSoundingsEnd.Inventory
         public float BaseSalePriceUsd { get { return Mathf.Max(0f, baseSalePriceUsd); } }
         public string SaleUnitLabel { get { return string.IsNullOrWhiteSpace(saleUnitLabel) ? "unit" : saleUnitLabel.Trim(); } }
         public bool OrdinarySaleEligible { get { return ordinarySaleEligible && !isQuestCritical && category != CargoItemCategory.Quest; } }
+        public SeafoodMarketClass MarketClass { get { return marketClass; } }
+        public string[] AvailableRegionIds { get { return availableRegionIds ?? Array.Empty<string>(); } }
+        public float MinimumLegalCatchWeightKg { get { return Mathf.Max(0f, minimumLegalCatchWeightKg); } }
+        public bool ProtectedCatch { get { return protectedCatch; } }
+        public bool ContractOnlySale { get { return contractOnlySale; } }
+        public string RequiredPermitId { get { return requiredPermitId ?? string.Empty; } }
+        public int AllowedTechniqueMask { get { return Mathf.Max(0, allowedTechniqueMask); } }
+        public string RequiredHookId { get { return requiredHookId ?? string.Empty; } }
+        public bool IsAvailableInRegion(string regionId)
+        {
+            if (availableRegionIds == null || availableRegionIds.Length == 0) return true;
+            if (string.IsNullOrWhiteSpace(regionId)) return false;
+            for (int i = 0; i < availableRegionIds.Length; i++)
+                if (string.Equals(availableRegionIds[i], regionId, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            return false;
+        }
         public FishHabitat Habitats { get { return habitats == FishHabitat.None ? FishHabitat.All : habitats; } }
         public FishPreferredTechnique PreferredTechnique { get { return preferredTechnique; } }
         public string PreferredBaitId { get { return string.IsNullOrWhiteSpace(preferredBaitId) ? "any" : preferredBaitId; } }

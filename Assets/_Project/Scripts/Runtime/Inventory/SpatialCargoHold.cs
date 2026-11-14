@@ -17,6 +17,11 @@ namespace WhereTheSoundingsEnd.Inventory
         [Range(0f, 1f)] public float quality = 1f;
         [Range(0f, 1f)] public float freshness = 1f;
         [Min(0.001f)] public float saleQuantity = 1f;
+        public string catchRegionId = string.Empty;
+        public string catchTechniqueId = string.Empty;
+        public bool catchLegal = true;
+        public string catchLegalityReason = string.Empty;
+        [Min(0f)] public float catchSizeKg;
     }
 
     /// <summary>
@@ -284,6 +289,26 @@ namespace WhereTheSoundingsEnd.Inventory
             return FindDefinition(itemId);
         }
 
+        public bool TrySetCatchLegality(string instanceId, string regionId, string techniqueId,
+            float catchSizeKg, bool isLegal, string reason)
+        {
+            if (string.IsNullOrWhiteSpace(instanceId) || !IsFinite(catchSizeKg) || catchSizeKg < 0f)
+                return false;
+            for (int i = 0; i < placements.Count; i++)
+            {
+                CargoPlacement placement = placements[i];
+                if (placement == null || !string.Equals(placement.instanceId, instanceId, StringComparison.Ordinal))
+                    continue;
+                placement.catchRegionId = string.IsNullOrWhiteSpace(regionId) ? string.Empty : regionId.Trim().ToLowerInvariant();
+                placement.catchTechniqueId = string.IsNullOrWhiteSpace(techniqueId) ? string.Empty : techniqueId.Trim();
+                placement.catchLegal = isLegal;
+                placement.catchLegalityReason = string.IsNullOrWhiteSpace(reason) ? string.Empty : reason.Trim();
+                placement.catchSizeKg = catchSizeKg;
+                return true;
+            }
+            return false;
+        }
+
         public bool IsCellBlocked(int x, int y)
         {
             if (x < 0 || y < 0 || x >= width || y >= height || blockedCells == null)
@@ -417,7 +442,12 @@ namespace WhereTheSoundingsEnd.Inventory
                     quantity = item.quantity,
                     quality = item.quality,
                     freshness = item.freshness,
-                    saleQuantity = item.saleQuantity
+                    saleQuantity = item.saleQuantity,
+                    catchRegionId = item.catchRegionId,
+                    catchTechniqueId = item.catchTechniqueId,
+                    catchLegal = item.catchLegal,
+                    catchLegalityReason = item.catchLegalityReason,
+                    catchSizeKg = item.catchSizeKg
                 });
             }
         }
@@ -465,7 +495,11 @@ namespace WhereTheSoundingsEnd.Inventory
                     string.IsNullOrWhiteSpace(saved.itemId) || saved.quantity < 1 ||
                     saved.rotationQuarterTurns < 0 || saved.rotationQuarterTurns > 3 ||
                     !IsNormalized(saved.quality) || !IsNormalized(saved.freshness) ||
-                    !IsFinite(saved.saleQuantity) || saved.saleQuantity <= 0f)
+                    !IsFinite(saved.saleQuantity) || saved.saleQuantity <= 0f ||
+                    !IsFinite(saved.catchSizeKg) || saved.catchSizeKg < 0f ||
+                    (saved.catchRegionId != null && saved.catchRegionId.Length > 128) ||
+                    (saved.catchTechniqueId != null && saved.catchTechniqueId.Length > 64) ||
+                    (saved.catchLegalityReason != null && saved.catchLegalityReason.Length > 256))
                 {
                     error = "The save contains a malformed or duplicate cargo instance at index " + i + ".";
                     return false;
@@ -527,7 +561,12 @@ namespace WhereTheSoundingsEnd.Inventory
                     quantity = saved.quantity,
                     quality = saved.quality,
                     freshness = saved.freshness,
-                    saleQuantity = saved.saleQuantity
+                    saleQuantity = saved.saleQuantity,
+                    catchRegionId = saved.catchRegionId ?? string.Empty,
+                    catchTechniqueId = saved.catchTechniqueId ?? string.Empty,
+                    catchLegal = string.IsNullOrWhiteSpace(saved.catchRegionId) || saved.catchLegal,
+                    catchLegalityReason = saved.catchLegalityReason ?? string.Empty,
+                    catchSizeKg = saved.catchSizeKg
                 });
             }
 

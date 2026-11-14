@@ -34,6 +34,8 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.AreEqual(SaveGameData.CurrentSchemaVersion, data.schemaVersion);
             CollectionAssert.Contains(data.progress.unlockedRegionIds, "the_shallows");
             CollectionAssert.Contains(data.progress.unlockedRegionIds, "blackrock_reach");
+            CollectionAssert.Contains(data.progress.unlockedRegionIds, "reef_stewardship");
+            CollectionAssert.Contains(data.progress.unlockedRegionIds, "licensed_sea_cucumber");
 
             GameObject restoredOwner = new GameObject("Restored research board");
             try

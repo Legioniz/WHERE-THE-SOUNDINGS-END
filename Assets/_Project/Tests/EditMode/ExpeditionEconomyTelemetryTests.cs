@@ -53,8 +53,11 @@ namespace WhereTheSoundingsEnd.Tests
         {
             ExpeditionEconomyTelemetry telemetry = owner.AddComponent<ExpeditionEconomyTelemetry>();
             telemetry.ObservePropulsion(0.5f);
+            telemetry.RecordCatch("FSH-001", 1.25f, true);
+            telemetry.RecordCatch("FSH-035", 0.20f, false);
             owner.GetComponent<EconomyWalletController>().TryApplyTransaction("trip.reward", 500L);
             telemetry.CompleteTrip();
+            StringAssert.Contains("LEGAL CATCH 50%", telemetry.BuildBalanceReport());
 
             SaveGameData data = SaveGameData.CreateNew(1, "greyhaven");
             telemetry.CaptureSaveData(data);
@@ -67,6 +70,10 @@ namespace WhereTheSoundingsEnd.Tests
                 restored.RestoreSaveData(data);
                 Assert.AreEqual(1, restored.CompletedTrips);
                 Assert.AreEqual(500L, restored.LastTripNetCents);
+                StringAssert.Contains("LEGAL CATCH 50%", restored.BuildBalanceReport());
+                StringAssert.Contains("Greyhaven", restored.BuildBalanceReport());
+                StringAssert.Contains("STARTER", restored.BuildBalanceReport());
+                StringAssert.Contains("MEDIAN NET-HR", restored.BuildBalanceReport());
             }
             finally
             {
@@ -96,6 +103,37 @@ namespace WhereTheSoundingsEnd.Tests
 
             Assert.IsTrue(restoredWallet.TryApplyTransaction("active.trip.repair", -200L));
             StringAssert.Contains("COST $2.00", restored.BuildSummary());
+        }
+
+
+        [Test]
+        public void CompletedBalanceSamplesStayWithinSaveFlagLimit()
+        {
+            ExpeditionEconomyTelemetry telemetry = owner.GetComponent<ExpeditionEconomyTelemetry>();
+            EconomyWalletController wallet = owner.GetComponent<EconomyWalletController>();
+            Assert.IsNotNull(telemetry);
+            Assert.IsNotNull(wallet);
+
+            for (int i = 0; i < 50; i++)
+            {
+                telemetry.ObservePropulsion(0.5f);
+                telemetry.RecordCatch("FSH-001", 0.75f, true);
+                wallet.TryApplyTransaction("balance.sample." + i, 25L);
+                telemetry.CompleteTrip();
+            }
+
+            SaveGameData data = SaveGameData.CreateNew(1, "greyhaven");
+            telemetry.CaptureSaveData(data);
+            WorldFlagSaveData samples = data.progress.worldFlags.Find(
+                flag => flag != null && flag.flagId == "economy.expedition-balance-samples");
+
+            Assert.IsNotNull(samples);
+            Assert.LessOrEqual(samples.stringValue.Length, SaveGameData.MaximumStringLength);
+
+            string error;
+            Assert.IsTrue(telemetry.TryValidateSaveData(data, out error), error);
+            telemetry.RestoreSaveData(data);
+            StringAssert.Contains("RECENT TRIPS", telemetry.BuildBalanceReport());
         }
 
         [Test]

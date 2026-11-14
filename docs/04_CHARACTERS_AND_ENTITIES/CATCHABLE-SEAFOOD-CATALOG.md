@@ -619,3 +619,12 @@ The authoritative names, habitat, behavior, catch conditions, handling, specimen
 The complete PHP selling-price table is maintained separately to avoid conflicting duplicate values. It assigns a base dockside payout to all 100 fish, 47 invertebrates, and 8 algae / seaweed records, plus fixed rules for ABR-001–ABR-008 and UNC-001–UNC-008.
 
 See [Seafood Selling Price Schedule](../07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md). That schedule is the single source of truth for prices and units. Prices are proposed game-balance values informed by public Philippine market references, not live market quotations or guaranteed real-world fisher earnings.
+
+
+## Runtime integration notes — 2026-11-14
+
+The generated cargo catalog now builds all 155 seafood records in the selling-price schedule. Region codes and market class are authored per item and validated against the schedule. Fish, shellfish and cephalopods enter the regional fishing encounter/population system. The eight algae/seaweed goods are gathered with the dedicated bait-free Seaweed Harvesting technique while the cast point is inside a Kelp habitat; they use renewable stock/recovery and are sold by wet weight.
+
+Catch eligibility is a separate runtime policy. Minimum landing weights, protected status, required research permits, region range, permitted technique and required hook configuration are fictional gameplay rules. FSH-035 requires Reef Stewardship, handlining and a circle hook. INV-031 requires the Managed Abalone Harvest permit and is contract-only. INV-037 through INV-041 require Licensed Sea Cucumber Harvest and are contract-only. These rules are not representations of real fisheries law.
+
+Illegal catch provenance (source region, technique, weight, legal state and reason) is persisted with the cargo placement. Flagged catches cannot be sold through ordinary market offers and may be released at dockside; any fine already collected is not refunded. Destination market factors and per-region stock are defined in the selling-price schedule.

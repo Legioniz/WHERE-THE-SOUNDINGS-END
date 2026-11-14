@@ -106,6 +106,12 @@ namespace WhereTheSoundingsEnd.World
         /// Records an earned permit without marking the region as visited or revealing its
         /// location. Physical entry remains the only way to add a visited chart record.
         /// </summary>
+        public bool HasPermit(string regionId)
+        {
+            string id = RegionalChartPolicy.NormalizeId(regionId);
+            return id.Length > 0 && unlockedRegionIds.Contains(id);
+        }
+
         public bool GrantChartPermit(string regionId)
         {
             string id = RegionalChartPolicy.NormalizeId(regionId);
@@ -152,10 +158,36 @@ namespace WhereTheSoundingsEnd.World
         {
             List<string> names = new List<string>();
             foreach (string id in unlockedRegionIds)
-                if (!visitedRegionIds.Contains(id))
+                if (!visitedRegionIds.Contains(id) && IsChartRegionId(id))
                     names.Add(GetDisplayName(id));
             names.Sort(StringComparer.Ordinal);
             return names;
+        }
+
+        public List<string> GetPermittedHarvestNames()
+        {
+            List<string> names = new List<string>();
+            if (unlockedRegionIds.Contains("reef_stewardship")) names.Add("Reef Stewardship");
+            if (unlockedRegionIds.Contains("licensed_sea_cucumber")) names.Add("Licensed Sea Cucumber Harvest");
+            if (unlockedRegionIds.Contains("managed_harvest")) names.Add("Managed Abalone Harvest");
+            names.Sort(StringComparer.Ordinal);
+            return names;
+        }
+
+        private static bool IsChartRegionId(string id)
+        {
+            switch (RegionalChartPolicy.NormalizeId(id))
+            {
+                case "greyhaven":
+                case "the_shallows":
+                case "blackrock_reach":
+                case "the_drowned_parish":
+                case "the_outer_shoals":
+                case "the_hollow_trench":
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public void CaptureSaveData(SaveGameData data)

@@ -1,7 +1,7 @@
 # Seafood Selling Price Schedule
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Proposed balancing baseline — playtest validation required  
+> Status: Authored runtime catalog and regional market matrix integrated; playtest validation required  
 > Owner: Project lead  
 > Version: 0.1  
 > Last reviewed: 2026-11-10  
@@ -409,3 +409,33 @@ These are prototype-only authored values for the first Greyhaven salvage buyer, 
 | SALVAGE-SCRAP-01 | Corroded Ship Fittings | Inez Sarmiento | $2.75 | piece | Provisional prototype value |
 
 Salvage offers still apply the configured buyer stock/demand, cargo quality and freshness factors, and the Inez relationship modifier. These prices must be playtested against salvage time, hold-cell footprint, repair-material utility and trip fuel costs before being treated as final balance. Unlisted salvage remains ineligible for ordinary sale.
+
+
+## 12. Runtime catalogue, legality and regional market integration
+
+The generated Greyhaven cargo catalog now builds all 155 scheduled seafood records (100 fish, 47 invertebrates, 8 algae/seaweed). The repository validator compares generated IDs, prices and market classes against this schedule so the editor builder cannot silently regress to the five-fish starter set. Each record has a stable ID, sale unit, market class, region availability, catch profile and ordinary/contract sale eligibility.
+
+- Fish, shellfish and cephalopods are available through the fishing encounter system according to their authored habitat and region profile.
+- Seaweed uses the bait-free Seaweed Harvesting method in a Kelp habitat. It has its own renewable population stock and is sold by wet harvested weight.
+- Destination market factors are applied at the destination where the player actually sells. Market stock is stored independently by destination and item.
+- Contract-only abalone and sea cucumber lots require their specific research-awarded harvest permits. They are shown as licensed contract intake rather than ordinary commodity sales.
+
+### Fictional catch-eligibility rules
+
+The runtime stores catch source region, technique, landed weight, legal state and reason on each cargo placement. These fields survive save/restore. The game policy currently uses these authored minimum landing weights:
+
+| Trade tier | Fish minimum weight | Invertebrate minimum weight |
+|---|---:|---:|
+| T1 | 0.08 kg | 0.03 kg |
+| T2 | 0.15 kg | 0.06 kg |
+| T3 | 0.30 kg | 0.10 kg |
+| T4 | 0.60 kg | 0.18 kg |
+| T5 | 1.00 kg | 0.30 kg |
+
+These are fictional gameplay thresholds, not real-world minimum landing sizes or legal advice. The other checks are species-region compatibility, the closed Hollow Trench, protected species permits, licensed harvest permits and species-specific permitted technique masks and required hook configurations and required hook configurations. Illegal landings remain flagged in cargo, apply the authored fine when payable, and are excluded from ordinary market offers. The Harbourmaster research progression awards Reef Stewardship, Licensed Sea Cucumber Harvest and Managed Abalone Harvest permits; the Outer Shoals permit also opens the Hollow Trench rule.
+
+### Validation and balancing
+
+The runtime telemetry records up to 50 completed expeditions with departure/destination, starter/average/optimized loadout band, gross receipts, operating expenses, actual fuel, game-clock duration and legal/flagged catch counts. The dockside panel reports average net, net per game-hour, fuel and legal-catch rate by destination/loadout.
+
+The values in this schedule remain a balancing baseline until Unity playtests collect the sample counts defined in [Economy Balancing](ECONOMY-BALANCING.md). No actual runtime balance results are claimed. Regional market pricing/stock logic is integrated; the corresponding dockside terminals still need to be authored in each streamed destination scene. Greyhaven is the currently generated dockside market scene.
