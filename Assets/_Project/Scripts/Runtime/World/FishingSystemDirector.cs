@@ -384,6 +384,7 @@ namespace WhereTheSoundingsEnd.World
 
         private CargoItemDefinition SelectFish()
         {
+            if (regionalChart == null) regionalChart = GetComponent<RegionalChartController>();
             List<CargoItemDefinition> candidates = new List<CargoItemDefinition>();
             List<float> weights = new List<float>();
             float total = 0f;
@@ -439,6 +440,9 @@ namespace WhereTheSoundingsEnd.World
 
         private void LandCatch()
         {
+            if (regionalChart == null) regionalChart = GetComponent<RegionalChartController>();
+            if (wallet == null) wallet = GetComponent<EconomyWalletController>();
+            if (economyTelemetry == null) economyTelemetry = GetComponent<ExpeditionEconomyTelemetry>();
             float quality = FishingSimulationPolicy.CalculateCatchQuality(successfulBeats, tension);
             float size = FishingSimulationPolicy.CalculateCatchSize(hookedFish.BaseCatchSize,
                 hookedFish.MaximumCatchSize, quality, UnityEngine.Random.Range(0.65f, 1f));
