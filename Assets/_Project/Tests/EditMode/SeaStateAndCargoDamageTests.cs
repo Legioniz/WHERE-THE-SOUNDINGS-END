@@ -4,6 +4,7 @@ using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.Core;
 using WhereTheSoundingsEnd.World;
+using WhereTheSoundingsEnd.Interaction;
 
 namespace WhereTheSoundingsEnd.Tests
 {
@@ -246,6 +247,19 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.IsNotNull(data.world.inspectedHistoricalArtifactIds);
             Assert.IsEmpty(data.world.inspectedHistoricalArtifactIds);
             CollectionAssert.Contains(data.world.inspectedPhenomenonSiteIds, "greyhaven.outer_channel_wreck");
+        }
+
+        [Test]
+        public void DocksideArchiveOption_RetainsStableHistoricalArtifactId()
+        {
+            DocksideFurnitureOption option = new DocksideFurnitureOption(
+                "lighthouse.archive-logbook", "Keeper's Weather Ledger",
+                "Inspect the surviving original entries and replacement pages.",
+                DocksideFurnitureAction.ReadHistoricalArtifact,
+                "greyhaven.lighthouse.keeper-logbook");
+
+            Assert.AreEqual(DocksideFurnitureAction.ReadHistoricalArtifact, option.Action);
+            Assert.AreEqual("greyhaven.lighthouse.keeper-logbook", option.HistoricalArtifactId);
         }
 
         [Test]
