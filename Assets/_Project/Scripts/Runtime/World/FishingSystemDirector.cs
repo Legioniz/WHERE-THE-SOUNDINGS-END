@@ -477,9 +477,10 @@ namespace WhereTheSoundingsEnd.World
             cargoHold.TrySetCatchLegality(instanceId, regionId, technique.ToString(),
                 size, legality.IsLegal, legality.Reason);
 
+            bool fineCollected = legality.IsLegal || legality.FineCents <= 0L;
             if (!legality.IsLegal && wallet != null && legality.FineCents > 0L)
-                wallet.TryApplyTransaction("catch.legality.fine." + Guid.NewGuid().ToString("N"),
-                    -legality.FineCents);
+                fineCollected = wallet.TryApplyTransaction(
+                    "catch.legality.fine." + Guid.NewGuid().ToString("N"), -legality.FineCents);
 
             ChangePopulation(hookedFish, activeHabitat, -1);
             if (hookedFish.Category != CargoItemCategory.Seaweed)
@@ -495,7 +496,8 @@ namespace WhereTheSoundingsEnd.World
                   species + " · " + size.ToString("0.0") + " kg · " + grade +
                   " · " + Mathf.RoundToInt(quality * 100f) + "%"
                 : "ILLEGAL LANDING: " + species + " · " + legality.Reason +
-                  " · FINE $" + (legality.FineCents / 100m).ToString("0.00") +
+                  (fineCollected ? " · FINE PAID $" : " · FINE NOT COLLECTED $") +
+                  (legality.FineCents / 100m).ToString("0.00") +
                   " · THIS CATCH CANNOT BE SOLD.";
             FinishFishing();
             hookedFish = null;
