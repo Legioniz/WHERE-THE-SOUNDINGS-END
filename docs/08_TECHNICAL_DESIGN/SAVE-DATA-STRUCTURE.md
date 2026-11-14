@@ -124,3 +124,22 @@ No save schema bump is required for the current equipment/research/telemetry pas
 `HarbourmasterResearchController` stores its one-time submission bitmask in a namespaced `ProgressSaveData.worldFlags` entry and writes earned permit IDs into the existing `ProgressSaveData.unlockedRegionIds` collection. `RegionalChartController` restores those unlocked permits separately from `WorldSaveData.visitedRegionIds`; a permit is not a visit and does not reveal an unknown region.
 
 `ExpeditionEconomyTelemetry` stores completed-trip count, lifetime gross receipts, operating expenses, game-clock duration, fuel consumed and the latest trip metrics in a namespaced progress world flag. An in-progress expedition is not committed as a completed trip until the player finishes a dockside service session. The wallet and fuel controllers expose successful transaction/consumption events for accounting; listener exceptions are isolated from the underlying wallet/cargo commit. Unity save/load round-trip verification remains pending.
+
+
+## Schema v8 additive seafood legality and balance records
+
+The schema version remains 8. New cargo placement fields are additive and have legacy-safe defaults:
+
+- catchRegionId and catchTechniqueId record where/how a seafood lot was landed;
+- catchLegal and catchLegalityReason preserve the result of the authored game legality policy;
+- catchSizeKg preserves the weight used for the legal landing check.
+
+Legacy cargo placements without a catch region are treated as legacy inventory rather than retroactively illegal catches. New catch metadata is validated for bounded strings, finite non-negative weight and valid placement identity before restore. This prevents an illegal landing from becoming saleable after save/reload.
+
+Expedition telemetry continues to use a namespaced progress world flag for trip totals. A second namespaced flag stores a bounded JSON collection of up to 50 completed balance samples. Each sample includes departure/destination region, departure loadout band (starter/average/optimized), gross receipts, operating expenses, actual fuel, game-clock duration, landed/legal/flagged catch counts and landed weight. The active-trip record was extended additively to preserve current catch totals, source region and loadout band through save/reload. Existing schema-v8 telemetry records with 9, 14 or 19 fields remain readable; the current active-trip record uses the 20-field format.
+
+Regional market stock reuses the existing per-vendor/item market stock collection. Destination market IDs use the stable prefix regional_market. plus the region ID. Legacy Mara Venn stock records normalize to regional_market.greyhaven during restore, and duplicate normalized market/item entries are deduplicated. No mutable market stock is stored in ScriptableObject assets.
+
+The additional harvest permits (reef_stewardship, licensed_sea_cucumber, managed_harvest) reuse the existing unlockedRegionIds collection. RegionalChartController filters those permit IDs out of the region-name list, so a harvest permit cannot reveal an unvisited chart region or create a false map marker.
+
+Unity Editor compilation and actual save/load round-trip tests are still required. Static schema validation does not prove JsonUtility serialization or Unity runtime participant ordering.
