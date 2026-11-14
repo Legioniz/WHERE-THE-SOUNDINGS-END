@@ -45,6 +45,13 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 
 ## World geography and regional ecology
 
+- [World Bible](02_LORE_AND_WORLD/WORLD-BIBLE.md) — central setting facts, six-region identity, the Choir, the Orison and continuity decisions.
+- [Lore Guide](02_LORE_AND_WORLD/LORE.md) — evidence labels, terminology, clue authoring and continuity checks.
+- [Island History](02_LORE_AND_WORLD/ISLAND-HISTORY.md) and [Timeline](02_LORE_AND_WORLD/TIMELINE.md) — relative chronology, the Drowned Parish, lighthouse bell and Orison intervals.
+- [Supernatural Lore](02_LORE_AND_WORLD/SUPERNATURAL-LORE.md) — consistent observable rules and unresolved explanations for the Choir.
+- [Factions and Institutions](02_LORE_AND_WORLD/FACTIONS.md), [Ocean Mythology](02_LORE_AND_WORLD/OCEAN-MYTHOLOGY.md), and [Religions and Beliefs](02_LORE_AND_WORLD/RELIGIONS-AND-BELIEFS.md) — social structures and original in-world stories, with cultural boundaries.
+- [Regional Location Catalog](05_WORLD_AND_LEVEL_DESIGN/LOCATION-CATALOG.md) — named locations and implementation status across the six regions.
+
 - [World Bible](02_LORE_AND_WORLD/WORLD-BIBLE.md)
 - [World Map](05_WORLD_AND_LEVEL_DESIGN/WORLD-MAP.md)\n- [Regional Chart and Discovery](06_GAMEPLAY_SYSTEMS/REGIONAL-CHART-AND-DISCOVERY.md) — physical region visits, fog-of-war, discovered-only map marks and chart save persistence.
 - [Greyhaven NPC system and initial resident cast](12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md)
@@ -97,6 +104,7 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 ## Narrative and maritime lore
 
 - [Main Story](03_STORY_AND_NARRATIVE/MAIN-STORY.md) — proposed four-act campaign, the Choir and Orison mystery.
+- [Character Arcs](03_STORY_AND_NARRATIVE/CHARACTER-ARCS.md) — emotional progression, knowledge boundaries and visual/personal motifs for the core cast.
 - [Story Structure](03_STORY_AND_NARRATIVE/STORY-STRUCTURE.md) — act escalation, evidence gates and vertical-slice boundary.
 - [Act I — Familiar Waters](03_STORY_AND_NARRATIVE/ACT-01.md)
 - [Act II — Beyond the Coast](03_STORY_AND_NARRATIVE/ACT-02.md)

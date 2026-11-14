@@ -123,6 +123,10 @@ AI agents must read `AGENTS.md` before modifying the project. Planned content an
 
 - [Game Design Document](docs/01_GAME_DESIGN/GAME-DESIGN-DOCUMENT.md)
 - [World Bible](docs/02_LORE_AND_WORLD/WORLD-BIBLE.md)
+- [Lore Guide](docs/02_LORE_AND_WORLD/LORE.md)
+- [Island History](docs/02_LORE_AND_WORLD/ISLAND-HISTORY.md) · [Timeline](docs/02_LORE_AND_WORLD/TIMELINE.md)
+- [Supernatural Lore](docs/02_LORE_AND_WORLD/SUPERNATURAL-LORE.md)
+- [Character Arcs](docs/03_STORY_AND_NARRATIVE/CHARACTER-ARCS.md)
 - [Maritime Horror Director](docs/06_GAMEPLAY_SYSTEMS/MARITIME-HORROR-DIRECTOR.md)
 - [Save and Load](docs/06_GAMEPLAY_SYSTEMS/SAVE-AND-LOAD.md)
 - [Boat Movement and Hydrodynamics](docs/06_GAMEPLAY_SYSTEMS/BOAT-MOVEMENT.md)
