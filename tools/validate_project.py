@@ -1174,6 +1174,10 @@ def main() -> int:
         if "IllegalCatchProvenanceSurvivesSaveAndRestore" not in cargo_legality_tests:
             failures.append("CatchLegalityCargoSaveTests is missing its save/restore regression.")
 
+        telemetry_tests = (ROOT / "Assets/_Project/Tests/EditMode/ExpeditionEconomyTelemetryTests.cs").read_text(encoding="utf-8")
+        if "CompletedBalanceSamplesStayWithinSaveFlagLimit" not in telemetry_tests:
+            failures.append("ExpeditionEconomyTelemetryTests is missing bounded 50-sample persistence coverage.")
+
         fishing_tests = (ROOT / "Assets/_Project/Tests/EditMode/FishingSimulationPolicyTests.cs").read_text(encoding="utf-8")
         if "FishPreferredTechnique.SeaweedHarvesting" not in fishing_tests:
             failures.append("FishingSimulationPolicyTests is missing seaweed harvest technique compatibility.")
