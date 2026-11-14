@@ -297,7 +297,7 @@ namespace WhereTheSoundingsEnd.Economy
             List<string> lines = new List<string> { "MEASURED EXPEDITION BALANCE  /  " + balanceSamples.Count + " RECENT TRIPS" };
             foreach (KeyValuePair<string, List<BalanceSample>> pair in grouped)
             {
-                long netTotal = 0L;
+                decimal netTotal = 0m;
                 double hours = 0d;
                 float fuelTotal = 0f;
                 int legal = 0;
@@ -305,14 +305,14 @@ namespace WhereTheSoundingsEnd.Economy
                 for (int i = 0; i < pair.Value.Count; i++)
                 {
                     BalanceSample sample = pair.Value[i];
-                    netTotal = SafeAdd(netTotal, sample.grossCents - sample.expenseCents);
+                    netTotal += (decimal)sample.grossCents - sample.expenseCents;
                     hours += sample.durationSeconds / 3600d;
                     fuelTotal += sample.fuelConsumed;
                     legal += sample.legalCatchCount;
                     catches += sample.catchCount;
                 }
                 int count = pair.Value.Count;
-                double netPerHour = hours > 0.0001d ? (netTotal / 100d) / hours : 0d;
+                double netPerHour = hours > 0.0001d ? (double)(netTotal / 100m) / hours : 0d;
                 double legalRate = catches > 0 ? (double)legal / catches * 100d : 0d;
                 lines.Add(SeafoodMarketPolicy.GetMarketName(pair.Key) + "  /  " + count +
                     " TRIPS  /  AVG NET $" + (netTotal / 100m / count).ToString("0.00") +
@@ -376,7 +376,9 @@ namespace WhereTheSoundingsEnd.Economy
                 if (flag == null) continue;
                 if (flag.flagId == SamplesFlagId)
                 {
-                    BalanceSampleCollection collection = JsonUtility.FromJson<BalanceSampleCollection>(flag.stringValue ?? string.Empty);
+                    BalanceSampleCollection collection = null;
+                    try { collection = JsonUtility.FromJson<BalanceSampleCollection>(flag.stringValue ?? string.Empty); }
+                    catch (Exception) { }
                     if (collection == null || collection.samples == null || collection.samples.Count > MaximumBalanceSamples)
                     { error = "The save contains malformed expedition balance samples."; return false; }
                     for (int sampleIndex = 0; sampleIndex < collection.samples.Count; sampleIndex++)
@@ -408,21 +410,21 @@ namespace WhereTheSoundingsEnd.Economy
                 double activeStart = 0d;
                 bool legacyRecord = p.Length == 9;
                 bool previousRecord = p.Length == 14;
-                bool activeRecordValid = legacyRecord || previousRecord ||
-                    (p.Length == 19 &&
+                bool activeRecordValid = legacyRecord ||
+                    ((previousRecord || p.Length == 19) &&
                      int.TryParse(p[9], NumberStyles.Integer, CultureInfo.InvariantCulture, out active) &&
                      (active == 0 || active == 1) &&
                      long.TryParse(p[10], NumberStyles.Integer, CultureInfo.InvariantCulture, out activeGross) && activeGross >= 0 &&
                      long.TryParse(p[11], NumberStyles.Integer, CultureInfo.InvariantCulture, out activeExpenses) && activeExpenses >= 0 &&
                      float.TryParse(p[12], NumberStyles.Float, CultureInfo.InvariantCulture, out activeFuel) && IsFinite(activeFuel) && activeFuel >= 0f &&
                      double.TryParse(p[13], NumberStyles.Float, CultureInfo.InvariantCulture, out activeStart) && IsFinite(activeStart) && activeStart >= 0d &&
-                     !string.IsNullOrWhiteSpace(p[14]) && p[14].Length <= 128 &&
+                     (previousRecord || (!string.IsNullOrWhiteSpace(p[14]) && p[14].Length <= 128 &&
                      int.TryParse(p[15], NumberStyles.Integer, CultureInfo.InvariantCulture, out int savedCatchCount) && savedCatchCount >= 0 &&
                      int.TryParse(p[16], NumberStyles.Integer, CultureInfo.InvariantCulture, out int savedLegalCount) && savedLegalCount >= 0 &&
                      int.TryParse(p[17], NumberStyles.Integer, CultureInfo.InvariantCulture, out int savedIllegalCount) && savedIllegalCount >= 0 &&
                      savedLegalCount + savedIllegalCount <= savedCatchCount &&
                      float.TryParse(p[18], NumberStyles.Float, CultureInfo.InvariantCulture, out float savedCatchWeight) &&
-                     IsFinite(savedCatchWeight) && savedCatchWeight >= 0f);
+                     IsFinite(savedCatchWeight) && savedCatchWeight >= 0f)));
                 if ((!legacyRecord && !previousRecord && p.Length != 19) || !activeRecordValid ||
                     !int.TryParse(p[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out trips) || trips < 0 ||
                     !long.TryParse(p[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out gross) || gross < 0 ||
@@ -444,6 +446,9 @@ namespace WhereTheSoundingsEnd.Economy
         public void RestoreSaveData(SaveGameData data)
         {
             balanceSamples.Clear();
+            tripStartRegionId = "greyhaven";
+            lastTripStartRegionId = "greyhaven";
+            lastTripDestinationRegionId = "greyhaven";
             tripCatchCount = 0;
             tripLegalCatchCount = 0;
             tripIllegalCatchCount = 0;
@@ -466,11 +471,19 @@ namespace WhereTheSoundingsEnd.Economy
                 if (flag == null) continue;
                 if (flag.flagId == SamplesFlagId)
                 {
-                    BalanceSampleCollection collection = JsonUtility.FromJson<BalanceSampleCollection>(flag.stringValue ?? string.Empty);
+                    BalanceSampleCollection collection = null;
+                    try { collection = JsonUtility.FromJson<BalanceSampleCollection>(flag.stringValue ?? string.Empty); }
+                    catch (Exception) { }
                     if (collection != null && collection.samples != null)
                     {
                         balanceSamples.Clear();
                         balanceSamples.AddRange(collection.samples);
+                        if (balanceSamples.Count > 0)
+                        {
+                            BalanceSample latest = balanceSamples[balanceSamples.Count - 1];
+                            lastTripStartRegionId = latest.departureRegionId;
+                            lastTripDestinationRegionId = latest.destinationRegionId;
+                        }
                     }
                     continue;
                 }
