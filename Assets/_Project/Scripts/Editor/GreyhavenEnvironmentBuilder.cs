@@ -108,6 +108,8 @@ namespace WhereTheSoundingsEnd.Editor
             BuildBuoys(landmarks, red, green, metal);
             BuildEnvironmentalArtifacts(harbor, village, estuary, landmarks, water,
                 wood, metal, glass, chartPaper, chartInk, rust, ceramic, cloth, rope);
+            BuildHistoricalArtifacts(harbor, village, estuary, landmarks, water,
+                wood, metal, glass, chartPaper, chartInk, rust, ceramic, cloth, rope);
             GreyhavenMaritimeAssetBuilder.Build(harbor, village, estuary, landmarks,
                 wood, metal, rust, ceramic, cloth, rope, foliage, rock, glass);
             BuildBoat(player, controls, cargoCatalog, seaSurface);
