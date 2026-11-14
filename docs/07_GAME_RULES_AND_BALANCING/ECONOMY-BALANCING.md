@@ -39,7 +39,7 @@ Each of the latest 50 completed samples records:
 
 Equipment purchases are capital investment and are excluded from recurring operating expenses. Fuel, bait, repairs and other service costs are operating expenses. Research stipends and other positive wallet transactions are receipts; review them separately if they dominate a sample.
 
-The dockside panel groups results by destination and loadout band and displays average net per trip, average net per game-hour, average fuel and legal-catch rate. The report is observational: it does not silently change prices, stock, fuel use or encounter odds.
+The dockside panel groups results by destination and loadout band and displays average net per trip, average and median net per game-hour, net-hour spread, average fuel and legal-catch rate. The report is observational: it does not silently change prices, stock, fuel use or encounter odds.
 
 ## 4. Loadout bands
 
