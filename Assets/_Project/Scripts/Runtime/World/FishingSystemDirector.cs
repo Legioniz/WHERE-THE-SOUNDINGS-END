@@ -474,7 +474,7 @@ namespace WhereTheSoundingsEnd.World
             string regionId = regionalChart != null && !string.IsNullOrWhiteSpace(regionalChart.CurrentRegionId)
                 ? regionalChart.CurrentRegionId : "greyhaven";
             CatchLegalityResult legality = CatchLegalityPolicy.Evaluate(
-                hookedFish, regionId, technique, size, regionalChart);
+                hookedFish, regionId, technique, size, regionalChart, Hooks[hookIndex].id);
             cargoHold.TrySetCatchLegality(instanceId, regionId, technique.ToString(),
                 size, legality.IsLegal, legality.Reason);
 
