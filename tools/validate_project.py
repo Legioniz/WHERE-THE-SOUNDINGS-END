@@ -49,6 +49,12 @@ REQUIRED_FILES = [
     "Assets/_Project/Tests/EditMode/CatchLegalityCargoSaveTests.cs",
     "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs",
     "docs/13_PRODUCTION_MANAGEMENT/ECONOMY-INTEGRATION-AUDIT.md",
+    "docs/07_GAME_RULES_AND_BALANCING/ECONOMY-BALANCING.md",
+    "docs/07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md",
+    "docs/04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md",
+    "docs/08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md",
+    "docs/08_TECHNICAL_DESIGN/SAVE-DATA-STRUCTURE.md",
+    "docs/13_PRODUCTION_MANAGEMENT/TASK-BACKLOG.md",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
@@ -1064,7 +1070,8 @@ def main() -> int:
         telemetry_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/ExpeditionEconomyTelemetry.cs").read_text(encoding="utf-8")
         for required_text in (
             "SamplesFlagId", "MaximumBalanceSamples", "RecordCatch", "BuildBalanceReport",
-            "departureRegionId", "destinationRegionId", "legalCatchCount", "JsonUtility.ToJson",
+            "departureRegionId", "destinationRegionId", "legalCatchCount", "loadoutBand",
+            "GetLoadoutBandName", "IsValidActiveRecord", "JsonUtility.ToJson",
         ):
             if required_text not in telemetry_source:
                 failures.append(f"ExpeditionEconomyTelemetry is missing measured balance sampling: {required_text}")
@@ -1161,6 +1168,15 @@ def main() -> int:
         cargo_legality_tests = (ROOT / "Assets/_Project/Tests/EditMode/CatchLegalityCargoSaveTests.cs").read_text(encoding="utf-8")
         if "IllegalCatchProvenanceSurvivesSaveAndRestore" not in cargo_legality_tests:
             failures.append("CatchLegalityCargoSaveTests is missing its save/restore regression.")
+
+        fishing_tests = (ROOT / "Assets/_Project/Tests/EditMode/FishingSimulationPolicyTests.cs").read_text(encoding="utf-8")
+        if "FishPreferredTechnique.SeaweedHarvesting" not in fishing_tests:
+            failures.append("FishingSimulationPolicyTests is missing seaweed harvest technique compatibility.")
+
+        research_tests = (ROOT / "Assets/_Project/Tests/EditMode/HarbourmasterResearchSaveTests.cs").read_text(encoding="utf-8")
+        for permit in ("reef_stewardship", "licensed_sea_cucumber"):
+            if permit not in research_tests:
+                failures.append(f"HarbourmasterResearchSaveTests is missing harvest permit persistence coverage: {permit}")
 
         economy_tests = (ROOT / "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs").read_text(encoding="utf-8")
         for required_test in (
