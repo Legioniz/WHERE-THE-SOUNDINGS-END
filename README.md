@@ -152,7 +152,7 @@ If a real credential is accidentally committed, revoke or rotate it and assess a
 
 The four resident conversations now contain a connected but deliberately unresolved evidence thread: the silent bell's log history, unusual cold-centred catches, unexplained hull scoring, and an empty but untorn net. Each clue is recorded in Yarn state and can be compared through resident dialogue. Personal details further distinguish the Harbourmaster, Mara, Tomas and Inez. This is authored dialogue content; it does not mean the full quest campaign or the Choir's cause is implemented. Yarn/Unity runtime verification remains pending.
 
-- Deterministic Greyhaven environmental artifact dressing across the harbour, village, estuary, lighthouse and outer-channel wreck; static and non-interactive by design.
+- Deterministic Greyhaven decorative artifact dressing across the harbour, village, estuary, lighthouse and outer-channel wreck; these visual props remain static and non-interactive.
 
 - [Regional Histories and Maritime Tales](docs/05_WORLD_AND_LEVEL_DESIGN/REGIONAL-HISTORIES-AND-MARITIME-TALES.md)
 - [Historical Artifacts and Archival Evidence](docs/05_WORLD_AND_LEVEL_DESIGN/HISTORICAL-ARTIFACTS-AND-ARCHIVAL-EVIDENCE.md)
