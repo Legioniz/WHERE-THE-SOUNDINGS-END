@@ -25,6 +25,7 @@ namespace WhereTheSoundingsEnd.Economy
         public string marketName;
         public decimal destinationFactor;
         public SeafoodMarketClass marketClass;
+        public bool contractOnlySale;
     }
 
     /// <summary>
@@ -126,6 +127,9 @@ namespace WhereTheSoundingsEnd.Economy
                     error = "The catch is not legally saleable: " + placement.catchLegalityReason;
                     return false;
                 }
+                if (definition != null && definition.ContractOnlySale &&
+                    (regionalChart == null || !regionalChart.HasPermit(definition.RequiredPermitId)))
+                { error = "This lot requires a licensed harvest permit and contract buyer."; return false; }
                 if (definition == null || !definition.OrdinarySaleEligible || definition.IsAberrant ||
                     !IsFinite(placement.saleQuantity) || placement.saleQuantity <= 0f ||
                     placement.saleQuantity > 1000000f ||
@@ -178,7 +182,8 @@ namespace WhereTheSoundingsEnd.Economy
                     marketRegionId = marketRegionId,
                     marketName = SeafoodMarketPolicy.GetMarketName(marketRegionId),
                     destinationFactor = destinationMarketFactor,
-                    marketClass = definition.MarketClass
+                    marketClass = definition.MarketClass,
+                    contractOnlySale = definition.ContractOnlySale
                 });
             }
 
@@ -283,9 +288,14 @@ namespace WhereTheSoundingsEnd.Economy
                 if (entry.vendorId != VendorId &&
                     (entry.vendorId == null || !entry.vendorId.StartsWith("regional_market.", StringComparison.Ordinal)))
                     continue;
+                string normalizedVendorId = entry.vendorId == VendorId
+                    ? "regional_market.greyhaven" : entry.vendorId;
+                bool duplicate = restored.Exists(existing => existing != null &&
+                    existing.vendorId == normalizedVendorId && existing.itemId == entry.itemId);
+                if (duplicate) continue;
                 restored.Add(new MarketStockSaveData
                 {
-                    vendorId = entry.vendorId == VendorId ? "regional_market.greyhaven" : entry.vendorId,
+                    vendorId = normalizedVendorId,
                     itemId = entry.itemId,
                     currentStock = entry.currentStock,
                     targetStock = entry.targetStock,
