@@ -127,6 +127,7 @@ namespace WhereTheSoundingsEnd.Economy
                     error = "The catch is not legally saleable: " + placement.catchLegalityReason;
                     return false;
                 }
+                if (regionalChart == null) regionalChart = GetComponent<RegionalChartController>();
                 if (definition != null && definition.ContractOnlySale &&
                     (regionalChart == null || !regionalChart.HasPermit(definition.RequiredPermitId)))
                 { error = "This lot requires a licensed harvest permit and contract buyer."; return false; }
