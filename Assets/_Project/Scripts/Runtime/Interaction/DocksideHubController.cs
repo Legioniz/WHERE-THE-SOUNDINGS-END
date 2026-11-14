@@ -1271,6 +1271,9 @@ namespace WhereTheSoundingsEnd.Interaction
             summary += "\n\nCHART PERMITS  /  " +
                 (permits.Count == 0 ? "None recorded." : string.Join(", ", permits.ToArray()));
             summary += "\nPermit names are recorded; unvisited waters remain unmarked and unlocated.";
+            List<string> harvestPermits = chart.GetPermittedHarvestNames();
+            summary += "\n\nHARVEST PERMITS  /  " +
+                (harvestPermits.Count == 0 ? "None recorded." : string.Join(", ", harvestPermits.ToArray()));
             return summary;
         }
 
