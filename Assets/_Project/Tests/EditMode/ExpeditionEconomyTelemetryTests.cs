@@ -72,6 +72,7 @@ namespace WhereTheSoundingsEnd.Tests
                 Assert.AreEqual(500L, restored.LastTripNetCents);
                 StringAssert.Contains("LEGAL CATCH 50%", restored.BuildBalanceReport());
                 StringAssert.Contains("Greyhaven", restored.BuildBalanceReport());
+                StringAssert.Contains("STARTER", restored.BuildBalanceReport());
             }
             finally
             {
