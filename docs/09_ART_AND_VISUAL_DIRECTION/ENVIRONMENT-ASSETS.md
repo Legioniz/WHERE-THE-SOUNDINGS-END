@@ -3,8 +3,8 @@
 > Project: WHERE THE SOUNDINGS END  
 > Status: Working visual specification — bespoke Greyhaven maritime dressing source-implemented; final production meshes/textures and Unity review pending  
 > Owner: Project lead  
-> Version: 0.3  
-> Last reviewed: 2026-11-14
+> Version: 0.4  
+> Last reviewed: 2026-11-14  
 
 ## 1. Visual target
 
@@ -44,13 +44,13 @@ GreyhavenEnvironmentBuilder.BuildEnvironmentalArtifacts adds deterministic, coll
 
 - Harbour: net repair residue, sea-glass floats, a worn lantern, rope coil, damaged oar and an unclaimed cup.
 - Village: market crates and tally residue; a retired propeller and dismantled radio; net weights and mismatched floats; rain collection and oilskin at the inn.
-- Estuary: damaged fish trap, driftwood, glass float, old tide stake, boot, ceramic fragments and rope.
+- Estuary: damaged fish trap, driftwood, glass float, old tide stake, boot, ceramic fragments and rope; partial lower landing with footings, piles, broken deck planks and winch frame; low storehouse foundation outline with threshold and reused timber sill.
 - Lighthouse: abandoned keeper equipment, storm shutter, cracked signal mirror and a closed log case.
-- Wreck: bell fragments, a personal case, ceramic/glass fragments, canvas, rope and a broken rail section.
+- Wreck: bell fragments, personal case, ceramic/glass fragments, canvas, rope and broken rail section; exposed keel, partial ribs/crossmembers and a sheared mast spar make the site read as a broken vessel rather than only a debris pile.
 
-The pass uses generated primitive meshes and four muted material variants (oxidized iron, chipped ceramic, salt-faded canvas, and tarred rope) alongside existing wood, metal, glass and paper materials. It is not a final bespoke model/texture/UV pass.
+The pass uses generated primitive meshes and four muted material variants (oxidized iron, chipped ceramic, salt-faded canvas, and tarred rope) alongside existing wood, metal, glass and paper materials. It is not a final bespoke model/texture/UV pass. The western estuary adds a collapsed lower-inlet landing and partial storehouse foundation; the outer-channel wreck adds exposed structural framing to its existing broken-hull mass.
 
-Artifact cylinders and spheres use parent-local transforms, including the offset wreck transform, so the cluster stays correctly attached when its streamed root moves. All dressing geometry is created without colliders, rigidbodies, lights, or runtime components. It does not become loot, an inspection target, a survey discovery, a map mark, or save data. The streamed-area revision is incremented so generated scene validation recognizes the new content revision.
+Artifact cylinders and spheres use parent-local transforms, including the offset wreck transform, so the cluster stays correctly attached when its streamed root moves. All dressing geometry is created without colliders, rigidbodies, lights, or runtime components. It does not become loot, an inspection target, a survey discovery, a map mark, or save data. The streamed-area revision is now 4. Western and eastern mudflat artifact roots are separate top-level estuary children positioned inside their respective streamed-area bounds; this prevents an origin-centred parent from sending both districts into only one streamed scene. All six generated area scenes must be rebuilt.
 
 ## 5. Bespoke Greyhaven maritime pass
 

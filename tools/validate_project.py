@@ -322,8 +322,10 @@ def main() -> int:
             "Sea_Glass_Collection_Shelf", "Radio_Experiment_Casing", "Knot_Sample_Board",
             "BuildEnvironmentalArtifacts", "BuildHarbourArtifactCluster",
             "BuildVillageArtifactClusters", "BuildEstuaryArtifactClusters",
+            "BuildAbandonedLowerLandingRemains", "BuildLowerSettlementFoundationRemains",
             "BuildLighthouseArtifactCluster", "BuildWreckArtifactCluster",
-            "StreamedAreaRevision = \"3\"",
+            "Wreck_Keel_Spine_Fragment", "Wreck_Broken_Rib_Port_A",
+            "StreamedAreaRevision = \"4\"",
         ):
             if required_text not in greyhaven_builder:
                 failures.append(f"Greyhaven area builder is missing: {required_text}")
@@ -341,6 +343,8 @@ def main() -> int:
         artifact_tests = (ROOT / "Assets/_Project/Tests/EditMode/GreyhavenEnvironmentalArtifactTests.cs").read_text(encoding="utf-8")
         for required_text in (
             "BuildEnvironmentalArtifacts_CreatesDistrictDressingWithoutGameplayComponents",
+            "EstuaryRemains_AreSplitAcrossStreamingOwnershipRoots",
+            "Lower_Inlet_Landing_Remains", "Old_Lower_Settlement_Foundation_Remains",
             "Build_BespokeMaritimePassCreatesDistinctRegionalAssetsWithoutGameplayComponents",
             "rendererCount, Is.GreaterThanOrEqualTo(250)",
             "GetComponentsInChildren<Collider>", "GetComponentsInChildren<MonoBehaviour>",
