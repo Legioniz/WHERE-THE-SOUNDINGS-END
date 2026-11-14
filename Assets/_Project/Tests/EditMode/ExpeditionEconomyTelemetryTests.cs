@@ -73,6 +73,7 @@ namespace WhereTheSoundingsEnd.Tests
                 StringAssert.Contains("LEGAL CATCH 50%", restored.BuildBalanceReport());
                 StringAssert.Contains("Greyhaven", restored.BuildBalanceReport());
                 StringAssert.Contains("STARTER", restored.BuildBalanceReport());
+                StringAssert.Contains("MEDIAN NET-HR", restored.BuildBalanceReport());
             }
             finally
             {
