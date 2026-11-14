@@ -662,6 +662,12 @@ namespace WhereTheSoundingsEnd.Interaction
                 RenderHarbourmasterContracts(location.Resident);
                 return;
             }
+            if (maraMarket != null && maraMarket.IsOpen &&
+                maraMarket.ActiveMarketRegionId != "greyhaven")
+            {
+                RenderMaraServices();
+                return;
+            }
             if (residentId == MaraFishMarketController.VendorId)
             {
                 RenderMaraServices();
@@ -776,7 +782,7 @@ namespace WhereTheSoundingsEnd.Interaction
             bool canQuote = eligibleIds.Count > 0 &&
                 maraMarket.TryBuildOffer(eligibleIds, out offer, out total, out error);
             Label summary = new Label(canQuote
-                ? "SEAFOOD OFFER  /  " + FormatMoney(total) + " USD  /  " + offer.Count + " CARGO LOTS"
+                ? maraMarket.ActiveMarketName.ToUpperInvariant() + " SEAFOOD OFFER  /  " + FormatMoney(total) + " USD  /  " + offer.Count + " CARGO LOTS"
                 : (eligibleIds.Count == 0 ? "No eligible seafood in the hold." : (error ?? "Market offer unavailable.")));
             summary.style.whiteSpace = WhiteSpace.Normal;
             summary.style.color = new Color(0.82f, 0.78f, 0.66f);
@@ -818,7 +824,7 @@ namespace WhereTheSoundingsEnd.Interaction
                     statusLabel.text = success
                         ? "SALE COMPLETE  /  +" + FormatMoney(paid) + " USD  /  " + receipt.Count + " LOTS SOLD."
                         : "SALE NOT COMPLETED  /  " + failure;
-                    furnitureTitle.text = "MARA'S FISH MARKET";
+                    furnitureTitle.text = maraMarket.ActiveMarketName.ToUpperInvariant() + " SEAFOOD MARKET";
                     furnitureDetail.text = statusLabel.text;
                     RenderMaraServices();
                 });
