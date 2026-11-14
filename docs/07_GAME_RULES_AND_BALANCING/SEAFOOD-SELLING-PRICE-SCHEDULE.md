@@ -432,7 +432,7 @@ The runtime stores catch source region, technique, landed weight, legal state an
 | T4 | 0.60 kg | 0.18 kg |
 | T5 | 1.00 kg | 0.30 kg |
 
-These are fictional gameplay thresholds, not real-world minimum landing sizes or legal advice. The other checks are species-region compatibility, the closed Hollow Trench, protected species permits, licensed harvest permits and species-specific permitted technique masks. Illegal landings remain flagged in cargo, apply the authored fine when payable, and are excluded from ordinary market offers. The Harbourmaster research progression awards Reef Stewardship, Licensed Sea Cucumber Harvest and Managed Abalone Harvest permits; the Outer Shoals permit also opens the Hollow Trench rule.
+These are fictional gameplay thresholds, not real-world minimum landing sizes or legal advice. The other checks are species-region compatibility, the closed Hollow Trench, protected species permits, licensed harvest permits and species-specific permitted technique masks and required hook configurations and required hook configurations. Illegal landings remain flagged in cargo, apply the authored fine when payable, and are excluded from ordinary market offers. The Harbourmaster research progression awards Reef Stewardship, Licensed Sea Cucumber Harvest and Managed Abalone Harvest permits; the Outer Shoals permit also opens the Hollow Trench rule.
 
 ### Validation and balancing
 
