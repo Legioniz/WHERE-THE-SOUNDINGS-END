@@ -462,17 +462,17 @@ INV-027|Crenate swimming crab|1.98|INVERTEBRATE|the_shallows,the_drowned_parish|
 INV-028|Common banded mantis shrimp|4.76|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.18|0.54|0||0|T4
 INV-029|Sculptured mitten lobster|7.14|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|1|kg|0.18|0.54|0||0|T4
 INV-030|Longleg spiny lobster|8.56|INVERTEBRATE|blackrock_reach,the_shallows,the_outer_shoals|Shellfish|1|kg|0.18|0.54|0||0|T4
-INV-031|Donkey's ear abalone|11.10|INVERTEBRATE|blackrock_reach,the_shallows|Shellfish|0|kg|0.30|0.90|0|managed_harvest|0|T5
+INV-031|Donkey's ear abalone|11.10|INVERTEBRATE|blackrock_reach,the_shallows|Shellfish|1|kg|0.30|0.90|0|managed_harvest|0|T5
 INV-032|Asian hard clam|2.06|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.10|0.30|0||0|T3
 INV-033|Razor clams|2.22|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.10|0.30|0||0|T3
 INV-034|Pen shell|2.22|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.10|0.30|0||0|T3
 INV-035|Dog conch|1.90|INVERTEBRATE|greyhaven,the_shallows,the_drowned_parish|Shellfish|1|kg|0.10|0.30|0||0|T3
 INV-036|Spider conch|3.01|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|1|kg|0.18|0.54|0||0|T4
-INV-037|Sandfish sea cucumber|1.51|INVERTEBRATE|greyhaven,the_shallows,the_drowned_parish|Shellfish|0|kg|0.30|0.90|0|licensed_sea_cucumber|0|T5
-INV-038|Warty sea cucumber|1.19|INVERTEBRATE|the_shallows,the_drowned_parish|Shellfish|0|kg|0.18|0.54|0|licensed_sea_cucumber|0|T4
-INV-039|Deepwater redfish sea cucumber|1.35|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|0|kg|0.18|0.54|0|licensed_sea_cucumber|0|T4
-INV-040|Lollyfish sea cucumber|0.95|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|0|kg|0.10|0.30|0|licensed_sea_cucumber|0|T3
-INV-041|Leopardfish sea cucumber|1.27|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|0|kg|0.18|0.54|0|licensed_sea_cucumber|0|T4
+INV-037|Sandfish sea cucumber|1.51|INVERTEBRATE|greyhaven,the_shallows,the_drowned_parish|Shellfish|1|kg|0.30|0.90|0|licensed_sea_cucumber|0|T5
+INV-038|Warty sea cucumber|1.19|INVERTEBRATE|the_shallows,the_drowned_parish|Shellfish|1|kg|0.18|0.54|0|licensed_sea_cucumber|0|T4
+INV-039|Deepwater redfish sea cucumber|1.35|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|1|kg|0.18|0.54|0|licensed_sea_cucumber|0|T4
+INV-040|Lollyfish sea cucumber|0.95|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|1|kg|0.10|0.30|0|licensed_sea_cucumber|0|T3
+INV-041|Leopardfish sea cucumber|1.27|INVERTEBRATE|the_shallows,blackrock_reach|Shellfish|1|kg|0.18|0.54|0|licensed_sea_cucumber|0|T4
 INV-042|Edible jellyfish|1.27|INVERTEBRATE|greyhaven,the_shallows,the_outer_shoals|Shellfish|1|kg|0.10|0.30|0||0|T3
 INV-043|Edible squid / lokos|3.01|INVERTEBRATE|the_shallows,the_drowned_parish,the_outer_shoals|Cephalopod|1|kg|0.10|0.30|0||0|T3
 INV-044|Spineless cuttlefish|3.73|INVERTEBRATE|the_shallows,the_drowned_parish,the_outer_shoals|Cephalopod|1|kg|0.18|0.54|0||0|T4
