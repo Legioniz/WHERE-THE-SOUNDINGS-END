@@ -12,7 +12,7 @@ Historical artifacts make the world legible through records that survived imperf
 
 Artifacts are not a conventional collectible checklist. They should feel like things people made, carried, repaired, copied, used and sometimes abandoned. Their importance comes from where they are found, how they were preserved, who can plausibly have handled them and what they cannot prove.
 
-The first playable artifact set is located in Greyhaven. Other regions have proposed artifact families in this document, but are not represented as implemented scenes.
+The first playable artifact set is located in Greyhaven. Other regions have proposed artifact families in this document, but are not represented as implemented scenes. The copied chart, repair tool roll, keeper's ledger and photograph are read through existing dockside furniture menus; the lower-landing letter and wreck recorder use direct close-range vessel inspection.
 
 ## 2. Artifact types and record contract
 
@@ -153,7 +153,7 @@ The Trench is not an archival warehouse or abandoned research base. Instruments 
 
 ## 5. Inspection, discovery and persistence rules
 
-- The existing boat Interact action is the sole first-pass inspection input. No new keybind or duplicate interaction manager is introduced.
+- No new keybind or duplicate interaction manager is introduced. The existing Interact action opens nearby dockside menus; four records are read through their archive furniture entries. The lower-landing letter and wreck recorder use the same close-range inspection controller directly.
 - Artifact anchors use stable IDs and the existing close-range inspection controller. The six Greyhaven metadata anchors are placed under the persistent scene's historical-artifact anchor root, outside static area-stream candidate hierarchies; their visual props still belong to the correct streamed-area roots.
 - The artifact inspection ledger is separate from discovered phenomenon-site IDs, Sounding Rig discoveries, visited regions, NPC relationships and quest state.
 - Reading an artifact does not reveal a region, place a chart mark, grant a bearing, update a quest, change an NPC relationship or create a generic journal collectible.
@@ -162,7 +162,7 @@ The Trench is not an archival warehouse or abandoned research base. Instruments 
 - Save schema v9 adds `WorldSaveData.inspectedHistoricalArtifactIds`. The v8-to-v9 migration creates an empty list for older saves; it never copies sonar-site IDs into the artifact ledger.
 - Keep existing save backups, schema validation limits and transactional restore semantics. Do not serialize GameObject references, object names or hierarchy paths as artifact identity.
 
-The first interaction presentation uses the existing field-note panel. A later UI pass may improve pagination, document zoom and accessibility, but it must preserve the boat-only interaction model until an on-foot controller is deliberately approved.
+Direct lower-landing and wreck inspections use the existing field-note panel. Dockside archive entries show the same record in the furniture detail panel. DocksideHubController executes before the direct inspector so an accessible dockside menu takes priority over a competing Interact action. A later UI pass may improve pagination, document zoom and accessibility, but it must preserve the boat-only interaction model until an on-foot controller is deliberately approved.
 
 ## 6. Narrative and evidence rules
 
@@ -200,7 +200,7 @@ The first interaction presentation uses the existing field-note panel. A later U
 ### Unity review still required
 
 - Open Unity 6000.3.28f1 and rebuild Greyhaven.
-- Approach each of the six anchors and inspect once, then re-inspect.
+- Read the chart, repair tool roll, keeper ledger and photograph through dockside archive entries; approach the lower-landing letter and wreck recorder for direct Interact inspection. Re-read each and confirm previously-examined feedback.
 - Save and reload after reading a subset; confirm the known/first-read status persists.
 - Confirm reading artifacts does not add site discoveries, chart marks, region names, quest state, NPC relationships or sea disturbance.
 - Unload/reload estuary and lighthouse streaming areas while keeping the persistent metadata anchors valid.
