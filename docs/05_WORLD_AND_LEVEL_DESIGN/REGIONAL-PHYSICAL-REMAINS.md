@@ -147,7 +147,7 @@ Keep deep space mostly empty. One instrument fragment carries more weight than a
 - Keep decorative geometry collider-free. The existing Greyhaven SalvageSite trigger remains the only wreck interaction owner.
 - Split top-level streamed roots by actual world-space region; do not group west/east assets beneath an origin root.
 - Keep harbour lanes, mudflat approach, wreck interaction radius, camera sightlines and region silhouettes readable.
-- A future inspectable remains system requires stable IDs, accessible text/audio, duplicate handling, save behavior and clue redundancy as a separate design.
+- Inspectable historical records are specified separately in [Historical Artifacts and Archival Evidence](HISTORICAL-ARTIFACTS-AND-ARCHIVAL-EVIDENCE.md). Their Greyhaven metadata anchors are source-implemented; the five other regional artifact families remain proposals. Physical rubble and ordinary remains do not automatically become interactables.
 - Rebuild generated scenes after changing the Editor builder. Generated scenes are output, not the source of truth.
 
 ## 11. Acceptance and verification
@@ -180,3 +180,4 @@ Static validators and C# syntax checks are not Unity semantic compilation, Edito
 - [Environment Assets](../09_ART_AND_VISUAL_DIRECTION/ENVIRONMENT-ASSETS.md)
 - [Location Catalogue](LOCATION-CATALOG.md)
 - [Regional Ecology](REGIONAL-ECOLOGY-AND-CREATURES.md)
+- [Historical Artifacts and Archival Evidence](HISTORICAL-ARTIFACTS-AND-ARCHIVAL-EVIDENCE.md)

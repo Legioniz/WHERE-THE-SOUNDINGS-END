@@ -108,6 +108,8 @@ namespace WhereTheSoundingsEnd.Editor
             BuildBuoys(landmarks, red, green, metal);
             BuildEnvironmentalArtifacts(harbor, village, estuary, landmarks, water,
                 wood, metal, glass, chartPaper, chartInk, rust, ceramic, cloth, rope);
+            BuildHistoricalArtifacts(harbor, village, estuary, landmarks, water,
+                wood, metal, glass, chartPaper, chartInk, rust, ceramic, cloth, rope);
             GreyhavenMaritimeAssetBuilder.Build(harbor, village, estuary, landmarks,
                 wood, metal, rust, ceramic, cloth, rope, foliage, rock, glass);
             BuildBoat(player, controls, cargoCatalog, seaSurface);
@@ -1008,6 +1010,8 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                             "Read the latest action-clock time, day, sea disturbance and recorded omen.", DocksideFurnitureAction.ReadTideLog),
                         new DocksideFurnitureOption("dock.harbour-chart", "Harbour Chart",
                             "Review the fixed settlement bearings and named service locations.", DocksideFurnitureAction.ReadHarbourChart),
+                        new DocksideFurnitureOption("dock.archive-chart", "Copied Inlet Chart",
+                            "Inspect the older working chart and its later pencil corrections; it is not a safe route.", DocksideFurnitureAction.ReadHistoricalArtifact, "greyhaven.quay.working-chart"),
                         new DocksideFurnitureOption("dock.cargo-hatch", "Cargo Hatch",
                             "Inspect the catch and salvage currently carried aboard.", DocksideFurnitureAction.InspectCatch)
                     }),
@@ -1048,7 +1052,9 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                         new DocksideFurnitureOption("repair.tool-wall", "Tool Wall",
                             "Review the current vessel diagnosis before deciding whether to continue an expedition.", DocksideFurnitureAction.InspectVessel),
                         new DocksideFurnitureOption("repair.propeller", "Spare Propeller",
-                            "Read Tomas's engine-load and propeller inspection notes.", DocksideFurnitureAction.ReadEngineNotes)
+                            "Read Tomas's engine-load and propeller inspection notes.", DocksideFurnitureAction.ReadEngineNotes),
+                        new DocksideFurnitureOption("repair.archive-tools", "Repair Yard Tool Roll",
+                            "Examine the worn tools, mismatched fasteners and replacement handles.", DocksideFurnitureAction.ReadHistoricalArtifact, "greyhaven.repair.tool-roll")
                     }),
                 new DocksideLocationDefinition(
                     "greyhaven.net-mender", "Net Mender Shed", "Network and Inez Sarmiento",
@@ -1085,7 +1091,11 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                         new DocksideFurnitureOption("lighthouse.beacon", "Beacon Mechanism",
                             "Inspect the lighthouse's current presentation-only beacon status.", DocksideFurnitureAction.InspectBeacon),
                         new DocksideFurnitureOption("lighthouse.logbook", "Keeper's Log",
-                            "Read a short local navigation note from the lighthouse log.", DocksideFurnitureAction.ReadLighthouseLog)
+                            "Read the keeper's short navigation notes.", DocksideFurnitureAction.ReadLighthouseLog),
+                        new DocksideFurnitureOption("lighthouse.archive-logbook", "Keeper's Weather Ledger",
+                            "Inspect the surviving original entries and replacement pages in the keeper's ledger.", DocksideFurnitureAction.ReadHistoricalArtifact, "greyhaven.lighthouse.keeper-logbook"),
+                        new DocksideFurnitureOption("lighthouse.archive-photograph", "Glass-Plate Photograph",
+                            "Examine the damaged photograph and distinguish the later annotation from the image.", DocksideFurnitureAction.ReadHistoricalArtifact, "greyhaven.lighthouse.keeper-photograph")
                     })
             };
 
@@ -2362,6 +2372,173 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
             BuildEstuaryArtifactClusters(estuary, wood, metal, glass, rust, ceramic, cloth, rope);
             BuildLighthouseArtifactCluster(landmarks, wood, metal, glass, rust, ceramic, cloth, rope);
             BuildWreckArtifactCluster(water, wood, metal, glass, rust, ceramic, cloth, rope);
+        }
+
+        /// <summary>
+        /// Creates the first inspectable Greyhaven archival set. Render geometry remains static
+        /// and collider-free beneath streamed area roots; metadata anchors live under the
+        /// persistent water root so streaming never strips their inspection/save ownership.
+        /// </summary>
+        public static void BuildHistoricalArtifacts(
+            Transform harbour, Transform village, Transform estuary, Transform landmarks, Transform water,
+            Material wood, Material metal, Material glass, Material paper, Material ink,
+            Material rust, Material ceramic, Material cloth, Material rope)
+        {
+            if (harbour == null || village == null || estuary == null || landmarks == null || water == null)
+                throw new ArgumentNullException("All historical artifact roots are required.");
+            if (wood == null || metal == null || glass == null || paper == null || ink == null ||
+                rust == null || ceramic == null || cloth == null || rope == null)
+                throw new ArgumentNullException("All historical artifact materials are required.");
+
+            Transform quay = Group("Harbour_Historical_Archive_Artifacts", harbour);
+            ArtifactCube(quay, "Quay_Chart_Parchment", new Vector3(7.35f, 1.05f, 33f),
+                new Vector3(1.18f, 0.035f, 0.82f), paper, -4f);
+            ArtifactCube(quay, "Quay_Chart_Crease", new Vector3(7.35f, 1.073f, 33f),
+                new Vector3(0.018f, 0.012f, 0.72f), ceramic, -4f);
+            ArtifactCube(quay, "Quay_Chart_Old_Channel_Line", new Vector3(7.28f, 1.078f, 33.02f),
+                new Vector3(0.9f, 0.009f, 0.018f), ink, 18f);
+            ArtifactCube(quay, "Quay_Chart_Updated_Pencil_Line", new Vector3(7.46f, 1.081f, 33.05f),
+                new Vector3(0.58f, 0.009f, 0.014f), rust, -23f);
+            ArtifactCylinder(quay, "Quay_Chart_Brass_Compass_Rose",
+                new Vector3(7.83f, 1.085f, 32.82f), new Vector3(0.13f, 0.025f, 0.13f),
+                metal, Quaternion.identity);
+            ArtifactCube(quay, "Quay_Envelope_Folded_Letter",
+                new Vector3(8.14f, 1.09f, 33.22f), new Vector3(0.34f, 0.028f, 0.24f), cloth, 12f);
+            ArtifactCube(quay, "Quay_Letter_Exposed_Page",
+                new Vector3(8.08f, 1.108f, 33.2f), new Vector3(0.26f, 0.012f, 0.16f), paper, 12f);
+
+            Transform repair = Group("Village_Historical_Artifacts", village);
+            float repairGround = HeightAt(8f, -47f);
+            ArtifactCube(repair, "Repair_Tool_Roll",
+                new Vector3(8f, repairGround + 0.13f, -47f), new Vector3(1.15f, 0.18f, 0.58f), cloth, -8f);
+            ArtifactCube(repair, "Tool_Roll_Flap",
+                new Vector3(8f, repairGround + 0.24f, -47.14f), new Vector3(1.05f, 0.045f, 0.32f), wood, -8f);
+            ArtifactCylinder(repair, "Tool_Roll_Open_End",
+                new Vector3(7.52f, repairGround + 0.26f, -47.22f), new Vector3(0.12f, 0.09f, 0.12f),
+                rust, Quaternion.identity);
+            ArtifactCylinder(repair, "Repair_Spanner_Head",
+                new Vector3(8.26f, repairGround + 0.36f, -46.88f), new Vector3(0.22f, 0.05f, 0.22f),
+                metal, Quaternion.Euler(90f, 0f, 0f));
+            ArtifactCube(repair, "Repair_Spanner_Handle",
+                new Vector3(8.26f, repairGround + 0.36f, -47.22f), new Vector3(0.07f, 0.055f, 0.5f), metal, -5f);
+            ArtifactCube(repair, "Brass_Divider_Leg_A",
+                new Vector3(7.82f, repairGround + 0.37f, -46.8f), new Vector3(0.035f, 0.04f, 0.48f), rust, 31f);
+            ArtifactCube(repair, "Brass_Divider_Leg_B",
+                new Vector3(8.02f, repairGround + 0.37f, -46.8f), new Vector3(0.035f, 0.04f, 0.48f), metal, -31f);
+
+            Transform westernRoot = estuary.Find("Estuary_Environmental_Artifacts");
+            Transform westernDebris = westernRoot != null
+                ? westernRoot.Find("Western_Mudflat_Debris_Artifacts")
+                : null;
+            if (westernDebris == null)
+                throw new InvalidOperationException("Western estuary historical artifacts require the western debris root.");
+            Transform lowerLanding = Group("Lower_Landing_Historical_Artifacts", westernDebris);
+            ArtifactCube(lowerLanding, "Unposted_Letter_Envelope",
+                new Vector3(4.3f, HeightAt(-71.7f, -25.8f) + 0.16f, 1.2f),
+                new Vector3(0.42f, 0.035f, 0.28f), ceramic, 17f);
+            ArtifactCube(lowerLanding, "Unposted_Letter_Folded_Page",
+                new Vector3(4.28f, HeightAt(-71.7f, -25.8f) + 0.19f, 1.2f),
+                new Vector3(0.34f, 0.018f, 0.2f), paper, 17f);
+            ArtifactCylinder(lowerLanding, "Old_Sounding_Lead_Weight",
+                new Vector3(5.15f, HeightAt(-70.8f, -26f) + 0.1f, 1.05f),
+                new Vector3(0.12f, 0.2f, 0.12f), metal, Quaternion.identity);
+            ArtifactCylinder(lowerLanding, "Lead_Line_Rope_Coil",
+                new Vector3(5.52f, HeightAt(-70.5f, -26.1f) + 0.08f, 1.2f),
+                new Vector3(0.38f, 0.09f, 0.38f), rope, Quaternion.Euler(90f, 0f, 0f));
+
+            Transform lighthouse = Group("Lighthouse_Historical_Artifacts", landmarks);
+            float lighthouseGround = HeightAt(-82.5f, -26.8f);
+            ArtifactCube(lighthouse, "Keeper_Logbook_Pages",
+                new Vector3(-82.5f, lighthouseGround + 0.2f, -26.8f),
+                new Vector3(0.62f, 0.12f, 0.46f), paper, -9f);
+            ArtifactCube(lighthouse, "Keeper_Logbook_Cover",
+                new Vector3(-82.5f, lighthouseGround + 0.27f, -26.8f),
+                new Vector3(0.68f, 0.07f, 0.5f), cloth, -9f);
+            ArtifactCube(lighthouse, "Keeper_Logbook_Spine",
+                new Vector3(-82.82f, lighthouseGround + 0.26f, -26.8f),
+                new Vector3(0.07f, 0.1f, 0.52f), rust, -9f);
+            ArtifactCube(lighthouse, "Keeper_Plate_Photograph_Frame",
+                new Vector3(-84.1f, lighthouseGround + 0.14f, -28.5f),
+                new Vector3(0.72f, 0.07f, 0.54f), rust, 8f);
+            ArtifactCube(lighthouse, "Keeper_Plate_Photograph_Glass",
+                new Vector3(-84.1f, lighthouseGround + 0.18f, -28.5f),
+                new Vector3(0.61f, 0.025f, 0.43f), glass, 8f);
+            ArtifactCube(lighthouse, "Keeper_Photograph_Shoreline_Silhouette",
+                new Vector3(-84.1f, lighthouseGround + 0.2f, -28.5f),
+                new Vector3(0.35f, 0.012f, 0.12f), ink, 8f);
+            ArtifactCube(lighthouse, "Keeper_Photograph_Distant_Landing",
+                new Vector3(-84.1f, lighthouseGround + 0.205f, -28.62f),
+                new Vector3(0.46f, 0.01f, 0.035f), ceramic, 8f);
+
+            Transform wreck = water.Find("Greyhaven_Outer_Channel_Wreck_Field");
+            if (wreck == null)
+                throw new InvalidOperationException("Historical wreck equipment requires the existing Greyhaven wreck site.");
+            Transform wreckArtifacts = Group("Wreck_Historical_Artifacts", wreck);
+            ArtifactCube(wreckArtifacts, "Recovered_Recorder_Housing",
+                new Vector3(3.2f, -0.72f, 0.2f), new Vector3(0.82f, 0.26f, 0.55f), rust, -11f);
+            ArtifactCube(wreckArtifacts, "Recovered_Recorder_Plate",
+                new Vector3(3.2f, -0.55f, 0.2f), new Vector3(0.68f, 0.035f, 0.42f), metal, -11f);
+            ArtifactCylinder(wreckArtifacts, "Recovered_Recorder_Seized_Dial",
+                new Vector3(3.36f, -0.51f, 0.12f), new Vector3(0.14f, 0.035f, 0.14f), ceramic, Quaternion.identity);
+            ArtifactCylinder(wreckArtifacts, "Recovered_Recorder_Cable_Drum",
+                new Vector3(3.92f, -0.79f, 0.57f), new Vector3(0.44f, 0.14f, 0.44f), rope, Quaternion.Euler(90f, 0f, 0f));
+            ArtifactCylinder(wreckArtifacts, "Recovered_Recorder_Lead_Weight",
+                new Vector3(2.7f, -0.84f, 0.85f), new Vector3(0.15f, 0.25f, 0.15f), metal, Quaternion.identity);
+
+            Transform anchors = Group("Historical_Artifact_Inspection_Anchors", water);
+            AddHistoricalArtifactAnchor(anchors, "Historical_Artifact_Anchor_Quay_Chart",
+                "greyhaven.quay.working-chart", "greyhaven", HistoricalArtifactType.Map,
+                "Working Chart of the Lower Inlet", "Copied chart; original date uncertain",
+                "Fold lines, salt bleaching and two different hands' route marks",
+                "Greyhaven T-pier chart table; copied from an older Harbour Office sheet",
+                "The channel line follows the former lower landing before bending toward a later stake position. Depth figures stop before the outer ridge. A pencil correction is in a different hand; it is evidence of revision, not a reliable safe route.",
+                new Vector3(7.35f, 1.08f, 33f));
+            AddHistoricalArtifactAnchor(anchors, "Historical_Artifact_Anchor_Repair_Tools",
+                "greyhaven.repair.tool-roll", "greyhaven", HistoricalArtifactType.Tool,
+                "Repair Yard Tool Roll", "Several generations of repairs",
+                "Oil darkening, mismatched fasteners and two replacement handles",
+                "Tomas Vale's repair yard; ownership of individual tools is uncertain",
+                "A worn spanner, brass dividers and improvised handle repairs share one roll. Their wear is consistent with repeated engine and line work. The set is assembled from different periods and should not be treated as one surveyor's personal kit.",
+                new Vector3(8f, repairGround + 0.36f, -47f));
+            AddHistoricalArtifactAnchor(anchors, "Historical_Artifact_Anchor_Lower_Letter",
+                "greyhaven.western-mudflat.unposted-letter", "greyhaven", HistoricalArtifactType.Letter,
+                "Unposted Letter from the Lower Landing", "Date missing",
+                "Paper swollen by water; ink survives only in short lines",
+                "Recovered beside the western lower-inlet landing; addressee absent",
+                "The surviving lines mention a marker moved between soundings and ask that an old copy not be used as a route. The final sentence is missing. Nothing identifies the writer or proves why the landing was abandoned.",
+                new Vector3(-71.7f, HeightAt(-71.7f, -25.8f) + 0.2f, -25.8f));
+            AddHistoricalArtifactAnchor(anchors, "Historical_Artifact_Anchor_Keeper_Logbook",
+                "greyhaven.lighthouse.keeper-logbook", "greyhaven", HistoricalArtifactType.Logbook,
+                "Keeper's Weather Ledger", "Year -11 onward; later pages are replacements",
+                "Salt-stiff pages; replacement leaves sewn into an older spine",
+                "Western lighthouse keeper's station; original and copied entries are mixed",
+                "The last confirmed bell sounding is entered in Year -11. Later entries describe lamp, lens and shutter maintenance but do not confirm another sounding. Several entries have been recopied; the ledger does not establish why the bell fell silent.",
+                new Vector3(-82.5f, lighthouseGround + 0.3f, -26.8f));
+            AddHistoricalArtifactAnchor(anchors, "Historical_Artifact_Anchor_Keeper_Photograph",
+                "greyhaven.lighthouse.keeper-photograph", "greyhaven", HistoricalArtifactType.Photograph,
+                "Glass Plate: The Lower Landing", "Undated; reverse annotation added later",
+                "Emulsion scratched; one corner deliberately cut away",
+                "Keeper's effects; place and subjects are not conclusively identified",
+                "Four figures stand near a low landing with three visible piles. A later pencil note reads 'before the second move'. The notation may refer to the settlement relocation, but it is not contemporary with the photograph and cannot date the image.",
+                new Vector3(-84.1f, lighthouseGround + 0.2f, -28.5f));
+            AddHistoricalArtifactAnchor(anchors, "Historical_Artifact_Anchor_Recovered_Recorder",
+                "greyhaven.outer-channel.recovered-recorder", "greyhaven", HistoricalArtifactType.SurveyEquipment,
+                "Recovered Bottom Recorder", "Date and vessel unknown",
+                "Pressure-crushed housing; seized cable drum; serial plate abraded",
+                "Outer Channel salvage field; recovery tag is a later copy",
+                "The casing contains a mechanical depth trace and a damaged timing wheel. The surviving serial digits do not match a complete harbour register entry. The recorder proves a survey instrument was recovered, not who carried it or why it was lost.",
+                new Vector3(33.2f, -0.72f, 55.2f));
+        }
+
+        private static void AddHistoricalArtifactAnchor(
+            Transform parent, string objectName, string id, string region, HistoricalArtifactType type,
+            string title, string period, string condition, string source, string reading, Vector3 worldPosition)
+        {
+            GameObject anchor = new GameObject(objectName);
+            anchor.transform.SetParent(parent, false);
+            anchor.transform.position = worldPosition;
+            HistoricalArtifact artifact = anchor.AddComponent<HistoricalArtifact>();
+            artifact.Configure(id, region, type, title, period, condition, source, reading);
         }
 
         private static void BuildHarbourArtifactCluster(

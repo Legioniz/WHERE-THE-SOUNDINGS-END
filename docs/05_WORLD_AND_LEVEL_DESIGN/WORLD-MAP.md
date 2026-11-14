@@ -18,6 +18,6 @@ The fixed chart table at Greyhaven is a separate settlement wayfinding prop show
 
 ## Runtime boundary
 
-The regional chart/discovery foundation is implemented in RegionalChartController, RegionalChartPolicy and GreyhavenRuntimeUI. Visits are persisted in SaveGameData schema v8; discovered site IDs remain owned by SoundingRigController. The current Outer Shoals and Hollow Trench scenes are isolated survey sandboxes, not destinations connected by sailing. A region unlock therefore records chart knowledge; it does not currently enable a travel transition.
+The regional chart/discovery foundation is implemented in RegionalChartController, RegionalChartPolicy and GreyhavenRuntimeUI. Visits are persisted in SaveGameData schema v9; discovered site IDs remain owned by SoundingRigController. The current Outer Shoals and Hollow Trench scenes are isolated survey sandboxes, not destinations connected by sailing. A region unlock therefore records chart knowledge; it does not currently enable a travel transition.
 
 Design around travel time, landmarks, fuel range, weather exposure, alternate routes, safe returns and discovery density once regional travel and shared world coordinates are implemented.

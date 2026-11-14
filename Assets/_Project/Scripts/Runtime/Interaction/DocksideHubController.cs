@@ -30,7 +30,8 @@ namespace WhereTheSoundingsEnd.Interaction
         ReadNightWatch,
         InspectBeacon,
         ReadLighthouseLog,
-        ReadResidenceNotice
+        ReadResidenceNotice,
+        ReadHistoricalArtifact
     }
 
     [Serializable]
@@ -40,18 +41,23 @@ namespace WhereTheSoundingsEnd.Interaction
         [SerializeField] private string displayName = string.Empty;
         [SerializeField, TextArea] private string description = string.Empty;
         [SerializeField] private DocksideFurnitureAction action;
+        [SerializeField] private string historicalArtifactId = string.Empty;
 
         public string FurnitureId => furnitureId;
         public string DisplayName => displayName;
         public string Description => description;
         public DocksideFurnitureAction Action => action;
+        public string HistoricalArtifactId => historicalArtifactId;
 
-        public DocksideFurnitureOption(string id, string name, string detail, DocksideFurnitureAction furnitureAction)
+        public DocksideFurnitureOption(
+            string id, string name, string detail, DocksideFurnitureAction furnitureAction,
+            string artifactId = "")
         {
             furnitureId = id;
             displayName = name;
             description = detail;
             action = furnitureAction;
+            historicalArtifactId = artifactId ?? string.Empty;
         }
     }
 
@@ -172,6 +178,7 @@ namespace WhereTheSoundingsEnd.Interaction
     /// Boat-only location hub. It presents authored interior/furniture menus while keeping
     /// streamed buildings static and all gameplay ownership in persistent runtime systems.
     /// </summary>
+    [DefaultExecutionOrder(-100)]
     [DisallowMultipleComponent]
     public sealed class DocksideHubController : MonoBehaviour
     {
@@ -1174,7 +1181,44 @@ namespace WhereTheSoundingsEnd.Interaction
             if (option == null) return;
             furnitureTitle.text = option.DisplayName.ToUpperInvariant();
             furnitureDetail.text = option.Description;
-            statusLabel.text = ResolveFurnitureAction(option.Action);
+            statusLabel.text = option.Action == DocksideFurnitureAction.ReadHistoricalArtifact
+                ? ResolveHistoricalArtifact(option.HistoricalArtifactId)
+                : ResolveFurnitureAction(option.Action);
+        }
+
+        private string ResolveHistoricalArtifact(string artifactId)
+        {
+            if (string.IsNullOrWhiteSpace(artifactId))
+                return "No historical record is assigned to this archive entry.";
+
+            HistoricalArtifact[] artifacts = FindObjectsByType<HistoricalArtifact>(FindObjectsSortMode.None);
+            HistoricalArtifact selected = null;
+            for (int index = 0; index < artifacts.Length; index++)
+            {
+                HistoricalArtifact candidate = artifacts[index];
+                if (candidate == null || !candidate.IsValid ||
+                    !string.Equals(candidate.ArtifactId, artifactId, StringComparison.Ordinal))
+                    continue;
+
+                selected = candidate;
+                break;
+            }
+
+            if (selected == null)
+                return "The referenced archival record is not present in this scene.";
+
+            DeepOceanSiteInteractionController inspector = vesselBody != null
+                ? vesselBody.GetComponent<DeepOceanSiteInteractionController>()
+                : null;
+            if (inspector == null)
+                inspector = FindFirstObjectByType<DeepOceanSiteInteractionController>();
+            if (inspector == null)
+                return "The archival inspection service is unavailable.";
+
+            bool firstInspection;
+            if (!inspector.TryRecordHistoricalArtifact(selected, out firstInspection))
+                return "The archival record could not be verified.";
+            return inspector.LatestInspection;
         }
 
         private string ResolveFurnitureAction(DocksideFurnitureAction action)

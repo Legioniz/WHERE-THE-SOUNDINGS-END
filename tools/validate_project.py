@@ -81,6 +81,9 @@ REQUIRED_FILES = [
     "Assets/_Project/Tests/EditMode/RegionalChartSaveTests.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanSurveyRegion.cs",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonSite.cs",
+    "Assets/_Project/Scripts/Runtime/World/HistoricalArtifact.cs",
+    "Assets/_Project/Scripts/Runtime/World/HistoricalArtifact.cs.meta",
+    "docs/05_WORLD_AND_LEVEL_DESIGN/HISTORICAL-ARTIFACTS-AND-ARCHIVAL-EVIDENCE.md",
     "Assets/_Project/Scripts/Runtime/World/DeepOceanPhenomenonRules.cs",
     "Assets/_Project/Scripts/Runtime/World/AcousticEventBus.cs",
     "Assets/_Project/Scripts/Runtime/World/AcousticWorldListener.cs",
@@ -189,8 +192,8 @@ def main() -> int:
                 failures.append("Input action/binding identifiers must be unique.")
 
         save_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs").read_text(encoding="utf-8")
-        if "CurrentSchemaVersion = 8" not in save_source:
-            failures.append("SaveGameData schema must be version 8 after economy wallet persistence changes.")
+        if "CurrentSchemaVersion = 9" not in save_source:
+            failures.append("SaveGameData schema must be version 9 after historical artifact inspection persistence.")
 
         if "case 4:" not in save_source or "data.schemaVersion = 5;" not in save_source:
             failures.append("SaveGameData is missing the schema 4 to 5 atmosphere-state migration.")
@@ -200,12 +203,14 @@ def main() -> int:
             failures.append("SaveGameData is missing the schema 6 to 7 regional chart discovery migration.")
         if "case 7:" not in save_source or "data.schemaVersion = 8;" not in save_source or "walletCents" not in save_source:
             failures.append("SaveGameData is missing the schema 7 to 8 economy wallet migration.")
+        if "case 8:" not in save_source or "data.schemaVersion = 9;" not in save_source or "inspectedHistoricalArtifactIds" not in save_source:
+            failures.append("SaveGameData is missing the schema 8 to 9 historical artifact inspection migration.")
 
         for required_text in (
             "weatherRemainingGameSeconds", "weatherShiftCooldownGameSeconds",
             "hallucinationCooldownGameSeconds", "birdEventPending",
             "atmosphereIncidentCountdownGameSeconds", "inspectedPhenomenonSiteIds",
-            "heardAcousticEventIds",
+            "inspectedHistoricalArtifactIds", "heardAcousticEventIds",
         ):
             if required_text not in save_source:
                 failures.append(f"WorldSaveData is missing persistent state: {required_text}")
@@ -325,6 +330,7 @@ def main() -> int:
             "BuildAbandonedLowerLandingRemains", "BuildLowerSettlementFoundationRemains",
             "BuildLighthouseArtifactCluster", "BuildWreckArtifactCluster",
             "Wreck_Keel_Spine_Fragment", "Wreck_Broken_Rib_Port_A",
+            "BuildHistoricalArtifacts", "Historical_Artifact_Inspection_Anchors",
             "StreamedAreaRevision = \"4\"",
         ):
             if required_text not in greyhaven_builder:
@@ -343,6 +349,8 @@ def main() -> int:
         artifact_tests = (ROOT / "Assets/_Project/Tests/EditMode/GreyhavenEnvironmentalArtifactTests.cs").read_text(encoding="utf-8")
         for required_text in (
             "BuildEnvironmentalArtifacts_CreatesDistrictDressingWithoutGameplayComponents",
+            "BuildHistoricalArtifacts_CreatesSixTypedAnchorsAndStaticEvidenceClusters",
+            "Historical_Artifact_Inspection_Anchors", "Keeper_Logbook_Cover", "Recovered_Recorder_Housing",
             "EstuaryRemains_AreSplitAcrossStreamingOwnershipRoots",
             "Lower_Inlet_Landing_Remains", "Old_Lower_Settlement_Foundation_Remains",
             "Build_BespokeMaritimePassCreatesDistinctRegionalAssetsWithoutGameplayComponents",
@@ -368,9 +376,17 @@ def main() -> int:
             "DocksideModalPolicy.CanOpenDocksideMenu",
             "pauseAction.WasPressedThisFrame()",
             "private void OnDisable()",
+            "DefaultExecutionOrder(-100)",
+            "ReadHistoricalArtifact",
+            "HistoricalArtifactId",
+            "ResolveHistoricalArtifact",
         ):
             if required_text not in dockside_source:
                 failures.append(f"DocksideHubController is missing expected interaction feature: {required_text}")
+
+        archive_option_tests = (ROOT / "Assets/_Project/Tests/EditMode/SeaStateAndCargoDamageTests.cs").read_text(encoding="utf-8")
+        if "DocksideArchiveOption_RetainsStableHistoricalArtifactId" not in archive_option_tests:
+            failures.append("Historical artifact archive menu option regression test is missing.")
 
         dockside_tests = (ROOT / "Assets/_Project/Tests/EditMode/DocksideAccessPolicyTests.cs").read_text(encoding="utf-8")
         for required_test in (
@@ -856,9 +872,9 @@ def main() -> int:
             if required_text not in harvest_source:
                 failures.append(f"HarvestingMinigameController is missing salvage transaction guards: {required_text}")
 
-        for required_text in ("inspectionCooldownRealSeconds", "DeepOceanInspectionPolicy", "IsCooldownReady", "TryClaimInteraction"):
+        for required_text in ("inspectionCooldownRealSeconds", "DeepOceanInspectionPolicy", "IsCooldownReady", "TryClaimInteraction", "HistoricalArtifact", "TryRecordHistoricalArtifact", "inspectedHistoricalArtifactIds"):
             if required_text not in site_interaction:
-                failures.append(f"DeepOceanSiteInteractionController is missing rate-limit/action guards: {required_text}")
+                failures.append(f"DeepOceanSiteInteractionController is missing inspection feature: {required_text}")
 
         if "TryClaimInteraction" not in sea_source or "IsGameplayActionBusy" not in sea_source:
             failures.append("SeaStateDirector must coordinate exclusive gameplay action claims.")

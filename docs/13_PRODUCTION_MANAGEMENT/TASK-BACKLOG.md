@@ -48,7 +48,7 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 | M0-04 | P0 | Run all 13 current Edit Mode test source files in Unity | M | M0-02 | Authored; Unity execution open |
 | M0-05 | P0 | Expand and run focused Play Mode integration tests | L | M0-03, M0-04 | Greyhaven streaming test authored; Unity execution and broader coverage open |
 | M0-06 | P0 | Validate boat, water and camera behavior together | L | M0-03, M0-05 | Source integration/cadence corrected; Unity acceptance open |
-| M0-07 | P0 | Verify save/load, autosave, backups and participant restore | M | M0-03, M0-05 | Front-end save UI and schema v8 source present; Unity integration open |
+| M0-07 | P0 | Verify save/load, autosave, backups and participant restore | M | M0-03, M0-05 | Front-end save UI and schema v9 source present; Unity integration open |
 | M0-08 | P0 | Produce and smoke-test a clean Windows 64-bit development build | M | M0-03 through M0-07 | Open |
 | M0-10 | P0 | Verify dockside hub, modal exclusivity and Greyhaven additive streaming in Unity | M | M0-03, M0-04, M0-05 | Source/tests authored; Unity verification open |
 | M0-09 | P1 | Decide how to enforce main-branch review/check requirements | S | Owner plan/visibility decision | Blocked by private-repository plan limitation |
@@ -225,9 +225,19 @@ A new player can start the slice and complete this sequence without developer co
 - [ ] Inspect prop placement at gameplay camera height; correct floating, clipping, scale, density and occlusion.
 - [ ] Confirm central pier, service approaches, dock chart, lighthouse silhouette and wreck inspection radius remain clear.
 - [ ] Run the new artifact Edit Mode tests and all existing Edit Mode tests in Unity 6000.3.28f1.
-- [ ] Verify the artifact groups stream with their owning area and create no colliders, runtime components, lights, rigidbodies or save changes.
+- [ ] Verify decorative prop groups stream with their owning area and create no colliders, runtime components, lights or rigidbodies. HistoricalArtifact metadata anchors are a separate persistent-scene layer; verify they do not migrate with static area scenes and save only stable artifact IDs.
 - [ ] Replace highest-visibility greybox props with original/licensed production meshes only after asset provenance and performance review.
 
+
+## Historical artifact inspection — 2026-11-14
+
+**Source status:** Six Greyhaven artifact anchors, dockside archive entries plus direct vessel inspection, a separate inspected-artifact save ledger and schema v8-to-v9 migration are implemented in source. Unity verification remains open.
+
+- [ ] Rebuild Greyhaven and inspect the working chart, tool roll, keeper's weather ledger and photograph through dockside archive entries; inspect the unposted letter and recovered bottom recorder directly from the boat.
+- [ ] Verify first read/re-read feedback and that the inspected-artifact ledger survives save/load without modifying inspected phenomenon-site IDs.
+- [ ] Confirm the metadata anchors remain in the persistent scene while estuary/lighthouse visual props unload/reload with their static streamed areas.
+- [ ] Confirm archive reads do not cause site disturbance, sonar discoveries, regional chart marks, visited-region unlocks, quest flags or NPC relationship changes.
+- [ ] The other five regional artifact families remain proposed until their locations, provenance, discovery gates and playable region scenes are authored.
 
 ## Economy and trading integration — researched design baseline, 2026-11-14
 
@@ -238,7 +248,7 @@ Authoritative design: [Economy and Trading System](../08_TECHNICAL_DESIGN/ECONOM
 | ID | Priority | Task | Dependencies | Status |
 |---|---|---|---|---|
 | ECO-01 | P1 | Add sale-unit/quantity and base-price data to cargo definitions using the existing schedule; preserve stable item IDs | Existing cargo catalog and price schedule | Source implemented — 100 fish, 47 invertebrates and 8 algae/seaweed definitions are generated from the authoritative schedule with regional availability, units, market class and catch profiles; three salvage prices remain provisional; Unity builder regeneration pending |
-| ECO-02 | P1 | Add economy save DTO, integer-cent wallet, schema migration and legacy currency conversion | Save schema v7, save migration tests | Partial — schema v8 cents wallet DTO, v7 migration and generated-vessel wallet component; Unity migration/wallet tests remain open |
+| ECO-02 | P1 | Add economy save DTO, integer-cent wallet, schema migration and legacy currency conversion | Save schema v7, save migration tests | Partial — schema v9 retains the schema-v8 cents wallet and adds the v8-to-v9 historical-artifact ledger migration; Unity migration/wallet tests remain open |
 | ECO-03 | P1 | Implement deterministic sale, demand, repair, fuel-cost and affordability policies | ECO-01, ECO-02 | Partial — deterministic pricing, demand, repair/fuel quotes, wallet overflow and transaction policies are connected to live services; Unity execution and balancing remain open |
 | ECO-04 | P1 | Implement vendor profiles, item acceptance, buyer stock, demand refresh and atomic cargo sales | ECO-03, SpatialCargoHold | Partial — Mara applies destination-specific factors and per-region stock/demand; catch provenance blocks illegal ordinary sales; licensed contract lots require harvest permits; regional pricing logic is source-complete, but streamed destination dockside terminals still need physical scene integration |
 | ECO-05 | P1 | Implement purchases, vendor stock, bait/supply consumption and hold/equipment capacity checks | ECO-04, cargo/equipment definitions | Partial — Inez sells stocked bait and starter equipment into the spatial hold; bait is consumed per cast; engine/rod/lantern can be installed into persistent slots, condition is saved and Tomas services damaged equipment; purchase rollback, stock limits and hold-fit checks implemented; broader tackle catalogue remains open |

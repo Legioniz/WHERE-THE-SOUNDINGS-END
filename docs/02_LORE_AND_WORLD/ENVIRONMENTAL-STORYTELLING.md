@@ -60,9 +60,11 @@ These are visual arrangements, not newly authored canonical history. Object name
 
 ## 6. Interaction and discovery boundaries
 
-The current artifact pass is intentionally non-interactive. The existing Sounding Rig site discovery and close-range phenomenon inspection systems remain separate and authoritative. Looking at or passing an artifact does not reveal a site, update the regional chart, change NPC dialogue, or write save data.
+The broad environmental dressing pass remains non-interactive. A separate, deliberately small set of six Greyhaven historical records is now inspectable through the existing boat Interact action and close-range site inspection controller. Each record has a stable artifact ID, type, date/period, condition, provenance and reading text. Its visual prop remains under the correct streamed-area root while its metadata anchor remains beneath the persistent historical-artifact root.
 
-A future inspectable artifact system must define stable IDs, interaction range, text/audio accessibility, save behavior, duplicate handling, clue redundancy, and whether the object is optional or progression-critical before implementation. It must not retroactively turn every decorative prop into a collectible.
+Historical artifact reads are persisted in a ledger separate from inspected phenomenon sites and Sounding Rig discoveries. Reading a chart or record does not reveal a region, add a chart mark/bearing, change NPC dialogue, create a quest flag or add sea disturbance. Re-reading reports a known record rather than adding duplicate state. The remaining environmental props stay decorative; they do not become inspectable collectibles by implication.
+
+See [Historical Artifacts and Archival Evidence](../05_WORLD_AND_LEVEL_DESIGN/HISTORICAL-ARTIFACTS-AND-ARCHIVAL-EVIDENCE.md) for the six Greyhaven records, proposed regional artifacts, provenance handling and acceptance criteria.
 
 ## 7. Horror escalation
 
@@ -89,4 +91,4 @@ A future inspectable artifact system must define stable IDs, interaction range, 
 
 The six-region treatment is specified in [Regional Physical Remains and Environmental Evidence](../05_WORLD_AND_LEVEL_DESIGN/REGIONAL-PHYSICAL-REMAINS.md). It covers reef-marker infrastructure, seasonal Blackrock camps, Outer Shoals survey debris, the Drowned Parish's staged relocation layers, and the Hollow Trench's expedition traces. These five regional treatments are proposed content designs, not claims that additional playable scenes or travel links exist.
 
-The Greyhaven source extension is narrower: the western mudflat contains a partial lower-inlet landing and a low old-settlement foundation outline; the wreck dressing has exposed frame members. All pieces remain deterministic, static and non-interactive. Unity generation, camera-height review, grounding and streamed-scene inspection are still required.
+The Greyhaven physical-remains extension adds a partial lower-inlet landing, low settlement foundation and exposed wreck frame. Their render props remain deterministic and non-interactive. The six archival metadata anchors are the deliberate exception and use the existing boat inspection path; Unity generation, camera-height review, grounding and Play Mode inspection remain required.

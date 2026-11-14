@@ -24,10 +24,13 @@ namespace WhereTheSoundingsEnd.World
         private Rigidbody vesselBody;
         private InputAction interactAction;
         private DeepOceanPhenomenonSite[] sites = Array.Empty<DeepOceanPhenomenonSite>();
+        private HistoricalArtifact[] historicalArtifacts = Array.Empty<HistoricalArtifact>();
         private readonly HashSet<string> inspectedSiteIds = new HashSet<string>(StringComparer.Ordinal);
+        private readonly HashSet<string> inspectedHistoricalArtifactIds = new HashSet<string>(StringComparer.Ordinal);
         private string latestInspection = "APPROACH A SURVEY SITE AND PRESS E TO INSPECT.";
 
         public IReadOnlyCollection<string> InspectedSiteIds => inspectedSiteIds;
+        public IReadOnlyCollection<string> InspectedHistoricalArtifactIds => inspectedHistoricalArtifactIds;
         public string LatestInspection => latestInspection;
 
         public void Configure(InputActionAsset input, SeaStateDirector director)
@@ -41,6 +44,7 @@ namespace WhereTheSoundingsEnd.World
             vesselBody = GetComponent<Rigidbody>();
             if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             sites = FindObjectsByType<DeepOceanPhenomenonSite>(FindObjectsSortMode.None);
+            historicalArtifacts = FindObjectsByType<HistoricalArtifact>(FindObjectsSortMode.None);
         }
 
         private void Start()
@@ -60,9 +64,11 @@ namespace WhereTheSoundingsEnd.World
                 !DeepOceanInspectionPolicy.IsCooldownReady(Time.unscaledTime, nextInspectionAllowedAt))
                 return;
 
-            DeepOceanPhenomenonSite nearest = null;
+            DeepOceanPhenomenonSite nearestSite = null;
+            HistoricalArtifact nearestArtifact = null;
             float bestDistance = interactionDistance * interactionDistance;
             Vector2 vesselPosition = new Vector2(vesselBody.position.x, vesselBody.position.z);
+
             for (int index = 0; index < sites.Length; index++)
             {
                 DeepOceanPhenomenonSite site = sites[index];
@@ -71,50 +77,102 @@ namespace WhereTheSoundingsEnd.World
                 float distance = (sitePosition - vesselPosition).sqrMagnitude;
                 if (distance <= bestDistance)
                 {
-                    nearest = site;
+                    nearestSite = site;
+                    nearestArtifact = null;
                     bestDistance = distance;
                 }
             }
 
-            if (nearest == null)
+            for (int index = 0; index < historicalArtifacts.Length; index++)
             {
-                latestInspection = "NO SURVEY SITE WITHIN SAFE INSPECTION RANGE.";
+                HistoricalArtifact artifact = historicalArtifacts[index];
+                if (artifact == null || !artifact.IsValid) continue;
+                Vector2 artifactPosition = new Vector2(artifact.transform.position.x, artifact.transform.position.z);
+                float distance = (artifactPosition - vesselPosition).sqrMagnitude;
+                if (distance <= bestDistance)
+                {
+                    nearestArtifact = artifact;
+                    nearestSite = null;
+                    bestDistance = distance;
+                }
+            }
+
+            if (nearestSite == null && nearestArtifact == null)
+            {
+                latestInspection = "NO SURVEY SITE OR HISTORICAL ARTIFACT WITHIN SAFE INSPECTION RANGE.";
                 return;
             }
 
             // Claim only after a valid target is found; an empty interaction must not
-            // steal the same-frame input from a nearby harbour NPC.
+            // steal the same-frame input from a nearby harbour NPC or dockside action.
             if (seaState != null && !seaState.TryClaimInteraction())
                 return;
 
             nextInspectionAllowedAt = DeepOceanInspectionPolicy.GetNextAllowedTime(
                 Time.unscaledTime, inspectionCooldownRealSeconds);
 
-            bool firstInspection = inspectedSiteIds.Add(nearest.SiteId);
-            latestInspection = (firstInspection ? "FIELD NOTE RECORDED: " : "KNOWN SITE: ") +
-                nearest.DisplayName + " [" + nearest.EvidenceLabel + "]\n" + nearest.FirstSurveyNote;
-            // A site's disturbance is a one-time discovery consequence, never a repeat-interaction farm.
-            if (seaState != null && firstInspection)
-                seaState.AddDisturbance(DeepOceanInspectionPolicy.GetDisturbance(firstInspection));
+            if (nearestArtifact != null)
+            {
+                bool firstInspection;
+                TryRecordHistoricalArtifact(nearestArtifact, out firstInspection);
+                return;
+            }
+
+            bool firstSiteInspection = inspectedSiteIds.Add(nearestSite.SiteId);
+            latestInspection = (firstSiteInspection ? "FIELD NOTE RECORDED: " : "KNOWN SITE: ") +
+                nearestSite.DisplayName + " [" + nearestSite.EvidenceLabel + "]\n" + nearestSite.FirstSurveyNote;
+            // Survey-site disturbance is a one-time consequence; archive reading never adds it.
+            if (seaState != null && firstSiteInspection)
+                seaState.AddDisturbance(DeepOceanInspectionPolicy.GetDisturbance(firstSiteInspection));
         }
 
+        /// <summary>
+        /// Records a read without treating it as a Sounding Rig discovery or causing sea disturbance.
+        /// </summary>
+        public bool TryRecordHistoricalArtifact(HistoricalArtifact artifact, out bool firstInspection)
+        {
+            firstInspection = false;
+            if (artifact == null || !artifact.IsValid) return false;
+
+            firstInspection = inspectedHistoricalArtifactIds.Add(artifact.ArtifactId);
+            latestInspection = artifact.BuildInspectionText(!firstInspection);
+            return true;
+        }
         public void CaptureSaveData(SaveGameData data)
         {
             if (data == null || data.world == null)
                 throw new ArgumentNullException(nameof(data), "Save data must contain world state.");
+            if (data.world.inspectedPhenomenonSiteIds == null)
+                data.world.inspectedPhenomenonSiteIds = new List<string>();
+            if (data.world.inspectedHistoricalArtifactIds == null)
+                data.world.inspectedHistoricalArtifactIds = new List<string>();
             data.world.inspectedPhenomenonSiteIds.Clear();
             data.world.inspectedPhenomenonSiteIds.AddRange(inspectedSiteIds);
+            data.world.inspectedHistoricalArtifactIds.Clear();
+            data.world.inspectedHistoricalArtifactIds.AddRange(inspectedHistoricalArtifactIds);
         }
 
         public void RestoreSaveData(SaveGameData data)
         {
             if (data == null || data.world == null) return;
             inspectedSiteIds.Clear();
-            if (data.world.inspectedPhenomenonSiteIds == null) return;
-            for (int index = 0; index < data.world.inspectedPhenomenonSiteIds.Count; index++)
+            if (data.world.inspectedPhenomenonSiteIds != null)
             {
-                string id = data.world.inspectedPhenomenonSiteIds[index];
-                if (!string.IsNullOrWhiteSpace(id)) inspectedSiteIds.Add(id);
+                for (int index = 0; index < data.world.inspectedPhenomenonSiteIds.Count; index++)
+                {
+                    string id = data.world.inspectedPhenomenonSiteIds[index];
+                    if (!string.IsNullOrWhiteSpace(id)) inspectedSiteIds.Add(id);
+                }
+            }
+
+            inspectedHistoricalArtifactIds.Clear();
+            if (data.world.inspectedHistoricalArtifactIds != null)
+            {
+                for (int index = 0; index < data.world.inspectedHistoricalArtifactIds.Count; index++)
+                {
+                    string id = data.world.inspectedHistoricalArtifactIds[index];
+                    if (!string.IsNullOrWhiteSpace(id)) inspectedHistoricalArtifactIds.Add(id);
+                }
             }
         }
 
@@ -126,7 +184,7 @@ namespace WhereTheSoundingsEnd.World
                 fontSize = 12, wordWrap = true,
                 normal = { textColor = new Color(0.82f, 0.86f, 0.84f) }
             };
-            GUI.Label(new Rect(20f, Screen.height - 210f, 520f, 54f), latestInspection, style);
+            GUI.Label(new Rect(20f, Screen.height - 250f, 560f, 150f), latestInspection, style);
         }
     }
 

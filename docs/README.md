@@ -52,6 +52,7 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 - [Factions and Institutions](02_LORE_AND_WORLD/FACTIONS.md), [Ocean Mythology](02_LORE_AND_WORLD/OCEAN-MYTHOLOGY.md), and [Religions and Beliefs](02_LORE_AND_WORLD/RELIGIONS-AND-BELIEFS.md) — social structures and original in-world stories, with cultural boundaries.
 - [Regional Location Catalog](05_WORLD_AND_LEVEL_DESIGN/LOCATION-CATALOG.md) — named locations and implementation status across the six regions.
 - [Regional Physical Remains and Environmental Evidence](05_WORLD_AND_LEVEL_DESIGN/REGIONAL-PHYSICAL-REMAINS.md) — abandoned structures, old settlements, wreck anatomy, regional traces and implementation boundaries.
+- [Historical Artifacts and Archival Evidence](05_WORLD_AND_LEVEL_DESIGN/HISTORICAL-ARTIFACTS-AND-ARCHIVAL-EVIDENCE.md) — letters, logbooks, maps, photographs, tools and survey instruments, with provenance, reading and persistence rules.
 
 - [World Bible](02_LORE_AND_WORLD/WORLD-BIBLE.md)
 - [World Map](05_WORLD_AND_LEVEL_DESIGN/WORLD-MAP.md)\n- [Regional Chart and Discovery](06_GAMEPLAY_SYSTEMS/REGIONAL-CHART-AND-DISCOVERY.md) — physical region visits, fog-of-war, discovered-only map marks and chart save persistence.

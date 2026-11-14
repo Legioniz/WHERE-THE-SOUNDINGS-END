@@ -33,7 +33,7 @@ The implementation lives in Assets/_Project/Scripts/Runtime/Persistence/.
 - SeaStateDirector persists elapsed game time, time of day, panic, sea disturbance, weather intensity/remaining duration/next shift, hallucination cooldown, pending seabird warning and latest omen.
 - FishermanAtmosphereDirector persists its incident countdown, caption/hush timers and active false-navigation-light position/remaining duration.
 - AcousticWorldListener persists hearing pressure, last heard signal metadata and a bounded event-ID deduplication ledger.
-- DeepOceanSiteInteractionController persists inspected phenomenon-site IDs.
+- DeepOceanSiteInteractionController persists inspected phenomenon-site IDs and separately persists inspected historical-artifact IDs; archive reads do not enter the Sounding Rig discovery ledger.
 - SoundingRigController persists accepted pulse count, discovered phenomenon site IDs and evaluated survey opportunity IDs.
 - RegionalChartController persists physically visited region IDs and records corresponding chart unlocks; map marks remain derived from SoundingRigController discoveries.
 - VesselConditionController persists hull and engine condition.
@@ -98,9 +98,9 @@ Implemented now:
 - Spatial cargo placements, damaged hold cells and equipment placements through SpatialCargoHold.
 - Action-driven day/time, panic and sea disturbance.
 - Hull/engine condition and wreck-site daily depletion.
-- Greyhaven NPC stable IDs, last activity IDs, region IDs, individual relationship scores and bounded relationship-event memory IDs through NpcAgent (schema v6 relationship memory, retained in schema v8).
+- Greyhaven NPC stable IDs, last activity IDs, region IDs, individual relationship scores and bounded relationship-event memory IDs through NpcAgent (schema v6 relationship memory, retained in schema v9).
 - Yarn Spinner float, string and bool variables through YarnDialogueSaveParticipant (requires a DialogueRunner reference).
-- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs introduced in schema v5 and retained in current schema v8.
+- Sounding Rig survey pulse sequence, discovered phenomenon-site IDs, and evaluated opportunity IDs introduced in schema v5 and retained in current schema v9.
 
 Not yet connected because the corresponding gameplay systems do not exist in the current prototype:
 
@@ -124,7 +124,7 @@ A field's presence in SaveGameData is a persistence contract, not proof that the
 
 ## Deep-ocean survey persistence
 
-Schema v5 introduced three survey fields to WorldSaveData; these fields remain part of the current schema v8:
+Schema v5 introduced three survey fields to WorldSaveData; these fields remain part of the current schema v9. Schema v9 adds an independent inspectedHistoricalArtifactIds ledger; the v8-to-v9 migration initializes it empty without copying inspected phenomenon-site IDs:
 - soundingPulseCount: monotonic accepted-pulse sequence used in stable opportunity IDs;
 - discoveredPhenomenonSiteIds: stable site IDs already found by the player;
 - evaluatedSurveyOpportunityIds: recent opportunity IDs retained as a duplicate-evaluation guard.
@@ -148,3 +148,9 @@ Generated scenes include an AcousticWorldListener. It subscribes to AcousticEven
 
 
 The Harbour Inn Guest Ledger uses the existing `AutosaveController.RequestCheckpointAutosave` method and does not introduce a new save kind, file, DTO or schema migration. The dockside UI is modal-exclusive with the inventory, dialogue and front-end pause/save/settings screens; it pauses simulation while open and restores the previous time scale on close.
+
+
+Historical archive persistence:
+- `WorldSaveData.inspectedHistoricalArtifactIds` stores stable artifact IDs read through `HistoricalArtifact`.
+- Schema v9 adds the list independently from `inspectedPhenomenonSiteIds`; older schema v8 saves receive an empty list.
+- `DeepOceanSiteInteractionController` owns both lists but does not merge their meaning. Artifact re-reads do not repeat discovery consequences or add survey disturbance.

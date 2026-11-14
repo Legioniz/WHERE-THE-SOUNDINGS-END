@@ -10,7 +10,7 @@ namespace WhereTheSoundingsEnd.Persistence
     [Serializable]
     public sealed class SaveGameData
     {
-        public const int CurrentSchemaVersion = 8;
+        public const int CurrentSchemaVersion = 9;
 
         public int schemaVersion;
         public int slotNumber;
@@ -83,6 +83,7 @@ namespace WhereTheSoundingsEnd.Persistence
         public List<string> discoveredPhenomenonSiteIds = new List<string>();
         public List<string> evaluatedSurveyOpportunityIds = new List<string>();
         public List<string> inspectedPhenomenonSiteIds = new List<string>();
+        public List<string> inspectedHistoricalArtifactIds = new List<string>();
 
         // Action-driven weather and horror state; timer fields are game seconds unless named RealSeconds.
         public float weatherFogPressure;
@@ -440,6 +441,14 @@ namespace WhereTheSoundingsEnd.Persistence
                         data.schemaVersion = 8;
                         break;
 
+                    case 8:
+                        NormalizeDefaults(data);
+                        // Historical artifact inspection is a new independent ledger. Older saves
+                        // must not inherit site-inspection IDs or invent archival discoveries.
+                        data.world.inspectedHistoricalArtifactIds = new List<string>();
+                        data.schemaVersion = 9;
+                        break;
+
                     default:
                         error = "No migration path exists for save schema version " + data.schemaVersion + ".";
                         return false;
@@ -497,6 +506,7 @@ namespace WhereTheSoundingsEnd.Persistence
                 data.world.discoveredPhenomenonSiteIds.Count,
                 data.world.evaluatedSurveyOpportunityIds.Count,
                 data.world.inspectedPhenomenonSiteIds.Count,
+                data.world.inspectedHistoricalArtifactIds.Count,
                 data.world.visitedRegionIds.Count,
                 data.world.heardAcousticEventIds.Count,
                 data.inventory.cargo.Count,
@@ -702,6 +712,7 @@ namespace WhereTheSoundingsEnd.Persistence
             if (!ValidateUniqueIds(data.world.discoveredPhenomenonSiteIds, "discovered site", out error) ||
                 !ValidateUniqueIds(data.world.evaluatedSurveyOpportunityIds, "survey opportunity", out error) ||
                 !ValidateUniqueIds(data.world.inspectedPhenomenonSiteIds, "inspected site", out error) ||
+                !ValidateUniqueIds(data.world.inspectedHistoricalArtifactIds, "inspected historical artifact", out error) ||
                 !ValidateUniqueIds(data.world.heardAcousticEventIds, "acoustic event", out error) ||
                 !ValidateUniqueIds(data.dialogue.completedNodeIds, "completed dialogue node", out error))
                 return false;
@@ -923,6 +934,7 @@ namespace WhereTheSoundingsEnd.Persistence
             if (data.world.discoveredPhenomenonSiteIds == null) data.world.discoveredPhenomenonSiteIds = new List<string>();
             if (data.world.evaluatedSurveyOpportunityIds == null) data.world.evaluatedSurveyOpportunityIds = new List<string>();
             if (data.world.inspectedPhenomenonSiteIds == null) data.world.inspectedPhenomenonSiteIds = new List<string>();
+            if (data.world.inspectedHistoricalArtifactIds == null) data.world.inspectedHistoricalArtifactIds = new List<string>();
             if (data.world.visitedRegionIds == null) data.world.visitedRegionIds = new List<string>();
             if (data.world.heardAcousticEventIds == null) data.world.heardAcousticEventIds = new List<string>();
             if (data.world.latestOmen == null) data.world.latestOmen = string.Empty;
