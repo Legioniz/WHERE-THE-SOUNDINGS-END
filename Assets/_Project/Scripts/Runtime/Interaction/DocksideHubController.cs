@@ -803,6 +803,7 @@ namespace WhereTheSoundingsEnd.Interaction
                 {
                     MarketSaleLine line = offer[lineIndex];
                     itemized.Append(line.displayName);
+                    if (line.contractOnlySale) itemized.Append("  /  LICENSED CONTRACT");
                     itemized.Append("  /  ");
                     itemized.Append(line.saleQuantity.ToString("0.00"));
                     itemized.Append(" ");
