@@ -84,7 +84,7 @@ Do not tune a destination to its top end based on one lucky catch. Evaluate medi
 Change one class of variable at a time and re-run the same sample:
 
 1. **Acquisition and ecology:** regional availability, stock, recovery and encounter weighting.
-2. **Legal eligibility:** authored minimum weight, regional closure, permit and technique restrictions.
+2. **Legal eligibility:** authored minimum weight, regional closure, permit, technique and required-hook restrictions.
 3. **Sale price:** base price from the schedule, only after verifying unit and destination factor.
 4. **Market behavior:** buyer stock, restock cadence and bounded demand.
 5. **Operating costs:** fuel burn, bait cost, repairs and emergency reserve.
