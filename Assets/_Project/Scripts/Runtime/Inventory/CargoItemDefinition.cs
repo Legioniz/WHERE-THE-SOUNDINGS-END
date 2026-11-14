@@ -77,6 +77,7 @@ namespace WhereTheSoundingsEnd.Inventory
         [SerializeField] private string[] availableRegionIds = Array.Empty<string>();
         [SerializeField, Min(0f)] private float minimumLegalCatchWeightKg = 0.05f;
         [SerializeField] private bool protectedCatch;
+        [SerializeField] private bool contractOnlySale;
         [SerializeField] private string requiredPermitId = string.Empty;
         [SerializeField] private int allowedTechniqueMask;
 
@@ -110,6 +111,7 @@ namespace WhereTheSoundingsEnd.Inventory
         public string[] AvailableRegionIds { get { return availableRegionIds ?? Array.Empty<string>(); } }
         public float MinimumLegalCatchWeightKg { get { return Mathf.Max(0f, minimumLegalCatchWeightKg); } }
         public bool ProtectedCatch { get { return protectedCatch; } }
+        public bool ContractOnlySale { get { return contractOnlySale; } }
         public string RequiredPermitId { get { return requiredPermitId ?? string.Empty; } }
         public int AllowedTechniqueMask { get { return Mathf.Max(0, allowedTechniqueMask); } }
         public bool IsAvailableInRegion(string regionId)
