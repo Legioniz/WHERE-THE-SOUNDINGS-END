@@ -155,3 +155,4 @@ The four resident conversations now contain a connected but deliberately unresol
 - Deterministic Greyhaven environmental artifact dressing across the harbour, village, estuary, lighthouse and outer-channel wreck; static and non-interactive by design.
 
 - [Regional Histories and Maritime Tales](docs/05_WORLD_AND_LEVEL_DESIGN/REGIONAL-HISTORIES-AND-MARITIME-TALES.md)
+- [Historical Artifacts and Archival Evidence](docs/05_WORLD_AND_LEVEL_DESIGN/HISTORICAL-ARTIFACTS-AND-ARCHIVAL-EVIDENCE.md)
