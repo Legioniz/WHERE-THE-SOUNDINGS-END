@@ -12,6 +12,7 @@ namespace WhereTheSoundingsEnd.Economy
         Undersized,
         ProtectedSpecies,
         MissingHarvestPermit,
+        ProhibitedGear,
         ProhibitedTechnique
     }
 
@@ -32,7 +33,7 @@ namespace WhereTheSoundingsEnd.Economy
     {
         public static CatchLegalityResult Evaluate(CargoItemDefinition definition,
             string regionId, FishingTechnique technique, float catchWeightKg,
-            RegionalChartController chart)
+            RegionalChartController chart, string selectedHookId = null)
         {
             if (definition == null)
                 return Illegal(CatchViolation.OutsideSpeciesRange, "Unknown species record.", 300L);
@@ -65,6 +66,11 @@ namespace WhereTheSoundingsEnd.Economy
                 (chart == null || !chart.HasPermit(definition.RequiredPermitId)))
                 return Illegal(CatchViolation.MissingHarvestPermit,
                     "A specific harvest permit is required for this catch.", 500L);
+
+            if (!string.IsNullOrWhiteSpace(definition.RequiredHookId) &&
+                !string.Equals(definition.RequiredHookId, selectedHookId, StringComparison.OrdinalIgnoreCase))
+                return Illegal(CatchViolation.ProhibitedGear,
+                    "This species requires the approved hook configuration.", 200L);
 
             int techniqueMask = definition.AllowedTechniqueMask;
             if (techniqueMask != 0 && (techniqueMask & (1 << (int)technique)) == 0)
