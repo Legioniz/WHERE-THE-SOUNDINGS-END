@@ -764,6 +764,7 @@ namespace WhereTheSoundingsEnd.Interaction
             }
 
             List<string> eligibleIds = new List<string>();
+            List<string> flaggedCatchIds = new List<string>();
             int flaggedCatchCount = 0;
             for (int i = 0; i < cargoHold.Placements.Count; i++)
             {
@@ -773,6 +774,7 @@ namespace WhereTheSoundingsEnd.Interaction
                 if (placement != null && !string.IsNullOrWhiteSpace(placement.catchRegionId) && !placement.catchLegal)
                 {
                     flaggedCatchCount++;
+                    flaggedCatchIds.Add(placement.instanceId);
                     continue;
                 }
                 if (definition != null && definition.OrdinarySaleEligible && !definition.IsAberrant &&
@@ -830,6 +832,22 @@ namespace WhereTheSoundingsEnd.Interaction
                 flagged.style.color = new Color(0.88f, 0.62f, 0.48f);
                 flagged.style.fontSize = 10;
                 vendorActions.Add(flagged);
+                Button releaseFlagged = MakeButton("RELEASE FLAGGED CATCHES  /  " + flaggedCatchCount, () =>
+                {
+                    int released = 0;
+                    for (int flaggedIndex = flaggedCatchIds.Count - 1; flaggedIndex >= 0; flaggedIndex--)
+                    {
+                        CargoPlacement removed;
+                        if (cargoHold.TryRemove(flaggedCatchIds[flaggedIndex], out removed))
+                            released++;
+                    }
+                    statusLabel.text = "FLAGGED CATCHES RELEASED  /  " + released +
+                        " LOTS  /  FINES ARE NOT REFUNDED.";
+                    furnitureTitle.text = maraMarket.ActiveMarketName.ToUpperInvariant() + " SEAFOOD MARKET";
+                    furnitureDetail.text = statusLabel.text;
+                    RenderMaraServices();
+                });
+                vendorActions.Add(releaseFlagged);
             }
 
             if (canQuote)
