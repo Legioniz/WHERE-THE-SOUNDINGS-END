@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -27,6 +28,8 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Core/Pcg32Random.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs",
     "Assets/_Project/Scripts/Runtime/Economy/EconomyPolicy.cs",
+    "Assets/_Project/Scripts/Runtime/Economy/SeafoodMarketPolicy.cs",
+    "Assets/_Project/Scripts/Runtime/Economy/CatchLegalityPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Economy/EconomyWalletController.cs",
     "Assets/_Project/Scripts/Runtime/Economy/MaraFishMarketController.cs",
     "Assets/_Project/Scripts/Runtime/Economy/VesselFuelController.cs",
@@ -41,6 +44,9 @@ REQUIRED_FILES = [
     "Assets/_Project/Tests/EditMode/ExpeditionEconomyTelemetryTests.cs",
     "Assets/_Project/Tests/EditMode/EconomyPolicyTests.cs",
     "Assets/_Project/Tests/EditMode/MaraMarketTransactionTests.cs",
+    "Assets/_Project/Tests/EditMode/SeafoodMarketPolicyTests.cs",
+    "Assets/_Project/Tests/EditMode/CatchLegalityPolicyTests.cs",
+    "Assets/_Project/Tests/EditMode/CatchLegalityCargoSaveTests.cs",
     "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs",
     "docs/13_PRODUCTION_MANAGEMENT/ECONOMY-INTEGRATION-AUDIT.md",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs",
@@ -950,9 +956,123 @@ def main() -> int:
             if required_text not in harvest_source:
                 failures.append(f"HarvestingMinigameController is disconnected from fishing runtime: {required_text}")
 
+        # The generated catalog must stay in lockstep with the authored seafood schedule.
+        seafood_builder = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
+        catalog_match = re.search(r'const string rows = @"(.*?)";', seafood_builder, re.DOTALL)
+        if catalog_match is None:
+            failures.append("GreyhavenEnvironmentBuilder is missing the embedded seafood catalog.")
+        else:
+            catalog_rows = [line for line in catalog_match.group(1).splitlines() if line.strip()]
+            catalog_by_id = {}
+            catalog_counts = {"FSH": 0, "INV": 0, "ALG": 0}
+            for row in catalog_rows:
+                fields = row.split("|")
+                if len(fields) != 14:
+                    failures.append(f"Malformed generated seafood catalog row: {row}")
+                    continue
+                item_id = fields[0]
+                prefix = item_id.split("-", 1)[0]
+                if prefix not in catalog_counts:
+                    failures.append(f"Unknown seafood catalog prefix: {item_id}")
+                    continue
+                catalog_counts[prefix] += 1
+                if item_id in catalog_by_id:
+                    failures.append(f"Duplicate generated seafood catalog ID: {item_id}")
+                catalog_by_id[item_id] = fields
+            if catalog_counts != {"FSH": 100, "INV": 47, "ALG": 8}:
+                failures.append(f"Seafood catalog counts are incomplete: {catalog_counts}")
+
+            price_doc = (ROOT / "docs/07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md").read_text(encoding="utf-8")
+            scheduled = {}
+            for line in price_doc.splitlines():
+                if not re.match(r"^\\|\\s*(FSH|INV|ALG)-", line):
+                    continue
+                fields = [part.strip() for part in line.split("|")]
+                if len(fields) < 6:
+                    failures.append(f"Malformed seafood price schedule row: {line}")
+                    continue
+                price_match = re.search(r"\\$([0-9.]+)", fields[5])
+                if price_match:
+                    scheduled[fields[1]] = (price_match.group(1), fields[4])
+            if set(catalog_by_id) != set(scheduled):
+                failures.append("Generated seafood catalog IDs do not exactly match the authoritative price schedule.")
+            for item_id, fields in catalog_by_id.items():
+                expected = scheduled.get(item_id)
+                if expected and (fields[2] != expected[0] or fields[3] != expected[1]):
+                    failures.append(f"{item_id} price/market class differs from the authoritative schedule.")
+
+        if "seafoodUsdPerKg" in seafood_builder:
+            failures.append("Legacy five-fish ConfigureEconomy table must not overwrite the expanded seafood catalog.")
+        for required_text in (
+            "AddExpandedSeafoodCatalog(definitions)", "SeaweedHarvesting",
+            'FindProperty("minimumLegalCatchWeightKg")',
+            'FindProperty("availableRegionIds")', 'FindProperty("contractOnlySale")',
+        ):
+            if required_text not in seafood_builder:
+                failures.append(f"GreyhavenEnvironmentBuilder is missing seafood catalog integration: {required_text}")
+
+        market_policy = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/SeafoodMarketPolicy.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "GetDestinationFactor", "greyhaven", "the_shallows", "blackrock_reach",
+            "the_drowned_parish", "the_outer_shoals", "the_hollow_trench",
+            "1.08m", "1.20m", "1.25m", "1.40m",
+        ):
+            if required_text not in market_policy:
+                failures.append(f"SeafoodMarketPolicy is missing destination market data: {required_text}")
+
+        legality_policy = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/CatchLegalityPolicy.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "CatchViolation.ClosedArea", "CatchViolation.OutsideSpeciesRange",
+            "CatchViolation.Undersized", "CatchViolation.ProtectedSpecies",
+            "CatchViolation.MissingHarvestPermit", "CatchViolation.ProhibitedTechnique",
+            "MinimumLegalCatchWeightKg", "HasPermit", "the_outer_shoals",
+        ):
+            if required_text not in legality_policy:
+                failures.append(f"CatchLegalityPolicy is missing an authored legality rule: {required_text}")
+
+        save_source = (ROOT / "Assets/_Project/Scripts/Runtime/Persistence/SaveGameData.cs").read_text(encoding="utf-8")
+        for required_text in ("catchRegionId", "catchTechniqueId", "catchLegal", "catchLegalityReason", "catchSizeKg"):
+            if required_text not in save_source:
+                failures.append(f"CargoPlacementSaveData is missing catch provenance: {required_text}")
+
+        cargo_source = (ROOT / "Assets/_Project/Scripts/Runtime/Inventory/SpatialCargoHold.cs").read_text(encoding="utf-8")
+        for required_text in ("TrySetCatchLegality", "catchRegionId = item.catchRegionId", "catchLegal = saved.catchLegal"):
+            if required_text not in cargo_source:
+                failures.append(f"SpatialCargoHold is missing catch provenance persistence: {required_text}")
+
+        chart_controller_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/RegionalChartController.cs").read_text(encoding="utf-8")
+        for required_text in ("HasPermit", "GetPermittedHarvestNames", "IsChartRegionId"):
+            if required_text not in chart_controller_source:
+                failures.append(f"RegionalChartController is missing harvest permit support: {required_text}")
+
+        research_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/HarbourmasterResearchController.cs").read_text(encoding="utf-8")
+        for required_text in ('GrantChartPermit("reef_stewardship")',
+                              'GrantChartPermit("licensed_sea_cucumber")',
+                              'GrantChartPermit("managed_harvest")'):
+            if required_text not in research_source:
+                failures.append(f"Harbourmaster research is missing harvest permit progression: {required_text}")
+
+        fishing_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishingSystemDirector.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "CatchLegalityPolicy.Evaluate", "TrySetCatchLegality", "economyTelemetry.RecordCatch",
+            "fish.IsAvailableInRegion(regionId)", "FishingTechnique.SeaweedHarvesting",
+            "fish.Category == CargoItemCategory.Seaweed",
+        ):
+            if required_text not in fishing_source:
+                failures.append(f"FishingSystemDirector is missing seafood/legality integration: {required_text}")
+
+        telemetry_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/ExpeditionEconomyTelemetry.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "SamplesFlagId", "MaximumBalanceSamples", "RecordCatch", "BuildBalanceReport",
+            "departureRegionId", "destinationRegionId", "legalCatchCount", "JsonUtility.ToJson",
+        ):
+            if required_text not in telemetry_source:
+                failures.append(f"ExpeditionEconomyTelemetry is missing measured balance sampling: {required_text}")
+
         market_source = (ROOT / "Assets/_Project/Scripts/Runtime/Economy/MaraFishMarketController.cs").read_text(encoding="utf-8")
         for required_text in (
             "OrdinarySaleEligible", "IsAberrant", "CalculateDemandFactor",
+            "SeafoodMarketPolicy.GetDestinationFactor", "regional_market.", "ContractOnlySale",
             "TryCommitRemoval", "wallet.TryApplyTransaction", "RefreshStock",
         ):
             if required_text not in market_source:
@@ -1023,6 +1143,24 @@ def main() -> int:
         ):
             if required_text not in dockside_source:
                 failures.append(f"DocksideHubController is missing economy service wiring: {required_text}")
+
+        seafood_tests = (ROOT / "Assets/_Project/Tests/EditMode/SeafoodMarketPolicyTests.cs").read_text(encoding="utf-8")
+        for required_test in ("DestinationFactorMatchesAuthoredMarketMatrix", "EveryEstablishedRegionHasAMarketAndUnknownRegionHasNoPrice"):
+            if f"void {required_test}(" not in seafood_tests:
+                failures.append(f"SeafoodMarketPolicyTests is missing: {required_test}")
+
+        legality_tests = (ROOT / "Assets/_Project/Tests/EditMode/CatchLegalityPolicyTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "StandardCatchInsideAuthoredRangeIsLegal", "UndersizedCatchIsFlaggedWithAuthoredFine",
+            "SpeciesOutsideItsAuthoredRegionIsFlagged", "HollowTrenchRequiresOuterShoalsResearchPermit",
+            "ProtectedSpeciesRequiresPermitAndAuthorizedTechnique", "ContractOnlyHarvestRequiresItsSpecificPermit",
+        ):
+            if f"void {required_test}()" not in legality_tests:
+                failures.append(f"CatchLegalityPolicyTests is missing: {required_test}")
+
+        cargo_legality_tests = (ROOT / "Assets/_Project/Tests/EditMode/CatchLegalityCargoSaveTests.cs").read_text(encoding="utf-8")
+        if "IllegalCatchProvenanceSurvivesSaveAndRestore" not in cargo_legality_tests:
+            failures.append("CatchLegalityCargoSaveTests is missing its save/restore regression.")
 
         economy_tests = (ROOT / "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs").read_text(encoding="utf-8")
         for required_test in (
