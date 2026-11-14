@@ -81,6 +81,7 @@ namespace WhereTheSoundingsEnd.Inventory
         [SerializeField] private bool contractOnlySale;
         [SerializeField] private string requiredPermitId = string.Empty;
         [SerializeField] private int allowedTechniqueMask;
+        [SerializeField] private string requiredHookId = string.Empty;
 
         [Header("Fish ecology and encounter")]
         [SerializeField] private FishHabitat habitats = FishHabitat.All;
@@ -115,6 +116,7 @@ namespace WhereTheSoundingsEnd.Inventory
         public bool ContractOnlySale { get { return contractOnlySale; } }
         public string RequiredPermitId { get { return requiredPermitId ?? string.Empty; } }
         public int AllowedTechniqueMask { get { return Mathf.Max(0, allowedTechniqueMask); } }
+        public string RequiredHookId { get { return requiredHookId ?? string.Empty; } }
         public bool IsAvailableInRegion(string regionId)
         {
             if (availableRegionIds == null || availableRegionIds.Length == 0) return true;
