@@ -172,7 +172,8 @@ namespace WhereTheSoundingsEnd.World
 
             bool seaweedHarvest = technique == FishingTechnique.SeaweedHarvesting;
             if (equipment == null) equipment = GetComponent<VesselEquipmentController>();
-            float installedRodRange = equipment != null ? equipment.RodCastMultiplier : 0.72f;
+            float installedRodRange = seaweedHarvest ? 1f :
+                (equipment != null ? equipment.RodCastMultiplier : 0.72f);
             selectedCastDistance = baseCastDistance * Rods[rodIndex].castMultiplier *
                                    Lines[lineIndex].castMultiplier * TechniqueCastMultiplier(technique) * installedRodRange;
             Vector3 castPoint = transform.position + transform.forward * selectedCastDistance;
@@ -481,7 +482,8 @@ namespace WhereTheSoundingsEnd.World
                     -legality.FineCents);
 
             ChangePopulation(hookedFish, activeHabitat, -1);
-            totalCatches++;
+            if (hookedFish.Category != CargoItemCategory.Seaweed)
+                totalCatches++;
             if (equipment != null && hookedFish.Category != CargoItemCategory.Seaweed)
                 equipment.WearRodForCatch();
             if (economyTelemetry != null)
