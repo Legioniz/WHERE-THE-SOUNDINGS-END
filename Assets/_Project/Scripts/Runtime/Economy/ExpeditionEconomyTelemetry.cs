@@ -308,6 +308,7 @@ namespace WhereTheSoundingsEnd.Economy
                 float fuelTotal = 0f;
                 int legal = 0;
                 int catches = 0;
+                List<double> tripNetPerHourSamples = new List<double>();
                 for (int i = 0; i < pair.Value.Count; i++)
                 {
                     BalanceSample sample = pair.Value[i];
@@ -316,10 +317,24 @@ namespace WhereTheSoundingsEnd.Economy
                     fuelTotal += sample.fuelConsumed;
                     legal += sample.legalCatchCount;
                     catches += sample.catchCount;
+                    double sampleHours = sample.durationSeconds / 3600d;
+                    double sampleNetPerHour = sampleHours > 0.0001d
+                        ? ((double)((decimal)sample.grossCents - sample.expenseCents) / 100d) / sampleHours
+                        : 0d;
+                    tripNetPerHourSamples.Add(sampleNetPerHour);
                 }
                 int count = pair.Value.Count;
                 double netPerHour = hours > 0.0001d ? (double)(netTotal / 100m) / hours : 0d;
                 double legalRate = catches > 0 ? (double)legal / catches * 100d : 0d;
+                tripNetPerHourSamples.Sort();
+                double medianNetPerHour = tripNetPerHourSamples.Count == 0 ? 0d :
+                    (tripNetPerHourSamples.Count % 2 == 1
+                        ? tripNetPerHourSamples[tripNetPerHourSamples.Count / 2]
+                        : (tripNetPerHourSamples[tripNetPerHourSamples.Count / 2 - 1] +
+                           tripNetPerHourSamples[tripNetPerHourSamples.Count / 2]) * 0.5d);
+                double minNetPerHour = tripNetPerHourSamples.Count == 0 ? 0d : tripNetPerHourSamples[0];
+                double maxNetPerHour = tripNetPerHourSamples.Count == 0 ? 0d :
+                    tripNetPerHourSamples[tripNetPerHourSamples.Count - 1];
                 string[] keyParts = pair.Key.Split('|');
                 int loadoutBand;
                 int.TryParse(keyParts.Length > 1 ? keyParts[1] : "0", out loadoutBand);
@@ -327,6 +342,9 @@ namespace WhereTheSoundingsEnd.Economy
                     GetLoadoutBandName(loadoutBand) + "  /  " + count +
                     " TRIPS  /  AVG NET $" + (netTotal / 100m / count).ToString("0.00") +
                     "  /  AVG NET-HR $" + netPerHour.ToString("0.00", CultureInfo.InvariantCulture) +
+                    "  /  MEDIAN NET-HR $" + medianNetPerHour.ToString("0.00", CultureInfo.InvariantCulture) +
+                    "  /  RANGE $" + minNetPerHour.ToString("0.00", CultureInfo.InvariantCulture) +
+                    "–$" + maxNetPerHour.ToString("0.00", CultureInfo.InvariantCulture) +
                     "  /  AVG FUEL " + (fuelTotal / count).ToString("0.0", CultureInfo.InvariantCulture) +
                     "  /  LEGAL CATCH " + legalRate.ToString("0", CultureInfo.InvariantCulture) + "%");
             }
