@@ -178,3 +178,8 @@ Until these decisions are approved, downstream content must preserve the uncerta
 - [Character Bible](../04_CHARACTERS_AND_ENTITIES/CHARACTER-BIBLE.md)
 - [Character Arcs](../03_STORY_AND_NARRATIVE/CHARACTER-ARCS.md)
 - [Regional locations](../05_WORLD_AND_LEVEL_DESIGN/LOCATION-CATALOG.md)
+
+
+## Regional history and maritime storytelling
+
+The six-region setting is expanded in [Regional Histories and Maritime Tales](../05_WORLD_AND_LEVEL_DESIGN/REGIONAL-HISTORIES-AND-MARITIME-TALES.md). The regions share a physical and human history through staged movement from the lower inlet to Greyhaven, changing reef and offshore routes, wreck recovery, reused materials and copied survey records. The sea stories are testimony and cultural memory, not proof that the Choir controls the environment. New locations and tales remain proposed until approved and implemented.

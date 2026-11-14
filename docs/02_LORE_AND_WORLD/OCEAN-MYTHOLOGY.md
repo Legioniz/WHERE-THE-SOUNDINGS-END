@@ -90,3 +90,8 @@ The game should make these changes visible through differences between testimony
 - [Maritime Myths Catalogue](MARITIME-MYTHS-CATALOG.md)
 - [Environmental Storytelling](ENVIRONMENTAL-STORYTELLING.md)
 - [Drowned Parish](../05_WORLD_AND_LEVEL_DESIGN/THE-DROWNED-PARISH.md)
+
+
+## Additional original sea stories
+
+The regional atlas adds The Borrowed Voice, The Lantern That Waits, The Net With No Weight, The Wake Against the Wind, The Name Left Off the Board, The Bell Below and The Last Reliable Return. These are original in-world tales with mundane and embellished versions. They are witness traditions, not confirmed supernatural facts. See [Regional Histories and Maritime Tales](../05_WORLD_AND_LEVEL_DESIGN/REGIONAL-HISTORIES-AND-MARITIME-TALES.md).
