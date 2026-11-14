@@ -1,5 +1,38 @@
 # Development Log
 
+## 2026-11-14 — Seafood catalogue, catch legality, regional markets and expedition measurement
+
+**Branch:** feature/seafood-legality-regional-markets-balance-20261114
+
+### Implemented in source
+
+- Expanded the generated seafood catalog from the five starter fish to the full 155 scheduled records: 100 fish, 47 invertebrates and 8 algae/seaweed. The builder authors prices, units, market class, regional availability, habitats, catch profiles and tier-based stock/recovery.
+- Extended fishing encounter selection to include shellfish and cephalopods. Added bait-free Seaweed Harvesting for Kelp habitat, with renewable stock and no rod-wear/rod-unlock progression.
+- Added game-authored catch legality for species region, minimum landing weight, protected species, specific harvest permits, prohibited technique and the Hollow Trench closure. Flagged catches retain source region, technique, weight, status and reason; fines use the wallet ledger and ordinary buyers reject illegal lots.
+- Connected harvest permits to Harbourmaster research: Reef Stewardship, Licensed Sea Cucumber Harvest and Managed Abalone Harvest. Harvest permits persist in the existing unlocked-permit collection but are filtered out of chart-region names to preserve fog of war.
+- Connected the six-destination market factor matrix to the market controller. Stock/demand is keyed by regional market and item; the sale UI displays destination factors and labels licensed contract intake.
+- Expanded expedition telemetry to retain up to 50 completed samples, grouped by destination and departure loadout band (STARTER / AVERAGE / OPTIMIZED). Samples record gross receipts, expenses, fuel, game-clock duration, catches and legal-catch rate. Active trip catch/loadout state survives save/reload.
+- Added Edit Mode source tests for market factors, catch legality, permits, catch provenance save/restore, seaweed technique compatibility and telemetry sample persistence.
+- Expanded repository validation to check 155 catalog rows against the authoritative price schedule and to inspect the cross-system links.
+
+### Verification boundary
+
+- GitHub Actions must run repository safeguards, project-file validation and C# syntax parsing for the pull request.
+- Unity 6000.3.28f1 compilation, Edit Mode test execution, Play Mode, Greyhaven scene regeneration and Development Build have not been performed in this environment.
+- Greyhaven is currently the only generated dockside market scene. Destination market factors and per-region stock logic are implemented; physical terminals and access triggers for non-Greyhaven streamed destinations remain scene work.
+- No real Unity expedition balance samples have been collected. Provisional target envelopes and a controlled sample protocol are documented; no actual measured balance result is claimed.
+- The tiered catch-weight thresholds are fictional game rules, not real-world legal limits.
+
+### Compatibility
+
+- Save schema remains v8. Catch provenance is additive on cargo placements; regional stock reuses existing market stock entries; harvest permits reuse unlockedRegionIds; telemetry samples use namespaced progress flags.
+- Legacy cargo placements with no catch-region metadata remain treated as legacy inventory.
+- No regional chart location is revealed or marked visited by a harvest permit.
+
+---
+
+
+
 ## 2026-11-14 — Greyhaven fishing encounter, tackle and population foundation
 
 **Branch:** fishing implementation work in progress; awaiting repository CI and review.
