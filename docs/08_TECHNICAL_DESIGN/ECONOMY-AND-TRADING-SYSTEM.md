@@ -1,7 +1,7 @@
 # Economy and Trading System
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Greyhaven seafood/salvage sales, bait/supply purchasing, fuel, repair and dockside service runtime partially implemented; full catalogue and playtest verification pending  
+> Status: Full authored seafood catalog, catch legality, destination pricing/stock and expedition measurement implemented in source; remote dockside scene coverage and Unity playtest validation pending  
 > Owner: Project lead  
 > Version: 0.1  
 > Last reviewed: 2026-11-14  
@@ -68,7 +68,7 @@ The current generated Greyhaven vessel owns the wallet, Mara market, fuel contro
 
 A new campaign receives a one-time $25.00 starter wallet balance. A zero-balance save with a transaction history is never topped up. The current salvage values are explicitly provisional and are defined in the seafood price schedule's supplemental salvage table.
 
-**Remaining:** broader authored seafood/invertebrate catalogue, per-catch size/closed-area/prohibited-gear legality, destination-specific trading routes, and actual starter/average/optimized expedition tuning. Telemetry is a measurement system, not evidence that balance is already correct. Unity compilation, Edit Mode execution, Play Mode testing, scene regeneration and economy playtests remain required.
+**Remaining:** physical dockside market terminals and interaction triggers still need to be authored in each streamed destination scene; the current generated Greyhaven scene is the only verified market location in the project. Numerical starter/average/optimized tuning still requires real Unity playtest samples. Telemetry is a measurement system, not evidence that balance is already correct. Unity compilation, Edit Mode execution, Play Mode testing, scene regeneration and economy playtests remain required.
 
 ## 5.1 Harbourmaster delivery contracts
 
@@ -216,7 +216,7 @@ Every transaction displays item, quantity/unit, base price, destination factor, 
 
 `EconomyPolicy` implements deterministic sale-line rounding, bounded quality/freshness/demand/live modifiers, stock-driven demand, repair/fuel quote arithmetic and overflow-safe wallet deltas. `SaveGameData` is schema v8 with a cents wallet and transaction-id ledger; v7 whole-dollar balances migrate to cents. Cargo instances now retain total sale quantity in their authored unit (stack count for ordinary stacked goods; landed kilograms for each fish), and fishing records the already-calculated landed weight rather than discarding it. Item definitions expose authored price/unit/ordinary-sale eligibility fields; existing assets still require reviewed schedule values before they can be sold.
 
-`EconomyWalletController` now owns the live integer-cent wallet and bounded idempotency ledger on the generated vessel and participates in the existing save coordinator. This does not yet implement vendor stock/demand persistence, sales/purchases, fuel burn, paid repairs, NPC service bindings or dockside economy UI. Do not treat the wallet and pure policies as a playable trading loop.
+`EconomyWalletController` now owns the live integer-cent wallet and bounded idempotency ledger on the generated vessel and participates in the existing save coordinator. That earlier wallet-only milestone has since been superseded by the connected vendor, fuel, repair, dockside, research, equipment, regional market and telemetry implementation described in the current runtime sections below. Do not treat the wallet and pure policies as a playable trading loop.
 
 
 
@@ -231,7 +231,7 @@ The generated player vessel now owns `MaraFishMarketController`, `VesselFuelCont
 - Mara and Inez stock is saved per vendor/item and replenishes gradually once per elapsed in-game day. Buyer stock and demand are shown in the itemized dockside offer.
 - The existing dockside modal exposes the resident-specific sale, purchase, repair and refuelling actions. New campaigns start with $25.00; transaction history prevents repeat starter grants.
 
-The editor builder must be run in Unity to regenerate Greyhaven with the new runtime components and bait/salvage definitions. Current scope does not include the full seafood catalogue, closed-area/quota legality, Harbourmaster research/contract rewards, active equipment-slot application, destination-market travel routes or income-per-hour balancing. Unity compilation, Edit Mode execution, Play Mode testing and economy playtests remain required.
+The editor builder must be run in Unity to regenerate Greyhaven with the new runtime components and bait/salvage definitions. The latest source now includes the expanded seafood catalog, per-catch legal provenance, game-authored restrictions and fines, licensed harvest permits, destination-specific market factors and stock ledgers, seaweed harvesting, and measured trip reports. Physical remote market terminals and destination scene interaction remain pending. Unity compilation, Edit Mode execution, Play Mode testing and economy playtests remain required.
 
 ### E0 — Data and persistence
 - Add authored base sale values/units and vendor profiles without changing stable item IDs.
@@ -272,3 +272,35 @@ The editor builder must be run in Unity to regenerate Greyhaven with the new run
 - Jonathon Doran and Ian Parberry, *Emergent Economies for Role Playing Games*: https://ianparberry.com/pubs/econ.pdf
 
 External references inform design principles only. All game-specific prices, coefficients and content must remain consistent with the project's own balance specifications and playtest evidence.
+
+
+## 5.5 Expanded seafood catalogue and catch legality
+
+The generated catalog now authors all 155 entries in the price schedule: 100 fish, 47 invertebrates and 8 algae/seaweed goods. Stable item IDs and base prices are read from the same authored schedule and checked by repository validation. Regional availability is assigned per species; the encounter director filters candidates against both the current region and habitat. Shellfish and cephalopods participate in the fishing encounter/population system. Seaweed is harvested through the dedicated bait-free Seaweed Harvesting technique, which requires a Kelp habitat and uses its own renewable stock/recovery profile.
+
+Every landed catch stores source region, fishing/harvest technique, landed weight, legal state and reason in its cargo placement. This provenance is additive to the existing schema-v8 placement record and survives save/restore. The legality policy evaluates:
+
+- the six authored region boundaries and species range;
+- the game's minimum landing weight by trade tier;
+- protected-species permits;
+- contract-only harvest permits;
+- the closed Hollow Trench rule;
+- species-specific permitted technique masks.
+
+These are fictional gameplay rules, not real-world legal thresholds. Current authored thresholds are tiered by catch group: fish T1–T5 use 0.08, 0.15, 0.30, 0.60 and 1.00 kg; invertebrates use 0.03, 0.06, 0.10, 0.18 and 0.30 kg. An undersized, out-of-range, protected, unpermitted, closed-area or prohibited-technique landing is retained as a flagged catch, applies its authored fine when the wallet can pay, and is excluded from ordinary market offers. The cargo provenance prevents save/reload from turning an illegal catch into a legal sale.
+
+Research submissions now award additional harvest permits: Reef Stewardship, Licensed Sea Cucumber Harvest and Managed Abalone Harvest. FSH-035 requires Reef Stewardship and handlining. INV-031 requires Managed Abalone Harvest. INV-037 through INV-041 require Licensed Sea Cucumber Harvest and are labelled as licensed contract intake. The Hollow Trench remains closed until the Outer Shoals research permit is earned. Harvest permits are persisted in the existing unlocked-permit collection but are kept out of the fog-of-war region-name list.
+
+## 5.6 Destination-specific seafood markets
+
+SeafoodMarketPolicy implements the six-destination by six-market-class matrix from the price schedule. Mara's market controller now reads the region where the player is selling, applies that destination factor once, and keys stock by regional market ID plus item ID. A sale in one destination cannot consume another destination's stock. Legacy Greyhaven market stock is normalized to the Greyhaven regional market during restore.
+
+The dockside panel displays the active market name and destination factor on each itemized line. Contract-only lots are visibly labelled and require the matching harvest permit. Illegal catch lots are excluded from the selectable sale set and shown separately.
+
+The market service can resolve a regional market during a destination dockside session. The generated Greyhaven scene currently provides the authored dockside hub. The remaining world-integration task is to place/open the corresponding dockside market terminal in each streamed destination scene; no market should be reachable merely by remote menu selection or while at sea. Regional price and stock logic is implemented; remote physical access is not yet claimed.
+
+## 5.7 Measured expedition balance
+
+The telemetry records up to 50 completed expedition samples in an additive namespaced progress flag. Each sample stores departure and destination region, departure loadout band, gross receipts, operating expenses, actual fuel, game-clock duration, landed/legal/flagged catch counts and catch weight. Loadout bands are captured at departure from installed engine × rod capability: STARTER below 0.85, AVERAGE from 0.85 to below 1.15, and OPTIMIZED at 1.15 or above.
+
+The dockside report groups samples by destination and loadout band and shows sample count, average net, average net per game-hour, average fuel and legal-catch rate. Active-trip loadout and catch totals survive save/reload. This instrumentation does not automatically rebalance prices or costs. The controlled sample protocol and provisional target envelopes are in [Economy Balancing](../07_GAME_RULES_AND_BALANCING/ECONOMY-BALANCING.md). No actual Unity playtest data has been collected yet.
