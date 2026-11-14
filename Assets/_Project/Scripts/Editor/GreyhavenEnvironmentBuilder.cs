@@ -43,7 +43,7 @@ namespace WhereTheSoundingsEnd.Editor
 
         public static bool HasGeneratedAreaScenes()
         {
-            for (int i = 1; i < StreamedAreaScenePaths.Length; i++)
+            for (int i = 0; i < StreamedAreaScenePaths.Length; i++)
                 if (AssetDatabase.LoadAssetAtPath<SceneAsset>(StreamedAreaScenePaths[i]) == null)
                     return false;
             return true;
@@ -61,7 +61,7 @@ namespace WhereTheSoundingsEnd.Editor
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-            Material ocean = Mat("Environment_Ocean.mat", new Color(1.125f, 1.115f, 1.13f), 0.78f);
+            Material ocean = Mat("Environment_Ocean.mat", new Color(0.025f, 0.105f, 0.13f), 0.78f);
             Material sand = Mat("Environment_ShoreSand.mat", new Color(0.34f, 0.29f, 0.21f), 0.08f);
             Material soil = Mat("Environment_Soil.mat", new Color(0.19f, 0.18f, 0.15f), 0.0f);
             Material grass = Mat("Environment_Grass.mat", new Color(0.17f, 0.22f, 0.17f), 0.02f);
