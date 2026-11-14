@@ -574,6 +574,7 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                 serialized.FindProperty("contractOnlySale").boolValue = !string.IsNullOrWhiteSpace(fields[11]) && fields[10] != "1";
                 serialized.FindProperty("requiredPermitId").stringValue = fields[11];
                 serialized.FindProperty("allowedTechniqueMask").intValue = int.Parse(fields[12], CultureInfo.InvariantCulture);
+                serialized.FindProperty("requiredHookId").stringValue = id == "FSH-035" ? "circle-hook" : string.Empty;
                 serialized.FindProperty("baseSalePriceUsd").floatValue = price;
                 serialized.FindProperty("saleUnitLabel").stringValue = fields[7];
                 serialized.FindProperty("ordinarySaleEligible").boolValue = fields[6] == "1";
