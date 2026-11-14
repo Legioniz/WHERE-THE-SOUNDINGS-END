@@ -95,3 +95,8 @@ Every record should have a credible author, date range, purpose and reason for b
 - [Drowned Parish](../05_WORLD_AND_LEVEL_DESIGN/THE-DROWNED-PARISH.md)
 - [Main Story](../03_STORY_AND_NARRATIVE/MAIN-STORY.md)
 - [Environmental Storytelling](ENVIRONMENTAL-STORYTELLING.md)
+
+
+## Regional histories as one connected chain
+
+The six regions form one physical and human geography connected by geology, migration, fisheries, salvage, changing routes and copied records. Greyhaven grew uphill from the lower inlet; the Shallows became the first navigation school; Blackrock shaped seamanship through surge and reflected sound; the Outer Shoals developed repeated survey traditions; the Drowned Parish preserves the material traces of staged relocation; and the Hollow Trench is known chiefly through increasingly uncertain instruments. Use the relative chronology in TIMELINE.md. The lighthouse bell's last confirmed sounding remains Year -11; the Orison was lost at Year -8. The Parish bell remains a separate object.

@@ -152,3 +152,5 @@ Legend-inspired encounters are rare, location-bound events. They may be harmless
 
 - [Environmental storytelling](02_LORE_AND_WORLD/ENVIRONMENTAL-STORYTELLING.md) — environmental clues, prop clusters, ambiguity and discovery boundaries.
 - [Environment assets and set dressing](09_ART_AND_VISUAL_DIRECTION/ENVIRONMENT-ASSETS.md) — Greyhaven material language, composition, asset provenance and performance constraints.
+
+- [Regional Histories and Maritime Tales](05_WORLD_AND_LEVEL_DESIGN/REGIONAL-HISTORIES-AND-MARITIME-TALES.md) — deep histories of all six regions, connected chronology, sea stories and environmental storytelling rules.
