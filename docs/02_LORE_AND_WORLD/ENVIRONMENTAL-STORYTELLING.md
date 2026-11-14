@@ -1,9 +1,9 @@
 # Environmental Storytelling
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Working design specification — Greyhaven artifact dressing source-implemented; Unity verification pending  
+> Status: Working design specification — Greyhaven physical-remains extension source-implemented; other five regional treatments proposed; Unity verification pending  
 > Owner: Project lead  
-> Version: 0.2  
+> Version: 0.3  
 > Last reviewed: 2026-11-13
 
 ## 1. Player promise
@@ -42,9 +42,9 @@ The first generated pass adds collider-free, non-interactive visual clusters to 
 | Repair shed | Retired propeller, radio casing without a dial, loose bearing, stained canvas | Repairs and experiments have accumulated over time |
 | Net-mender yard | Net weights, old float line and mismatched floats | Work materials are reused rather than replaced |
 | Inn threshold | Rain barrel, basin, folded oilskin | Residents and visitors leave traces of ordinary weather routines |
-| Estuary | Broken fish trap, driftwood, glass float, tide stake, boot, ceramic fragments, rope | The shoreline collects both natural debris and evidence of human activity |
+| Estuary | Broken fish trap, driftwood, glass float, tide stake, boot and ceramic fragments; collapsed lower landing with stone footings, partial decking and winch; low settlement foundation with threshold and reused sill | The inlet's working edge and an earlier settlement layer have been partly buried and dismantled; exact building use remains uncertain |
 | Lighthouse | Keeper lantern, storm shutter, cracked signal mirror, sealed log case, rope ring | Maintenance has stopped or moved elsewhere; the reason remains unstated |
-| Outer-channel wreck | Bell fragments, personal case, ceramic, glass, canvas, rope and rail stub | A wreck is materially specific without exposing a named victim or a complete explanation |
+| Outer-channel wreck | Broken hull, exposed keel, partial ribs and crossmembers, sheared mast spar, bell fragments, personal case, ceramic/glass, canvas and rope | The vessel broke apart and was disturbed by time, current or salvage; no named victim, complete manifest or definitive loss account is exposed |
 
 These are visual arrangements, not newly authored canonical history. Object names are implementation identifiers and must not be surfaced as player-facing text.
 
@@ -78,6 +78,15 @@ A future inspectable artifact system must define stable IDs, interaction range, 
 - Rebuilding produces the same hierarchy and placement.
 - Dressing adds no colliders, rigidbodies, runtime scripts, save participants, or interaction targets.
 - The main pier, service approaches, wreck interaction radius, and lighthouse silhouette remain readable.
+- Western and eastern estuary dressing are separate top-level roots whose world positions place them in their corresponding streamed scenes.
+- The collapsed landing and foundation remain render-only and do not become traversal obstacles, salvage nodes, survey discoveries, or quest evidence by themselves.
 - Props remain with their correct streamed area and are unloaded with it where applicable.
 - No artifact automatically writes a note, map mark, objective, discovery, or save value.
 - Visual scale, material quality, occlusion, clipping, and density are reviewed in Unity at gameplay camera height.
+
+
+## 9. Regional physical remains
+
+The six-region treatment is specified in [Regional Physical Remains and Environmental Evidence](../05_WORLD_AND_LEVEL_DESIGN/REGIONAL-PHYSICAL-REMAINS.md). It covers reef-marker infrastructure, seasonal Blackrock camps, Outer Shoals survey debris, the Drowned Parish's staged relocation layers, and the Hollow Trench's expedition traces. These five regional treatments are proposed content designs, not claims that additional playable scenes or travel links exist.
+
+The Greyhaven source extension is narrower: the western mudflat contains a partial lower-inlet landing and a low old-settlement foundation outline; the wreck dressing has exposed frame members. All pieces remain deterministic, static and non-interactive. Unity generation, camera-height review, grounding and streamed-scene inspection are still required.
