@@ -106,6 +106,12 @@ namespace WhereTheSoundingsEnd.World
         /// Records an earned permit without marking the region as visited or revealing its
         /// location. Physical entry remains the only way to add a visited chart record.
         /// </summary>
+        public bool HasPermit(string regionId)
+        {
+            string id = RegionalChartPolicy.NormalizeId(regionId);
+            return id.Length > 0 && unlockedRegionIds.Contains(id);
+        }
+
         public bool GrantChartPermit(string regionId)
         {
             string id = RegionalChartPolicy.NormalizeId(regionId);
