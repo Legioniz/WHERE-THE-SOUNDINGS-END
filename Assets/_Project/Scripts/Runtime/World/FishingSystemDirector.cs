@@ -16,7 +16,8 @@ namespace WhereTheSoundingsEnd.World
         Jigging,
         Trolling,
         Drifting,
-        Handlining
+        Handlining,
+        SeaweedHarvesting
     }
 
     public enum FishingEncounterPhase
@@ -169,8 +170,21 @@ namespace WhereTheSoundingsEnd.World
                 return false;
             }
 
+            bool seaweedHarvest = technique == FishingTechnique.SeaweedHarvesting;
+            if (equipment == null) equipment = GetComponent<VesselEquipmentController>();
+            float installedRodRange = equipment != null ? equipment.RodCastMultiplier : 0.72f;
+            selectedCastDistance = baseCastDistance * Rods[rodIndex].castMultiplier *
+                                   Lines[lineIndex].castMultiplier * TechniqueCastMultiplier(technique) * installedRodRange;
+            Vector3 castPoint = transform.position + transform.forward * selectedCastDistance;
+            activeHabitat = DetermineHabitat(castPoint);
+            if (seaweedHarvest && activeHabitat != FishHabitat.Kelp)
+            {
+                status = "SEAWEED HARVESTING REQUIRES A KELP BED. Change grounds before setting the line.";
+                return false;
+            }
+
             string baitItemId = BaitItemIds[Mathf.Clamp(baitIndex, 0, BaitItemIds.Length - 1)];
-            if (cargoHold.GetAvailableQuantity(baitItemId) < 1)
+            if (!seaweedHarvest && cargoHold.GetAvailableQuantity(baitItemId) < 1)
             {
                 status = "NO BAIT — return to Inez and purchase " + BaitLabels[baitIndex] + " bait.";
                 return false;
@@ -182,19 +196,13 @@ namespace WhereTheSoundingsEnd.World
                 return false;
             }
 
-            if (!cargoHold.TryConsumeOne(baitItemId))
+            if (!seaweedHarvest && !cargoHold.TryConsumeOne(baitItemId))
             {
                 status = "BAIT INVENTORY CHANGED — no cast was made.";
                 return false;
             }
 
             EnsurePopulationStocks();
-            if (equipment == null) equipment = GetComponent<VesselEquipmentController>();
-            float installedRodRange = equipment != null ? equipment.RodCastMultiplier : 0.72f;
-            selectedCastDistance = baseCastDistance * Rods[rodIndex].castMultiplier *
-                                   Lines[lineIndex].castMultiplier * TechniqueCastMultiplier(technique) * installedRodRange;
-            Vector3 castPoint = transform.position + transform.forward * selectedCastDistance;
-            activeHabitat = DetermineHabitat(castPoint);
             estimatedDepth = EstimateDepth(activeHabitat) * TechniqueDepthMultiplier(technique);
             hookedFish = null;
             tension = 0.35f;
@@ -276,7 +284,9 @@ namespace WhereTheSoundingsEnd.World
             phaseTimer = 0f;
             targetPhase = UnityEngine.Random.Range(0.25f, 0.75f);
             currentHookWindow = FishingSimulationPolicy.CalculateTimingWindow(strikeWindow, hookedFish.Resistance, (Rods[rodIndex].control + Hooks[hookIndex].control) * 0.5f * (equipment != null ? equipment.RodControlMultiplier : 0.70f));
-            status = "BITE! " + hookedFish.DisplayName + " is testing the bait — strike when the marker crosses the narrow target.";
+            status = hookedFish.Category == CargoItemCategory.Seaweed
+                ? "KELP BED CONTACT — harvest window is open. Pull at the marked moment."
+                : "BITE! " + hookedFish.DisplayName + " is testing the bait — strike when the marker crosses the narrow target.";
         }
 
         private void BeginFight()
@@ -287,7 +297,9 @@ namespace WhereTheSoundingsEnd.World
             targetPhase = UnityEngine.Random.Range(0.2f, 0.8f);
             currentFightWindow = FishingSimulationPolicy.CalculateTimingWindow(strikeWindow, hookedFish.Resistance * 0.85f, (Rods[rodIndex].control + Hooks[hookIndex].control + Reels[reelIndex].control) / 3f * (equipment != null ? equipment.RodControlMultiplier : 0.70f));
             tension = Mathf.Clamp(0.3f + hookedFish.Resistance * 0.12f, 0.2f, 0.65f);
-            status = hookedFish.DisplayName.ToUpperInvariant() + " HOOKED — manage tension and tire it out. SPACE / ENTER at the marked moment.";
+            status = hookedFish.Category == CargoItemCategory.Seaweed
+                ? "SEAWEED HARVEST — keep the line steady and gather the fronds. SPACE / ENTER at the marked moment."
+                : hookedFish.DisplayName.ToUpperInvariant() + " HOOKED — manage tension and tire it out. SPACE / ENTER at the marked moment.";
         }
 
         private void UpdateFightTension()
@@ -379,7 +391,8 @@ namespace WhereTheSoundingsEnd.World
         {
             return category == CargoItemCategory.Fish ||
                    category == CargoItemCategory.Shellfish ||
-                   category == CargoItemCategory.Cephalopod;
+                   category == CargoItemCategory.Cephalopod ||
+                   category == CargoItemCategory.Seaweed;
         }
 
         private CargoItemDefinition SelectFish()
@@ -396,6 +409,9 @@ namespace WhereTheSoundingsEnd.World
             {
                 CargoItemDefinition fish = definitions[i];
                 if (fish == null || !IsCatchableSeafood(fish.Category)) continue;
+                if (technique == FishingTechnique.SeaweedHarvesting
+                    ? fish.Category != CargoItemCategory.Seaweed
+                    : fish.Category == CargoItemCategory.Seaweed) continue;
                 string regionId = regionalChart != null && !string.IsNullOrWhiteSpace(regionalChart.CurrentRegionId)
                     ? regionalChart.CurrentRegionId : "greyhaven";
                 if (!fish.IsAvailableInRegion(regionId)) continue;
@@ -466,13 +482,15 @@ namespace WhereTheSoundingsEnd.World
 
             ChangePopulation(hookedFish, activeHabitat, -1);
             totalCatches++;
-            if (equipment != null) equipment.WearRodForCatch();
+            if (equipment != null && hookedFish.Category != CargoItemCategory.Seaweed)
+                equipment.WearRodForCatch();
             if (economyTelemetry != null)
                 economyTelemetry.RecordCatch(hookedFish.ItemId, size, legality.IsLegal);
             string grade = quality >= 0.9f ? "PRISTINE" : quality >= 0.75f ? "GOOD" : quality >= 0.55f ? "FAIR" : "POOR";
             string species = hookedFish.DisplayName;
             status = legality.IsLegal
-                ? "LANDED: " + species + " · " + size.ToString("0.0") + " kg · " + grade +
+                ? (hookedFish.Category == CargoItemCategory.Seaweed ? "HARVESTED: " : "LANDED: ") +
+                  species + " · " + size.ToString("0.0") + " kg · " + grade +
                   " · " + Mathf.RoundToInt(quality * 100f) + "%"
                 : "ILLEGAL LANDING: " + species + " · " + legality.Reason +
                   " · FINE $" + (legality.FineCents / 100m).ToString("0.00") +
@@ -532,6 +550,7 @@ namespace WhereTheSoundingsEnd.World
                 case FishingTechnique.Jigging: return 0.85f;
                 case FishingTechnique.Trolling: return 0.7f;
                 case FishingTechnique.Handlining: return 0.8f;
+                case FishingTechnique.SeaweedHarvesting: return 0.45f;
                 default: return 1f;
             }
         }
@@ -546,6 +565,7 @@ namespace WhereTheSoundingsEnd.World
                 case FishingTechnique.BottomFishing: return 1.15f;
                 case FishingTechnique.FloatFishing: return 1.1f;
                 case FishingTechnique.Handlining: return 1.2f;
+                case FishingTechnique.SeaweedHarvesting: return 0.65f;
                 default: return 1f;
             }
         }
@@ -560,6 +580,7 @@ namespace WhereTheSoundingsEnd.World
                 case FishingTechnique.Trolling: return 1.35f;
                 case FishingTechnique.Drifting: return 1.1f;
                 case FishingTechnique.Handlining: return 0.65f;
+                case FishingTechnique.SeaweedHarvesting: return 0.45f;
                 default: return 1f;
             }
         }
@@ -725,7 +746,8 @@ namespace WhereTheSoundingsEnd.World
                     reelIndex = NextUnlocked(Reels, reelIndex, totalCatches);
                 int selectedBait = Mathf.Clamp(baitIndex, 0, Baits.Length - 1);
                 int baitCount = cargoHold != null ? cargoHold.GetAvailableQuantity(BaitItemIds[selectedBait]) : 0;
-                string baitStatus = baitCount > 0 ? " x" + baitCount : "  /  EMPTY";
+                string baitStatus = technique == FishingTechnique.SeaweedHarvesting
+                    ? "  /  NOT REQUIRED" : (baitCount > 0 ? " x" + baitCount : "  /  EMPTY");
                 if (GUI.Button(new Rect(panelX + 10, Screen.height - 60, 150, 22),
                     "Bait: " + BaitLabels[selectedBait] + baitStatus + "  ‹"))
                     baitIndex = (baitIndex + 1) % Baits.Length;
