@@ -40,13 +40,13 @@ jobs:
         shell: powershell
         run: |
           New-Item -ItemType Directory -Force -Path "TestResults" | Out-Null
-          & $env:UNITY_EDITOR -batchmode -nographics -quit -projectPath "$env:GITHUB_WORKSPACE" -runTests -testPlatform EditMode -testResults "TestResults/EditMode.xml" -logFile "Logs/EditMode.log"
+          & $env:UNITY_EDITOR -batchmode -projectPath "$env:GITHUB_WORKSPACE" -runTests -testPlatform EditMode -testResults "TestResults/EditMode.xml" -logFile "Logs/EditMode.log"
           if ($LASTEXITCODE -ne 0) { throw "Unity Edit Mode tests failed with exit code $LASTEXITCODE." }
 
       - name: Run Play Mode tests
         shell: powershell
         run: |
-          & $env:UNITY_EDITOR -batchmode -nographics -quit -projectPath "$env:GITHUB_WORKSPACE" -runTests -testPlatform PlayMode -testResults "TestResults/PlayMode.xml" -logFile "Logs/PlayMode.log"
+          & $env:UNITY_EDITOR -batchmode -projectPath "$env:GITHUB_WORKSPACE" -runTests -testPlatform PlayMode -testResults "TestResults/PlayMode.xml" -logFile "Logs/PlayMode.log"
           if ($LASTEXITCODE -ne 0) { throw "Unity Play Mode tests failed with exit code $LASTEXITCODE." }
 
       - name: Build Windows 64-bit Development Player
