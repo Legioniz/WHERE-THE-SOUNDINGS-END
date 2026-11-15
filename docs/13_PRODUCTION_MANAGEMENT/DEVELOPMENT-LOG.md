@@ -1,3 +1,21 @@
+## 2026-11-15 — Import-safe first-open bootstrap hardening
+
+### Research finding
+- Unity's official Editor documentation warns that `InitializeOnLoad` runs before non-script asset import completes and that `AssetDatabase.LoadAssetAtPath` can return null for assets still importing.
+- The previous first-open hook used `InitializeOnLoad` plus `delayCall` to load the Input Actions asset. Although delayed, this left the bootstrap dependent on import timing.
+
+### Correction
+- Replaced the first-open hook with `AssetPostprocessor.OnPostprocessAllAssets(..., didDomainReload)`, which Unity calls after asset import completes.
+- The callback schedules the scene generation on the Editor main thread, coalesces duplicate notifications, and retries if compilation is still active.
+- Existing scenes remain untouched by the fresh-checkout hook. The explicit normal-Editor stale-scene confirmation remains in place.
+- Extended the repository validator to reject a return to the pre-import `InitializeOnLoad` asset-loading pattern.
+
+### Verification boundary
+- Static validation can check the import-safe bootstrap contract; only opening a fresh clone in Unity 6000.3.28f1 can prove the actual import and generated scene sequence.
+- Unity semantic compilation, Edit/Play Mode execution and Windows player launch remain pending on the locally licensed runner.
+
+---
+
 ## 2026-11-15 — Fresh-checkout bootstrap and Unity playable verification path
 
 ### Implemented in source

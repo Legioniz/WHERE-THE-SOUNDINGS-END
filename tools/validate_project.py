@@ -460,6 +460,17 @@ def main() -> int:
             if required_text not in setup_source:
                 failures.append(f"ProjectFoundationSetup is missing generated-scene preflight safeguard: {required_text}")
 
+        for required_text in (
+            "ProjectFirstOpenBootstrap : AssetPostprocessor",
+            "OnPostprocessAllAssets(",
+            "didDomainReload",
+            "EditorApplication.delayCall -= BootstrapFreshCheckout",
+        ):
+            if required_text not in setup_source:
+                failures.append(f"Fresh-checkout bootstrap is missing import-safe initialization: {required_text}")
+        if "[InitializeOnLoad]" in setup_source:
+            failures.append("Fresh-checkout bootstrap must not load assets from InitializeOnLoad before asset import completes.")
+
         area_scene_builder = (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8")
         if "Greyhaven_Lighthouse.unity" not in area_scene_builder:
             failures.append("Deep-ocean build-list refresh must preserve all additive Greyhaven area scenes.")
@@ -1227,7 +1238,14 @@ def main() -> int:
 
 
         setup_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
-        for required_text in ("InitializeForAutomation", "[InitializeOnLoad]", "EditorApplication.delayCall", "Application.isBatchMode"):
+        for required_text in (
+            "InitializeForAutomation",
+            "ProjectFirstOpenBootstrap : AssetPostprocessor",
+            "OnPostprocessAllAssets(",
+            "didDomainReload",
+            "EditorApplication.delayCall",
+            "Application.isBatchMode",
+        ):
             if required_text not in setup_source:
                 failures.append(f"ProjectFoundationSetup is missing first-open/CI bootstrap behavior: {required_text}")
 

@@ -8,7 +8,7 @@
 
 1. Install Unity Hub and Unity Editor 6000.3.28f1. Include Windows Build Support (Mono).
 2. Clone the repository and open its root folder in Unity Hub.
-3. Allow the package resolver and asset import to finish. On a fresh checkout without `Greyhaven_Blockout.unity`, the Editor first-open hook creates the project rendering settings, Greyhaven blockout, six additive Greyhaven area scenes and two survey sandboxes.
+3. Allow the package resolver and asset import to finish. On a fresh checkout without `Greyhaven_Blockout.unity`, an `AssetPostprocessor.OnPostprocessAllAssets` callback detects the completed import and schedules the bootstrap on the Editor main thread. It then creates the project rendering settings, Greyhaven blockout, six additive Greyhaven area scenes and two survey sandboxes. This avoids loading the Input Actions asset from an `InitializeOnLoad` callback before Unity has imported it.
 4. Open `Assets/_Project/Scenes/Greyhaven_Blockout.unity`. The vessel and core systems should be present. Press Play.
 5. If bootstrap was interrupted, run **Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation**. Existing stale generated scenes continue to require an explicit rebuild confirmation in the normal Editor.
 

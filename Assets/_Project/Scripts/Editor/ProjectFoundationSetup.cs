@@ -182,26 +182,40 @@ namespace WhereTheSoundingsEnd.Editor
     }
 
     /// <summary>
-    /// A fresh clone has no generated Unity scenes. Bootstrap those generated scenes once
-    /// after the Editor has finished importing the project so the first Play action has a scene.
+    /// A fresh clone has no generated Unity scenes. AssetPostprocessor invokes the bootstrap
+    /// only after Unity finishes importing assets, so the Input Actions asset is available.
     /// Existing projects are never silently rebuilt by this first-open hook.
     /// </summary>
-    [InitializeOnLoad]
-    internal static class ProjectFirstOpenBootstrap
+    internal sealed class ProjectFirstOpenBootstrap : AssetPostprocessor
     {
         private const string GreyhavenScenePath = "Assets/_Project/Scenes/Greyhaven_Blockout.unity";
 
-        static ProjectFirstOpenBootstrap()
+        private static void OnPostprocessAllAssets(
+            string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths,
+            bool didDomainReload)
         {
+            if (!didDomainReload)
+                return;
+
+            // Coalesce import notifications and perform AssetDatabase operations after import.
+            EditorApplication.delayCall -= BootstrapFreshCheckout;
             EditorApplication.delayCall += BootstrapFreshCheckout;
         }
 
         private static void BootstrapFreshCheckout()
         {
-            if (EditorApplication.isPlayingOrWillChangePlaymode ||
-                EditorApplication.isCompiling ||
-                AssetDatabase.IsAssetImportWorkerProcess())
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
+
+            if (EditorApplication.isCompiling || AssetDatabase.IsAssetImportWorkerProcess())
+            {
+                EditorApplication.delayCall -= BootstrapFreshCheckout;
+                EditorApplication.delayCall += BootstrapFreshCheckout;
+                return;
+            }
 
             // Only a missing persistent scene identifies a fresh checkout. Stale existing scenes
             // still use the explicit menu confirmation unless Unity is running unattended.
