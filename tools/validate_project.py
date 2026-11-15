@@ -126,6 +126,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
     "Assets/_Project/Scripts/Editor/ProjectBuildAutomation.cs",
+    "Assets/_Project/Scripts/Editor/ProjectReferenceIntegrityValidator.cs",
     ".github/workflows/unity-verification.yml",
     "docs/14_TESTING_AND_QUALITY/UNITY-PLAYABLE-VALIDATION.md",
     "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs",
@@ -172,6 +173,69 @@ def main() -> int:
             actual = dependencies.get(package)
             if actual != expected:
                 failures.append(f"{package}: expected {expected}, found {actual!r}")
+
+        # Validate assembly names and references as a graph, not merely as existing files.
+        assembly_specs = {
+            "Assets/_Project/Scripts/Runtime/WhereTheSoundingsEnd.Runtime.asmdef": {
+                "name": "WhereTheSoundingsEnd.Runtime",
+                "references": {"Unity.InputSystem", "YarnSpinner.Unity"},
+            },
+            "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef": {
+                "name": "WhereTheSoundingsEnd.Editor",
+                "references": {
+                    "WhereTheSoundingsEnd.Runtime",
+                    "Unity.RenderPipelines.Universal.Runtime",
+                    "Unity.InputSystem",
+                    "YarnSpinner.Unity",
+                },
+            },
+            "Assets/_Project/Tests/EditMode/WhereTheSoundingsEnd.Tests.EditMode.asmdef": {
+                "name": "WhereTheSoundingsEnd.Tests.EditMode",
+                "references": {"WhereTheSoundingsEnd.Runtime", "WhereTheSoundingsEnd.Editor"},
+            },
+            "Assets/_Project/Tests/PlayMode/WhereTheSoundingsEnd.Tests.PlayMode.asmdef": {
+                "name": "WhereTheSoundingsEnd.Tests.PlayMode",
+                "references": {"WhereTheSoundingsEnd.Runtime"},
+            },
+        }
+        for assembly_path, expected in assembly_specs.items():
+            assembly = load_json(assembly_path)
+            if assembly.get("name") != expected["name"]:
+                failures.append(f"{assembly_path}: assembly name does not match its expected identity.")
+            actual_references = set(assembly.get("references", []))
+            missing_references = expected["references"] - actual_references
+            if missing_references:
+                failures.append(
+                    f"{assembly_path}: missing assembly references: {', '.join(sorted(missing_references))}"
+                )
+            if not assembly.get("autoReferenced", False) and "Tests." not in expected["name"]:
+                failures.append(f"{assembly_path}: production assembly must remain auto-referenced.")
+
+        yarn_project = load_json("Assets/_Project/Dialogue/Greyhaven.yarnproject")
+        yarn_sources = yarn_project.get("sourceFiles", [])
+        if not yarn_sources or not any(
+            list((ROOT / "Assets/_Project/Dialogue").glob(pattern))
+            for pattern in yarn_sources
+        ):
+            failures.append("Greyhaven.yarnproject sourceFiles pattern does not resolve to any Yarn source files.")
+
+        reference_validator = (
+            ROOT / "Assets/_Project/Scripts/Editor/ProjectReferenceIntegrityValidator.cs"
+        ).read_text(encoding="utf-8")
+        for required_text in (
+            "ValidateOrThrow", "ValidateBuildSettings", "ValidatePersistentGameplayGraph",
+            "GetMonoBehavioursWithMissingScriptCount", "GetDependencies",
+            "GreyhavenEnvironmentBuilder.HasGeneratedAreaScenes",
+            "CameraFollow2_5D target is not the generated player vessel",
+        ):
+            if required_text not in reference_validator:
+                failures.append(f"Unity reference-integrity preflight is missing: {required_text}")
+
+        build_automation = (
+            ROOT / "Assets/_Project/Scripts/Editor/ProjectBuildAutomation.cs"
+        ).read_text(encoding="utf-8")
+        if "ProjectReferenceIntegrityValidator.ValidateOrThrow();" not in build_automation:
+            failures.append("Windows build automation must run the Unity reference-integrity preflight.")
 
         actions = load_json("Assets/_Project/Settings/Input/PlayerControls.inputactions")
         maps = {item["name"]: item for item in actions.get("maps", [])}
