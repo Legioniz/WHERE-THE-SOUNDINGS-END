@@ -22,6 +22,18 @@ namespace WhereTheSoundingsEnd.Streaming
             contentRevision = revision;
         }
 
+        public static bool MatchesIdentityAndRevision(
+            string actualAreaId, string actualRevision,
+            string expectedAreaId, string expectedRevision)
+        {
+            return !string.IsNullOrWhiteSpace(actualAreaId) &&
+                   !string.IsNullOrWhiteSpace(actualRevision) &&
+                   !string.IsNullOrWhiteSpace(expectedAreaId) &&
+                   !string.IsNullOrWhiteSpace(expectedRevision) &&
+                   string.Equals(actualAreaId, expectedAreaId, System.StringComparison.Ordinal) &&
+                   string.Equals(actualRevision, expectedRevision, System.StringComparison.Ordinal);
+        }
+
         public bool TryValidate(string expectedAreaId, string expectedRevision, out string error)
         {
             if (gameObject.activeSelf)
@@ -30,17 +42,13 @@ namespace WhereTheSoundingsEnd.Streaming
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(areaId) ||
-                !string.Equals(areaId, expectedAreaId, System.StringComparison.Ordinal))
+            if (!MatchesIdentityAndRevision(areaId, contentRevision, expectedAreaId, expectedRevision))
             {
-                error = "Area identity mismatch. Expected '" + expectedAreaId + "', received '" + areaId + "'.";
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(contentRevision) ||
-                !string.Equals(contentRevision, expectedRevision, System.StringComparison.Ordinal))
-            {
-                error = "Area content revision mismatch for '" + areaId + "'.";
+                if (!string.Equals(areaId, expectedAreaId, System.StringComparison.Ordinal))
+                    error = "Area identity mismatch. Expected '" + expectedAreaId + "', received '" + areaId + "'.";
+                else
+                    error = "Area content revision mismatch for '" + areaId +
+                            "'. Expected '" + expectedRevision + "', received '" + contentRevision + "'.";
                 return false;
             }
 

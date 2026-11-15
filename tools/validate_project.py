@@ -290,7 +290,7 @@ def main() -> int:
         for required_text in (
             "contentRevision", "TryValidate", "GetComponentsInChildren<Renderer>",
             "sharedMesh == null", "material.shader == null", "shader.isSupported",
-            "subMeshCount", "Rigidbody",
+            "subMeshCount", "Rigidbody", "MatchesIdentityAndRevision",
         ):
             if required_text not in area_root_source:
                 failures.append(f"StreamedAreaSceneRoot is missing asset integrity check: {required_text}")
@@ -301,6 +301,8 @@ def main() -> int:
             "ShouldPreload_UsesInclusiveInnerBoundary",
             "ShouldUnload_UsesOuterBoundaryAndPreservesHysteresisBand",
             "DistanceRules_RejectNonFiniteValues",
+            "StreamedSceneIdentityAndRevision_AcceptsExactCurrentContent",
+            "StreamedSceneIdentityAndRevision_RejectsStaleRevisionOrWrongArea",
         ):
             if f"void {required_test}()" not in area_policy_tests:
                 failures.append(f"AreaStreamingPolicyTests is missing regression: {required_test}")
@@ -331,7 +333,10 @@ def main() -> int:
             "BuildLighthouseArtifactCluster", "BuildWreckArtifactCluster",
             "Wreck_Keel_Spine_Fragment", "Wreck_Broken_Rib_Port_A",
             "BuildHistoricalArtifacts", "Historical_Artifact_Inspection_Anchors",
-            "StreamedAreaRevision = \"4\"",
+            "StreamedAreaRevision = \"5\"",
+            "StreamedAreaIds", "HasGeneratedAreaScenes(out string error)",
+            "EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive)",
+            "areaRoot.TryValidate(StreamedAreaIds[index], StreamedAreaRevision",
         ):
             if required_text not in greyhaven_builder:
                 failures.append(f"Greyhaven area builder is missing: {required_text}")
@@ -443,8 +448,14 @@ def main() -> int:
             failures.append("Externally managed NPC triggers must not compete for the shared Interact action.")
 
         setup_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
-        if "Install Greyhaven area streaming?" not in setup_source:
-            failures.append("Existing generated Greyhaven scenes must require explicit confirmation before destructive streaming rebuild.")
+        for required_text in (
+            "HasGeneratedAreaScenes(out validationError)",
+            "Rebuild stale Greyhaven area scenes?",
+            "Keep current scenes",
+            "area-scene preflight failed",
+        ):
+            if required_text not in setup_source:
+                failures.append(f"ProjectFoundationSetup is missing generated-scene preflight safeguard: {required_text}")
 
         area_scene_builder = (ROOT / "Assets/_Project/Scripts/Editor/DeepOceanSurveySandboxBuilder.cs").read_text(encoding="utf-8")
         if "Greyhaven_Lighthouse.unity" not in area_scene_builder:

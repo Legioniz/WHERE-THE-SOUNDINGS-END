@@ -22,7 +22,7 @@ This is the authoritative implementation backlog. The [Implementation Audit](IMP
 |---|---|---|---|---|---|
 | ENV-04 | P1 | Replace prominent Greyhaven primitive prop silhouettes; add regional vegetation, wear and shoreline debris | M | Generated scene rebuild and Unity visual review | Source implemented; Unity acceptance open |
 
-**ENV-04 acceptance:** rebuild all six streamed Greyhaven areas at revision 3; inspect the harbour work lane, village service approaches, estuary vegetation, shoreline tide line and lighthouse headland from the gameplay camera; confirm grounded placement, no prop overlap that obscures navigation, no collision/runtime/save side effects, and acceptable memory/draw-call impact in a Windows Development Build.
+**ENV-04 acceptance:** rebuild all six streamed Greyhaven areas at revision 5; inspect the harbour work lane, village service approaches, estuary vegetation, shoreline tide line and lighthouse headland from the gameplay camera; confirm grounded placement, no prop overlap that obscures navigation, no collision/runtime/save side effects, and acceptable memory/draw-call impact in a Windows Development Build.
 
 ## P1 — Fishing encounter and Greyhaven ecology
 
@@ -217,11 +217,26 @@ A new player can start the slice and complete this sequence without developer co
 - **Acceptance:** rebuild all generated scenes in Unity 6000.3.28f1; verify first-entry/re-entry behavior, map M/button/Esc input, modal exclusivity, site discovery visibility, schema 6/7 save-load, marker scaling and absence of unknown content. Verify the feature does not imply inter-region travel; the deep-water scenes remain isolated sandboxes.
 
 
+## M0-12 — Generated area-scene revision preflight
+
+**Source status:** Implemented in this fix branch; CI and Unity verification pending.
+
+- The Greyhaven builder owns streamed-area content revision 5 and the ordered stable IDs for all six area scenes.
+- Project initialization opens every generated area scene additively, validates its single root, stable ID, revision and referenced render assets, then closes only scenes it opened and restores the previous active scene.
+- Missing, stale or invalid scenes produce an explicit rebuild confirmation. Declining preserves existing content and logs the validation failure.
+- Edit Mode regression tests cover exact ID/revision matches and stale revision/wrong-area rejection.
+
+Acceptance:
+- [ ] Run preflight on six valid revision-5 area scenes; verify no scene duplication, loss of active scene, or unintended close of scenes already loaded.
+- [ ] Test stale revision, wrong area ID, missing root and missing scene asset; each must report the exact area/path and offer an explicit rebuild.
+- [ ] Accept rebuild and confirm all six area scenes carry revision 5 and all generated content appears.
+- [ ] Decline rebuild and confirm existing content remains untouched while the warning is clear.
+
 ## Greyhaven environmental dressing — 2026-11-13
 
 **Source status:** First deterministic artifact pass implemented; Unity visual acceptance open.
 
-- [ ] Rebuild all six Greyhaven additive area scenes with the updated streamed-area revision.
+- [ ] Rebuild all six Greyhaven additive area scenes at streamed-area revision 5 using the revision-aware Editor preflight.
 - [ ] Inspect prop placement at gameplay camera height; correct floating, clipping, scale, density and occlusion.
 - [ ] Confirm central pier, service approaches, dock chart, lighthouse silhouette and wreck inspection radius remain clear.
 - [ ] Run the new artifact Edit Mode tests and all existing Edit Mode tests in Unity 6000.3.28f1.
@@ -238,6 +253,7 @@ A new player can start the slice and complete this sequence without developer co
 - [ ] Confirm the metadata anchors remain in the persistent scene while estuary/lighthouse visual props unload/reload with their static streamed areas.
 - [ ] Confirm archive reads do not cause site disturbance, sonar discoveries, regional chart marks, visited-region unlocks, quest flags or NPC relationship changes.
 - [ ] The other five regional artifact families remain proposed until their locations, provenance, discovery gates and playable region scenes are authored.
+- [ ] Rebuild all six streamed Greyhaven area scenes at content revision 5 so the latest archive and physical-remains prop clusters are included; validate the Editor preflight on both current and deliberately stale area scenes.
 
 ## Economy and trading integration — researched design baseline, 2026-11-14
 

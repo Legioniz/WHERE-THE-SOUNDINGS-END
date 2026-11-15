@@ -27,13 +27,13 @@ A single-player, 2.5D open-world fishing survival-horror prototype for Windows P
 4. Run **Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation** in the Editor.
 5. Open the generated Greyhaven blockout and press Play.
 
-The setup command creates the starter URP assets and generates three scenes when missing:
+The setup command creates the starter URP assets and generates the Greyhaven gameplay scene, six static additive area scenes, and two deep-water survey scenes as needed:
 
 - `Greyhaven_Blockout.unity` — harbour, village, starter boat, Harbourmaster, fishing/salvage prototype, and shallow survey profile.
 - `OuterShoals_SurveySandbox.unity` — deep bathymetry profile, a diel scattering layer, authored phenomenon sites, Sounding Rig, and site inspection.
 - `HollowTrench_SurveySandbox.unity` — trench profile, authored brine-pool/seep/hydrate/whale-fall evidence sites, Sounding Rig, and site inspection.
 
-The two deep-water scenes are isolated test ranges included in Build Settings. There is **no in-game region-travel system yet**. They are functional survey prototypes, not finished levels or complete deep-ocean hazard simulations.
+The six Greyhaven area scenes are registered in Build Settings and loaded additively around the vessel. Initialization checks each generated area's root, stable ID, content revision and render-asset references; missing or stale scenes trigger an explicit rebuild prompt. The two deep-water scenes are isolated test ranges included in Build Settings. There is **no in-game region-travel system yet**. They are functional survey prototypes, not finished levels or complete deep-ocean hazard simulations.
 
 Use **Tools > WHERE THE SOUNDINGS END > Rebuild Greyhaven Environment** after changing the Greyhaven builder. Use **Tools > WHERE THE SOUNDINGS END > Rebuild Deep Ocean Survey Sandboxes** to regenerate the two deep-water test scenes. Rebuild operations replace generated scenes and warn before discarding manual scene edits.
 
@@ -58,7 +58,8 @@ The shared Harvest Beat Input System action handles fishing strikes/fight pulls 
 - Force-driven Rigidbody workboat movement with forward/reverse thrust, braking, speed-dependent rudder, prop wash, lateral resistance, and quadratic drag.
 - Four-point spring buoyancy sampled from the same moving ocean surface used by rendering and the velocity-aware orthographic follow camera.
 - Movement/action-driven sea time: the day advances while the boat is genuinely moving or the player is performing a supported harvesting or survey action.
-- Multi-stage fishing encounters with selectable rod, line, hook, reel, bait and seven techniques; cast/deployment, variable bite waits, hook windows, multi-beat fish fights, tension/line failure, species-specific resistance and burst behavior, catch grading/size and spatial cargo storage.\n- Greyhaven fish profiles with habitat/depth eligibility, bait and technique preferences, per-habitat aggregate populations, catch depletion, daily recovery and six-hour habitat migration; loadout, lifetime catches and fish stocks use existing save data. Dredging remains a separate reservation-based minigame.
+- Multi-stage fishing encounters with selectable rod, line, hook, reel, bait and seven techniques; cast/deployment, variable bite waits, hook windows, multi-beat fish fights, tension/line failure, species-specific resistance and burst behavior, catch grading/size and spatial cargo storage.
+- Greyhaven fish profiles with habitat/depth eligibility, bait and technique preferences, per-habitat aggregate populations, catch depletion, daily recovery and six-hour habitat migration; loadout, lifetime catches and fish stocks use existing save data. Dredging remains a separate reservation-based minigame.
 - Cargo hold geometry, blocked/damaged cells, item placement, salvage-site depletion, and vessel hull/engine condition.
 - Day/night lighting and fog response, panic pressure, dead-calm and wrong-way-swell incidents, distant hull knocks, false navigation lights, and other restrained maritime omens.
 - Rare unexplained warning flashes: a brief, non-directional broken-corner indicator with no text, sound, map mark, journal note, or gameplay effect.
@@ -89,7 +90,7 @@ The title/pause front end includes a player-facing manual save/load screen for f
 
 ## Project status and verification boundary
 
-The repository contains a connected prototype, not a complete 20-hour game. Creature AI, population simulation, a full regional travel network, the finished market/economy loop, quest campaign, and site-specific physical hazard simulations remain incomplete. The economy now has an integrated researched design specification that connects the existing USD seafood price schedule and economy mathematics to Greyhaven's current NPCs, spatial cargo, vessel condition and save architecture; runtime transactions, fuel use, services and market UI remain unimplemented. Deep-ocean site markers are survey evidence; they do not yet implement the heat/chemistry/pressure/entanglement effects of vents, seeps, hydrates, brine pools, or wreck hazards.
+The repository contains a connected prototype, not a complete 20-hour game. Full creature AI and population simulation, an interconnected regional travel network, the complete quest campaign, and site-specific physical hazard simulations remain incomplete. The economy is now connected in source: the generated 155-item seafood catalogue, catch legality and provenance, harvest permits, destination-specific market stock/pricing, atomic sales and purchases, fuel, repairs, equipment, contracts, research and expedition telemetry use the existing vessel, cargo, NPC and save systems. Greyhaven is the only generated market scene; physical terminals in the other destinations, Unity runtime validation and measured expedition-balance playtests remain open. Deep-ocean site markers are survey evidence; they do not yet implement the heat/chemistry/pressure/entanglement effects of vents, seeps, hydrates, brine pools, or wreck hazards.
 
 The static check is:
 

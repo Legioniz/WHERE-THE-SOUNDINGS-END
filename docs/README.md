@@ -55,7 +55,8 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 - [Historical Artifacts and Archival Evidence](05_WORLD_AND_LEVEL_DESIGN/HISTORICAL-ARTIFACTS-AND-ARCHIVAL-EVIDENCE.md) — letters, logbooks, maps, photographs, tools and survey instruments, with provenance, reading and persistence rules.
 
 - [World Bible](02_LORE_AND_WORLD/WORLD-BIBLE.md)
-- [World Map](05_WORLD_AND_LEVEL_DESIGN/WORLD-MAP.md)\n- [Regional Chart and Discovery](06_GAMEPLAY_SYSTEMS/REGIONAL-CHART-AND-DISCOVERY.md) — physical region visits, fog-of-war, discovered-only map marks and chart save persistence.
+- [World Map](05_WORLD_AND_LEVEL_DESIGN/WORLD-MAP.md)
+- [Regional Chart and Discovery](06_GAMEPLAY_SYSTEMS/REGIONAL-CHART-AND-DISCOVERY.md) — physical region visits, fog-of-war, discovered-only map marks and chart save persistence.
 - [Greyhaven NPC system and initial resident cast](12_AI_AND_SIMULATION/GREYHAVEN-NPC-SYSTEM.md)
 - [Greyhaven environment and first-hub layout](05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN.md)
 - [Greyhaven settlement, buildings and wayfinding](05_WORLD_AND_LEVEL_DESIGN/GREYHAVEN-SETTLEMENT-AND-WAYFINDING.md) — building silhouettes, shopfronts, NPC workplace coordinates and the fixed dock chart.
@@ -85,7 +86,8 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 - [Economy and trading system](08_TECHNICAL_DESIGN/ECONOMY-AND-TRADING-SYSTEM.md) — connected vendors, regional markets, legality, equipment, research and expedition telemetry.
 - [Economy integration audit](13_PRODUCTION_MANAGEMENT/ECONOMY-INTEGRATION-AUDIT.md) — source integration paths and remaining Unity/scene verification.
 
-- [Fishing simulation runtime](08_TECHNICAL_DESIGN/FISHING-SIMULATION.md) — encounter state machine, equipment/progression, species profiles, population persistence, migration approximation and verification boundary.\n- [Catchable seafood and market species catalog](04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)
+- [Fishing simulation runtime](08_TECHNICAL_DESIGN/FISHING-SIMULATION.md) — encounter state machine, equipment/progression, species profiles, population persistence, migration approximation and verification boundary.
+- [Catchable seafood and market species catalog](04_CHARACTERS_AND_ENTITIES/CATCHABLE-SEAFOOD-CATALOG.md)
 - [Fish species index](04_CHARACTERS_AND_ENTITIES/FISH-SPECIES.md)
 - [Mutated and unnatural catchable specimens](04_CHARACTERS_AND_ENTITIES/MUTATED-AND-UNNATURAL-CATCHES.md)
 - [Creature Bible](04_CHARACTERS_AND_ENTITIES/CREATURE-BIBLE.md)
