@@ -37,11 +37,12 @@ The workflow performs these steps in order:
 4. Build a Windows 64-bit Development Player after both test suites pass.
 5. Upload test reports, logs and the Windows build as GitHub Actions artifacts.
 
-The Windows build method checks that the persistent Greyhaven scene, all six streamed areas, and both survey test scenes are enabled in Build Settings. It fails if a required scene is missing or Unity's BuildPipeline does not report success.
+Before a Windows build, `ProjectReferenceIntegrityValidator` now performs a Unity Editor preflight. It verifies all nine required scenes are imported and enabled, opens every generated scene, rejects missing MonoBehaviour scripts and unresolved project asset dependencies, validates all six streamed-area roots and their content revisions, and checks the persistent gameplay graph. The graph check confirms the vessel's Input Actions asset and required physics, cargo, fishing, survey, economy, chart, camera-follow, save/autosave, dockside and area-streaming components are connected. The Windows build still fails if Unity's BuildPipeline does not report success. Run **Tools > WHERE THE SOUNDINGS END > Validate Project References** to execute this preflight manually after initialization.
 
 ## Required acceptance checks
 
-- Unity opens the repository without package-resolution failures or C# compilation errors.
+- Unity opens the repository without package-resolution failures or C# compilation errors. The assembly-definition graph resolves Runtime, Editor, Edit Mode and Play Mode references; the Yarn project source glob resolves to at least one source file.
+- **Tools > WHERE THE SOUNDINGS END > Validate Project References** passes, with no missing MonoBehaviour scripts or unresolved project asset dependencies across the nine generated scenes.
 - The Greyhaven startup smoke test finds the physics-driven vessel, assigned Input System asset, hydrodynamics, cargo hold, harvesting, Sounding Rig, economy components, Main Camera follow target, sea-state director, save/autosave services, and area streamer.
 - All Edit Mode tests pass.
 - The additive-area Play Mode test preloads terrain/harbour/village, loads the lighthouse before approach, unloads it after leaving, and retains the persistent gameplay scene without failed transitions.
