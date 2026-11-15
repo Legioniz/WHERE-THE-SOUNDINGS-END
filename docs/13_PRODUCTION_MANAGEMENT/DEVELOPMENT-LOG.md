@@ -1,3 +1,20 @@
+## 2026-11-15 — Fresh-checkout bootstrap and Unity playable verification path
+
+### Implemented in source
+- Added a first-open Editor bootstrap for a fresh checkout with no generated Greyhaven scene. It waits until Unity finishes importing, generates the starter environment and project rendering settings, and does not silently rebuild an existing scene.
+- Added a non-interactive setup entry point for unattended Unity validation. Batch setup repairs stale generated areas without opening a modal confirmation dialog; normal Editor setup retains the explicit confirmation.
+- Added a Play Mode startup smoke test covering the generated boat, Rigidbody/hydrodynamics, assigned Input System controls, harvesting, Sounding Rig, cargo hold, economy components, camera follow target, sea-state director, save/autosave and area streaming.
+- Added a deterministic Windows Development Build entry point. It prepares generated scenes, checks that all six Greyhaven streamed areas and both deep-water test ranges are enabled in Build Settings, then fails unless Unity reports a successful Windows 64-bit build.
+- Added a manually dispatched licensed Unity workflow: all Edit/Play Mode tests first, Windows Development Build second, with test reports and build artifact upload.
+- Expanded the static validator to guard the bootstrap, build entry point, startup smoke test and Unity workflow. Updated setup and verification documentation.
+
+### Verification boundary
+- Repository source changes can be statically validated in GitHub CI, but this work session cannot launch Unity Editor or a Windows player. No Unity semantic compile, Edit Mode/Play Mode pass, Windows build or manual play session is claimed here.
+- The licensed Unity workflow requires the repository Actions secret `UNITY_LICENSE`. After the workflow succeeds, the downloaded Windows Development Build must still be launched on Windows and exercised through a complete Greyhaven expedition before the game is considered play-verified.
+- Generated `.unity`, `.meta`, `packages-lock.json` and editor build settings remain Unity-generated outputs; they must not be fabricated in a source-only change.
+
+---
+
 # Development Log
 
 ## 2026-11-15 — Revision-aware area-scene bootstrap and repository reconciliation
