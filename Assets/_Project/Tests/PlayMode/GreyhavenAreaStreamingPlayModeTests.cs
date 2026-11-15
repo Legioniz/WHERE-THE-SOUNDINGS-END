@@ -4,7 +4,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using WhereTheSoundingsEnd.Boat;
+using WhereTheSoundingsEnd.CameraSystem;
+using WhereTheSoundingsEnd.Economy;
+using WhereTheSoundingsEnd.Inventory;
+using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.Streaming;
+using WhereTheSoundingsEnd.World;
 
 namespace WhereTheSoundingsEnd.Tests.PlayMode
 {
@@ -52,6 +57,45 @@ namespace WhereTheSoundingsEnd.Tests.PlayMode
 
             _loadedSceneForTest = false;
             _boatBody = null;
+        }
+
+
+        [UnityTest]
+        public IEnumerator GreyhavenStartsWithPlayerControlledVesselAndCoreLoop()
+        {
+            BoatPrototypeController boat = FindInScene<BoatPrototypeController>(_greyhavenScene);
+            Assert.That(boat, Is.Not.Null, "The generated Greyhaven scene must contain the player workboat.");
+            Assert.That(boat.enabled, Is.True);
+            Assert.That(boat.InputActions, Is.Not.Null, "Boat controls must be assigned by the scene builder.");
+
+            Rigidbody body = boat.GetComponent<Rigidbody>();
+            Assert.That(body, Is.Not.Null);
+            Assert.That(body.isKinematic, Is.False, "The player boat must be physics driven.");
+            Assert.That(boat.GetComponent<BoatHydrodynamics>(), Is.Not.Null);
+            Assert.That(boat.GetComponent<SpatialCargoHold>(), Is.Not.Null);
+            Assert.That(boat.GetComponent<HarvestingMinigameController>(), Is.Not.Null);
+            Assert.That(boat.GetComponent<SoundingRigController>(), Is.Not.Null);
+            Assert.That(boat.GetComponent<VesselConditionController>(), Is.Not.Null);
+            Assert.That(boat.GetComponent<VesselFuelController>(), Is.Not.Null);
+            Assert.That(boat.GetComponent<EconomyWalletController>(), Is.Not.Null);
+            Assert.That(boat.GetComponent<MaraFishMarketController>(), Is.Not.Null);
+            Assert.That(boat.GetComponent<GreyhavenVendorServices>(), Is.Not.Null);
+
+            Camera camera = FindInScene<Camera>(_greyhavenScene);
+            Assert.That(camera, Is.Not.Null, "A gameplay camera must be present.");
+            Assert.That(camera.CompareTag("MainCamera"), Is.True);
+            CameraFollow2_5D follow = camera.GetComponent<CameraFollow2_5D>();
+            Assert.That(follow, Is.Not.Null);
+            Assert.That(follow.Target, Is.EqualTo(boat.transform));
+
+            Assert.That(FindInScene<SeaStateDirector>(_greyhavenScene), Is.Not.Null);
+            Assert.That(FindInScene<SaveGameCoordinator>(_greyhavenScene), Is.Not.Null);
+            Assert.That(FindInScene<AutosaveController>(_greyhavenScene), Is.Not.Null);
+            Assert.That(FindInScene<AreaStreamingDirector>(_greyhavenScene), Is.Not.Null);
+
+            yield return null;
+            Assert.That(body == null || body.isKinematic, Is.False,
+                "The vessel must remain physics controlled after the first runtime frame.");
         }
 
         [UnityTest]
