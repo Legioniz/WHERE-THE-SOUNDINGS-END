@@ -1,3 +1,23 @@
+## 2026-11-15 — Greyhaven opening and first-contact cinematics
+
+**Branch:** feature/greyhaven-opening-cinematics-20261115.
+
+### Implemented in source
+- Added a first-launch in-world archive sequence with four restrained beats establishing the Orison loss and the protagonist's return to Greyhaven. It is skippable and replayable from the title menu.
+- Added a four-beat fresh-voyage prologue when Continue finds neither a restorable manual save nor autosave. Existing save restore is unchanged.
+- Added first-contact camera/name-card presentations for the Harbourmaster, Mara Venn, Tomas Vale and Inez Sarmiento. The existing Yarn dialogue node begins only after the cinematic restores the live camera.
+- Added temporary letterbox bars, low-contrast archive shading, scanline accents, lower-third captions and fades. Cinematics use unscaled time and pause gameplay; keyboard, gamepad and on-screen skip paths are supported.
+- Added deterministic first-contact registration tests and updated repository validation, the README, documentation index and cinematic acceptance checklist.
+- No save schema, NPC stable ID, Yarn node, input action, package, voiceover or licensed media changed.
+
+### Verification boundary
+- Repository CI is expected to validate project contracts, C# syntax and safeguards when the pull request is opened.
+- Unity 6000.3.28f1 semantic compilation, UI Toolkit rendering, actual camera framing, input focus, Edit Mode execution, Play Mode and Windows launch/playtesting remain unperformed in this environment.
+- First-contact presentation state is session-local and cosmetic; it is intentionally not persisted to campaign saves. Re-launching may show a resident's introductory card again.
+- The opening/prologue use the generated Greyhaven scene and authored text/camera movement; they are not pre-rendered movies and do not include voice acting or music.
+
+---
+
 ## 2026-11-15 — Import-safe first-open bootstrap hardening
 
 ### Research finding

@@ -56,6 +56,9 @@ REQUIRED_FILES = [
     "docs/08_TECHNICAL_DESIGN/SAVE-DATA-STRUCTURE.md",
     "docs/13_PRODUCTION_MANAGEMENT/TASK-BACKLOG.md",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs",
+    "Assets/_Project/Scripts/Runtime/Narrative/CinematicSequencePolicy.cs",
+    "Assets/_Project/Tests/EditMode/OpeningCinematicPolicyTests.cs",
+    "docs/03_STORY_AND_NARRATIVE/OPENING-CINEMATICS.md",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveRestoreTransaction.cs",
@@ -908,6 +911,35 @@ def main() -> int:
         for required_text in ("TryClaimInteraction", "BeginDialogue", "_inventoryOpen"):
             if required_text not in ui_source:
                 failures.append(f"GreyhavenRuntimeUI is missing exclusive dialogue/inventory guards: {required_text}")
+
+        front_end_cinematic_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "BuildOpeningBeats", "BuildFirstVoyageBeats", "TryPlayFirstContact",
+            "wse.openingCinematicSeen", "REPLAY OPENING RECORD", "SKIP  /  CONTINUE",
+            "Time.unscaledDeltaTime", "FadeCinematicOverlay", "RestoreCinematicCamera",
+            "cinematicCameraFollow.enabled = false", "Gamepad.current",
+        ):
+            if required_text not in front_end_cinematic_source:
+                failures.append(f"GreyhavenFrontEndUI is missing cinematic integration: {required_text}")
+
+        if "frontEnd.TryPlayFirstContact" not in ui_source or "BeginDialogueAfterFirstContact" not in ui_source:
+            failures.append("GreyhavenRuntimeUI must run first-contact presentation before starting the existing Yarn dialogue.")
+
+        cinematic_policy_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/CinematicSequencePolicy.cs").read_text(encoding="utf-8")
+        if "TryRegisterFirstContact" not in cinematic_policy_source or "MaximumNpcIdLength" not in cinematic_policy_source:
+            failures.append("CinematicSequencePolicy is missing stable-ID validation and first-contact registration.")
+
+        cinematic_tests = (ROOT / "Assets/_Project/Tests/EditMode/OpeningCinematicPolicyTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "TryRegisterFirstContact_AcceptsStableIdOnlyOnce",
+            "TryRegisterFirstContact_AcceptsDistinctResidents",
+            "TryRegisterFirstContact_RejectsBlankOrUntrimmedId",
+            "TryRegisterFirstContact_RejectsOversizedId",
+            "TryRegisterFirstContact_RejectsNullSet",
+        ):
+            if f"void {required_test}" not in cinematic_tests:
+                failures.append(f"OpeningCinematicPolicyTests is missing regression: {required_test}")
+
 
         save_tests = (ROOT / "Assets/_Project/Tests/EditMode/SaveFileServiceTests.cs").read_text(encoding="utf-8")
         for required_test in (

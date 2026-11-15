@@ -87,7 +87,7 @@ Runtime saves are stored outside the project in `Application.persistentDataPath/
 
 Save schema v9 preserves boat transform/velocity, cargo (including sale quantity), vessel condition, daily salvage depletion, sea time, weather intensity and remaining duration, weather cooldown, hallucination cooldown, pending seabird events, the latest omen, maritime incident countdown/caption/hush/false-light state, Sounding Rig discoveries and opportunities, acoustic hearing history, separately inspected survey-site and historical-artifact IDs, bounded per-NPC relationship-event memory, physically visited chart regions, and the integer-cent USD wallet with its processed-transaction ledger. Save participants are discovered by the scene coordinator.
 
-The title/pause front end includes a player-facing manual save/load screen for five slots plus the separate autosave. Cross-scene restore, mid-dialogue resume, and persistence adapters for future creature/population/quest/economy systems are not complete.
+The title/pause front end includes a player-facing manual save/load screen for five slots plus the separate autosave. It also presents a skippable in-world opening record on first launch, a fresh-voyage prologue when no save can be restored, and a short camera/name-card introduction before each resident's first dialogue in a session; the opening record can be replayed from the title menu. Cross-scene restore, mid-dialogue resume, and persistence adapters for future creature/population/quest/economy systems are not complete.
 
 ## Project status and verification boundary
 
