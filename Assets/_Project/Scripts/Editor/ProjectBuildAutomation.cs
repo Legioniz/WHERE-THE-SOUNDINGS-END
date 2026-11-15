@@ -32,6 +32,7 @@ namespace WhereTheSoundingsEnd.Editor
         public static void BuildWindowsDevelopment()
         {
             ProjectFoundationSetup.InitializeForAutomation();
+            ProjectReferenceIntegrityValidator.ValidateOrThrow();
 
             string[] enabledScenes = EditorBuildSettings.scenes
                 .Where(scene => scene.enabled)
