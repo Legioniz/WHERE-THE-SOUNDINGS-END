@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System.Reflection;
 using UnityEngine;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Persistence;
@@ -53,6 +54,33 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.AreEqual(0f, UnexplainedWarningPolicy.RemapIncidentRoll(UnexplainedWarningPolicy.Probability), 0.0001f);
             Assert.AreEqual(1f, UnexplainedWarningPolicy.RemapIncidentRoll(1f), 0.0001f);
             Assert.AreEqual(0.5f, UnexplainedWarningPolicy.RemapIncidentRoll(0.5275f), 0.001f);
+        }
+
+        [Test]
+        public void SeaStateSceneRefresh_PreservesOriginalAudioBaselineAcrossRepeatedAreaTransitions()
+        {
+            AudioSource source = root.AddComponent<AudioSource>();
+            source.pitch = 1f;
+            source.volume = 1f;
+            SeaStateDirector director = root.AddComponent<SeaStateDirector>();
+
+            typeof(SeaStateDirector).GetField("panicLevel", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(director, 1f);
+            MethodInfo updateAtmosphere = typeof(SeaStateDirector).GetMethod(
+                "UpdateAtmosphere", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.IsNotNull(updateAtmosphere);
+
+            updateAtmosphere.Invoke(director, new object[] { 0f });
+            float expectedPitch = source.pitch;
+            float expectedVolume = source.volume;
+
+            director.RefreshSceneTargets();
+            updateAtmosphere.Invoke(director, new object[] { 0f });
+
+            Assert.AreEqual(expectedPitch, source.pitch, 0.0001f,
+                "Refreshing streamed scene targets must not compound the atmospheric pitch warp.");
+            Assert.AreEqual(expectedVolume, source.volume, 0.0001f,
+                "Refreshing streamed scene targets must not compound the atmospheric volume warp.");
         }
 
         [TestCase(0f, false, false, false)]
