@@ -155,6 +155,11 @@ All values are USD per kilogram of whole landed fish before the destination-isla
 | FSH-098 | Striped snakehead | T3 | INSHORE | $2.38/kg |
 | FSH-099 | Climbing perch | T2 | INSHORE | $1.35/kg |
 | FSH-100 | Philippine broadhead catfish | T3 | INSHORE | $1.82/kg |
+| FSH-101 | Pacific sailfish | T5 | PELAGIC | $7.80/kg |
+| FSH-102 | Cobia | T4 | PELAGIC | $4.25/kg |
+| FSH-103 | Red cornetfish | T3 | REEF | $2.65/kg |
+| FSH-104 | Black marlin | T5 | PELAGIC | $8.40/kg |
+| FSH-105 | Giant oarfish | T5 | DEEPWATER | $9.20/kg |
 
 ## 4. Invertebrates — base dockside payout
 
@@ -379,7 +384,7 @@ Review these after fuel, bait, repairs, equipment prices, boat upgrades, storage
 
 ## 13. Acceptance checks
 
-- Every FSH-001–FSH-100 code has exactly one base price.
+- Every FSH-001–FSH-105 code has exactly one base price.
 - Every INV-001–INV-047 code has exactly one price and unit.
 - Every ALG-001–ALG-008 code has exactly one wet-weight price.
 - Protected species have no ordinary commodity price.
@@ -413,7 +418,7 @@ Salvage offers still apply the configured buyer stock/demand, cargo quality and 
 
 ## 12. Runtime catalogue, legality and regional market integration
 
-The generated Greyhaven cargo catalog now builds all 155 scheduled seafood records (100 fish, 47 invertebrates, 8 algae/seaweed). The repository validator compares generated IDs, prices and market classes against this schedule so the editor builder cannot silently regress to the five-fish starter set. Each record has a stable ID, sale unit, market class, region availability, catch profile and ordinary/contract sale eligibility.
+The generated Greyhaven cargo catalog now builds all 160 scheduled seafood records (105 fish, 47 invertebrates, 8 algae/seaweed). The repository validator compares generated IDs, prices and market classes against this schedule so the editor builder cannot silently regress to the five-fish starter set. Each record has a stable ID, sale unit, market class, region availability, catch profile and ordinary/contract sale eligibility.
 
 - Fish, shellfish and cephalopods are available through the fishing encounter system according to their authored habitat and region profile.
 - Seaweed uses the bait-free Seaweed Harvesting method in a Kelp habitat. It has its own renewable population stock and is sold by wet harvested weight.
@@ -439,3 +444,8 @@ These are fictional gameplay thresholds, not real-world minimum landing sizes or
 The runtime telemetry records up to 50 completed expeditions with departure/destination, starter/average/optimized loadout band, gross receipts, operating expenses, actual fuel, game-clock duration and legal/flagged catch counts. The dockside panel reports average net, net per game-hour, fuel and legal-catch rate by destination/loadout.
 
 The values in this schedule remain a balancing baseline until Unity playtests collect the sample counts defined in [Economy Balancing](ECONOMY-BALANCING.md). No actual runtime balance results are claimed. Regional market pricing/stock logic is integrated; the corresponding dockside terminals still need to be authored in each streamed destination scene. Greyhaven is the currently generated dockside market scene.
+
+
+### Field-discovery catalogue additions
+
+FSH-101–FSH-105 are new journal entries in the generated runtime roster. Their species-specific prices and market classes are listed above and are checked against the builder by repository validation. First-time recovery is recorded separately from sale eligibility. The four archive-grade salvage discoveries (SALVAGE-ARCHIVE-01–04) remain unpriced and ineligible for ordinary sale until a buyer and appraisal system are authored.
