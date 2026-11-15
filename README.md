@@ -23,9 +23,10 @@ A single-player, 2.5D open-world fishing survival-horror prototype for Windows P
 
 1. Install Unity Hub and Unity Editor **6000.3.28f1** with Windows Build Support.
 2. Clone this repository and open the repository root in Unity Hub.
-3. Let Unity resolve packages and finish importing assets.
-4. Run **Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation** in the Editor.
-5. Open the generated Greyhaven blockout and press Play.
+3. Let Unity resolve packages and finish importing assets. On a fresh checkout, the Editor automatically generates the Greyhaven starter scene, additive area scenes, survey sandboxes, and initial URP settings after import.
+4. Open `Assets/_Project/Scenes/Greyhaven_Blockout.unity` and press Play.
+
+If the first-open bootstrap is interrupted or the generated starter scene is missing, run **Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation**. Existing generated areas that are stale or invalid still require an explicit rebuild confirmation in the normal Editor; unattended CI uses the non-interactive setup entry point.
 
 The setup command creates the starter URP assets and generates the Greyhaven gameplay scene, six static additive area scenes, and two deep-water survey scenes as needed:
 
@@ -92,13 +93,17 @@ The title/pause front end includes a player-facing manual save/load screen for f
 
 The repository contains a connected prototype, not a complete 20-hour game. Full creature AI and population simulation, an interconnected regional travel network, the complete quest campaign, and site-specific physical hazard simulations remain incomplete. The economy is now connected in source: the generated 155-item seafood catalogue, catch legality and provenance, harvest permits, destination-specific market stock/pricing, atomic sales and purchases, fuel, repairs, equipment, contracts, research and expedition telemetry use the existing vessel, cargo, NPC and save systems. Greyhaven is the only generated market scene; physical terminals in the other destinations, Unity runtime validation and measured expedition-balance playtests remain open. Deep-ocean site markers are survey evidence; they do not yet implement the heat/chemistry/pressure/entanglement effects of vents, seeps, hydrates, brine pools, or wreck hazards.
 
-The static check is:
+The static checks are:
 
 ```bash
 python tools/validate_project.py
+python tools/validate_csharp.py
+python tools/validate_safeguards.py --self-test
 ```
 
-GitHub Actions runs this repository-integrity validator on pushes and pull requests to `main`. It checks file/configuration contracts and key integration wiring. It is **not a Unity compilation or player build**. The Edit Mode tests are in `Assets/_Project/Tests/EditMode/`; they still need to be run in Unity 6000.3.28f1, followed by Play Mode checks and a Windows build.
+The existing GitHub Actions workflow runs repository-integrity, C# syntax and safeguard checks. Those checks are **not** a Unity compilation or player build. A separate manually dispatched [Unity verification workflow](.github/workflows/unity-verification.yml) runs the full Edit/Play Mode suite and, after tests pass, creates a Windows Development Build on a locally licensed Windows self-hosted runner. The Unity license stays on that runner and is not passed through repository secrets. Setup instructions and the acceptance boundary are documented in [Unity Playable Validation](docs/14_TESTING_AND_QUALITY/UNITY-PLAYABLE-VALIDATION.md).
+
+A successful automated build proves that Unity compiled and packaged the project in the runner environment. The resulting Windows artifact must still be launched and played on a Windows machine before the project can be called manually play-verified.
 
 ## Repository safeguards
 

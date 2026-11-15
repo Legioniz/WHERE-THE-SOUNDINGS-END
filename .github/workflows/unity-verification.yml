@@ -1,0 +1,76 @@
+name: Unity verification
+
+# This workflow uses a locally licensed Windows runner. No Unity license or repository secret
+# is passed into the job. Only trusted code on main may use the self-hosted machine.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unity-tests-and-build:
+    name: Unity tests and Windows Development Build
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Windows, X64, unity-6000.3.28f1]
+    timeout-minutes: 360
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Locate activated Unity Editor
+        shell: powershell
+        run: |
+          $unity = Get-Command "Unity.exe" -ErrorAction Stop
+          "UNITY_EDITOR=$($unity.Source)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          & $unity.Source -version
+          if ($LASTEXITCODE -ne 0) { throw "Unity Editor could not be started." }
+
+      - name: Generate fresh project scenes and settings
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path "Logs" | Out-Null
+          & $env:UNITY_EDITOR -batchmode -quit -projectPath "$env:GITHUB_WORKSPACE" -executeMethod WhereTheSoundingsEnd.Editor.ProjectFoundationSetup.InitializeForAutomation -logFile "Logs/UnitySetup.log"
+          if ($LASTEXITCODE -ne 0) { throw "Unity project bootstrap failed with exit code $LASTEXITCODE." }
+
+      - name: Run Edit Mode tests
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path "TestResults" | Out-Null
+          & $env:UNITY_EDITOR -batchmode -nographics -quit -projectPath "$env:GITHUB_WORKSPACE" -runTests -testPlatform EditMode -testResults "TestResults/EditMode.xml" -logFile "Logs/EditMode.log"
+          if ($LASTEXITCODE -ne 0) { throw "Unity Edit Mode tests failed with exit code $LASTEXITCODE." }
+
+      - name: Run Play Mode tests
+        shell: powershell
+        run: |
+          & $env:UNITY_EDITOR -batchmode -nographics -quit -projectPath "$env:GITHUB_WORKSPACE" -runTests -testPlatform PlayMode -testResults "TestResults/PlayMode.xml" -logFile "Logs/PlayMode.log"
+          if ($LASTEXITCODE -ne 0) { throw "Unity Play Mode tests failed with exit code $LASTEXITCODE." }
+
+      - name: Build Windows 64-bit Development Player
+        shell: powershell
+        run: |
+          & $env:UNITY_EDITOR -batchmode -quit -projectPath "$env:GITHUB_WORKSPACE" -executeMethod WhereTheSoundingsEnd.Editor.ProjectBuildAutomation.BuildWindowsDevelopment -logFile "Logs/WindowsBuild.log"
+          if ($LASTEXITCODE -ne 0) { throw "Windows Development Build failed with exit code $LASTEXITCODE." }
+          if (-not (Test-Path "Builds/Windows/WHERE THE SOUNDINGS END.exe")) { throw "Unity did not create the expected Windows executable." }
+
+      - name: Upload Unity test reports and logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unity-test-reports-and-logs
+          path: |
+            TestResults/
+            Logs/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Windows Development Build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: WHERE-THE-SOUNDINGS-END-Windows-Development
+          path: Builds/Windows/
+          if-no-files-found: error
+          retention-days: 14

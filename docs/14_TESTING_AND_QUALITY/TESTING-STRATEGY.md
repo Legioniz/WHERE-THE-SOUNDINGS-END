@@ -21,6 +21,7 @@
 - Dockside access and modal policy: stationary-speed threshold, horizontal approach radius, invalid numeric input, vertical-separation independence, and exclusive ownership across dockside, inventory, dialogue and front-end pause overlays.
 
 ### Play Mode
+- Bootstrap a fresh checkout in Unity 6000.3.28f1, load the generated Greyhaven persistent scene, and verify the player-controlled vessel, Rigidbody/hydrodynamics, Input System asset, harvest and Sounding Rig components, cargo hold, camera target, world clock, save coordinator, autosave controller and area streamer are present.
 - Load the generated Greyhaven persistent scene and verify the three startup areas become resident without replacing the gameplay scene.
 - Move the vessel into the lighthouse preload radius, confirm the lighthouse area activates, return to the harbour, and confirm it unloads after the configured grace period while the persistent scene remains loaded.
 - Repeat area transitions and check that queued requests are cancelled when out of range, re-entry during unload is safely re-queued, and no area is left in a failed/loading/unloading state.
@@ -106,6 +107,10 @@ The Edit Mode assembly contains deterministic suites for the following policies 
 - Exact generated-area identity/revision matching; stale revisions, wrong area IDs and empty identity/version values are rejected.
 
 The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v9 and ordered v4-to-v5/v5-to-v6/v6-to-v7/v7-to-v8/v8-to-v9 migrations, dockside modal wiring, Sounding Rig and historical-artifact persistence markers, generated-area revision/preflight wiring, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
+
+## Licensed Unity verification workflow
+
+The manual GitHub Actions workflow `.github/workflows/unity-verification.yml` runs the full Edit Mode and Play Mode suites with Unity 6000.3.28f1, then builds a Windows Development Player only after tests pass. It requires a Windows self-hosted GitHub Actions runner labelled `unity-6000.3.28f1`, with that Unity Editor installed and activated locally. The license remains on the runner; the workflow receives no repository secrets. The first-open Editor bootstrap generates scenes in a fresh checkout, and the build entry point validates all nine required scenes before compiling the player.
 
 ## Verification boundary
 
