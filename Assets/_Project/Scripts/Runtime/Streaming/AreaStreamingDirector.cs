@@ -168,6 +168,7 @@ namespace WhereTheSoundingsEnd.Streaming
             AreaState state = FindState(areaId);
             if (state == null) return false;
             state.ExplicitlyRequested = true;
+            state.Failed = false;
             state.OutsideSince = -1f;
             if (state.IsUnloading)
                 state.PendingLoad = true;
