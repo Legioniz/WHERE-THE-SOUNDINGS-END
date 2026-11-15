@@ -84,6 +84,8 @@ namespace WhereTheSoundingsEnd.Tests
                 float.NaN, 10, 30f));
             Assert.AreEqual(0, CinematicSequencePolicy.GetVisibleCharacterCount(
                 1f, 10, float.PositiveInfinity));
+            Assert.AreEqual(10, CinematicSequencePolicy.GetVisibleCharacterCount(
+                float.MaxValue, 10, float.MaxValue));
         }
     }
 }
