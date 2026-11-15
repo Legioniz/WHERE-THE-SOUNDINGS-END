@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -1118,8 +1119,9 @@ namespace WhereTheSoundingsEnd.Narrative
                     fishingSystem.TryGetFieldJournalMetadata(records[i].ItemId, out region, out recordedAt, out read) && !read)
                     unread++;
             }
+            int totalDiscoveries = fishingSystem != null ? fishingSystem.DiscoveredFieldItemIds.Count : records.Count;
             _journalCountLabel.text = records.Count + " RECORDED  /  " + unread + " UNREAD  /  " +
-                fishingSystem.DiscoveredFieldItemIds.Count + " TOTAL DISCOVERIES";
+                totalDiscoveries + " TOTAL DISCOVERIES";
 
             if (records.Count == 0)
             {
