@@ -111,6 +111,7 @@ AI agents must read the repository's AGENTS.md before changing code. A roadmap, 
 - [Character Arcs](03_STORY_AND_NARRATIVE/CHARACTER-ARCS.md) — emotional progression, knowledge boundaries and visual/personal motifs for the core cast.
 - [Story Structure](03_STORY_AND_NARRATIVE/STORY-STRUCTURE.md) — act escalation, evidence gates and vertical-slice boundary.
 - [Act I — Familiar Waters](03_STORY_AND_NARRATIVE/ACT-01.md)
+- [Opening Cinematics and First Contacts](03_STORY_AND_NARRATIVE/OPENING-CINEMATICS.md) — first-launch record, fresh-voyage prologue and resident introductions.
 - [Act II — Beyond the Coast](03_STORY_AND_NARRATIVE/ACT-02.md)
 - [Act III — The Deep](03_STORY_AND_NARRATIVE/ACT-03.md)
 - [Act IV — The Last Sounding](03_STORY_AND_NARRATIVE/ACT-04.md)
