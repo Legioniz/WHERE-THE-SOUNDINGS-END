@@ -108,6 +108,10 @@ The Edit Mode assembly contains deterministic suites for the following policies 
 
 The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v9 and ordered v4-to-v5/v5-to-v6/v6-to-v7/v7-to-v8/v8-to-v9 migrations, dockside modal wiring, Sounding Rig and historical-artifact persistence markers, generated-area revision/preflight wiring, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 
+## Licensed Unity verification workflow
+
+The manual GitHub Actions workflow `.github/workflows/unity-verification.yml` runs the full Edit Mode and Play Mode suites with Unity 6000.3.28f1, then builds a Windows Development Player only after tests pass. It requires a Windows self-hosted GitHub Actions runner labelled `unity-6000.3.28f1`, with that Unity Editor installed and activated locally. The license remains on the runner; the workflow receives no repository secrets. The first-open Editor bootstrap generates scenes in a fresh checkout, and the build entry point validates all nine required scenes before compiling the player.
+
 ## Verification boundary
 
 The static validator checks repository structure and configuration; Tree-sitter checks C# syntax. Neither resolves C# symbols or compiles against Unity/package assemblies. These checks do not import the Unity project, run Edit Mode or Play Mode tests, or create a player build.
