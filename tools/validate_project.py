@@ -1238,7 +1238,14 @@ def main() -> int:
 
 
         setup_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
-        for required_text in ("InitializeForAutomation", "[InitializeOnLoad]", "EditorApplication.delayCall", "Application.isBatchMode"):
+        for required_text in (
+            "InitializeForAutomation",
+            "ProjectFirstOpenBootstrap : AssetPostprocessor",
+            "OnPostprocessAllAssets(",
+            "didDomainReload",
+            "EditorApplication.delayCall",
+            "Application.isBatchMode",
+        ):
             if required_text not in setup_source:
                 failures.append(f"ProjectFoundationSetup is missing first-open/CI bootstrap behavior: {required_text}")
 
