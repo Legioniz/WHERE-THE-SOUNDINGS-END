@@ -21,6 +21,7 @@
 - Dockside access and modal policy: stationary-speed threshold, horizontal approach radius, invalid numeric input, vertical-separation independence, and exclusive ownership across dockside, inventory, dialogue and front-end pause overlays.
 
 ### Play Mode
+- Bootstrap a fresh checkout in Unity 6000.3.28f1, load the generated Greyhaven persistent scene, and verify the player-controlled vessel, Rigidbody/hydrodynamics, Input System asset, harvest and Sounding Rig components, cargo hold, camera target, world clock, save coordinator, autosave controller and area streamer are present.
 - Load the generated Greyhaven persistent scene and verify the three startup areas become resident without replacing the gameplay scene.
 - Move the vessel into the lighthouse preload radius, confirm the lighthouse area activates, return to the harbour, and confirm it unloads after the configured grace period while the persistent scene remains loaded.
 - Repeat area transitions and check that queued requests are cancelled when out of range, re-entry during unload is safely re-queued, and no area is left in a failed/loading/unloading state.
