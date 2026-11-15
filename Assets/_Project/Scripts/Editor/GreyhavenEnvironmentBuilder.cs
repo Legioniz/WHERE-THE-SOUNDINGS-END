@@ -380,6 +380,14 @@ namespace WhereTheSoundingsEnd.Editor
                     new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up }, 0f),
                 CreateCargoDefinition("SALVAGE-SCRAP-01", "Corroded Ship Fittings", CargoItemCategory.Salvage,
                     new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right, Vector2Int.right * 2 }, 0f),
+                CreateCargoDefinition("SALVAGE-ARCHIVE-01", "Brass Sounding Weight", CargoItemCategory.Salvage,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up }, 0f),
+                CreateCargoDefinition("SALVAGE-ARCHIVE-02", "Ceramic Hydrophone Insulator", CargoItemCategory.Salvage,
+                    new[] { Vector2Int.zero, Vector2Int.right }, 0f),
+                CreateCargoDefinition("SALVAGE-ARCHIVE-03", "Orison Signal-Lamp Lens", CargoItemCategory.Salvage,
+                    new[] { Vector2Int.zero, Vector2Int.up }, 0f),
+                CreateCargoDefinition("SALVAGE-ARCHIVE-04", "Water-Sealed Chart Tube", CargoItemCategory.Salvage,
+                    new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up, Vector2Int.up + Vector2Int.right }, 0f),
                 CreateCargoDefinition("QUEST-SEALED-PARCEL", "Sealed Survey Parcel", CargoItemCategory.Quest,
                     new[] { Vector2Int.zero, Vector2Int.up }, 0f, true),
                 CreateCargoDefinition("ABR-FSH-001", "Milkfish — Glass-Eyed", CargoItemCategory.Fish,
@@ -516,6 +524,11 @@ FSH-097|Asian swamp eel|2.06|INSHORE|greyhaven|Fish|1|kg|0.30|1.20|0||0|T3
 FSH-098|Striped snakehead|2.38|INSHORE|greyhaven|Fish|1|kg|0.30|1.20|0||0|T3
 FSH-099|Climbing perch|1.35|INSHORE|greyhaven|Fish|1|kg|0.15|0.60|0||0|T2
 FSH-100|Philippine broadhead catfish|1.82|INSHORE|greyhaven|Fish|1|kg|0.30|1.20|0||0|T3
+FSH-101|Whale shark|6.50|PELAGIC|the_outer_shoals,the_hollow_trench|Fish|1|kg|2.00|8.00|1||0|T5
+FSH-102|Giant manta ray|5.80|PELAGIC|the_shallows,the_outer_shoals|Fish|1|kg|1.50|6.00|1||0|T5
+FSH-103|Largetooth sawfish|5.25|INSHORE|greyhaven,the_drowned_parish|Fish|1|kg|1.00|5.00|1||0|T5
+FSH-104|Black marlin|8.40|PELAGIC|the_outer_shoals|Fish|1|kg|2.00|10.00|0||0|T5
+FSH-105|Giant oarfish|9.20|DEEPWATER|the_hollow_trench|Fish|1|kg|2.00|12.00|0||0|T5
 INV-001|Small shrimp / alamang group|1.43|INVERTEBRATE|greyhaven,the_drowned_parish|Shellfish|1|kg|0.03|0.09|0||0|T1
 INV-002|Giant tiger prawn|6.66|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.18|0.54|0||0|T4
 INV-003|Banana prawn|3.96|INVERTEBRATE|greyhaven,the_drowned_parish,the_shallows|Shellfish|1|kg|0.10|0.30|0||0|T3
