@@ -610,3 +610,20 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 ### Verification boundary
 - Repository validation and C# syntax checks are expected from the pull request workflow.
 - Unity semantic compilation, ScriptableObject regeneration, actual fish encounter probabilities, generated-scene presentation, Edit Mode execution, Play Mode discovery/save-load, Windows build and player launch remain unverified until run in Unity 6000.3.28f1.
+
+## 2026-11-15 — Campaign Field Journal
+
+**Branch:** `feature/field-journal-system-20261115`.
+
+### Implemented in source
+- Added a Field Journal overlay to the Greyhaven HUD, opened from the new **FIELD JOURNAL [J]** button or keyboard shortcut.
+- Added filters for all records, biological specimens, recovered objects and unexplained Sounding Rig findings.
+- Item records show stable ID, recovery region, UTC timestamp rendered in local time, catalogue description, habitat/depth/method profile where applicable and unresolved evidence notes.
+- Survey findings show site ID, region, UTC timestamp, phenomenon type, depth, evidence label and the authored first-survey note. They remain explicitly unclassified where the source is unconfirmed.
+- Opening an entry marks it read. Read state, region and timestamp are stored in the existing `ProgressSaveData.journalEntries` DTO.
+- Reused the existing `field-discovery:` namespace for secured cargo and introduced `field-finding:` for Sounding Rig-confirmed sites. Existing quest/narrative journal entries are preserved by both save participants.
+- Restored older discovery IDs without metadata as visible entries with unknown location/date rather than discarding them.
+- Added policy tests, source validation and HUD/save-data documentation.
+
+### Verification boundary
+Repository validation and C# syntax checks are expected from the pull request workflow. Unity semantic compilation, UI Toolkit layout, keyboard behavior, save/load integration, additive-scene finding visibility and Play Mode testing remain unverified until run in Unity 6000.3.28f1.
