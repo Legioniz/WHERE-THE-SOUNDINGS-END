@@ -2,8 +2,8 @@
 
 > Project: WHERE THE SOUNDINGS END  
 > Status: Runtime telemetry and Play Mode transition test authored; Unity execution pending  
-> Version: 1.1  
-> Last reviewed: 2026-11-13
+> Version: 1.2  
+> Last reviewed: 2026-11-15
 
 ## 1. Design intent
 
@@ -72,6 +72,12 @@ StreamedAreaSceneRoot.TryValidate rejects an area before activation if any of th
 
 A rejected scene is unloaded. The streaming layer does not spawn substitute cubes, render magenta materials, or accept partially loaded asset sets. The persistent dockside menu is not a streamed interior scene: it is a UI presentation bound to location coordinates and existing runtime systems. A missing scene/build-list entry is also rejected before load starts.
 
+### Editor preflight and content revisions
+
+The Greyhaven Editor builder owns the current streamed-area content revision (5) and the ordered stable IDs for all six area scenes. The project-initialization command opens each generated area scene additively for a preflight check and verifies that it contains exactly one root with a StreamedAreaSceneRoot, the expected stable ID and current content revision, and valid referenced meshes/materials/shaders. A scene already loaded before preflight is left loaded; scenes opened only for validation are closed, and the previously active scene is restored.
+
+Missing, stale or invalid area scenes produce a clear confirmation prompt before the generated Greyhaven blockout and all six area scenes are rebuilt. Choosing to keep them leaves the existing content untouched and emits a warning; affected areas may still be rejected by the runtime loader. The November 15 revision increment covers the new historical-artifact visual clusters added beneath the streamed harbour, village, western estuary and lighthouse roots. Rebuilding from the current Editor builder is required before those visual additions appear in existing generated area scenes.
+
 ## 5. State transitions
 
 1. UNLOADED to QUEUED when the vessel enters the preload radius.
@@ -120,6 +126,6 @@ For future islands or larger maritime regions, author additional area definition
 
 ## 9. Verification status
 
-The source includes deterministic Edit Mode tests for distance boundaries, non-finite inputs, and preload/unload hysteresis. A new Play Mode test loads Greyhaven, waits for its startup areas, moves the vessel to the lighthouse to trigger additive preload, returns to its original position, and waits for the lighthouse area to unload while asserting the persistent gameplay scene remains loaded. Static CI validation checks the scene loader, root integrity contract, editor scene generation, build-scene list preservation, telemetry instrumentation and presence of the Play Mode test.
+The source includes deterministic Edit Mode tests for distance boundaries, non-finite inputs, preload/unload hysteresis, and exact area-ID/content-revision matching (including stale revision and wrong-area rejection). The Editor preflight also checks generated scene presence, root count, serialized root state and referenced asset integrity before offering a rebuild. A new Play Mode test loads Greyhaven, waits for its startup areas, moves the vessel to the lighthouse to trigger additive preload, returns to its original position, and waits for the lighthouse area to unload while asserting the persistent gameplay scene remains loaded. Static CI validation checks the scene loader, root integrity contract, editor scene generation, build-scene list preservation, telemetry instrumentation and presence of the Play Mode test.
 
 Unity semantic compilation, Edit Mode test execution, Play Mode travel test execution, frame-time profiling, and Windows player build remain mandatory before treating the feature as production-verified. The telemetry is implemented but no real hardware measurements have been collected in this environment.
