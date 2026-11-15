@@ -117,6 +117,9 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Camera/CameraFollow2_5D.cs",
     "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef",
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
+    "Assets/_Project/Scripts/Editor/ProjectBuildAutomation.cs",
+    ".github/workflows/unity-verification.yml",
+    "docs/14_TESTING_AND_QUALITY/UNITY-PLAYABLE-VALIDATION.md",
     "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs",
     "Assets/_Project/Scripts/Editor/GreyhavenMaritimeAssetBuilder.cs",
     "Assets/_Project/Tests/EditMode/GreyhavenEnvironmentalArtifactTests.cs",
@@ -1221,6 +1224,27 @@ def main() -> int:
         for permit in ("reef_stewardship", "licensed_sea_cucumber"):
             if permit not in research_tests:
                 failures.append(f"HarbourmasterResearchSaveTests is missing harvest permit persistence coverage: {permit}")
+
+
+        setup_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
+        for required_text in ("InitializeForAutomation", "[InitializeOnLoad]", "EditorApplication.delayCall", "Application.isBatchMode"):
+            if required_text not in setup_source:
+                failures.append(f"ProjectFoundationSetup is missing first-open/CI bootstrap behavior: {required_text}")
+
+        build_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectBuildAutomation.cs").read_text(encoding="utf-8")
+        for required_text in ("BuildWindowsDevelopment", "StandaloneWindows64", "BuildOptions.Development", "BuildResult.Succeeded"):
+            if required_text not in build_source:
+                failures.append(f"ProjectBuildAutomation is missing Windows build contract: {required_text}")
+
+        play_mode_source = (ROOT / "Assets/_Project/Tests/PlayMode/GreyhavenAreaStreamingPlayModeTests.cs").read_text(encoding="utf-8")
+        for required_test in ("GreyhavenStartsWithPlayerControlledVesselAndCoreLoop", "AdditiveAreasPreloadAndRetireWhilePersistentGameplaySceneStaysLoaded"):
+            if f"IEnumerator {required_test}()" not in play_mode_source:
+                failures.append(f"Greyhaven Play Mode coverage is missing: {required_test}")
+
+        unity_workflow = (ROOT / ".github/workflows/unity-verification.yml").read_text(encoding="utf-8")
+        for required_text in ("game-ci/unity-test-runner@", "game-ci/unity-builder@", "UNITY_LICENSE", "testMode: all", "BuildWindowsDevelopment"):
+            if required_text not in unity_workflow:
+                failures.append(f"Unity verification workflow is missing: {required_text}")
 
         economy_tests = (ROOT / "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs").read_text(encoding="utf-8")
         for required_test in (
