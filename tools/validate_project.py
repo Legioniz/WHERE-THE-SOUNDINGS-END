@@ -918,6 +918,8 @@ def main() -> int:
             "wse.openingCinematicSeen", "REPLAY OPENING RECORD", "SKIP  /  CONTINUE",
             "Time.unscaledDeltaTime", "FadeCinematicOverlay", "RestoreCinematicCamera",
             "cinematicCameraFollow.enabled = false", "Gamepad.current",
+            "cinematicBeatCounter", "cinematicProgressFill", "GetVisibleCharacterCount",
+            "wse.reduceCinematicMotion", "Reduce cinematic camera movement",
         ):
             if required_text not in front_end_cinematic_source:
                 failures.append(f"GreyhavenFrontEndUI is missing cinematic integration: {required_text}")
@@ -928,6 +930,8 @@ def main() -> int:
         cinematic_policy_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/CinematicSequencePolicy.cs").read_text(encoding="utf-8")
         if "TryRegisterFirstContact" not in cinematic_policy_source or "MaximumNpcIdLength" not in cinematic_policy_source:
             failures.append("CinematicSequencePolicy is missing stable-ID validation and first-contact registration.")
+        if "GetVisibleCharacterCount" not in cinematic_policy_source:
+            failures.append("CinematicSequencePolicy is missing the deterministic caption reveal policy.")
 
         cinematic_tests = (ROOT / "Assets/_Project/Tests/EditMode/OpeningCinematicPolicyTests.cs").read_text(encoding="utf-8")
         for required_test in (
@@ -936,6 +940,8 @@ def main() -> int:
             "TryRegisterFirstContact_RejectsBlankOrUntrimmedId",
             "TryRegisterFirstContact_RejectsOversizedId",
             "TryRegisterFirstContact_RejectsNullSet",
+            "GetVisibleCharacterCount_ClampsRevealProgress",
+            "GetVisibleCharacterCount_HandlesInvalidTimingValues",
         ):
             if f"void {required_test}" not in cinematic_tests:
                 failures.append(f"OpeningCinematicPolicyTests is missing regression: {required_test}")
