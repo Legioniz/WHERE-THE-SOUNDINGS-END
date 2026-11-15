@@ -31,6 +31,13 @@ namespace WhereTheSoundingsEnd.Streaming
                    distance > unloadRadius;
         }
 
+        /// <summary>Disables area rendering outside preload range while retaining loaded scene assets for quick re-entry.</summary>
+        public static bool ShouldStandby(float distance, float preloadRadius)
+        {
+            return IsFinite(distance) && IsFinite(preloadRadius) &&
+                   distance >= 0f && preloadRadius > 0f && distance > preloadRadius;
+        }
+
         private static bool IsFinite(float value)
         {
             return !float.IsNaN(value) && !float.IsInfinity(value);
