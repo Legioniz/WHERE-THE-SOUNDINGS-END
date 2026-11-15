@@ -488,7 +488,8 @@ namespace WhereTheSoundingsEnd.Narrative
 
                     int visibleCharacters = reduceCinematicMotion
                         ? beat.Caption.Length
-                        : Mathf.Clamp(Mathf.FloorToInt(elapsed * 34f), 0, beat.Caption.Length);
+                        : CinematicSequencePolicy.GetVisibleCharacterCount(
+                            elapsed, beat.Caption.Length, 34f);
                     if (cinematicCaption.text.Length != visibleCharacters)
                         cinematicCaption.text = beat.Caption.Substring(0, visibleCharacters);
 
