@@ -150,3 +150,17 @@ Unity Editor compilation and actual save/load round-trip tests are still require
 Schema v9 adds `WorldSaveData.inspectedHistoricalArtifactIds`, a bounded, unique-ID list of historical records examined through the existing `DeepOceanSiteInteractionController`. It is independent from `inspectedPhenomenonSiteIds`, which continues to mean that a player has inspected a Sounding Rig site.
 
 The v8-to-v9 migration creates an empty artifact ledger for older saves. It does not copy existing site IDs, create artifact discoveries or modify the regional chart. The controller captures/restores the separate list transactionally with its existing save-participant contract. Artifact UI text and visual GameObjects remain transient/scene-authored; only stable artifact IDs are persisted.
+
+
+## Field journal discovery records
+
+The Greyhaven field journal reuses `ProgressSaveData.journalEntries` and the existing `JournalEntrySaveData` DTO. No save schema migration is required.
+
+- Field discovery IDs use the stable `field-discovery:<CargoItemDefinition.ItemId>` namespace.
+- `entryId` stores the stable item identity.
+- `interpretationId` stores the normalized recovery region ID (or `unknown` when no chart region is active).
+- `recordedAtUtc` stores the UTC timestamp at the moment cargo recovery is committed.
+- `read` tracks whether the player opened the entry.
+- `ProgressSaveData.discoveredEntryIds` remains the compatibility/discovery index. On restore, field journal records and discovery IDs are reconciled so saves created before the journal UI can still show previously discovered item IDs, with missing metadata displayed as unknown / date not recorded.
+
+The fishing save participant replaces only entries in its own `field-discovery:` namespace during capture. Quest, narrative and other journal records remain untouched. The field journal reads from the generated cargo catalogue and never fabricates a specimen or salvage entry that has not been secured.
