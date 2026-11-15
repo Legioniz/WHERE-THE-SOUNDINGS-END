@@ -62,6 +62,7 @@
 - Confirm Harbourmaster's log desk and office records, Mara's sorting/scale/collection props, Tomas's repair bench/radio/engine props, Inez's net loom/knot/spool props and the Inn's shared seating are visible from the gameplay camera.
 - Confirm resident furniture is static and collider-free, is assigned to the intended additive area scene, and does not obstruct NPC schedule destinations, the quay walking lane, market service face, repair bay, net-shed approach, road access or boat mooring.
 - Stream the harbour and village areas in/out repeatedly and confirm furniture appears/disappears with its owning static area without duplicate props or persistent-scene references.
+- Run the Editor generated-area preflight against six valid revision-5 scenes, then against stale revision, wrong stable ID, missing root and missing scene asset cases. Only the valid set should pass. Confirm scenes opened only for validation are closed afterward, previously loaded scenes remain loaded, and the previously active scene is restored.
 - Confirm NPC relationship scores and Yarn first-meeting/trust variables restore independently after a save/load cycle.
 - Confirm Outer Shoals and Hollow Trench sandbox scenes contain valid regional profiles and authored site markers.
 - Enter and leave each DeepOceanSurveyRegion; verify the first visit unlocks exactly once, persists through save/load, and never exposes other region names.
@@ -102,8 +103,9 @@ The Edit Mode assembly contains deterministic suites for the following policies 
 - Four-point buoyancy force and damping response, forward/reverse acceleration, braking behaviour, engine/hull condition effects, and flow-dependent rudder authority.
 - Continuous wave phase across reversal, gradual direction blending, vertical surface velocity including amplitude transitions, and maximum probe-submersion clamping.
 - Fixed-step surface-velocity estimation and normalized interpolation between previous/current wave snapshots.
+- Exact generated-area identity/revision matching; stale revisions, wrong area IDs and empty identity/version values are rejected.
 
-The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v9 and ordered v4-to-v5/v5-to-v6/v6-to-v7/v7-to-v8/v8-to-v9 migrations, dockside modal wiring, Sounding Rig and historical-artifact persistence markers, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
+The repository static validator checks required project files, pinned Unity / package versions, input action presence, save schema v9 and ordered v4-to-v5/v5-to-v6/v6-to-v7/v7-to-v8/v8-to-v9 migrations, dockside modal wiring, Sounding Rig and historical-artifact persistence markers, generated-area revision/preflight wiring, regional profile IDs and assembly-definition references. A Tree-sitter C# parser checks syntax across all project C# files.
 
 ## Verification boundary
 
