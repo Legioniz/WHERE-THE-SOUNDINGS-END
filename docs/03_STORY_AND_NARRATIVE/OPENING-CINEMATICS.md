@@ -23,7 +23,7 @@ The sequence is restrained: measured camera movement, letterbox framing, a low-c
 | 1 | The Second Return | The first sounding found the seabed. The second came back eleven seconds late. |
 | 2 | A Voice on the Radio | A familiar voice crossed an empty channel. The crew stopped answering. |
 | 3 | The Orison Was Lost | One apprentice was recovered. The vessel and the rest of its crew were never found. |
-| 4 | The Coast Is Waiting | Eight years later, a new hand takes work on an old boat. There is a harbour to learn and a living to make. |\n| 5 | One Apprentice | The surviving apprentice was the only person recovered. The Orison and the rest of its crew were never found. |\n| 6 | No Final Position | The Orison's loss remains unaccounted for. The surviving record does not establish what happened beyond the outer marker. |
+| 4 | The Coast Is Waiting | Eight years later, a new hand takes work on an old boat. There is a harbour to learn and a living to make. |\n| 5 | The Recovery File | The report was left open. No confirmed cause or final position was entered for the Orison. |\n| 6 | No Final Position | The Orison's loss remains unaccounted for. The surviving record does not establish what happened beyond the outer marker. |
 
 The opening is intentionally incomplete. It establishes the Orison loss and the protagonist's past without explaining the signal, assigning objective blame, confirming the voice's identity, or revealing later evidence. The title menu appears after the sequence. **Replay Opening Record** is available from the title menu.
 
