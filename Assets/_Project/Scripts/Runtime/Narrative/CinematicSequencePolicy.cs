@@ -36,8 +36,13 @@ namespace WhereTheSoundingsEnd.Narrative
 
             double elapsed = Math.Max(0d, elapsedSeconds);
             double rate = Math.Max(0d, charactersPerSecond);
-            int visible = (int)Math.Floor(elapsed * rate);
-            return Math.Max(0, Math.Min(textLength, visible));
+            double reveal = elapsed * rate;
+            if (double.IsNaN(reveal) || reveal <= 0d)
+                return 0;
+            if (double.IsInfinity(reveal) || reveal >= textLength)
+                return textLength;
+
+            return (int)Math.Floor(reveal);
         }
     }
 }
