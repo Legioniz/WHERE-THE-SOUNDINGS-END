@@ -1,3 +1,18 @@
+## 2026-11-15 — Cinematic presentation major upgrade
+
+**Branch:** feature/cinematic-presentation-upgrade-20261115.
+
+- Reworked cinematic cards into a guided sequence with record/beat counters and a progress indicator.
+- Added progressive caption reveals with a deterministic, bounded timing policy.
+- Added a persistent Reduce cinematic camera movement option. It suppresses authored camera moves/zoom, displays captions immediately and shortens transitions without changing the story sequence.
+- Added Edit Mode coverage for caption reveal timing and invalid floating-point inputs.
+- Extended repository validation to guard the director UI, accessibility option, policy and regression tests.
+- No story facts, save schema, Yarn node, resident ID, input action or external media changed.
+
+**Verification boundary:** repository CI checks source contracts and C# syntax only. Unity Editor rendering, semantic compilation, Play Mode camera/input tests and Windows launch remain required.
+
+---
+
 ## 2026-11-15 — Greyhaven opening and first-contact cinematics
 
 **Branch:** feature/greyhaven-opening-cinematics-20261115.
