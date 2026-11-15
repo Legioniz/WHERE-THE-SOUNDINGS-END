@@ -313,7 +313,7 @@ namespace WhereTheSoundingsEnd.Narrative
                 new CinematicBeat(
                     "HARBOURMASTER'S INSTRUCTION",
                     "THE FIRST JOB",
-                    "Recover the sounding buoy intact. Do not switch it on. If it starts answering, drop the line.",
+                    "Recover the sounding buoy intact. Do not switch it on.",
                     new Vector3(0f, 1f, -15f), new Vector3(0f, 40f, -30f), 3f, 1.18f),
                 new CinematicBeat(
                     "FIELD NOTE  /  DAY ONE",
@@ -337,9 +337,9 @@ namespace WhereTheSoundingsEnd.Narrative
                 title,
                 caption,
                 new Vector3(0f, 1f, 0f),
-                new Vector3(0f, 7.5f, -9f),
+                new Vector3(0f, 5f, -6f),
                 2.65f,
-                0.62f);
+                0.12f);
             StartCoroutine(RunCinematic(new[] { beat }, npc.transform, true, afterSequence));
             return true;
         }
