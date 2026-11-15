@@ -58,7 +58,7 @@ The current blockout uses generated Unity primitives and mesh assets. The author
 
 ## 5. Memory policy
 
-Unloading an additive scene destroys its scene objects and releases scene-owned references. Shared materials, textures, and meshes remain resident while another loaded scene or object references them. The runtime deliberately does not call Resources.UnloadUnusedAssets after every area exit: a global unused-asset sweep can itself create a frame-time spike. Any future global asset collection should run during a title/safe-harbour transition or another authored quiet window, after profiling proves that it is needed.
+Unloading an additive scene destroys its scene objects and releases scene-owned references. Shared materials, textures, and meshes remain resident while another loaded scene or object references them. A loaded area outside its preload radius first enters standby: its static root is deactivated while its scene remains resident for quick re-entry. It is fully unloaded only after leaving the wider unload radius for the configured grace period. After at least two area unloads and a 12-second quiet window, the director may run an asynchronous `Resources.UnloadUnusedAssets` sweep, throttled by a 90-second cooldown; new scene loads wait for the sweep to finish. No forced `GC.Collect` is used. Global unused-asset sweeps can still cause frame-time spikes, so these are conservative starting thresholds that must be profiled and tuned on target hardware. `SeaStateDirector.RefreshSceneTargets` restores its prior audio baselines before rescanning active lights and audio sources, preventing repeated area transitions from compounding atmosphere pitch/volume attenuation.
 
 For final art, large textures and meshes should be split by area, reused through shared project assets where appropriate, and imported with platform-appropriate compression, mipmaps, LODs, and sensible texture sizes. Streaming scenes is not a substitute for those asset budgets.
 
@@ -92,6 +92,7 @@ Initial target: no blocking load screen, no forced time-scale pause, no duplicat
 
 - Unity Editor compilation, Edit Mode execution, Play Mode travel tests, and Windows build have not yet been performed for this feature.
 - The six generated scene assets are outputs of the Editor bootstrap and are not committed as binary scene files in the repository. A clean checkout must run Initialize Project Foundation.
+- Explicit `RequestArea` / `ReleaseArea` APIs are currently exercised by Play Mode coverage but have no gameplay/quest caller yet; current Greyhaven streaming is distance-driven.
 - The current system streams static scenery, not NPCs, water simulation, mission state, dynamic wildlife, or arbitrary audio/addressable groups.
 - A late or failed load may leave a visible gap rather than freeze the player. Preload radius and asset budgets must be tuned to avoid reaching an unloaded area.
 - Scene unloading does not guarantee immediate physical deallocation of shared assets. Avoid global asset unload sweeps during active navigation.
