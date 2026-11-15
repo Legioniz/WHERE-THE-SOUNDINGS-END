@@ -63,5 +63,29 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.Throws<ArgumentNullException>(() =>
                 CinematicSequencePolicy.TryRegisterFirstContact(null, "greyhaven.harbourmaster"));
         }
+
+        [TestCase(0f, 12, 30f, 0)]
+        [TestCase(0.1f, 12, 30f, 3)]
+        [TestCase(0.5f, 12, 30f, 12)]
+        [TestCase(-1f, 12, 30f, 0)]
+        [TestCase(1f, 0, 30f, 0)]
+        [TestCase(1f, 12, 0f, 0)]
+        public void GetVisibleCharacterCount_ClampsRevealProgress(
+            float elapsed, int length, float rate, int expected)
+        {
+            Assert.AreEqual(expected,
+                CinematicSequencePolicy.GetVisibleCharacterCount(elapsed, length, rate));
+        }
+
+        [Test]
+        public void GetVisibleCharacterCount_HandlesInvalidTimingValues()
+        {
+            Assert.AreEqual(0, CinematicSequencePolicy.GetVisibleCharacterCount(
+                float.NaN, 10, 30f));
+            Assert.AreEqual(0, CinematicSequencePolicy.GetVisibleCharacterCount(
+                1f, 10, float.PositiveInfinity));
+            Assert.AreEqual(10, CinematicSequencePolicy.GetVisibleCharacterCount(
+                float.MaxValue, 10, float.MaxValue));
+        }
     }
 }

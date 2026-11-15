@@ -66,6 +66,14 @@ First-contact presentation uses a session-local ID set. It is cosmetic and is no
 - The overlay uses text for every critical narrative cue. No clue or progression requirement depends on an audio-only effect.
 - The current implementation uses existing procedural Greyhaven scenery and UI Toolkit elements. It does not include commissioned shots, character animation, voice acting, music or new licensed media.
 
+## Presentation upgrade — cinematic director pass
+
+The presentation layer exposes a beat counter and a per-sequence progress line so players can judge the remaining length. Captions reveal progressively at a controlled reading pace rather than appearing as a static paragraph. The title and eyebrow remain fully visible while the supporting record text types in.
+
+A separate **Reduce cinematic camera movement** accessibility preference is stored locally. When enabled, authored camera moves and zoom are suppressed, captions appear immediately, and transitions shorten. The scene still uses the same narrative cards and sequence order. This is independent from the existing reduce-camera-shake preference.
+
+The progress line advances once per beat, not by elapsed wall-clock time, so skipping cannot produce a misleading percentage. Caption reveal uses a pure, bounded policy with tests for negative timing, zero text, zero speed, oversized progress and invalid floating-point values.
+
 ## Ownership and lifecycle
 
 GreyhavenFrontEndUI owns the cinematic overlay, title/replay flow, camera snapshot, animation and skip input. The existing GreyhavenRuntimeUI delegates a first resident greeting to that front end, then starts the same Yarn node after camera restoration. CinematicSequencePolicy owns only the deterministic validation/registration rule for a session-local first contact.

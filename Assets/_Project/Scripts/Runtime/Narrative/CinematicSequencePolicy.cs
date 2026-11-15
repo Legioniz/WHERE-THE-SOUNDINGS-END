@@ -23,5 +23,26 @@ namespace WhereTheSoundingsEnd.Narrative
 
             return seenNpcIds.Add(npcId);
         }
+
+        public static int GetVisibleCharacterCount(float elapsedSeconds, int textLength, float charactersPerSecond)
+        {
+            if (textLength <= 0)
+                return 0;
+
+            if (float.IsNaN(elapsedSeconds) || float.IsInfinity(elapsedSeconds))
+                elapsedSeconds = 0f;
+            if (float.IsNaN(charactersPerSecond) || float.IsInfinity(charactersPerSecond))
+                charactersPerSecond = 0f;
+
+            double elapsed = Math.Max(0d, elapsedSeconds);
+            double rate = Math.Max(0d, charactersPerSecond);
+            double reveal = elapsed * rate;
+            if (double.IsNaN(reveal) || reveal <= 0d)
+                return 0;
+            if (double.IsInfinity(reveal) || reveal >= textLength)
+                return textLength;
+
+            return (int)Math.Floor(reveal);
+        }
     }
 }
