@@ -44,8 +44,8 @@ Only one of the following gameplay-facing modal states may own the screen at a t
 
 DocksideModalPolicy supplies deterministic guards used by the runtime UI:
 - Dockside cannot open over inventory, dialogue, an active gameplay action, a front-end overlay or a paused time scale.
-- Inventory cannot open over dockside, dialogue, the regional chart or front-end overlays.
-- The regional chart cannot open over inventory, dialogue, dockside, front-end overlays, a paused state or an active gameplay action.
+- Inventory cannot open over dockside, dialogue, the regional chart, field journal or front-end overlays.
+- The regional chart cannot open over inventory, dialogue, dockside, field journal, front-end overlays, a paused state or an active gameplay action.\n- The field journal cannot open over inventory, dialogue, dockside, the regional chart, front-end overlays, a paused state or an active gameplay action.
 - Pause cannot open over dockside, inventory, the regional chart or dialogue.
 - Esc / Start closes the active dockside menu; it must not also open the pause page.
 
@@ -54,3 +54,8 @@ Each pause owner restores only the time scale it captured. The UI must never res
 ## Verification and accessibility
 
 Unity Play Mode review is still required for 16:9 and 16:10 resolutions, minimum supported window size, safe-area/layout overflow, keyboard and gamepad focus, UI sorting, text scaling, colour contrast, and modal transitions. Full controller navigation, remappable controls, reduced-motion integration and comprehensive accessibility settings remain incomplete.
+
+
+## Field journal overlay
+
+The Field Journal [J] is a pause-owning, read-only register. It separates biological specimens, recovered objects and Sounding Rig-confirmed unexplained findings. Entries include stable IDs, region, UTC recovery timestamp rendered in local time, specimen or site profile, evidence notes and unread state. Opening an entry marks it read; the state is retained in the existing campaign journal DTO. It does not reveal undiscovered sites or fabricate entries for uncommitted cargo.
