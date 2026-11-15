@@ -156,11 +156,11 @@ The v8-to-v9 migration creates an empty artifact ledger for older saves. It does
 
 The Greyhaven field journal reuses `ProgressSaveData.journalEntries` and the existing `JournalEntrySaveData` DTO. No save schema migration is required.
 
-- Field discovery IDs use the stable `field-discovery:<CargoItemDefinition.ItemId>` namespace.
-- `entryId` stores the stable item identity.
-- `interpretationId` stores the normalized recovery region ID (or `unknown` when no chart region is active).
+- Specimen and salvage IDs use the stable `field-discovery:<CargoItemDefinition.ItemId>` namespace. Sounding Rig findings use `field-finding:<DeepOceanPhenomenonSite.SiteId>`.
+- `entryId` stores the stable item or survey-site identity.
+- `interpretationId` stores the normalized recovery/survey region ID (or `unknown` when no chart region is active).
 - `recordedAtUtc` stores the UTC timestamp at the moment cargo recovery is committed.
 - `read` tracks whether the player opened the entry.
 - `ProgressSaveData.discoveredEntryIds` remains the compatibility/discovery index. On restore, field journal records and discovery IDs are reconciled so saves created before the journal UI can still show previously discovered item IDs, with missing metadata displayed as unknown / date not recorded.
 
-The fishing save participant replaces only entries in its own `field-discovery:` namespace during capture. Quest, narrative and other journal records remain untouched. The field journal reads from the generated cargo catalogue and never fabricates a specimen or salvage entry that has not been secured.
+The fishing and Sounding Rig save participants replace only entries in their own `field-discovery:` and `field-finding:` namespaces during capture. Quest, narrative and other journal records remain untouched. The field journal reads from the generated cargo catalogue and never fabricates a specimen or salvage entry that has not been secured.
