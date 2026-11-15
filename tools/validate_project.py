@@ -1369,7 +1369,7 @@ def main() -> int:
                     "SALVAGE-ARCHIVE-03", "SALVAGE-ARCHIVE-04"):
         if item_id not in builder_source:
             failures.append(f"Generated field-discovery catalogue is missing {item_id}.")
-    if "TryPlayFieldDiscovery" not in cinematic_source or "field-discovery:" not in fishing_source:
+    if "TryPlayFieldDiscovery" not in cinematic_source or "CreateEntryId" not in fishing_source:
         failures.append("First-time field discoveries are not connected to cinematic presentation and save persistence.")
 
     if failures:
