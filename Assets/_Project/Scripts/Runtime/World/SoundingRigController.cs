@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using WhereTheSoundingsEnd.Core;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.Narrative;
 
 namespace WhereTheSoundingsEnd.World
 {
@@ -32,6 +33,8 @@ namespace WhereTheSoundingsEnd.World
         private DeepOceanSurveyRegion[] regions = Array.Empty<DeepOceanSurveyRegion>();
         private DeepOceanPhenomenonSite[] sites = Array.Empty<DeepOceanPhenomenonSite>();
         private readonly HashSet<string> discoveredSiteIds = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, JournalEntrySaveData> discoveredSiteRecords =
+            new Dictionary<string, JournalEntrySaveData>(StringComparer.Ordinal);
         private readonly List<string> evaluatedOpportunityIds = new List<string>();
         private float nextPulseAllowedAt;
         private float surveyingRemaining;
@@ -48,6 +51,29 @@ namespace WhereTheSoundingsEnd.World
         public int PulseSequence => pulseSequence;
         public string LatestReading => latestReading;
         public IReadOnlyCollection<string> DiscoveredSiteIds => discoveredSiteIds;
+        public bool TryGetFindingMetadata(string siteId, out string regionId, out string recordedAtUtc, out bool read)
+        {
+            regionId = "unknown";
+            recordedAtUtc = string.Empty;
+            read = false;
+            if (string.IsNullOrWhiteSpace(siteId)) return false;
+
+            JournalEntrySaveData entry;
+            if (!discoveredSiteRecords.TryGetValue(siteId.Trim(), out entry) || entry == null)
+                return false;
+            regionId = FieldJournalPolicy.NormalizeRegionId(entry.interpretationId);
+            recordedAtUtc = entry.recordedAtUtc ?? string.Empty;
+            read = entry.read;
+            return true;
+        }
+
+        public void MarkFindingRead(string siteId)
+        {
+            if (string.IsNullOrWhiteSpace(siteId)) return;
+            JournalEntrySaveData entry;
+            if (discoveredSiteRecords.TryGetValue(siteId.Trim(), out entry) && entry != null)
+                entry.read = true;
+        }
 
         public void Configure(InputActionAsset input, SeaStateDirector director, Rigidbody vessel)
         {
@@ -210,6 +236,16 @@ namespace WhereTheSoundingsEnd.World
             if (site != null)
             {
                 bool firstDiscovery = discoveredSiteIds.Add(site.SiteId);
+                if (firstDiscovery)
+                {
+                    discoveredSiteRecords[site.SiteId] = new JournalEntrySaveData
+                    {
+                        entryId = FieldJournalPolicy.CreateFindingEntryId(site.SiteId),
+                        interpretationId = FieldJournalPolicy.NormalizeRegionId(site.RegionId),
+                        recordedAtUtc = DateTime.UtcNow.ToString("O"),
+                        read = false
+                    };
+                }
                 reading += firstDiscovery
                     ? "\nNEW SITE: " + site.DisplayName + " [" + site.EvidenceLabel + "]"
                     : "\nKNOWN SITE: " + site.DisplayName;
@@ -274,22 +310,77 @@ namespace WhereTheSoundingsEnd.World
             data.world.discoveredPhenomenonSiteIds.AddRange(discoveredSiteIds);
             data.world.evaluatedSurveyOpportunityIds.Clear();
             data.world.evaluatedSurveyOpportunityIds.AddRange(evaluatedOpportunityIds);
+
+            if (data.progress == null) return;
+            if (data.progress.journalEntries == null)
+                data.progress.journalEntries = new List<JournalEntrySaveData>();
+            data.progress.journalEntries.RemoveAll(entry =>
+            {
+                string ignored;
+                return entry != null && FieldJournalPolicy.TryGetSiteId(entry.entryId, out ignored);
+            });
+            foreach (KeyValuePair<string, JournalEntrySaveData> pair in discoveredSiteRecords)
+            {
+                JournalEntrySaveData entry = pair.Value;
+                if (entry == null) continue;
+                data.progress.journalEntries.Add(new JournalEntrySaveData
+                {
+                    entryId = entry.entryId,
+                    interpretationId = entry.interpretationId,
+                    recordedAtUtc = entry.recordedAtUtc,
+                    read = entry.read
+                });
+            }
         }
 
         public void RestoreSaveData(SaveGameData data)
         {
-            if (data == null || data.world == null) return;
-            pulseSequence = Mathf.Max(0, data.world.soundingPulseCount);
+            if (data == null) return;
             discoveredSiteIds.Clear();
+            discoveredSiteRecords.Clear();
             evaluatedOpportunityIds.Clear();
-            if (data.world.discoveredPhenomenonSiteIds != null)
-                for (int i = 0; i < data.world.discoveredPhenomenonSiteIds.Count; i++)
-                    if (!string.IsNullOrWhiteSpace(data.world.discoveredPhenomenonSiteIds[i]))
-                        discoveredSiteIds.Add(data.world.discoveredPhenomenonSiteIds[i]);
-            if (data.world.evaluatedSurveyOpportunityIds != null)
-                for (int i = 0; i < data.world.evaluatedSurveyOpportunityIds.Count; i++)
-                    if (!string.IsNullOrWhiteSpace(data.world.evaluatedSurveyOpportunityIds[i]))
-                        evaluatedOpportunityIds.Add(data.world.evaluatedSurveyOpportunityIds[i]);
+            if (data.world != null)
+            {
+                pulseSequence = Mathf.Max(0, data.world.soundingPulseCount);
+                if (data.world.discoveredPhenomenonSiteIds != null)
+                    for (int i = 0; i < data.world.discoveredPhenomenonSiteIds.Count; i++)
+                    {
+                        string siteId = data.world.discoveredPhenomenonSiteIds[i];
+                        if (!string.IsNullOrWhiteSpace(siteId))
+                            discoveredSiteIds.Add(siteId);
+                    }
+                if (data.world.evaluatedSurveyOpportunityIds != null)
+                    for (int i = 0; i < data.world.evaluatedSurveyOpportunityIds.Count; i++)
+                        if (!string.IsNullOrWhiteSpace(data.world.evaluatedSurveyOpportunityIds[i]))
+                            evaluatedOpportunityIds.Add(data.world.evaluatedSurveyOpportunityIds[i]);
+            }
+
+            if (data.progress != null && data.progress.journalEntries != null)
+                for (int i = 0; i < data.progress.journalEntries.Count; i++)
+                {
+                    JournalEntrySaveData entry = data.progress.journalEntries[i];
+                    string siteId;
+                    if (entry == null || !FieldJournalPolicy.TryGetSiteId(entry.entryId, out siteId))
+                        continue;
+                    discoveredSiteIds.Add(siteId);
+                    discoveredSiteRecords[siteId] = new JournalEntrySaveData
+                    {
+                        entryId = FieldJournalPolicy.CreateFindingEntryId(siteId),
+                        interpretationId = FieldJournalPolicy.NormalizeRegionId(entry.interpretationId),
+                        recordedAtUtc = entry.recordedAtUtc ?? string.Empty,
+                        read = entry.read
+                    };
+                }
+
+            foreach (string siteId in discoveredSiteIds)
+                if (!discoveredSiteRecords.ContainsKey(siteId))
+                    discoveredSiteRecords[siteId] = new JournalEntrySaveData
+                    {
+                        entryId = FieldJournalPolicy.CreateFindingEntryId(siteId),
+                        interpretationId = "unknown",
+                        recordedAtUtc = string.Empty,
+                        read = false
+                    };
         }
 
         private void OnGUI()

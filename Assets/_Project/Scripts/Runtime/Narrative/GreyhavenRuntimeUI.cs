@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -31,6 +32,16 @@ namespace WhereTheSoundingsEnd.Narrative
         private VisualElement _optionsContainer;
         private VisualElement _inventoryPanel;
         private VisualElement _chartPanel;
+        private VisualElement _journalPanel;
+        private VisualElement _journalList;
+        private VisualElement _journalDetail;
+        private Label _journalCountLabel;
+        private Label _journalDetailTitle;
+        private Label _journalDetailBody;
+        private int _journalFilter;
+        private string _selectedJournalItemId;
+        private string _selectedJournalFindingId;
+        private SoundingRigController soundingRig;
         private VisualElement _chartSurface;
         private VisualElement _chartSiteList;
         private VisualElement _chartVisitedList;
@@ -53,6 +64,7 @@ namespace WhereTheSoundingsEnd.Narrative
         private bool _ownsInventoryAction;
         private bool _inventoryOpen;
         private bool _chartOpen;
+        private bool _journalOpen;
         private string _lastChartNotice = string.Empty;
         private RegionalChartController chartController;
         private bool _lineWaiting;
@@ -72,6 +84,7 @@ namespace WhereTheSoundingsEnd.Narrative
         public InputActionAsset Controls { get => controls; set => controls = value; }
         public bool IsInventoryOpen => _inventoryOpen;
         public bool IsChartOpen => _chartOpen;
+        public bool IsJournalOpen => _journalOpen;
         public bool IsDialogueOpen => dialogueRunner != null && dialogueRunner.IsDialogueRunning;
         public GreyhavenFrontEndUI FrontEnd => frontEnd;
         public DocksideHubController DocksideHub { get => docksideHub; set => docksideHub = value; }
@@ -112,6 +125,13 @@ namespace WhereTheSoundingsEnd.Narrative
 
             if (keyboard == null) return;
 
+            if (_journalOpen)
+            {
+                if (keyboard.escapeKey.wasPressedThisFrame || keyboard.jKey.wasPressedThisFrame)
+                    SetJournalVisible(false);
+                return;
+            }
+
             if (_chartOpen)
             {
                 if (keyboard.escapeKey.wasPressedThisFrame || keyboard.mKey.wasPressedThisFrame)
@@ -127,6 +147,9 @@ namespace WhereTheSoundingsEnd.Narrative
                     RotateSelected();
                 return;
             }
+
+            if (!_inventoryOpen && keyboard.jKey.wasPressedThisFrame)
+                ToggleJournal();
 
             if (!_inventoryOpen && (keyboard.mKey.wasPressedThisFrame))
                 ToggleChart();
@@ -172,6 +195,7 @@ namespace WhereTheSoundingsEnd.Narrative
             BuildDialoguePanel();
             BuildInventoryPanel();
             BuildChartPanel();
+            BuildJournalPanel();
             RefreshInventory();
         }
 
@@ -216,6 +240,10 @@ namespace WhereTheSoundingsEnd.Narrative
             Button chartButton = MakeButton("CHART  [M]", () => ToggleChart());
             chartButton.style.minWidth = 118;
             actions.Add(chartButton);
+
+            Button journalButton = MakeButton("FIELD JOURNAL  [J]", () => ToggleJournal());
+            journalButton.style.minWidth = 164;
+            actions.Add(journalButton);
 
             Button holdButton = MakeButton("CARGO HOLD  [I]", () => ToggleInventory());
             holdButton.style.minWidth = 150;
@@ -935,6 +963,416 @@ namespace WhereTheSoundingsEnd.Narrative
             return null;
         }
 
+        private void BuildJournalPanel()
+        {
+            _journalPanel = new VisualElement();
+            _journalPanel.style.position = Position.Absolute;
+            _journalPanel.style.left = 0;
+            _journalPanel.style.right = 0;
+            _journalPanel.style.top = 0;
+            _journalPanel.style.bottom = 0;
+            _journalPanel.style.justifyContent = Justify.Center;
+            _journalPanel.style.alignItems = Align.Center;
+            _journalPanel.style.backgroundColor = new Color(0.008f, 0.018f, 0.021f, 0.96f);
+            _journalPanel.style.display = DisplayStyle.None;
+            _journalPanel.pickingMode = PickingMode.Position;
+            _root.Add(_journalPanel);
+
+            VisualElement window = new VisualElement();
+            window.style.width = new Length(96, LengthUnit.Percent);
+            window.style.maxWidth = 1220;
+            window.style.maxHeight = new Length(94, LengthUnit.Percent);
+            window.style.minHeight = 420;
+            window.style.paddingLeft = 20;
+            window.style.paddingRight = 20;
+            window.style.paddingTop = 16;
+            window.style.paddingBottom = 16;
+            window.style.backgroundColor = new Color(0.055f, 0.075f, 0.073f, 1f);
+            window.style.borderTopWidth = 2;
+            window.style.borderTopColor = new Color(0.70f, 0.43f, 0.25f);
+            window.style.flexDirection = FlexDirection.Column;
+            _journalPanel.Add(window);
+
+            VisualElement header = new VisualElement();
+            header.style.flexDirection = FlexDirection.Row;
+            header.style.alignItems = Align.Center;
+            header.style.justifyContent = Justify.SpaceBetween;
+            header.style.marginBottom = 12;
+            window.Add(header);
+
+            VisualElement heading = new VisualElement();
+            heading.style.flexDirection = FlexDirection.Column;
+            header.Add(heading);
+            Label title = new Label("FIELD JOURNAL  /  RECOVERY REGISTER");
+            title.style.color = new Color(0.91f, 0.85f, 0.71f);
+            title.style.fontSize = 20;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            heading.Add(title);
+            _journalCountLabel = new Label("NO SPECIMENS OR OBJECTS RECORDED");
+            _journalCountLabel.style.color = new Color(0.68f, 0.76f, 0.70f);
+            _journalCountLabel.style.fontSize = 12;
+            heading.Add(_journalCountLabel);
+            header.Add(MakeButton("CLOSE  [J / ESC]", () => SetJournalVisible(false)));
+
+            VisualElement filters = new VisualElement();
+            filters.style.flexDirection = FlexDirection.Row;
+            filters.style.marginBottom = 10;
+            window.Add(filters);
+            filters.Add(MakeButton("ALL RECORDS", () => { _journalFilter = 0; RefreshJournal(); }));
+            filters.Add(MakeButton("SPECIMENS", () => { _journalFilter = 1; RefreshJournal(); }));
+            filters.Add(MakeButton("RECOVERED OBJECTS", () => { _journalFilter = 2; RefreshJournal(); }));
+            filters.Add(MakeButton("UNEXPLAINED FINDINGS", () => { _journalFilter = 3; RefreshJournal(); }));
+
+            VisualElement body = new VisualElement();
+            body.style.flexDirection = FlexDirection.Row;
+            body.style.flexGrow = 1f;
+            body.style.minHeight = 0;
+            window.Add(body);
+
+            ScrollView listScroll = new ScrollView(ScrollViewMode.Vertical);
+            listScroll.style.width = new Length(38, LengthUnit.Percent);
+            listScroll.style.minWidth = 250;
+            listScroll.style.maxWidth = 410;
+            listScroll.style.marginRight = 18;
+            listScroll.style.paddingRight = 8;
+            listScroll.style.backgroundColor = new Color(0.035f, 0.055f, 0.055f);
+            body.Add(listScroll);
+            _journalList = listScroll;
+
+            ScrollView detailScroll = new ScrollView(ScrollViewMode.Vertical);
+            detailScroll.style.flexGrow = 1f;
+            detailScroll.style.minWidth = 0;
+            detailScroll.style.paddingLeft = 18;
+            detailScroll.style.paddingRight = 18;
+            detailScroll.style.paddingTop = 12;
+            detailScroll.style.backgroundColor = new Color(0.075f, 0.095f, 0.088f);
+            body.Add(detailScroll);
+            _journalDetail = detailScroll;
+        }
+
+        private void ToggleJournal()
+        {
+            if (_journalOpen)
+            {
+                SetJournalVisible(false);
+                return;
+            }
+
+            if (_inventoryOpen || _chartOpen || IsDialogueOpen ||
+                (docksideHub != null && docksideHub.IsMenuOpen) ||
+                (frontEnd != null && frontEnd.IsOverlayOpen) ||
+                Time.timeScale <= 0.0001f ||
+                (_seaState != null && _seaState.IsGameplayActionBusy))
+                return;
+
+            SetJournalVisible(true);
+        }
+
+        private void SetJournalVisible(bool visible)
+        {
+            if (_journalPanel == null) return;
+            _journalOpen = visible;
+            _journalPanel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            if (visible)
+            {
+                RefreshJournal();
+                AcquirePause();
+            }
+            else
+            {
+                ReleasePauseWhenUiClosed();
+            }
+        }
+
+        private void RefreshJournal()
+        {
+            if (_journalList == null || _journalDetail == null) return;
+            if (fishingSystem == null)
+                fishingSystem = FindFirstObjectByType<FishingSystemDirector>();
+            if (soundingRig == null)
+                soundingRig = FindFirstObjectByType<SoundingRigController>();
+
+            _journalList.Clear();
+            _journalDetail.Clear();
+            List<CargoItemDefinition> records = new List<CargoItemDefinition>();
+            IReadOnlyList<CargoItemDefinition> definitions = cargoHold != null
+                ? cargoHold.ItemDefinitions
+                : Array.Empty<CargoItemDefinition>();
+            IReadOnlyCollection<string> discovered = fishingSystem != null
+                ? fishingSystem.DiscoveredFieldItemIds
+                : new List<string>();
+
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                CargoItemDefinition definition = definitions[i];
+                if (definition == null || !discovered.Contains(definition.ItemId)) continue;
+                bool specimen = definition.Category == CargoItemCategory.Fish ||
+                    definition.Category == CargoItemCategory.Shellfish ||
+                    definition.Category == CargoItemCategory.Cephalopod ||
+                    definition.Category == CargoItemCategory.Seaweed;
+                if (_journalFilter == 3 || (_journalFilter == 1 && !specimen) ||
+                    (_journalFilter == 2 && specimen)) continue;
+                records.Add(definition);
+            }
+            records.Sort((a, b) => string.Compare(a.DisplayName, b.DisplayName, StringComparison.OrdinalIgnoreCase));
+
+            List<DeepOceanPhenomenonSite> findings = new List<DeepOceanPhenomenonSite>();
+            if (soundingRig != null && (_journalFilter == 0 || _journalFilter == 3))
+            {
+                DeepOceanPhenomenonSite[] knownSites =
+                    FindObjectsByType<DeepOceanPhenomenonSite>(FindObjectsSortMode.None);
+                foreach (string siteId in soundingRig.DiscoveredSiteIds)
+                {
+                    DeepOceanPhenomenonSite site = Array.Find(knownSites,
+                        candidate => candidate != null && string.Equals(candidate.SiteId, siteId, StringComparison.Ordinal));
+                    if (site != null) findings.Add(site);
+                }
+                findings.Sort((a, b) => string.Compare(a.DisplayName, b.DisplayName, StringComparison.OrdinalIgnoreCase));
+            }
+
+            int unread = 0;
+            for (int i = 0; i < records.Count; i++)
+            {
+                string region, recordedAt;
+                bool read;
+                if (fishingSystem != null &&
+                    fishingSystem.TryGetFieldJournalMetadata(records[i].ItemId, out region, out recordedAt, out read) &&
+                    !read && !string.Equals(_selectedJournalItemId, records[i].ItemId, StringComparison.Ordinal))
+                    unread++;
+            }
+            for (int i = 0; i < findings.Count; i++)
+            {
+                string region, recordedAt;
+                bool read;
+                if (soundingRig.TryGetFindingMetadata(findings[i].SiteId, out region, out recordedAt, out read) &&
+                    !read && !string.Equals(_selectedJournalFindingId, findings[i].SiteId, StringComparison.Ordinal))
+                    unread++;
+            }
+
+            int totalItems = fishingSystem != null ? fishingSystem.DiscoveredFieldItemIds.Count : records.Count;
+            int totalFindings = soundingRig != null ? soundingRig.DiscoveredSiteIds.Count : findings.Count;
+            _journalCountLabel.text = records.Count + " ITEM RECORDS  /  " + findings.Count +
+                " FINDINGS  /  " + unread + " UNREAD  /  " + (totalItems + totalFindings) + " TOTAL";
+
+            if (records.Count == 0 && findings.Count == 0)
+            {
+                Label empty = new Label("NO ENTRIES IN THIS REGISTER.\n\nSecure a specimen or salvage object, or use the Sounding Rig to record a repeatable return. Unconfirmed observations are not added to the journal.");
+                empty.style.color = new Color(0.70f, 0.75f, 0.69f);
+                empty.style.whiteSpace = WhiteSpace.Normal;
+                empty.style.paddingLeft = 14;
+                empty.style.paddingTop = 18;
+                _journalList.Add(empty);
+                AddJournalDetailLabel("NOTHING RECORDED", "The journal does not invent entries for cargo you have not secured or signals you have not confirmed.");
+                return;
+            }
+
+            for (int i = 0; i < records.Count; i++)
+            {
+                CargoItemDefinition item = records[i];
+                string region, recordedAt;
+                bool read;
+                if (fishingSystem != null)
+                    fishingSystem.TryGetFieldJournalMetadata(item.ItemId, out region, out recordedAt, out read);
+                else
+                {
+                    region = "unknown";
+                    recordedAt = string.Empty;
+                    read = true;
+                }
+
+                if (string.Equals(_selectedJournalItemId, item.ItemId, StringComparison.Ordinal)) read = true;
+                string prefix = item.Category == CargoItemCategory.Salvage ? "RECOVERED OBJECT" : "SPECIMEN";
+                string rowText = (read ? "" : "●  ") + prefix + "\n" + item.DisplayName +
+                    "\n" + RegionalChartController.GetDisplayName(region);
+                Button row = MakeButton(rowText, () =>
+                {
+                    _selectedJournalItemId = item.ItemId;
+                    _selectedJournalFindingId = string.Empty;
+                    RefreshJournal();
+                });
+                row.style.width = new Length(100, LengthUnit.Percent);
+                row.style.minHeight = 68;
+                row.style.unityTextAlign = TextAnchor.MiddleLeft;
+                row.style.whiteSpace = WhiteSpace.Normal;
+                row.style.marginBottom = 5;
+                row.style.backgroundColor = string.Equals(_selectedJournalItemId, item.ItemId, StringComparison.Ordinal)
+                    ? new Color(0.20f, 0.25f, 0.21f)
+                    : new Color(0.10f, 0.15f, 0.14f);
+                _journalList.Add(row);
+            }
+
+            for (int i = 0; i < findings.Count; i++)
+            {
+                DeepOceanPhenomenonSite site = findings[i];
+                string region, recordedAt;
+                bool read;
+                soundingRig.TryGetFindingMetadata(site.SiteId, out region, out recordedAt, out read);
+                if (string.Equals(_selectedJournalFindingId, site.SiteId, StringComparison.Ordinal)) read = true;
+                Button row = MakeButton((read ? "" : "●  ") + "UNEXPLAINED FINDING\n" +
+                    site.DisplayName + "\n" + RegionalChartController.GetDisplayName(region), () =>
+                {
+                    _selectedJournalItemId = string.Empty;
+                    _selectedJournalFindingId = site.SiteId;
+                    RefreshJournal();
+                });
+                row.style.width = new Length(100, LengthUnit.Percent);
+                row.style.minHeight = 68;
+                row.style.unityTextAlign = TextAnchor.MiddleLeft;
+                row.style.whiteSpace = WhiteSpace.Normal;
+                row.style.marginBottom = 5;
+                row.style.backgroundColor = string.Equals(_selectedJournalFindingId, site.SiteId, StringComparison.Ordinal)
+                    ? new Color(0.25f, 0.20f, 0.17f)
+                    : new Color(0.10f, 0.15f, 0.14f);
+                _journalList.Add(row);
+            }
+
+            CargoItemDefinition selected = _journalFilter == 3 ? null : records.Find(item =>
+                string.Equals(item.ItemId, _selectedJournalItemId, StringComparison.Ordinal));
+            if (selected != null)
+            {
+                ShowJournalEntry(selected);
+                return;
+            }
+
+            DeepOceanPhenomenonSite selectedFinding = findings.Find(site =>
+                string.Equals(site.SiteId, _selectedJournalFindingId, StringComparison.Ordinal));
+            if (selectedFinding != null)
+            {
+                ShowJournalFinding(selectedFinding);
+                return;
+            }
+
+            if (_journalFilter != 3 && records.Count > 0)
+            {
+                _selectedJournalItemId = records[0].ItemId;
+                _selectedJournalFindingId = string.Empty;
+                ShowJournalEntry(records[0]);
+                return;
+            }
+
+            if (findings.Count > 0)
+            {
+                selectedFinding = findings[0];
+                _selectedJournalFindingId = selectedFinding.SiteId;
+                _selectedJournalItemId = string.Empty;
+                ShowJournalFinding(selectedFinding);
+            }
+        }
+
+        private void ShowJournalEntry(CargoItemDefinition item)
+        {
+            if (item == null) return;
+            string region, recordedAt;
+            bool read;
+            if (fishingSystem != null)
+                fishingSystem.TryGetFieldJournalMetadata(item.ItemId, out region, out recordedAt, out read);
+            else
+            {
+                region = "unknown";
+                recordedAt = string.Empty;
+                read = true;
+            }
+            if (fishingSystem != null) fishingSystem.MarkFieldJournalEntryRead(item.ItemId);
+
+            string kind = item.Category == CargoItemCategory.Salvage ? "RECOVERED OBJECT" : "BIOLOGICAL SPECIMEN";
+            AddJournalDetailLabel(kind + "  /  " + item.ItemId, item.DisplayName.ToUpperInvariant());
+            AddJournalDetailLabel("RECOVERY RECORD",
+                "LOCATION: " + RegionalChartController.GetDisplayName(region) +
+                "\nRECORDED: " + FormatJournalDate(recordedAt) +
+                "\nCLASSIFICATION: " + item.Category.ToString().ToUpperInvariant());
+            AddJournalDetailLabel("FIELD DESCRIPTION", GetJournalDescription(item));
+            if (item.Category != CargoItemCategory.Salvage)
+            {
+                AddJournalDetailLabel("OBSERVED PROFILE",
+                    "HABITAT: " + item.Habitats +
+                    "\nMARKET CLASS: " + item.MarketClass +
+                    "\nDEPTH: " + item.MinimumDepthMetres.ToString("0") + "–" +
+                    item.MaximumDepthMetres.ToString("0") + " m" +
+                    "\nPREFERRED METHOD: " + item.PreferredTechnique);
+            }
+            AddJournalDetailLabel("UNRESOLVED NOTES",
+                item.Category == CargoItemCategory.Salvage
+                    ? "Material, wear and markings are recorded as evidence. The object's maker, intended use and route into the wreck field remain unconfirmed."
+                    : "The specimen is identified by the current catalogue. Its presence here does not explain the unusual returns reported elsewhere in these waters.");
+            AddJournalDetailLabel("ARCHIVE STATUS", "RECOVERED AND SECURED  /  ENTRY RETAINED IN CAMPAIGN RECORD");
+        }
+
+        private void ShowJournalFinding(DeepOceanPhenomenonSite site)
+        {
+            if (site == null) return;
+            string region, recordedAt;
+            bool read;
+            soundingRig.TryGetFindingMetadata(site.SiteId, out region, out recordedAt, out read);
+            soundingRig.MarkFindingRead(site.SiteId);
+            AddJournalDetailLabel("UNEXPLAINED FINDING  /  " + site.SiteId, site.DisplayName.ToUpperInvariant());
+            AddJournalDetailLabel("SURVEY RECORD",
+                "LOCATION: " + RegionalChartController.GetDisplayName(region) +
+                "\nRECORDED: " + FormatJournalDate(recordedAt) +
+                "\nRETURN TYPE: " + site.PhenomenonType.ToString().ToUpperInvariant() +
+                "\nDEPTH: " + site.DepthMeters.ToString("0") + " m");
+            AddJournalDetailLabel("EVIDENCE CLASS", site.EvidenceLabel);
+            AddJournalDetailLabel("FIRST OBSERVATION", site.FirstSurveyNote);
+            AddJournalDetailLabel("UNRESOLVED NOTES",
+                "The sounding is repeatable enough to be entered in the survey register. Its source has not been established. A recorded return is not a confirmed explanation.");
+            AddJournalDetailLabel("ARCHIVE STATUS", "SOUNDING RECORDED  /  ORIGIN UNRESOLVED");
+        }
+
+        private void AddJournalDetailLabel(string heading, string body)
+        {
+            Label title = new Label(heading);
+            title.style.color = new Color(0.83f, 0.65f, 0.46f);
+            title.style.fontSize = 11;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.marginTop = 12;
+            title.style.marginBottom = 5;
+            _journalDetail.Add(title);
+
+            Label text = new Label(body);
+            text.style.color = new Color(0.84f, 0.86f, 0.79f);
+            text.style.fontSize = 14;
+            text.style.whiteSpace = WhiteSpace.Normal;
+            text.style.marginBottom = 8;
+            _journalDetail.Add(text);
+        }
+
+        private static string FormatJournalDate(string recordedAtUtc)
+        {
+            DateTime parsed;
+            if (DateTime.TryParse(recordedAtUtc, null,
+                System.Globalization.DateTimeStyles.RoundtripKind, out parsed))
+                return parsed.ToLocalTime().ToString("yyyy-MM-dd  HH:mm");
+            return "DATE NOT RECORDED";
+        }
+
+        private static string GetJournalDescription(CargoItemDefinition item)
+        {
+            switch (item.ItemId)
+            {
+                case "FSH-101":
+                    return "A fast pelagic billfish with an elongated bill and a high, sail-like dorsal fin. Its recovery suggests open-water passage through the Outer Shoals.";
+                case "FSH-102":
+                    return "A heavy-bodied coastal and offshore fish, often found around floating structure and current lines. Its presence spans several Greyhaven grounds.";
+                case "FSH-103":
+                    return "A slender, long-snouted fish associated with reef edges and open coastal water. The narrow profile can be mistaken for drifting debris at a distance.";
+                case "FSH-104":
+                    return "A powerful open-ocean billfish. The recorded specimen is a trophy-class catch; the journal does not treat size as proof of age.";
+                case "FSH-105":
+                    return "A long, ribbon-shaped deepwater fish rarely observed near the surface. Its appearance in a secured catch is recorded without assigning a cause.";
+                case "SALVAGE-ARCHIVE-01":
+                    return "A dense brass weight with worn calibration marks. Salt deposits have collected in the recesses; the original measuring standard is unknown.";
+                case "SALVAGE-ARCHIVE-02":
+                    return "A fractured ceramic insulator with darkened channels along one edge. No intact cable or instrument was recovered with it.";
+                case "SALVAGE-ARCHIVE-03":
+                    return "A signal-lamp lens clouded by salt and fine scratches. Its optical assembly is incomplete, and no reliable bearing can be reconstructed.";
+                case "SALVAGE-ARCHIVE-04":
+                    return "A sealed chart tube with a distorted cap. The contents have not been opened or interpreted by this entry.";
+                default:
+                    return item.Category == CargoItemCategory.Salvage
+                        ? "Recovered from a wreck or debris field. Record its material, condition and recovery location before drawing conclusions."
+                        : "A secured specimen from the current catch catalogue. Compare its habitat, depth range and recovery grounds with later observations.";
+            }
+        }
+
         private void ToggleInventory()
         {
             // Closing an already-open panel must remain possible even if another
@@ -945,7 +1383,7 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
             }
 
-            if (_chartOpen || !DocksideModalPolicy.CanOpenInventory(
+            if (_chartOpen || _journalOpen || !DocksideModalPolicy.CanOpenInventory(
                     docksideHub != null && docksideHub.IsMenuOpen,
                     frontEnd != null && frontEnd.IsOverlayOpen,
                     IsDialogueOpen) ||
@@ -983,7 +1421,7 @@ namespace WhereTheSoundingsEnd.Narrative
         private void ReleasePauseWhenUiClosed()
         {
             bool dialogueVisible = _dialoguePanel != null && _dialoguePanel.style.display == DisplayStyle.Flex;
-            if (!dialogueVisible && !_chartOpen && !_inventoryOpen) ReleasePause();
+            if (!dialogueVisible && !_chartOpen && !_inventoryOpen && !_journalOpen) ReleasePause();
         }
 
         private void ReleasePause()
@@ -1016,7 +1454,7 @@ namespace WhereTheSoundingsEnd.Narrative
                 return;
             }
 
-            if (_inventoryOpen || _chartOpen || (docksideHub != null && docksideHub.IsMenuOpen) ||
+            if (_inventoryOpen || _chartOpen || _journalOpen || (docksideHub != null && docksideHub.IsMenuOpen) ||
                 (frontEnd != null && frontEnd.IsOverlayOpen) ||
                 Time.timeScale <= 0.0001f || dialogueRunner.IsDialogueRunning)
                 return;

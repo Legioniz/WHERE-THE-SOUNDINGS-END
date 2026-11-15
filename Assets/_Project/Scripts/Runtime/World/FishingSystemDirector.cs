@@ -128,6 +128,8 @@ namespace WhereTheSoundingsEnd.World
         private readonly Dictionary<string, int> populations = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly Dictionary<string, double> populationTimes = new Dictionary<string, double>(StringComparer.Ordinal);
         private readonly HashSet<string> discoveredFieldItemIds = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, JournalEntrySaveData> fieldJournalEntries =
+            new Dictionary<string, JournalEntrySaveData>(StringComparer.Ordinal);
 
         public FishingEncounterPhase Phase { get { return phase; } }
         public FishingTechnique Technique { get { return technique; } }
@@ -135,10 +137,49 @@ namespace WhereTheSoundingsEnd.World
         public float FightProgress { get { return fightProgress; } }
         public float LineTension { get { return tension; } }
 
+        public IReadOnlyCollection<string> DiscoveredFieldItemIds => discoveredFieldItemIds;
+
+        public bool TryGetFieldJournalMetadata(string itemId, out string regionId, out string recordedAtUtc, out bool read)
+        {
+            regionId = "unknown";
+            recordedAtUtc = string.Empty;
+            read = false;
+            if (string.IsNullOrWhiteSpace(itemId)) return false;
+
+            JournalEntrySaveData entry;
+            if (!fieldJournalEntries.TryGetValue(itemId.Trim(), out entry) || entry == null)
+                return false;
+
+            regionId = FieldJournalPolicy.NormalizeRegionId(entry.interpretationId);
+            recordedAtUtc = entry.recordedAtUtc ?? string.Empty;
+            read = entry.read;
+            return true;
+        }
+
+        public void MarkFieldJournalEntryRead(string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return;
+            JournalEntrySaveData entry;
+            if (fieldJournalEntries.TryGetValue(itemId.Trim(), out entry) && entry != null)
+                entry.read = true;
+        }
+
         public bool RegisterFieldDiscovery(CargoItemDefinition item, string recordType)
         {
             if (item == null || !FieldDiscoveryPolicy.TryRegister(discoveredFieldItemIds, item.ItemId))
                 return false;
+
+            string itemId = item.ItemId.Trim();
+            string regionId = regionalChart != null
+                ? FieldJournalPolicy.NormalizeRegionId(regionalChart.CurrentRegionId)
+                : "unknown";
+            fieldJournalEntries[itemId] = new JournalEntrySaveData
+            {
+                entryId = FieldJournalPolicy.CreateEntryId(itemId),
+                interpretationId = regionId,
+                recordedAtUtc = DateTime.UtcNow.ToString("O"),
+                read = false
+            };
 
             GreyhavenFrontEndUI frontEnd = FindFirstObjectByType<GreyhavenFrontEndUI>();
             if (frontEnd != null)
@@ -833,9 +874,28 @@ namespace WhereTheSoundingsEnd.World
                 data.progress.discoveredEntryIds = new List<string>();
             foreach (string discoveredId in discoveredFieldItemIds)
             {
-                string entryId = "field-discovery:" + discoveredId;
+                string entryId = FieldJournalPolicy.CreateEntryId(discoveredId);
                 if (!data.progress.discoveredEntryIds.Contains(entryId))
                     data.progress.discoveredEntryIds.Add(entryId);
+            }
+            if (data.progress.journalEntries == null)
+                data.progress.journalEntries = new List<JournalEntrySaveData>();
+            data.progress.journalEntries.RemoveAll(entry =>
+            {
+                string ignored;
+                return entry != null && FieldJournalPolicy.TryGetItemId(entry.entryId, out ignored);
+            });
+            foreach (KeyValuePair<string, JournalEntrySaveData> pair in fieldJournalEntries)
+            {
+                JournalEntrySaveData entry = pair.Value;
+                if (entry == null) continue;
+                data.progress.journalEntries.Add(new JournalEntrySaveData
+                {
+                    entryId = entry.entryId,
+                    interpretationId = entry.interpretationId,
+                    recordedAtUtc = entry.recordedAtUtc,
+                    read = entry.read
+                });
             }
             for (int i = 0; i < data.progress.regionalStocks.Count; i++)
             {
@@ -876,14 +936,41 @@ namespace WhereTheSoundingsEnd.World
         {
             if (data == null || data.progress == null) return;
             discoveredFieldItemIds.Clear();
+            fieldJournalEntries.Clear();
+            if (data.progress.journalEntries != null)
+            {
+                for (int i = 0; i < data.progress.journalEntries.Count; i++)
+                {
+                    JournalEntrySaveData entry = data.progress.journalEntries[i];
+                    string itemId;
+                    if (entry == null || !FieldJournalPolicy.TryGetItemId(entry.entryId, out itemId))
+                        continue;
+                    discoveredFieldItemIds.Add(itemId);
+                    fieldJournalEntries[itemId] = new JournalEntrySaveData
+                    {
+                        entryId = FieldJournalPolicy.CreateEntryId(itemId),
+                        interpretationId = FieldJournalPolicy.NormalizeRegionId(entry.interpretationId),
+                        recordedAtUtc = entry.recordedAtUtc ?? string.Empty,
+                        read = entry.read
+                    };
+                }
+            }
             if (data.progress.discoveredEntryIds != null)
             {
-                const string discoveryPrefix = "field-discovery:";
                 for (int i = 0; i < data.progress.discoveredEntryIds.Count; i++)
                 {
-                    string entryId = data.progress.discoveredEntryIds[i];
-                    if (!string.IsNullOrWhiteSpace(entryId) && entryId.StartsWith(discoveryPrefix, StringComparison.Ordinal))
-                        discoveredFieldItemIds.Add(entryId.Substring(discoveryPrefix.Length));
+                    string itemId;
+                    if (!FieldJournalPolicy.TryGetItemId(data.progress.discoveredEntryIds[i], out itemId))
+                        continue;
+                    discoveredFieldItemIds.Add(itemId);
+                    if (!fieldJournalEntries.ContainsKey(itemId))
+                        fieldJournalEntries[itemId] = new JournalEntrySaveData
+                        {
+                            entryId = FieldJournalPolicy.CreateEntryId(itemId),
+                            interpretationId = "unknown",
+                            recordedAtUtc = string.Empty,
+                            read = false
+                        };
                 }
             }
             populations.Clear();

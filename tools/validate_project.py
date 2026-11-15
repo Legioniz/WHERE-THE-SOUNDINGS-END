@@ -59,6 +59,8 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Narrative/CinematicSequencePolicy.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/FieldDiscoveryPolicy.cs",
     "Assets/_Project/Tests/EditMode/FieldDiscoveryPolicyTests.cs",
+    "Assets/_Project/Scripts/Runtime/Narrative/FieldJournalPolicy.cs",
+    "Assets/_Project/Tests/EditMode/FieldJournalPolicyTests.cs",
     "Assets/_Project/Tests/EditMode/OpeningCinematicPolicyTests.cs",
     "docs/03_STORY_AND_NARRATIVE/OPENING-CINEMATICS.md",
     "docs/03_STORY_AND_NARRATIVE/FIELD-DISCOVERY-CINEMATICS.md",
@@ -1264,6 +1266,35 @@ def main() -> int:
         if "IllegalCatchProvenanceSurvivesSaveAndRestore" not in cargo_legality_tests:
             failures.append("CatchLegalityCargoSaveTests is missing its save/restore regression.")
 
+        journal_policy_tests = (ROOT / "Assets/_Project/Tests/EditMode/FieldJournalPolicyTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "CreateEntryId_UsesStableNamespaceAndTrimmedItemId",
+            "TryGetItemId_RejectsOtherNamespacesAndBlankSuffixes",
+            "FindingIds_UseTheirOwnStableNamespace",
+            "NormalizeRegionId_UsesUnknownFallbackAndStableCase",
+        ):
+            if f"void {required_test}()" not in journal_policy_tests:
+                failures.append(f"FieldJournalPolicyTests is missing: {required_test}")
+
+        journal_ui = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenRuntimeUI.cs").read_text(encoding="utf-8")
+        for required_text in (
+            '"FIELD JOURNAL  [J]"', "BuildJournalPanel", "ShowJournalEntry",
+            "ShowJournalFinding", "MarkFieldJournalEntryRead", "MarkFindingRead",
+            "UNEXPLAINED FINDINGS", "FormatJournalDate",
+        ):
+            if required_text not in journal_ui:
+                failures.append(f"Field journal UI is missing: {required_text}")
+
+        fishing_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishingSystemDirector.cs").read_text(encoding="utf-8")
+        sounding_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SoundingRigController.cs").read_text(encoding="utf-8")
+        for source, required_texts, label in (
+            (fishing_source, ("fieldJournalEntries", "CreateEntryId", "recordedAtUtc", "MarkFieldJournalEntryRead"), "fishing journal"),
+            (sounding_source, ("discoveredSiteRecords", "CreateFindingEntryId", "recordedAtUtc", "MarkFindingRead"), "survey journal"),
+        ):
+            for required_text in required_texts:
+                if required_text not in source:
+                    failures.append(f"{label} is missing persistence/read integration: {required_text}")
+
         telemetry_tests = (ROOT / "Assets/_Project/Tests/EditMode/ExpeditionEconomyTelemetryTests.cs").read_text(encoding="utf-8")
         if "CompletedBalanceSamplesStayWithinSaveFlagLimit" not in telemetry_tests:
             failures.append("ExpeditionEconomyTelemetryTests is missing bounded 50-sample persistence coverage.")
@@ -1338,7 +1369,7 @@ def main() -> int:
                     "SALVAGE-ARCHIVE-03", "SALVAGE-ARCHIVE-04"):
         if item_id not in builder_source:
             failures.append(f"Generated field-discovery catalogue is missing {item_id}.")
-    if "TryPlayFieldDiscovery" not in cinematic_source or "field-discovery:" not in fishing_source:
+    if "TryPlayFieldDiscovery" not in cinematic_source or "CreateEntryId" not in fishing_source:
         failures.append("First-time field discoveries are not connected to cinematic presentation and save persistence.")
 
     if failures:
