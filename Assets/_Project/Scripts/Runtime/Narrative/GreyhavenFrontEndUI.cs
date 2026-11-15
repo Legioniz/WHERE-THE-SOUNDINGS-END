@@ -32,6 +32,10 @@ namespace WhereTheSoundingsEnd.Narrative
         private Label cinematicEyebrow;
         private Label cinematicTitle;
         private Label cinematicCaption;
+        private Label cinematicBeatCounter;
+        private VisualElement cinematicProgressTrack;
+        private VisualElement cinematicProgressFill;
+        private bool reduceCinematicMotion;
         private CameraFollow2_5D cinematicCameraFollow;
         private Camera cinematicCamera;
         private readonly HashSet<string> firstContactNpcIds = new HashSet<string>(StringComparer.Ordinal);
@@ -234,7 +238,26 @@ namespace WhereTheSoundingsEnd.Narrative
             cinematicCaption.style.fontSize = 14;
             cinematicCaption.style.whiteSpace = WhiteSpace.Normal;
             cinematicCaption.style.maxWidth = 760;
+            cinematicCaption.style.minHeight = 42;
             cinematicCard.Add(cinematicCaption);
+
+            cinematicBeatCounter = new Label("RECORD 01 / 04");
+            cinematicBeatCounter.style.color = Muted;
+            cinematicBeatCounter.style.fontSize = 9;
+            cinematicBeatCounter.style.marginTop = 10;
+            cinematicCard.Add(cinematicBeatCounter);
+
+            cinematicProgressTrack = new VisualElement();
+            cinematicProgressTrack.style.height = 2;
+            cinematicProgressTrack.style.marginTop = 5;
+            cinematicProgressTrack.style.backgroundColor = new Color(0.24f, 0.32f, 0.31f, 1f);
+            cinematicCard.Add(cinematicProgressTrack);
+
+            cinematicProgressFill = new VisualElement();
+            cinematicProgressFill.style.height = 2;
+            cinematicProgressFill.style.width = Length.Percent(0f);
+            cinematicProgressFill.style.backgroundColor = Accent;
+            cinematicProgressTrack.Add(cinematicProgressFill);
 
             VisualElement actionRow = new VisualElement();
             actionRow.style.flexDirection = FlexDirection.Row;
@@ -372,6 +395,7 @@ namespace WhereTheSoundingsEnd.Narrative
 
             cinematicActive = true;
             skipCinematic = false;
+            reduceCinematicMotion = PlayerPrefs.GetInt("wse.reduceCinematicMotion", 0) == 1;
             Pause();
             overlay.style.display = DisplayStyle.None;
             cinematicOverlay.style.display = DisplayStyle.Flex;
@@ -410,7 +434,11 @@ namespace WhereTheSoundingsEnd.Narrative
                 CinematicBeat beat = beats[beatIndex];
                 cinematicEyebrow.text = beat.Eyebrow;
                 cinematicTitle.text = beat.Title;
-                cinematicCaption.text = beat.Caption;
+                cinematicCaption.text = string.Empty;
+                cinematicBeatCounter.text = "RECORD " + (beatIndex + 1).ToString("00") +
+                    " / " + beats.Length.ToString("00");
+                cinematicProgressFill.style.width = Length.Percent(
+                    ((beatIndex + 1f) / beats.Length) * 100f);
                 cinematicCard.style.opacity = 0f;
 
                 Vector3 startPosition = cinematicCamera != null
@@ -433,6 +461,7 @@ namespace WhereTheSoundingsEnd.Narrative
                     ? (cinematicCamera.orthographic ? cameraSnapshotOrthographicSize : cameraSnapshotFieldOfView)
                     : 0f;
                 float targetZoom = initialZoom * beat.FrameScale;
+                if (reduceCinematicMotion) targetZoom = initialZoom;
                 float elapsed = 0f;
                 float duration = Mathf.Max(0.5f, beat.Duration);
 
@@ -440,12 +469,16 @@ namespace WhereTheSoundingsEnd.Narrative
                 {
                     elapsed += Time.unscaledDeltaTime;
                     float progress = Mathf.Clamp01(elapsed / duration);
-                    float eased = progress * progress * (3f - 2f * progress);
+                    float eased = reduceCinematicMotion
+                        ? 1f
+                        : progress * progress * (3f - 2f * progress);
 
                     if (cinematicCamera != null && focusAnchor != null)
                     {
-                        cinematicCamera.transform.position = Vector3.Lerp(startPosition, destination, eased);
-                        cinematicCamera.transform.rotation = Quaternion.Slerp(startRotation, destinationRotation, eased);
+                        cinematicCamera.transform.position = Vector3.Lerp(
+                            startPosition, reduceCinematicMotion ? startPosition : destination, eased);
+                        cinematicCamera.transform.rotation = Quaternion.Slerp(
+                            startRotation, reduceCinematicMotion ? startRotation : destinationRotation, eased);
                         if (cinematicCamera.orthographic)
                             cinematicCamera.orthographicSize = Mathf.Lerp(initialZoom, targetZoom, eased);
                         else
@@ -453,7 +486,13 @@ namespace WhereTheSoundingsEnd.Narrative
                                 initialZoom, Mathf.Clamp(targetZoom, 25f, 80f), eased);
                     }
 
-                    float fadeIn = Mathf.Clamp01(elapsed / 0.38f);
+                    int visibleCharacters = reduceCinematicMotion
+                        ? beat.Caption.Length
+                        : Mathf.Clamp(Mathf.FloorToInt(elapsed * 34f), 0, beat.Caption.Length);
+                    if (cinematicCaption.text.Length != visibleCharacters)
+                        cinematicCaption.text = beat.Caption.Substring(0, visibleCharacters);
+
+                    float fadeIn = Mathf.Clamp01(elapsed / (reduceCinematicMotion ? 0.01f : 0.38f));
                     float fadeOut = Mathf.Clamp01((duration - elapsed) / 0.32f);
                     cinematicCard.style.opacity = Mathf.Min(fadeIn, fadeOut);
                     yield return null;
@@ -463,7 +502,7 @@ namespace WhereTheSoundingsEnd.Narrative
             }
 
             cinematicCard.style.opacity = 0f;
-            yield return StartCoroutine(FadeCinematicOverlay(1f, 0f, 0.42f));
+            yield return StartCoroutine(FadeCinematicOverlay(1f, 0f, reduceCinematicMotion ? 0.08f : 0.42f));
             RestoreCinematicCamera();
             cinematicOverlay.style.display = DisplayStyle.None;
             cinematicActive = false;
@@ -608,6 +647,7 @@ namespace WhereTheSoundingsEnd.Narrative
             AddSlider("Effects preference",0f,1f,PlayerPrefs.GetFloat("wse.effectsVolume",1f),v=>PlayerPrefs.SetFloat("wse.effectsVolume",v));
             Section("ACCESSIBILITY");
             AddToggle("Reduce camera shake (preference)",PlayerPrefs.GetInt("wse.reduceCameraShake",0)==1,v=>PlayerPrefs.SetInt("wse.reduceCameraShake",v?1:0));
+            AddToggle("Reduce cinematic camera movement",PlayerPrefs.GetInt("wse.reduceCinematicMotion",0)==1,v=>PlayerPrefs.SetInt("wse.reduceCinematicMotion",v?1:0));
             AddToggle("High contrast (preference)",PlayerPrefs.GetInt("wse.highContrast",0)==1,v=>PlayerPrefs.SetInt("wse.highContrast",v?1:0));
             AddButton("RESTORE DEFAULTS",ResetSettings); AddButton("BACK",Back);
             feedback.text = "Only master volume, fullscreen, and interface scale currently have direct runtime effects.";
