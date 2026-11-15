@@ -4,7 +4,7 @@
 > Status: Proposed production roster — final ecology and legal review required  
 > Owner: Project lead  
 > Version: 0.1  
-> Last reviewed: 2026-11-10
+> Last reviewed: 2026-11-15
 
 ## 1. Purpose
 
@@ -72,7 +72,7 @@ Nets, pots, specialized jigs, and deep drop lines are equipment unlocks. Avoid u
 
 ---
 
-## 3. Fish species — 100 entries
+## 3. Fish species — 105 entries
 
 Scientific names are used for stable production identification. Common and local names may vary between ports and languages.
 
