@@ -58,3 +58,17 @@ These are cargo rewards in the existing salvage pool. They are not ordinary mark
 - Reduced-motion mode retains all record text and sequence order while suppressing authored camera movement.
 
 Unity Edit Mode/Play Mode execution, ScriptableObject regeneration, runtime presentation, probabilities, save/load integration and Windows player launch remain required. Static source validation is not a substitute for those checks.
+
+
+## Field Journal interface
+
+The runtime HUD exposes **FIELD JOURNAL [J]**. It is also available through the keyboard shortcut `J`; `Escape` or `J` closes it. The panel pauses the simulation and cannot be opened over dialogue, the chart, inventory, a dockside menu or an active gameplay interaction.
+
+- **All Records** lists every secured discovery.
+- **Specimens** filters biological catches and harvests.
+- **Recovered Objects** filters salvage.
+- The register shows unread state, item ID and recovery region.
+- The detail page shows the recorded date, category, field description, catalogue habitat/depth/method data where applicable, and deliberately unresolved notes.
+- Opening an entry marks it read. The read state, location and UTC recovery date are saved with the campaign.
+
+Descriptions are field observations and catalogue notes, not an omniscient explanation of the Orison, the Choir or the recovered object's origin. Entries appear only for item IDs present in the campaign discovery ledger and the generated cargo catalogue.
