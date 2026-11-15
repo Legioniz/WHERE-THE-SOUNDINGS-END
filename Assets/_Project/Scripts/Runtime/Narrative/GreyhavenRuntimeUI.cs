@@ -1236,21 +1236,26 @@ namespace WhereTheSoundingsEnd.Narrative
 
             DeepOceanPhenomenonSite selectedFinding = findings.Find(site =>
                 string.Equals(site.SiteId, _selectedJournalFindingId, StringComparison.Ordinal));
-            if (selectedFinding == null && findings.Count > 0)
-                selectedFinding = findings[0];
             if (selectedFinding != null)
             {
-                _selectedJournalFindingId = selectedFinding.SiteId;
-                _selectedJournalItemId = string.Empty;
                 ShowJournalFinding(selectedFinding);
                 return;
             }
 
-            if (records.Count > 0)
+            if (_journalFilter != 3 && records.Count > 0)
             {
                 _selectedJournalItemId = records[0].ItemId;
                 _selectedJournalFindingId = string.Empty;
                 ShowJournalEntry(records[0]);
+                return;
+            }
+
+            if (findings.Count > 0)
+            {
+                selectedFinding = findings[0];
+                _selectedJournalFindingId = selectedFinding.SiteId;
+                _selectedJournalItemId = string.Empty;
+                ShowJournalFinding(selectedFinding);
             }
         }
 
