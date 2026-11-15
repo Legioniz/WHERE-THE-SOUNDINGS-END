@@ -61,6 +61,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Tests/EditMode/FieldDiscoveryPolicyTests.cs",
     "Assets/_Project/Tests/EditMode/OpeningCinematicPolicyTests.cs",
     "docs/03_STORY_AND_NARRATIVE/OPENING-CINEMATICS.md",
+    "docs/03_STORY_AND_NARRATIVE/FIELD-DISCOVERY-CINEMATICS.md",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveRestoreTransaction.cs",
