@@ -30,7 +30,7 @@ namespace WhereTheSoundingsEnd.Editor
         private const string MaterialsPath = "Assets/_Project/Art/Materials";
         private const string MeshesPath = "Assets/_Project/Art/Meshes";
         private const string StreamedSceneFolder = "Assets/_Project/Scenes";
-        private const string StreamedAreaRevision = "4";
+        private const string StreamedAreaRevision = "5";
         private static readonly string[] StreamedAreaScenePaths =
         {
             StreamedSceneFolder + "/Greyhaven_Terrain.unity",
@@ -41,11 +41,93 @@ namespace WhereTheSoundingsEnd.Editor
             StreamedSceneFolder + "/Greyhaven_Lighthouse.unity"
         };
 
+        private static readonly string[] StreamedAreaIds =
+        {
+            "greyhaven.terrain",
+            "greyhaven.harbour",
+            "greyhaven.village",
+            "greyhaven.estuary.west",
+            "greyhaven.estuary.east",
+            "greyhaven.lighthouse"
+        };
+
         public static bool HasGeneratedAreaScenes()
         {
-            for (int i = 0; i < StreamedAreaScenePaths.Length; i++)
-                if (AssetDatabase.LoadAssetAtPath<SceneAsset>(StreamedAreaScenePaths[i]) == null)
+            string ignored;
+            return HasGeneratedAreaScenes(out ignored);
+        }
+
+        /// <summary>
+        /// Opens each generated area additively and checks its root, stable ID, current content
+        /// revision and referenced render assets before startup can rely on it.
+        /// Scenes already loaded are left loaded; scenes opened for this check are closed.
+        /// </summary>
+        public static bool HasGeneratedAreaScenes(out string error)
+        {
+            error = string.Empty;
+            Scene previousActiveScene = SceneManager.GetActiveScene();
+
+            for (int index = 0; index < StreamedAreaScenePaths.Length; index++)
+            {
+                string scenePath = StreamedAreaScenePaths[index];
+                if (AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath) == null)
+                {
+                    error = "Missing generated area scene '" + scenePath + "'."; 
                     return false;
+                }
+
+                Scene areaScene = SceneManager.GetSceneByPath(scenePath);
+                bool openedForValidation = !areaScene.IsValid() || !areaScene.isLoaded;
+                try
+                {
+                    if (openedForValidation)
+                        areaScene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+
+                    if (!areaScene.IsValid() || !areaScene.isLoaded)
+                    {
+                        error = "Generated area scene '" + scenePath + "' could not be opened for validation."; 
+                        return false;
+                    }
+
+                    GameObject[] roots = areaScene.GetRootGameObjects();
+                    if (roots.Length != 1)
+                    {
+                        error = "Generated area scene '" + scenePath +
+                                "' must contain exactly one root; found " + roots.Length + ".";
+                        return false;
+                    }
+
+                    StreamedAreaSceneRoot areaRoot = roots[0].GetComponent<StreamedAreaSceneRoot>();
+                    if (areaRoot == null)
+                    {
+                        error = "Generated area scene '" + scenePath +
+                                "' is missing its StreamedAreaSceneRoot component.";
+                        return false;
+                    }
+
+                    string rootError;
+                    if (!areaRoot.TryValidate(StreamedAreaIds[index], StreamedAreaRevision, out rootError))
+                    {
+                        error = "Generated area scene '" + scenePath + "' is stale or invalid: " + rootError;
+                        return false;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    error = "Could not validate generated area scene '" + scenePath + "': " + exception.Message;
+                    return false;
+                }
+                finally
+                {
+                    if (openedForValidation && areaScene.IsValid() && areaScene.isLoaded)
+                        EditorSceneManager.CloseScene(areaScene, true);
+
+                    if (previousActiveScene.IsValid() && previousActiveScene.isLoaded &&
+                        SceneManager.GetActiveScene() != previousActiveScene)
+                        SceneManager.SetActiveScene(previousActiveScene);
+                }
+            }
+
             return true;
         }
         private const string CargoDefinitionsPath = "Assets/_Project/Data/Inventory";
