@@ -151,6 +151,66 @@ namespace WhereTheSoundingsEnd.Tests.PlayMode
             Assert.That(_greyhavenScene.isLoaded, Is.True);
         }
 
+        [UnityTest]
+        public IEnumerator ExplicitAreaRequestsWakeStandbyScenesAndReleaseReturnsThemToDistancePolicy()
+        {
+            AreaStreamingDirector director = FindInScene<AreaStreamingDirector>(_greyhavenScene);
+            BoatPrototypeController boat = FindInScene<BoatPrototypeController>(_greyhavenScene);
+            Assert.That(director, Is.Not.Null);
+            Assert.That(boat, Is.Not.Null);
+
+            _boatBody = boat.GetComponent<Rigidbody>();
+            _originalKinematic = _boatBody.isKinematic;
+            _originalPosition = _boatBody.position;
+            _originalRotation = _boatBody.rotation;
+            _boatBody.isKinematic = true;
+
+            Assert.That(director.RequestArea("greyhaven.lighthouse"), Is.True,
+                "Explicit requests must load a known area without relying on proximity.");
+
+            float deadline = Time.realtimeSinceStartup + 30f;
+            while (!director.IsAreaLoaded("greyhaven.lighthouse") && Time.realtimeSinceStartup < deadline)
+                yield return null;
+            Assert.That(director.IsAreaLoaded("greyhaven.lighthouse"), Is.True);
+            Assert.That(director.IsAreaInStandby("greyhaven.lighthouse"), Is.False,
+                "An explicitly requested area must remain active while held.");
+
+            Vector3 standbyPosition = new Vector3(-6f, _originalPosition.y, -22f);
+            _boatBody.position = standbyPosition;
+            boat.transform.position = standbyPosition;
+            Physics.SyncTransforms();
+            Assert.That(director.ReleaseArea("greyhaven.lighthouse"), Is.True);
+
+            deadline = Time.realtimeSinceStartup + 5f;
+            while (!director.IsAreaInStandby("greyhaven.lighthouse") && Time.realtimeSinceStartup < deadline)
+                yield return null;
+            Assert.That(director.IsAreaInStandby("greyhaven.lighthouse"), Is.True,
+                "A loaded area outside preload range should enter standby before it is unloaded.");
+
+            Vector3 wakePosition = new Vector3(-86f, _originalPosition.y, -22f);
+            _boatBody.position = wakePosition;
+            boat.transform.position = wakePosition;
+            Physics.SyncTransforms();
+
+            deadline = Time.realtimeSinceStartup + 5f;
+            while (director.IsAreaInStandby("greyhaven.lighthouse") && Time.realtimeSinceStartup < deadline)
+                yield return null;
+            Assert.That(director.IsAreaLoaded("greyhaven.lighthouse"), Is.True);
+            Assert.That(director.IsAreaInStandby("greyhaven.lighthouse"), Is.False,
+                "Re-entering preload range should reactivate the already resident scene.");
+
+            _boatBody.position = _originalPosition;
+            boat.transform.position = _originalPosition;
+            Physics.SyncTransforms();
+            deadline = Time.realtimeSinceStartup + 20f;
+            while (director.IsAreaLoaded("greyhaven.lighthouse") && Time.realtimeSinceStartup < deadline)
+                yield return null;
+            Assert.That(director.IsAreaLoaded("greyhaven.lighthouse"), Is.False,
+                "Released areas outside unload range should eventually unload.");
+            Assert.That(_greyhavenScene.isLoaded, Is.True,
+                "The persistent gameplay scene must survive on-demand area retirement.");
+        }
+
         private static T FindInScene<T>(Scene scene) where T : Component
         {
             GameObject[] roots = scene.GetRootGameObjects();
