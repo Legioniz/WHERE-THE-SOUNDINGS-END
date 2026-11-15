@@ -218,7 +218,6 @@ namespace WhereTheSoundingsEnd.Narrative
             cinematicEyebrow.style.color = Accent;
             cinematicEyebrow.style.fontSize = 10;
             cinematicEyebrow.style.unityFontStyleAndWeight = FontStyle.Bold;
-            cinematicEyebrow.style.letterSpacing = 1.2f;
             cinematicCard.Add(cinematicEyebrow);
 
             cinematicTitle = new Label("");
@@ -374,6 +373,7 @@ namespace WhereTheSoundingsEnd.Narrative
             cinematicActive = true;
             skipCinematic = false;
             Pause();
+            overlay.style.display = DisplayStyle.None;
             cinematicOverlay.style.display = DisplayStyle.Flex;
             cinematicOverlay.style.opacity = 0f;
             cinematicCard.style.opacity = 0f;
