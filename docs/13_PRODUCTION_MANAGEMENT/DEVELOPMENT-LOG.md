@@ -1,5 +1,25 @@
 # Development Log
 
+## 2026-11-15 — Revision-aware area-scene bootstrap and repository reconciliation
+
+**Branch:** fix/revision-aware-bootstrap-and-doc-reconciliation-20261115
+
+### Implemented in source
+
+- Advanced Greyhaven streamed-area content revision from 4 to 5 to include historical archive prop clusters beneath their owning static area roots.
+- Changed the Editor preflight from file-existence-only detection to additive scene inspection. It verifies the single scene root, stable area ID, current content revision and referenced render asset integrity.
+- Preserved scenes already loaded before preflight; scenes opened only for validation are closed, and the previously active scene is restored.
+- Changed project initialization to show a clear rebuild confirmation for missing, stale or invalid generated area scenes. Declining preserves existing scenes and logs the validation failure.
+- Added deterministic Edit Mode coverage for exact scene identity/revision matches and rejection of stale revision, wrong area, and missing identifiers.
+- Updated the project validator, README, documentation index, streaming technical spec, testing strategy, implementation audit, milestone checkpoint and backlog. Reconciled the README economy status with connected source implementation and corrected escaped newline formatting.
+
+### Verification boundary
+
+- Pull-request CI will run repository integrity checks, Tree-sitter C# syntax parsing and repository safeguard checks.
+- Unity Editor semantic compilation, Editor preflight against real generated scene assets, Edit Mode execution, Play Mode streaming/archive/save-load, visual inspection and Windows build remain unperformed.
+- Packages/packages-lock.json, broad Unity-generated .meta files, generated .unity scenes and ProjectSettings/EditorBuildSettings.asset must be generated/validated by Unity 6000.3.28f1. They are intentionally not fabricated in this source-only update.
+
+---
 ## 2026-11-14 — Seafood catalogue, catch legality, regional markets and expedition measurement
 
 **Branch:** feature/seafood-legality-regional-markets-balance-20261114
