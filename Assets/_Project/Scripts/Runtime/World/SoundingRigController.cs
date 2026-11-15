@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using WhereTheSoundingsEnd.Core;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.Narrative;
 
 namespace WhereTheSoundingsEnd.World
 {
