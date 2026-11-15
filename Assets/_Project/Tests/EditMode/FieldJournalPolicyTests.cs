@@ -23,6 +23,17 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void FindingIds_UseTheirOwnStableNamespace()
+        {
+            string siteId;
+            Assert.AreEqual("field-finding:shoal.return.01",
+                FieldJournalPolicy.CreateFindingEntryId("shoal.return.01"));
+            Assert.IsTrue(FieldJournalPolicy.TryGetSiteId("field-finding:shoal.return.01", out siteId));
+            Assert.AreEqual("shoal.return.01", siteId);
+            Assert.IsFalse(FieldJournalPolicy.TryGetSiteId("field-discovery:FSH-101", out siteId));
+        }
+
+        [Test]
         public void NormalizeRegionId_UsesUnknownFallbackAndStableCase()
         {
             Assert.AreEqual("the_outer_shoals", FieldJournalPolicy.NormalizeRegionId(" THE_OUTER_SHOALS "));
