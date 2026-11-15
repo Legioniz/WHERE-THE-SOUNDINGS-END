@@ -313,8 +313,8 @@ namespace WhereTheSoundingsEnd.Narrative
                     new Vector3(-16f, 1f, -28f), new Vector3(0f, 40f, -30f), 3.2f, 1.16f),
                 new CinematicBeat(
                     "RECOVERY REGISTER  /  ORISON",
-                    "ONE APPRENTICE",
-                    "The surviving apprentice was the only person recovered. The Orison and the rest of its crew were never found.",
+                    "THE RECOVERY FILE",
+                    "The report was left open. No confirmed cause or final position was entered for the Orison.",
                     new Vector3(-8f, 1f, -18f), new Vector3(0f, 44f, -33f), 3.1f, 1.14f),
                 new CinematicBeat(
                     "ARCHIVE STATUS  /  UNRESOLVED",
