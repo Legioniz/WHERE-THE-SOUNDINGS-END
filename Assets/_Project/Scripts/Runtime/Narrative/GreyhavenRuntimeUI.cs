@@ -1136,14 +1136,16 @@ namespace WhereTheSoundingsEnd.Narrative
                 string region, recordedAt;
                 bool read;
                 if (fishingSystem != null &&
-                    fishingSystem.TryGetFieldJournalMetadata(records[i].ItemId, out region, out recordedAt, out read) && !read)
+                    fishingSystem.TryGetFieldJournalMetadata(records[i].ItemId, out region, out recordedAt, out read) &&
+                    !read && !string.Equals(_selectedJournalItemId, records[i].ItemId, StringComparison.Ordinal))
                     unread++;
             }
             for (int i = 0; i < findings.Count; i++)
             {
                 string region, recordedAt;
                 bool read;
-                if (soundingRig.TryGetFindingMetadata(findings[i].SiteId, out region, out recordedAt, out read) && !read)
+                if (soundingRig.TryGetFindingMetadata(findings[i].SiteId, out region, out recordedAt, out read) &&
+                    !read && !string.Equals(_selectedJournalFindingId, findings[i].SiteId, StringComparison.Ordinal))
                     unread++;
             }
 
@@ -1178,6 +1180,7 @@ namespace WhereTheSoundingsEnd.Narrative
                     read = true;
                 }
 
+                if (string.Equals(_selectedJournalItemId, item.ItemId, StringComparison.Ordinal)) read = true;
                 string prefix = item.Category == CargoItemCategory.Salvage ? "RECOVERED OBJECT" : "SPECIMEN";
                 string rowText = (read ? "" : "●  ") + prefix + "\n" + item.DisplayName +
                     "\n" + RegionalChartController.GetDisplayName(region);
@@ -1204,6 +1207,7 @@ namespace WhereTheSoundingsEnd.Narrative
                 string region, recordedAt;
                 bool read;
                 soundingRig.TryGetFindingMetadata(site.SiteId, out region, out recordedAt, out read);
+                if (string.Equals(_selectedJournalFindingId, site.SiteId, StringComparison.Ordinal)) read = true;
                 Button row = MakeButton((read ? "" : "●  ") + "UNEXPLAINED FINDING\n" +
                     site.DisplayName + "\n" + RegionalChartController.GetDisplayName(region), () =>
                 {
