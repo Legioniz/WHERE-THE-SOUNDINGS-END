@@ -37,7 +37,7 @@ The opening is intentionally incomplete. It establishes the Orison loss and the 
 |---|---|---|
 | 1 | Three Departures | Three boats passed beyond the outer marker. Only one came back. |
 | 2 | A Silent Bell | The returned skipper kept asking whether the lighthouse bell was ringing. It had been silent for eleven years. |
-| 3 | The First Job | Recover the sounding buoy intact. Do not switch it on. If it starts answering, drop the line. |
+| 3 | The First Job | Recover the sounding buoy intact. Do not switch it on. |
 | 4 | Learn the Water | Keep the old boat running. Learn the channel. Bring back what the sea gives you. |
 
 After the prologue, control returns to the existing Greyhaven gameplay scene. The Harbourmaster's Yarn node remains the source of the resident's actual greeting and optional conversation; the cinematic does not auto-start or pre-answer dialogue.
