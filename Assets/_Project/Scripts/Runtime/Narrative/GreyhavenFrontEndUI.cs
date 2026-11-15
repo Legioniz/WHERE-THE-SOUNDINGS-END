@@ -312,6 +312,16 @@ namespace WhereTheSoundingsEnd.Narrative
                     "One apprentice was recovered. The vessel and the rest of its crew were never found.",
                     new Vector3(-16f, 1f, -28f), new Vector3(0f, 40f, -30f), 3.2f, 1.16f),
                 new CinematicBeat(
+                    "RECOVERY REGISTER  /  ORISON",
+                    "ONE APPRENTICE",
+                    "The surviving apprentice was the only person recovered. The Orison and the rest of its crew were never found.",
+                    new Vector3(-8f, 1f, -18f), new Vector3(0f, 44f, -33f), 3.1f, 1.14f),
+                new CinematicBeat(
+                    "ARCHIVE STATUS  /  UNRESOLVED",
+                    "NO FINAL POSITION",
+                    "The Orison's loss remains unaccounted for. The surviving record does not establish what happened beyond the outer marker.",
+                    new Vector3(8f, 1f, -24f), new Vector3(0f, 46f, -34f), 3.1f, 1.08f),
+                new CinematicBeat(
                     "PRESENT DAY  /  GREYHAVEN",
                     "THE COAST IS WAITING",
                     "Eight years later, a new hand takes work on an old boat. There is a harbour to learn and a living to make.",
@@ -342,7 +352,17 @@ namespace WhereTheSoundingsEnd.Narrative
                     "FIELD NOTE  /  DAY ONE",
                     "LEARN THE WATER",
                     "Keep the old boat running. Learn the channel. Bring back what the sea gives you.",
-                    new Vector3(0f, 0f, 6f), new Vector3(0f, 45f, -34f), 2.8f, 1.1f)
+                    new Vector3(0f, 0f, 6f), new Vector3(0f, 45f, -34f), 2.8f, 1.1f),
+                new CinematicBeat(
+                    "DECK CHECK  /  BEFORE DEPARTURE",
+                    "THE COST OF DISTANCE",
+                    "Fuel, bait, hull condition and cargo space decide how far the old boat can safely range.",
+                    new Vector3(0f, 1f, 8f), new Vector3(0f, 43f, -32f), 2.8f, 1.06f),
+                new CinematicBeat(
+                    "OUTER CHANNEL  /  FIRST WATCH",
+                    "A MARKER IS NOT A PROMISE",
+                    "The chart shows the working channel. Weather, depth and the condition of the vessel still decide whether it is passable.",
+                    new Vector3(-18f, 1f, -12f), new Vector3(0f, 45f, -34f), 3f, 1.12f)
             };
         }
 
@@ -364,6 +384,36 @@ namespace WhereTheSoundingsEnd.Narrative
                 2.65f,
                 0.12f);
             StartCoroutine(RunCinematic(new[] { beat }, npc.transform, true, afterSequence));
+            return true;
+        }
+
+        /// <summary>Plays a short archival reveal the first time a specimen or salvage object is recovered.</summary>
+        public bool TryPlayFieldDiscovery(string recordType, string title, string caption)
+        {
+            if (cinematicActive || page != "game" ||
+                string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(caption))
+                return false;
+
+            CinematicBeat[] beats =
+            {
+                new CinematicBeat(
+                    string.IsNullOrWhiteSpace(recordType) ? "FIELD ARCHIVE / NEW ENTRY" : recordType.ToUpperInvariant(),
+                    title.ToUpperInvariant(),
+                    caption,
+                    new Vector3(0f, 1f, 0f),
+                    new Vector3(0f, 43f, -33f),
+                    3.15f,
+                    1.1f),
+                new CinematicBeat(
+                    "GREYHAVEN FIELD JOURNAL",
+                    "RECORDED, NOT EXPLAINED",
+                    "The entry is added to the field record. Its origin, condition and place of recovery remain part of the evidence.",
+                    new Vector3(0f, 0.5f, 2f),
+                    new Vector3(0f, 40f, -30f),
+                    2.2f,
+                    1.04f)
+            };
+            StartCoroutine(RunCinematic(beats, null, true, null));
             return true;
         }
 
@@ -500,6 +550,12 @@ namespace WhereTheSoundingsEnd.Narrative
                 }
 
                 cinematicCard.style.opacity = 0f;
+                if (beatIndex < beats.Length - 1 && !skipCinematic)
+                {
+                    float transitionDuration = reduceCinematicMotion ? 0.06f : 0.16f;
+                    yield return StartCoroutine(FadeCinematicOverlay(1f, 0.35f, transitionDuration));
+                    yield return StartCoroutine(FadeCinematicOverlay(0.35f, 1f, transitionDuration));
+                }
             }
 
             cinematicCard.style.opacity = 0f;
