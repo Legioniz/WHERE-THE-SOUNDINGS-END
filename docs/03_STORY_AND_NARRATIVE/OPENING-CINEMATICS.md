@@ -16,14 +16,14 @@ The sequence is restrained: measured camera movement, letterbox framing, a low-c
 
 **Trigger:** first application launch on a local installation, when the PlayerPrefs key wse.openingCinematicSeen is not set.
 
-**Length:** approximately 14 seconds of authored beat time, plus fades. It may be skipped at any time.
+**Length:** approximately 20 seconds of authored beat time, plus fades. It may be skipped at any time.
 
 | Beat | On-screen heading | Record text |
 |---|---|---|
 | 1 | The Second Return | The first sounding found the seabed. The second came back eleven seconds late. |
 | 2 | A Voice on the Radio | A familiar voice crossed an empty channel. The crew stopped answering. |
 | 3 | The Orison Was Lost | One apprentice was recovered. The vessel and the rest of its crew were never found. |
-| 4 | The Coast Is Waiting | Eight years later, a new hand takes work on an old boat. There is a harbour to learn and a living to make. |
+| 4 | The Coast Is Waiting | Eight years later, a new hand takes work on an old boat. There is a harbour to learn and a living to make. |\n| 5 | The Recovery File | The report was left open. No confirmed cause or final position was entered for the Orison. |\n| 6 | No Final Position | The Orison's loss remains unaccounted for. The surviving record does not establish what happened beyond the outer marker. |
 
 The opening is intentionally incomplete. It establishes the Orison loss and the protagonist's past without explaining the signal, assigning objective blame, confirming the voice's identity, or revealing later evidence. The title menu appears after the sequence. **Replay Opening Record** is available from the title menu.
 
@@ -31,14 +31,14 @@ The opening is intentionally incomplete. It establishes the Orison loss and the 
 
 **Trigger:** the player chooses Begin / Continue and neither a valid manual save nor a restorable autosave is available.
 
-**Length:** approximately 12 seconds of authored beat time, plus fades. It may be skipped.
+**Length:** approximately 18 seconds of authored beat time, plus fades. It may be skipped.
 
 | Beat | On-screen heading | Record text |
 |---|---|---|
 | 1 | Three Departures | Three boats passed beyond the outer marker. Only one came back. |
 | 2 | A Silent Bell | The returned skipper kept asking whether the lighthouse bell was ringing. It had been silent for eleven years. |
 | 3 | The First Job | Recover the sounding buoy intact. Do not switch it on. |
-| 4 | Learn the Water | Keep the old boat running. Learn the channel. Bring back what the sea gives you. |
+| 4 | Learn the Water | Keep the old boat running. Learn the channel. Bring back what the sea gives you. |\n| 5 | The Cost of Distance | Fuel, bait, hull condition and cargo space decide how far the old boat can safely range. |\n| 6 | A Marker Is Not a Promise | The chart shows the working channel. Weather, depth and vessel condition still decide whether it is passable. |
 
 After the prologue, control returns to the existing Greyhaven gameplay scene. The Harbourmaster's Yarn node remains the source of the resident's actual greeting and optional conversation; the cinematic does not auto-start or pre-answer dialogue.
 
@@ -103,3 +103,14 @@ The cinematic code is presentation-only. It introduces no save schema change, ne
 9. Repeat at the target desktop aspect ratios and verify text safe areas, legibility, keyboard focus, gamepad access and reduced-motion expectations.
 
 Static repository checks do not substitute for these Unity and Windows player checks.
+
+
+## Sequence D — first field discoveries
+
+**Trigger:** the first successful recovery of a stable cargo item ID in a campaign. Fish and marine specimens register after a catch is secured; salvage objects register only after the reserved dredge pull commits successfully.
+
+Each discovery uses a two-beat archival reveal: a specimen/object title card followed by a short field-journal record. The live camera is framed around the vessel and surrounding water; the sequence uses the same skip, camera restoration, reduced-motion and pause lifecycle as the opening. A short exposure dip separates adjacent shots.
+
+Discovery IDs are stored in the existing `ProgressSaveData.discoveredEntryIds` list with the `field-discovery:` prefix. No save schema migration is required. A failed catch, full hold, interrupted dredge or uncommitted salvage reservation does not award a salvage discovery. Repeated recovery of the same item ID does not replay the reveal.
+
+The current added catalogue content includes five fish (FSH-101–FSH-105) and four archive-grade salvage objects (SALVAGE-ARCHIVE-01–04). The latter are not ordinary sale stock and have no implied vendor price. Their origin remains unconfirmed; the reveal records recovery, not an explanation of the Choir or the Orison.

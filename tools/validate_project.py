@@ -57,8 +57,11 @@ REQUIRED_FILES = [
     "docs/13_PRODUCTION_MANAGEMENT/TASK-BACKLOG.md",
     "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs",
     "Assets/_Project/Scripts/Runtime/Narrative/CinematicSequencePolicy.cs",
+    "Assets/_Project/Scripts/Runtime/Narrative/FieldDiscoveryPolicy.cs",
+    "Assets/_Project/Tests/EditMode/FieldDiscoveryPolicyTests.cs",
     "Assets/_Project/Tests/EditMode/OpeningCinematicPolicyTests.cs",
     "docs/03_STORY_AND_NARRATIVE/OPENING-CINEMATICS.md",
+    "docs/03_STORY_AND_NARRATIVE/FIELD-DISCOVERY-CINEMATICS.md",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveFileService.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveGameCoordinator.cs",
     "Assets/_Project/Scripts/Runtime/Persistence/SaveRestoreTransaction.cs",
@@ -1071,7 +1074,7 @@ def main() -> int:
                 if item_id in catalog_by_id:
                     failures.append(f"Duplicate generated seafood catalog ID: {item_id}")
                 catalog_by_id[item_id] = fields
-            if catalog_counts != {"FSH": 100, "INV": 47, "ALG": 8}:
+            if catalog_counts != {"FSH": 105, "INV": 47, "ALG": 8}:
                 failures.append(f"Seafood catalog counts are incomplete: {catalog_counts}")
 
             price_doc = (ROOT / "docs/07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md").read_text(encoding="utf-8")
@@ -1326,6 +1329,17 @@ def main() -> int:
 
 
 
+
+    cinematic_source = (ROOT / "Assets/_Project/Scripts/Runtime/Narrative/GreyhavenFrontEndUI.cs").read_text(encoding="utf-8")
+    fishing_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishingSystemDirector.cs").read_text(encoding="utf-8")
+    builder_source = (ROOT / "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs").read_text(encoding="utf-8")
+    for item_id in ("FSH-101", "FSH-102", "FSH-103", "FSH-104", "FSH-105",
+                    "SALVAGE-ARCHIVE-01", "SALVAGE-ARCHIVE-02",
+                    "SALVAGE-ARCHIVE-03", "SALVAGE-ARCHIVE-04"):
+        if item_id not in builder_source:
+            failures.append(f"Generated field-discovery catalogue is missing {item_id}.")
+    if "TryPlayFieldDiscovery" not in cinematic_source or "field-discovery:" not in fishing_source:
+        failures.append("First-time field discoveries are not connected to cinematic presentation and save persistence.")
 
     if failures:
         for failure in failures:

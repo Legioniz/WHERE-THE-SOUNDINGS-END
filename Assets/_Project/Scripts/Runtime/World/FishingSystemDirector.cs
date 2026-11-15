@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Economy;
 using WhereTheSoundingsEnd.Persistence;
+using WhereTheSoundingsEnd.Narrative;
 
 namespace WhereTheSoundingsEnd.World
 {
@@ -126,12 +127,27 @@ namespace WhereTheSoundingsEnd.World
         private string status = "F: prepare and cast";
         private readonly Dictionary<string, int> populations = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly Dictionary<string, double> populationTimes = new Dictionary<string, double>(StringComparer.Ordinal);
+        private readonly HashSet<string> discoveredFieldItemIds = new HashSet<string>(StringComparer.Ordinal);
 
         public FishingEncounterPhase Phase { get { return phase; } }
         public FishingTechnique Technique { get { return technique; } }
         public string Status { get { return status; } }
         public float FightProgress { get { return fightProgress; } }
         public float LineTension { get { return tension; } }
+
+        public bool RegisterFieldDiscovery(CargoItemDefinition item, string recordType)
+        {
+            if (item == null || !FieldDiscoveryPolicy.TryRegister(discoveredFieldItemIds, item.ItemId))
+                return false;
+
+            GreyhavenFrontEndUI frontEnd = FindFirstObjectByType<GreyhavenFrontEndUI>();
+            if (frontEnd != null)
+            {
+                string caption = item.DisplayName + " has been recovered and entered into the field journal. Compare its condition, habitat and recovery site before drawing conclusions.";
+                frontEnd.TryPlayFieldDiscovery(recordType, item.DisplayName, caption);
+            }
+            return true;
+        }
 
         public void Configure(InputActionAsset input, SpatialCargoHold hold, SeaStateDirector director)
         {
@@ -500,8 +516,11 @@ namespace WhereTheSoundingsEnd.World
                   (fineCollected ? " · FINE PAID $" : " · FINE NOT COLLECTED $") +
                   (legality.FineCents / 100m).ToString("0.00") +
                   " · THIS CATCH CANNOT BE SOLD.";
+            CargoItemDefinition landedDefinition = hookedFish;
             FinishFishing();
             hookedFish = null;
+            if (landedDefinition != null)
+                RegisterFieldDiscovery(landedDefinition, "SPECIMEN RECORDED / FIRST CATCH");
         }
 
         private void FinishFishing()
@@ -810,6 +829,14 @@ namespace WhereTheSoundingsEnd.World
         public void CaptureSaveData(SaveGameData data)
         {
             if (data == null || data.progress == null) return;
+            if (data.progress.discoveredEntryIds == null)
+                data.progress.discoveredEntryIds = new List<string>();
+            foreach (string discoveredId in discoveredFieldItemIds)
+            {
+                string entryId = "field-discovery:" + discoveredId;
+                if (!data.progress.discoveredEntryIds.Contains(entryId))
+                    data.progress.discoveredEntryIds.Add(entryId);
+            }
             for (int i = 0; i < data.progress.regionalStocks.Count; i++)
             {
                 RegionalStockSaveData existing = data.progress.regionalStocks[i];
@@ -848,6 +875,17 @@ namespace WhereTheSoundingsEnd.World
         public void RestoreSaveData(SaveGameData data)
         {
             if (data == null || data.progress == null) return;
+            discoveredFieldItemIds.Clear();
+            if (data.progress.discoveredEntryIds != null)
+            {
+                const string discoveryPrefix = "field-discovery:";
+                for (int i = 0; i < data.progress.discoveredEntryIds.Count; i++)
+                {
+                    string entryId = data.progress.discoveredEntryIds[i];
+                    if (!string.IsNullOrWhiteSpace(entryId) && entryId.StartsWith(discoveryPrefix, StringComparison.Ordinal))
+                        discoveredFieldItemIds.Add(entryId.Substring(discoveryPrefix.Length));
+                }
+            }
             populations.Clear();
             populationTimes.Clear();
             for (int i = 0; i < data.progress.regionalStocks.Count; i++)

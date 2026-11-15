@@ -302,6 +302,8 @@ namespace WhereTheSoundingsEnd.World
             }
 
             activeSalvageReservationId = null;
+            if (fishingSystem != null)
+                fishingSystem.RegisterFieldDiscovery(item, "RECOVERED OBJECT / FIRST FIND");
             return "SALVAGED: " + item.DisplayName + " ×" + quantity;
         }
 
