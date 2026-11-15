@@ -494,10 +494,15 @@ def main() -> int:
         for required_text in (
             "movementThreshold", "SetHarvesting", "panicLevel", "timeOfDaySeconds",
             "worldClock.Advance", "LastGameDeltaSeconds", "weatherShiftCooldownGameSeconds",
-            "birdEventCountdownGameSeconds", "latestOmen",
+            "birdEventCountdownGameSeconds", "latestOmen", "RefreshSceneTargets",
+            "RestoreSoundscapeBaselines",
         ):
             if required_text not in sea_source:
                 failures.append(f"SeaStateDirector is missing expected runtime feature: {required_text}")
+
+        sea_tests = (ROOT / "Assets/_Project/Tests/EditMode/SeaStateAndCargoDamageTests.cs").read_text(encoding="utf-8")
+        if "SeaStateSceneRefresh_PreservesOriginalAudioBaselineAcrossRepeatedAreaTransitions" not in sea_tests:
+            failures.append("SeaStateDirector is missing its streamed-scene audio baseline regression test.")
 
         harvest_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/HarvestingMinigameController.cs").read_text(encoding="utf-8")
         if 'FindAction("HarvestBeat"' not in harvest_source or "harvestBeatAction.WasPressedThisFrame()" not in harvest_source:

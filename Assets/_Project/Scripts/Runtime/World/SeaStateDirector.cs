@@ -105,6 +105,7 @@ namespace WhereTheSoundingsEnd.World
         /// <summary>Refreshes ambience targets after an additive area activates or unloads.</summary>
         public void RefreshSceneTargets()
         {
+            RestoreSoundscapeBaselines();
             sceneLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
             soundscapeSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
             sourceBasePitch = new float[soundscapeSources.Length];
@@ -113,6 +114,20 @@ namespace WhereTheSoundingsEnd.World
             {
                 sourceBasePitch[i] = soundscapeSources[i] != null ? soundscapeSources[i].pitch : 1f;
                 sourceBaseVolume[i] = soundscapeSources[i] != null ? soundscapeSources[i].volume : 1f;
+            }
+        }
+
+        private void RestoreSoundscapeBaselines()
+        {
+            // Restore the previous atmosphere baselines before recapturing the active scene set.
+            // Otherwise every area transition would treat already-warped pitch/volume as a new
+            // baseline and progressively attenuate persistent ambience.
+            for (int i = 0; i < soundscapeSources.Length; i++)
+            {
+                AudioSource source = soundscapeSources[i];
+                if (source == null) continue;
+                if (i < sourceBasePitch.Length) source.pitch = sourceBasePitch[i];
+                if (i < sourceBaseVolume.Length) source.volume = sourceBaseVolume[i];
             }
         }
 
