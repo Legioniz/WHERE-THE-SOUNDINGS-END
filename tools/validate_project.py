@@ -1074,7 +1074,7 @@ def main() -> int:
                 if item_id in catalog_by_id:
                     failures.append(f"Duplicate generated seafood catalog ID: {item_id}")
                 catalog_by_id[item_id] = fields
-            if catalog_counts != {"FSH": 100, "INV": 47, "ALG": 8}:
+            if catalog_counts != {"FSH": 105, "INV": 47, "ALG": 8}:
                 failures.append(f"Seafood catalog counts are incomplete: {catalog_counts}")
 
             price_doc = (ROOT / "docs/07_GAME_RULES_AND_BALANCING/SEAFOOD-SELLING-PRICE-SCHEDULE.md").read_text(encoding="utf-8")
