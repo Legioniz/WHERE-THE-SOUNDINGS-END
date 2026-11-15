@@ -1242,9 +1242,11 @@ def main() -> int:
                 failures.append(f"Greyhaven Play Mode coverage is missing: {required_test}")
 
         unity_workflow = (ROOT / ".github/workflows/unity-verification.yml").read_text(encoding="utf-8")
-        for required_text in ("game-ci/unity-test-runner@", "game-ci/unity-builder@", "UNITY_LICENSE", "testMode: all", "BuildWindowsDevelopment"):
+        for required_text in ("self-hosted", "unity-6000.3.28f1", "-runTests", "-testPlatform EditMode", "-testPlatform PlayMode", "BuildWindowsDevelopment", "Get-Command"):
             if required_text not in unity_workflow:
                 failures.append(f"Unity verification workflow is missing: {required_text}")
+        if "secrets." in unity_workflow:
+            failures.append("Unity verification workflow must keep Unity licensing on the self-hosted runner, not repository secrets.")
 
         economy_tests = (ROOT / "Assets/_Project/Tests/EditMode/EconomyRuntimeIntegrationTests.cs").read_text(encoding="utf-8")
         for required_test in (
