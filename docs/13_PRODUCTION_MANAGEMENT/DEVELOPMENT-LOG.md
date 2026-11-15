@@ -627,3 +627,18 @@ Added a rare, transient visual anomaly to the existing FishermanAtmosphereDirect
 
 ### Verification boundary
 Repository validation and C# syntax checks are expected from the pull request workflow. Unity semantic compilation, UI Toolkit layout, keyboard behavior, save/load integration, additive-scene finding visibility and Play Mode testing remain unverified until run in Unity 6000.3.28f1.
+
+
+## 2026-11-15 — On-demand area residency and standby optimization
+
+**Branch:** `feature/on-demand-area-residency-standby-20261115`.
+
+### Implemented in source
+- Extended the existing six-scene additive area streamer with explicit `RequestArea`, `ReleaseArea`, and `RetryFailedArea` calls. Explicitly requested areas load regardless of vessel distance and remain active until released.
+- Added a standby state between active residency and final unload. Leaving the preload radius deactivates the static area root immediately while retaining the additive scene in memory; returning wakes the existing scene without reloading it.
+- Preserved the larger unload radius and grace period to prevent boundary flicker. Explicit requests are exempt from automatic standby and unload until released.
+- Added a throttled asynchronous unused-asset sweep after at least two area retirements and a 12-second quiet window, with a 90-second cooldown. Scene loads are serialized against the global sweep; no forced managed-GC collection is used.
+- Added Edit Mode standby-boundary coverage and Play Mode coverage for explicit load, standby, wake, release and final unload. Extended static validation and the authoritative area-streaming design document.
+
+### Verification boundary
+Repository CI can validate source contracts and C# syntax, but it cannot prove Unity scene activation, rendering visibility, asset-release timing or frame-time impact. Unity 6000.3.28f1 compilation, Edit Mode execution, Play Mode execution and Windows Development Build profiling remain required. The cleanup thresholds are conservative initial values, not measured optimal settings; tune them only after profiling representative hardware.
