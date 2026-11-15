@@ -37,5 +37,24 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(AreaStreamingPolicy.ShouldUnload(float.PositiveInfinity, 90f), Is.False);
             Assert.That(AreaStreamingPolicy.IsValidRadii(float.NaN, 90f), Is.False);
         }
+        [Test]
+        public void StreamedSceneIdentityAndRevision_AcceptsExactCurrentContent()
+        {
+            Assert.That(StreamedAreaSceneRoot.MatchesIdentityAndRevision(
+                "greyhaven.harbour", "5", "greyhaven.harbour", "5"), Is.True);
+        }
+
+        [Test]
+        public void StreamedSceneIdentityAndRevision_RejectsStaleRevisionOrWrongArea()
+        {
+            Assert.That(StreamedAreaSceneRoot.MatchesIdentityAndRevision(
+                "greyhaven.harbour", "4", "greyhaven.harbour", "5"), Is.False);
+            Assert.That(StreamedAreaSceneRoot.MatchesIdentityAndRevision(
+                "greyhaven.village", "5", "greyhaven.harbour", "5"), Is.False);
+            Assert.That(StreamedAreaSceneRoot.MatchesIdentityAndRevision(
+                "", "5", "greyhaven.harbour", "5"), Is.False);
+            Assert.That(StreamedAreaSceneRoot.MatchesIdentityAndRevision(
+                "greyhaven.harbour", "5", "greyhaven.harbour", ""), Is.False);
+        }
     }
 }
