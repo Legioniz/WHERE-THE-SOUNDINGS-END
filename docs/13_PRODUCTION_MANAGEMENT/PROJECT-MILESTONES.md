@@ -4,7 +4,7 @@
 > Status: Planned milestone baseline — no future milestone is presumed complete  
 > Owner: Project lead  
 > Version: 0.2  
-> Last reviewed: 2026-11-13
+> Last reviewed: 2026-11-15
 
 Milestones are evidence gates, not calendar-only achievements. Dates are approximate and should be reforecast after the repository audit and each major playtest.
 
@@ -72,12 +72,14 @@ Milestones are evidence gates, not calendar-only achievements. Dates are approxi
 - Audited the tracked repository, existing runtime foundations, Editor scene-generation path, package/configuration files, seven Edit Mode test suites, GitHub Actions and repository protection constraints.
 - Corrected the known undeclared `trim` material argument in the Greyhaven builder (commit `06a7004`). Unity semantic compilation is still required.
 - The pre-correction main baseline's repository integrity and safeguard workflows passed. This is static/configuration evidence only.
-- M0 blockers remain: clean Unity import, tracked package lock and stable `.meta` files, generated-scene/bootstrap verification, Edit Mode execution, Play Mode integration tests, save/restore validation and a clean Windows build.
+- M0 blockers remain: clean Unity import and semantic compilation, Unity-generated package lock and stable `.meta` files, generated-scene/bootstrap verification, Edit Mode execution, Play Mode integration tests, save/restore validation and a clean Windows build.
 - The repository's rulesets endpoint reports a plan restriction for this private repository. Required remote approvals/status checks are therefore not recorded as active.
 
 - Greyhaven now has a persistent seven-location boat-operated dockside hub, resident Yarn handoff, furniture inspections, vessel/cargo diagnostics and a guest-ledger autosave checkpoint. Menu-based interior presentation is implemented; walkable 3D interiors are not.
 - Greyhaven static scenery is split into six additive scenes with load/unload safeguards and development profiling telemetry. A Play Mode transition test is authored but not yet executed.
 - Shared modal ownership now prevents dockside, inventory, dialogue and front-end pause overlays from overlapping. Edit Mode regression tests are authored but not yet executed.
+- The source now has a revision-aware generated-area preflight: current revision 5, exact stable-ID/revision checks, explicit rebuild confirmation, and Editor tests for stale/wrong-area rejection. This remains source-level until Unity runs valid/stale scene scenarios.
+- The historical archive now has six Greyhaven source records and a schema-v9 ledger. Rebuild and inspect all six generated areas; no Unity runtime verification is claimed.
 - PR #8 implementation, PR #9 documentation updates and PR #10 modal-ownership/documentation reconciliation merged. GitHub Actions runs #274, #275 and #279 passed repository/C# syntax validation and safeguards. These checks are not Unity compilation or runtime evidence.
 
 
