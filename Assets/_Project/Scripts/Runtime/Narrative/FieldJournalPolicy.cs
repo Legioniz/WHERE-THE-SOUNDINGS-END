@@ -6,6 +6,7 @@ namespace WhereTheSoundingsEnd.Narrative
     public static class FieldJournalPolicy
     {
         public const string EntryPrefix = "field-discovery:";
+        public const string FindingPrefix = "field-finding:";
 
         public static string CreateEntryId(string itemId)
         {
@@ -22,6 +23,24 @@ namespace WhereTheSoundingsEnd.Narrative
             string candidate = entryId.Substring(EntryPrefix.Length).Trim();
             if (candidate.Length == 0) return false;
             itemId = candidate;
+            return true;
+        }
+
+        public static string CreateFindingEntryId(string siteId)
+        {
+            return string.IsNullOrWhiteSpace(siteId) ? string.Empty : FindingPrefix + siteId.Trim();
+        }
+
+        public static bool TryGetSiteId(string entryId, out string siteId)
+        {
+            siteId = string.Empty;
+            if (string.IsNullOrWhiteSpace(entryId) ||
+                !entryId.StartsWith(FindingPrefix, StringComparison.Ordinal))
+                return false;
+
+            string candidate = entryId.Substring(FindingPrefix.Length).Trim();
+            if (candidate.Length == 0) return false;
+            siteId = candidate;
             return true;
         }
 
