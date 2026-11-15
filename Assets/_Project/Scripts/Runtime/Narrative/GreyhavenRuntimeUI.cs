@@ -1024,10 +1024,29 @@ namespace WhereTheSoundingsEnd.Narrative
             if (npc != null && !npc.CanTalk)
                 return;
 
+            _activeNpc = npc;
+            if (npc != null && frontEnd != null &&
+                frontEnd.TryPlayFirstContact(npc, () => BeginDialogueAfterFirstContact(nodeName)))
+                return;
+
+            BeginDialogueAfterFirstContact(nodeName);
+        }
+
+        private void BeginDialogueAfterFirstContact(string nodeName)
+        {
+            if (dialogueRunner == null || dialogueRunner.IsDialogueRunning ||
+                _inventoryOpen || _chartOpen ||
+                (docksideHub != null && docksideHub.IsMenuOpen) ||
+                (frontEnd != null && frontEnd.IsOverlayOpen) ||
+                Time.timeScale <= 0.0001f)
+                return;
+
+            if (_activeNpc != null && !_activeNpc.CanTalk)
+                return;
+
             if (_seaState != null && !_seaState.TryClaimInteraction())
                 return;
 
-            _activeNpc = npc;
             SyncRelationshipVariables();
             RefreshRelationshipMeter();
 
