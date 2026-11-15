@@ -292,7 +292,10 @@ def main() -> int:
             "Profiler.GetTotalReservedMemoryLong",
             "Profiler.GetRuntimeMemorySizeLong",
             "LogAreaLoadMetrics", "LogAreaUnloadCompleteMetrics",
-            "state.PendingLoad = true",
+            "state.PendingLoad = true", "RequestArea(string areaId)", "ReleaseArea(string areaId)",
+            "RetryFailedArea(string areaId)", "AreaStreamingPolicy.ShouldStandby",
+            "EnterStandby", "IsAreaInStandby", "Resources.UnloadUnusedAssets",
+            "assetCleanupQuietSeconds", "assetCleanupCooldownSeconds", "assetCleanupRoutine != null",
         ):
             if required_text not in streaming_source:
                 failures.append(f"AreaStreamingDirector is missing streaming safeguard: {required_text}")
@@ -312,6 +315,7 @@ def main() -> int:
             "ShouldPreload_UsesInclusiveInnerBoundary",
             "ShouldUnload_UsesOuterBoundaryAndPreservesHysteresisBand",
             "DistanceRules_RejectNonFiniteValues",
+            "ShouldStandby_OnlyOutsidePreloadRadiusAndRejectsInvalidDistances",
             "StreamedSceneIdentityAndRevision_AcceptsExactCurrentContent",
             "StreamedSceneIdentityAndRevision_RejectsStaleRevisionOrWrongArea",
         ):
@@ -321,6 +325,9 @@ def main() -> int:
         streaming_playmode = (ROOT / "Assets/_Project/Tests/PlayMode/GreyhavenAreaStreamingPlayModeTests.cs").read_text(encoding="utf-8")
         for required_test in (
             "AdditiveAreasPreloadAndRetireWhilePersistentGameplaySceneStaysLoaded",
+            "ExplicitAreaRequestsWakeStandbyScenesAndReleaseReturnsThemToDistancePolicy",
+            "RequestArea(\"greyhaven.lighthouse\")", "ReleaseArea(\"greyhaven.lighthouse\")",
+            "IsAreaInStandby(\"greyhaven.lighthouse\")",
             "IsAreaLoaded(\"greyhaven.lighthouse\")",
             "FailedAreaCount",
         ):

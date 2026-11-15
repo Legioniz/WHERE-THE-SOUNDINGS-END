@@ -92,6 +92,8 @@ namespace WhereTheSoundingsEnd.Streaming
             public bool IsUnloading;
             public bool PendingLoad;
             public bool Failed;
+            public bool ExplicitlyRequested;
+            public bool IsStandby;
             public float OutsideSince = -1f;
             public double LoadStartedAt;
             public long AllocatedMemoryBeforeLoad;
@@ -100,6 +102,14 @@ namespace WhereTheSoundingsEnd.Streaming
         private readonly List<AreaState> states = new List<AreaState>();
         private float nextDistanceCheck;
         private int activeLoadCount;
+        [SerializeField] private bool enableIdleAssetCleanup = true;
+        [SerializeField, Min(1)] private int unloadsBeforeAssetCleanup = 2;
+        [SerializeField, Min(5f)] private float assetCleanupQuietSeconds = 12f;
+        [SerializeField, Min(30f)] private float assetCleanupCooldownSeconds = 90f;
+        private int unloadedAreasSinceCleanup;
+        private float lastAreaActivityAt;
+        private float lastAssetCleanupAt = -90f;
+        private Coroutine assetCleanupRoutine;
 
         public int FailedAreaCount
         {
@@ -121,6 +131,17 @@ namespace WhereTheSoundingsEnd.Streaming
             return false;
         }
 
+        public int StandbyAreaCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < states.Count; i++)
+                    if (states[i].IsLoaded && states[i].IsStandby) count++;
+                return count;
+            }
+        }
+
         public int LoadedAreaCount
         {
             get
@@ -130,6 +151,83 @@ namespace WhereTheSoundingsEnd.Streaming
                     if (states[i].IsLoaded) count++;
                 return count;
             }
+        }
+
+        public bool IsAreaInStandby(string areaId)
+        {
+            if (string.IsNullOrWhiteSpace(areaId)) return false;
+            for (int i = 0; i < states.Count; i++)
+                if (string.Equals(states[i].Definition.AreaId, areaId, StringComparison.Ordinal))
+                    return states[i].IsLoaded && states[i].IsStandby;
+            return false;
+        }
+
+        /// <summary>Requests an area immediately, independent of vessel distance. Keep the request until ReleaseArea.</summary>
+        public bool RequestArea(string areaId)
+        {
+            AreaState state = FindState(areaId);
+            if (state == null) return false;
+            state.ExplicitlyRequested = true;
+            state.Failed = false;
+            state.OutsideSince = -1f;
+            if (state.IsUnloading)
+                state.PendingLoad = true;
+            else
+            {
+                if (state.IsLoaded && state.IsStandby && state.Root != null)
+                {
+                    state.Root.gameObject.SetActive(true);
+                    state.IsStandby = false;
+                    RefreshWorldSystems();
+                }
+                RequestLoad(state);
+            }
+            return true;
+        }
+
+        /// <summary>Releases an explicit area request; distance policy resumes control of residency.</summary>
+        public bool ReleaseArea(string areaId)
+        {
+            AreaState state = FindState(areaId);
+            if (state == null) return false;
+            state.ExplicitlyRequested = false;
+            if (state.IsLoaded && trackedPlayer != null &&
+                AreaStreamingPolicy.ShouldStandby(
+                    HorizontalDistance(trackedPlayer.position, state.Definition.Center),
+                    state.Definition.PreloadRadius))
+                EnterStandby(state);
+            return true;
+        }
+
+        /// <summary>Retries a scene rejected earlier in this director lifetime.</summary>
+        public bool RetryFailedArea(string areaId)
+        {
+            AreaState state = FindState(areaId);
+            if (state == null || !state.Failed) return false;
+            state.Failed = false;
+            if (state.ExplicitlyRequested || state.Definition.LoadAtStartup ||
+                (trackedPlayer != null && AreaStreamingPolicy.ShouldPreload(
+                    HorizontalDistance(trackedPlayer.position, state.Definition.Center), state.Definition.PreloadRadius)))
+                RequestLoad(state);
+            return true;
+        }
+
+        private AreaState FindState(string areaId)
+        {
+            if (string.IsNullOrWhiteSpace(areaId)) return null;
+            for (int i = 0; i < states.Count; i++)
+                if (string.Equals(states[i].Definition.AreaId, areaId, StringComparison.Ordinal))
+                    return states[i];
+            return null;
+        }
+
+        private void EnterStandby(AreaState state)
+        {
+            if (state == null || !state.IsLoaded || state.IsStandby || state.ExplicitlyRequested)
+                return;
+            if (state.Root != null) state.Root.gameObject.SetActive(false);
+            state.IsStandby = true;
+            RefreshWorldSystems();
         }
 
         public void Configure(Transform player, IList<StreamedAreaDefinition> definitions)
@@ -184,6 +282,7 @@ namespace WhereTheSoundingsEnd.Streaming
                     RequestLoad(states[i]);
             }
 
+            lastAreaActivityAt = Time.unscaledTime;
             ProcessLoadQueue();
         }
 
@@ -198,6 +297,7 @@ namespace WhereTheSoundingsEnd.Streaming
             }
 
             ProcessLoadQueue();
+            TryScheduleIdleAssetCleanup();
         }
 
         private void EvaluateAreas()
@@ -216,7 +316,15 @@ namespace WhereTheSoundingsEnd.Streaming
                     if (state.IsUnloading)
                         state.PendingLoad = true;
                     else
+                    {
                         RequestLoad(state);
+                        if (state.IsLoaded && state.IsStandby && state.Root != null)
+                        {
+                            state.Root.gameObject.SetActive(true);
+                            state.IsStandby = false;
+                            RefreshWorldSystems();
+                        }
+                    }
                     continue;
                 }
 
@@ -226,6 +334,15 @@ namespace WhereTheSoundingsEnd.Streaming
                         state.PendingLoad = false;
                     continue;
                 }
+
+                if (state.ExplicitlyRequested)
+                {
+                    state.OutsideSince = -1f;
+                    continue;
+                }
+
+                if (AreaStreamingPolicy.ShouldStandby(distance, definition.PreloadRadius))
+                    EnterStandby(state);
 
                 if (!AreaStreamingPolicy.ShouldUnload(distance, definition.UnloadRadius))
                 {
@@ -255,6 +372,8 @@ namespace WhereTheSoundingsEnd.Streaming
 
         private void ProcessLoadQueue()
         {
+            // Do not overlap scene activation with Unity's global unused-asset sweep.
+            if (assetCleanupRoutine != null) return;
             int concurrencyLimit = Mathf.Clamp(maximumConcurrentLoads, 1, 3);
             while (activeLoadCount < concurrencyLimit)
             {
@@ -267,7 +386,7 @@ namespace WhereTheSoundingsEnd.Streaming
                         float distance = trackedPlayer != null
                             ? HorizontalDistance(trackedPlayer.position, states[i].Definition.Center)
                             : float.PositiveInfinity;
-                        if (!states[i].Definition.LoadAtStartup &&
+                        if (!states[i].Definition.LoadAtStartup && !states[i].ExplicitlyRequested &&
                             !AreaStreamingPolicy.ShouldPreload(distance, states[i].Definition.PreloadRadius))
                         {
                             states[i].PendingLoad = false;
@@ -357,7 +476,9 @@ namespace WhereTheSoundingsEnd.Streaming
             state.Scene = loadedScene;
             state.Root = areaRoot;
             state.Root.gameObject.SetActive(true);
+            state.IsStandby = false;
             state.IsLoaded = true;
+            lastAreaActivityAt = Time.unscaledTime;
             state.OutsideSince = -1f;
             RefreshWorldSystems();
             LogAreaLoadMetrics(state);
@@ -400,6 +521,7 @@ namespace WhereTheSoundingsEnd.Streaming
             }
 
             state.IsUnloading = true;
+            lastAreaActivityAt = Time.unscaledTime;
             double unloadStartedAt = Time.realtimeSinceStartupAsDouble;
             LogAreaUnloadStartMetrics(state);
             if (state.Root != null)
@@ -420,7 +542,10 @@ namespace WhereTheSoundingsEnd.Streaming
             state.Root = null;
             state.IsLoaded = false;
             state.IsUnloading = false;
+            state.IsStandby = false;
             state.OutsideSince = -1f;
+            unloadedAreasSinceCleanup++;
+            lastAreaActivityAt = Time.unscaledTime;
             LogAreaUnloadCompleteMetrics(state, Time.realtimeSinceStartupAsDouble - unloadStartedAt);
         }
 
@@ -526,6 +651,44 @@ namespace WhereTheSoundingsEnd.Streaming
         {
             if (asset == null || !seen.Add(asset.GetInstanceID())) return;
             residency.Bytes += Profiler.GetRuntimeMemorySizeLong(asset);
+        }
+
+        private void TryScheduleIdleAssetCleanup()
+        {
+            if (!enableIdleAssetCleanup || assetCleanupRoutine != null ||
+                unloadedAreasSinceCleanup < Mathf.Max(1, unloadsBeforeAssetCleanup) ||
+                Time.unscaledTime - lastAreaActivityAt < Mathf.Max(5f, assetCleanupQuietSeconds) ||
+                Time.unscaledTime - lastAssetCleanupAt < Mathf.Max(30f, assetCleanupCooldownSeconds) ||
+                activeLoadCount > 0)
+                return;
+
+            for (int i = 0; i < states.Count; i++)
+                if (states[i].IsLoading || states[i].IsUnloading || states[i].PendingLoad)
+                    return;
+
+            assetCleanupRoutine = StartCoroutine(UnloadUnusedAssetsDuringIdle());
+        }
+
+        private IEnumerator UnloadUnusedAssetsDuringIdle()
+        {
+            // A global sweep can cause a hitch; run only after multiple area retirements and a quiet window.
+            yield return null;
+            if (activeLoadCount > 0)
+            {
+                assetCleanupRoutine = null;
+                yield break;
+            }
+
+            double startedAt = Time.realtimeSinceStartupAsDouble;
+            AsyncOperation operation = Resources.UnloadUnusedAssets();
+            if (operation != null) yield return operation;
+            lastAssetCleanupAt = Time.unscaledTime;
+            unloadedAreasSinceCleanup = 0;
+            if (Application.isEditor || Debug.isDebugBuild)
+                Debug.Log("[AreaStreaming] IDLE_ASSET_CLEANUP durationMs=" +
+                    (Math.Max(0d, Time.realtimeSinceStartupAsDouble - startedAt) * 1000d).ToString("F1") +
+                    " totalAllocatedBytes=" + Profiler.GetTotalAllocatedMemoryLong(), this);
+            assetCleanupRoutine = null;
         }
 
         private void RefreshWorldSystems()

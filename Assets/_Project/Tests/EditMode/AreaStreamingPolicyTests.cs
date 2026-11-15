@@ -31,6 +31,16 @@ namespace WhereTheSoundingsEnd.Tests
         }
 
         [Test]
+        public void ShouldStandby_OnlyOutsidePreloadRadiusAndRejectsInvalidDistances()
+        {
+            Assert.That(AreaStreamingPolicy.ShouldStandby(60.01f, 60f), Is.True);
+            Assert.That(AreaStreamingPolicy.ShouldStandby(60f, 60f), Is.False);
+            Assert.That(AreaStreamingPolicy.ShouldStandby(20f, 60f), Is.False);
+            Assert.That(AreaStreamingPolicy.ShouldStandby(float.NaN, 60f), Is.False);
+            Assert.That(AreaStreamingPolicy.ShouldStandby(80f, float.PositiveInfinity), Is.False);
+        }
+
+        [Test]
         public void DistanceRules_RejectNonFiniteValues()
         {
             Assert.That(AreaStreamingPolicy.ShouldPreload(float.NaN, 60f), Is.False);

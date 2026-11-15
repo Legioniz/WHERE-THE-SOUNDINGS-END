@@ -55,6 +55,10 @@ AreaStreamingDirector performs horizontal X/Z distance checks using unscaled tim
 - Retry: a missing or invalid scene is marked failed for the current director lifetime. This prevents per-frame load loops and repeated IO/log spam.
 - Re-entry: if the vessel returns while an area is already unloading, the director queues a fresh load request. The load queue rechecks the current distance before starting so a stale request cannot load an area the vessel has already left.
 - Unload guard: the unload coroutine rechecks the vessel distance immediately before deactivating the area root.
+- On-demand access: `RequestArea(areaId)` pins a known area as an explicit request and loads it regardless of vessel distance; `ReleaseArea(areaId)` returns it to automatic distance policy. Explicit requests keep the area active until released. Unknown IDs return false, and a new explicit request retries a previously failed area.
+- Standby: after the vessel leaves the preload radius, a loaded static root is deactivated immediately while its scene and assets remain resident. Returning inside the preload radius reactivates it without a scene reload. The wider unload radius and grace period still govern final retirement. Explicitly requested areas do not enter standby.
+- Idle cleanup: after at least two area unloads, a quiet window of 12 seconds, and a 90-second cleanup cooldown, the director runs one asynchronous `Resources.UnloadUnusedAssets` sweep. New scene loads wait until the sweep finishes. The cleanup is not run on every transition and never forces a managed-GC collection.
+- Retry: explicit `RequestArea` calls clear a prior failed flag and allow a deliberate retry; automatic proximity loading still avoids retry loops.
 
 Areas marked loadAtStartup are terrain, harbour, and village. The estuaries and lighthouse are loaded on approach. The initial radii are conservative starting values and should be tuned from measured vessel speed, scene load duration, and target-device hardware.
 
@@ -85,12 +89,14 @@ Missing, stale or invalid area scenes produce a clear confirmation prompt before
 3. LOADING to VALIDATING when Unity additive load completes.
 4. VALIDATING to ACTIVE after identity, revision, and asset checks pass and the root activates.
 5. VALIDATING to REJECTED if validation fails; the scene unloads without partial activation.
-6. ACTIVE to OUTSIDE_GRACE when the vessel exceeds the unload radius.
-7. OUTSIDE_GRACE to ACTIVE if the vessel returns before grace expires.
-8. OUTSIDE_GRACE to UNLOADING after the grace duration.
-9. UNLOADING to UNLOADED when scene unload completes.
+6. ACTIVE to STANDBY when the vessel leaves the preload radius and no explicit request holds the area.
+7. STANDBY to ACTIVE when the vessel returns inside preload range; the already-loaded scene is reactivated.
+8. ACTIVE or STANDBY to OUTSIDE_GRACE when the vessel exceeds the unload radius.
+9. OUTSIDE_GRACE to ACTIVE if the vessel returns before grace expires.
+10. OUTSIDE_GRACE to UNLOADING after the grace duration.
+11. UNLOADING to UNLOADED when scene unload completes.
 
-A request that is still queued is cancelled when the vessel leaves the preload band before the load begins. A request that has entered Unity's async-load phase is allowed to complete and then follows the normal distance/grace unload policy.
+A queued proximity request is cancelled when the vessel leaves the preload band before loading begins. Explicit requests are distance-independent and remain pinned until released. An async load already underway is allowed to complete, then standby/unload policy is applied.
 
 ## 6. Asset and memory rules
 
@@ -99,7 +105,7 @@ A request that is still queued is cancelled when the vessel leaves the preload b
 - Use LOD groups, mesh simplification, occlusion culling, static batching where appropriate, texture mipmaps/compression, and sensible shadow distances based on profiling.
 - Keep dynamic objects and their references in the persistent world or move them through a dedicated ownership/state-transfer contract; do not mix them into static area scenes.
 - Scene unload retires the area's GameObjects and scene references. Unity may retain shared assets still referenced elsewhere.
-- Do not call Resources.UnloadUnusedAssets after every transition; global sweeps can introduce the very frame-time spikes this system is intended to avoid. Consider an explicit quiet-window cleanup only after memory profiling proves it is required.
+- Do not call `Resources.UnloadUnusedAssets` after every transition; global sweeps can introduce frame-time spikes. The director performs a throttled asynchronous sweep only after multiple area retirements and a quiet window, and serializes new scene loads against that sweep. Keep the cleanup thresholds configurable and profile them on target hardware.
 - No Addressables package, remote download, paid storage, paid API, or runtime account is required for this implementation.
 
 ## 7. Runtime profiling and telemetry
@@ -126,6 +132,6 @@ For future islands or larger maritime regions, author additional area definition
 
 ## 9. Verification status
 
-The source includes deterministic Edit Mode tests for distance boundaries, non-finite inputs, preload/unload hysteresis, and exact area-ID/content-revision matching (including stale revision and wrong-area rejection). The Editor preflight also checks generated scene presence, root count, serialized root state and referenced asset integrity before offering a rebuild. A new Play Mode test loads Greyhaven, waits for its startup areas, moves the vessel to the lighthouse to trigger additive preload, returns to its original position, and waits for the lighthouse area to unload while asserting the persistent gameplay scene remains loaded. Static CI validation checks the scene loader, root integrity contract, editor scene generation, build-scene list preservation, telemetry instrumentation and presence of the Play Mode test.
+The source includes deterministic Edit Mode tests for distance boundaries, non-finite inputs, preload/unload hysteresis, standby boundaries, and exact area-ID/content-revision matching (including stale revision and wrong-area rejection). The Editor preflight also checks generated scene presence, root count, serialized root state and referenced asset integrity before offering a rebuild. Play Mode coverage exercises proximity preload/unload and an explicit request → standby → wake → release → unload cycle while asserting the persistent gameplay scene remains loaded. Static CI validation checks the scene loader, on-demand API, standby lifecycle, quiet-window cleanup, root integrity contract, editor scene generation, build-scene list preservation, telemetry instrumentation and Play Mode coverage.
 
 Unity semantic compilation, Edit Mode test execution, Play Mode travel test execution, frame-time profiling, and Windows player build remain mandatory before treating the feature as production-verified. The telemetry is implemented but no real hardware measurements have been collected in this environment.
