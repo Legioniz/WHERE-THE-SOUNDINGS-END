@@ -10,7 +10,7 @@
 
 This catalog defines the fish and marine creatures the player may catch, land, process, and sell. It uses the project's provisional warm-water volcanic archipelago and draws on real Western Central Pacific and Philippine fisheries.
 
-**Expanded proposed roster:** 100 fish, 47 invertebrates, 3 broad seaweed harvest categories plus 5 specific seaweed records, and a separate protected / release-only wildlife class. This is a game content proposal, not a claim that every species is abundant, sustainable, or legally harvestable in every real-world location. Exact climate, species distribution, and fictional harvest rules remain provisional.
+**Expanded proposed roster:** 105 fish, 47 invertebrates, 3 broad seaweed harvest categories plus 5 specific seaweed records, and a separate protected / release-only wildlife class. This is a game content proposal, not a claim that every species is abundant, sustainable, or legally harvestable in every real-world location. Exact climate, species distribution, and fictional harvest rules remain provisional.
 
 Philippine marine capture fisheries include pelagic resources such as tuna, sardines, scads, mackerels, and anchovies, and demersal resources such as slipmouth, threadfin bream, squid, shrimp, and blue crab. SEAFDEC's Philippines profile, using BFAR production data for 2023, lists these among the leading marine capture commodities. NFRDI also identifies commercially relevant reef fish families including snappers, groupers, trevallies, emperors, goatfishes, rabbitfishes, and threadfin breams.
 
@@ -628,3 +628,20 @@ The generated cargo catalog now builds all 155 seafood records in the selling-pr
 Catch eligibility is a separate runtime policy. Minimum landing weights, protected status, required research permits, region range, permitted technique and required hook configuration are fictional gameplay rules. FSH-035 requires Reef Stewardship, handlining and a circle hook. INV-031 requires the Managed Abalone Harvest permit and is contract-only. INV-037 through INV-041 require Licensed Sea Cucumber Harvest and are contract-only. These rules are not representations of real fisheries law.
 
 Illegal catch provenance (source region, technique, weight, legal state and reason) is persisted with the cargo placement. Flagged catches cannot be sold through ordinary market offers and may be released at dockside; any fine already collected is not refunded. Destination market factors and per-region stock are defined in the selling-price schedule.
+
+
+## 8. Runtime additions — first field discoveries
+
+The generated Greyhaven cargo catalog now includes five additional targeted species. These are **new entries in the player's field journal**, not species newly discovered by science. Availability is still gated by region, habitat, depth, fishing method and stock.
+
+| ID | Species | Scientific name | Runtime grounds | Method / encounter |
+|---|---|---|---|---|
+| FSH-101 | Pacific sailfish | *Istiophorus platypterus* | Outer Shoals | Pelagic trolling; rare, fast run |
+| FSH-102 | Cobia | *Rachycentron canadum* | Greyhaven, Shallows, Outer Shoals | Pelagic trolling; heavy sustained resistance |
+| FSH-103 | Red cornetfish | *Fistularia petimba* | Shallows, Blackrock Reach, Outer Shoals | Reef-edge bottom fishing |
+| FSH-104 | Black marlin | *Istiompax indica* | Outer Shoals | Pelagic trolling; trophy resistance |
+| FSH-105 | Giant oarfish | *Regalecus glesne* | Hollow Trench | Deepwater handline; rare deep encounter |
+
+The generated salvage pool also contains four archive-grade objects: Brass Sounding Weight, Ceramic Hydrophone Insulator, Salt-Clouded Signal-Lamp Lens and Water-Sealed Chart Tube. They are cargo discoveries, not ordinary market stock; no sale price or vendor acceptance is implied.
+
+The first successful recovery of each stable item ID is recorded in the existing `ProgressSaveData.discoveredEntryIds` collection under the `field-discovery:` prefix. A short two-beat archival reveal plays once per campaign item ID. The campaign save, not the local cinematic preference, is authoritative for whether the reveal has already been earned.
