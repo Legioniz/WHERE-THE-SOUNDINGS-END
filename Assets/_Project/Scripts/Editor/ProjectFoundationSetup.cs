@@ -35,14 +35,27 @@ namespace WhereTheSoundingsEnd.Editor
             {
                 GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
             }
-            else if (!GreyhavenEnvironmentBuilder.HasGeneratedAreaScenes() &&
-                     EditorUtility.DisplayDialog(
-                         "Install Greyhaven area streaming?",
-                         "The generated Greyhaven scene predates area streaming. Rebuilding it will replace the generated blockout scene and create its additive area scenes. Manual edits to Greyhaven_Blockout will be lost.",
-                         "Rebuild generated Greyhaven",
-                         "Keep current scene"))
+            else
             {
-                GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
+                string validationError;
+                if (!GreyhavenEnvironmentBuilder.HasGeneratedAreaScenes(out validationError))
+                {
+                    bool rebuild = EditorUtility.DisplayDialog(
+                        "Rebuild stale Greyhaven area scenes?",
+                        "One or more generated Greyhaven area scenes are missing, stale, or invalid.\n\n" +
+                        validationError + "\n\n" +
+                        "Rebuilding replaces the generated Greyhaven blockout and all six additive area scenes. " +
+                        "Manual edits to generated Greyhaven content will be lost.",
+                        "Rebuild generated Greyhaven",
+                        "Keep current scenes");
+
+                    if (rebuild)
+                        GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
+                    else
+                        Debug.LogWarning(
+                            "Greyhaven area-scene preflight failed. Existing scenes were kept; affected areas may be rejected at runtime. " +
+                            validationError);
+                }
             }
 
             RegisterBuildScene();
