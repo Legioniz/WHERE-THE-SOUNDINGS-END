@@ -101,9 +101,9 @@ python tools/validate_csharp.py
 python tools/validate_safeguards.py --self-test
 ```
 
-The existing GitHub Actions workflow runs repository-integrity, C# syntax and safeguard checks. Those checks are **not** a Unity compilation or player build. A separate manually dispatched [Unity verification workflow](.github/workflows/unity-verification.yml) runs the full Edit/Play Mode suite and, after tests pass, creates a Windows Development Build. It requires the repository Actions secret `UNITY_LICENSE` containing a valid Unity license file. Setup instructions and the acceptance boundary are documented in [Unity Playable Validation](docs/14_TESTING_AND_QUALITY/UNITY-PLAYABLE-VALIDATION.md).
+The existing GitHub Actions workflow runs repository-integrity, C# syntax and safeguard checks. Those checks are **not** a Unity compilation or player build. A separate manually dispatched [Unity verification workflow](.github/workflows/unity-verification.yml) runs the full Edit/Play Mode suite and, after tests pass, creates a Windows Development Build on a locally licensed Windows self-hosted runner. The Unity license stays on that runner and is not passed through repository secrets. Setup instructions and the acceptance boundary are documented in [Unity Playable Validation](docs/14_TESTING_AND_QUALITY/UNITY-PLAYABLE-VALIDATION.md).
 
-A successful CI build proves that Unity compiled and packaged the project in its runner environment. The resulting Windows artifact must still be launched and played on a Windows machine before the project can be called manually play-verified.
+A successful automated build proves that Unity compiled and packaged the project in the runner environment. The resulting Windows artifact must still be launched and played on a Windows machine before the project can be called manually play-verified.
 
 ## Repository safeguards
 
