@@ -371,6 +371,8 @@ namespace WhereTheSoundingsEnd.Streaming
 
         private void ProcessLoadQueue()
         {
+            // Do not overlap scene activation with Unity's global unused-asset sweep.
+            if (assetCleanupRoutine != null) return;
             int concurrencyLimit = Mathf.Clamp(maximumConcurrentLoads, 1, 3);
             while (activeLoadCount < concurrencyLimit)
             {
