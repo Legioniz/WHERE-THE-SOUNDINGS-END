@@ -125,7 +125,7 @@ Project initialization creates two deterministic runtime prefabs and registers t
 | `runtime.panic.shadow` | `Panic_Hallucination_Shadow.prefab` | Distant phantom / leviathan shadow |
 | `runtime.panic.bird_swarm` | `Panic_Bird_Swarm.prefab` | Panic-triggered seabird hallucination |
 
-The generated assets live under `Assets/_Project/Prefabs/Runtime`. The Editor preflight verifies that both prefab assets exist, have their expected Addressables entries and addresses, and that the bird prefab retains its visual controller. The Windows Development Build invokes `AddressableAssetSettings.BuildPlayerContent` before building the player, so the local catalog and bundles are not silently omitted.
+The generated assets live under `Assets/_Project/Prefabs/Runtime`. The Editor preflight verifies that both prefab assets exist, are saved inactive, have their expected Addressables entries and addresses, and that the bird prefab retains its visual controller. The Windows Development Build invokes `AddressableAssetSettings.BuildPlayerContent` before building the player, so the local catalog and bundles are not silently omitted.
 
 ### Residency leases
 
