@@ -156,7 +156,7 @@ namespace WhereTheSoundingsEnd.Streaming
             for (int i = 0; i < waiters.Length; i++)
             {
                 if (shuttingDown) break;
-                waiters[i](CreateLease(entry), string.Empty);
+                NotifyWaiter(waiters[i], CreateLease(entry), string.Empty);
             }
         }
 
@@ -172,8 +172,22 @@ namespace WhereTheSoundingsEnd.Streaming
             Action<PrefabLease, string>[] waiters = entry.Waiters.ToArray();
             entry.Waiters.Clear();
             for (int i = 0; i < waiters.Length; i++)
-                waiters[i](null, reason);
+                NotifyWaiter(waiters[i], null, reason);
             Debug.LogError("[AddressableResidency] " + reason, this);
+        }
+
+        private void NotifyWaiter(
+            Action<PrefabLease, string> callback, PrefabLease lease, string error)
+        {
+            try
+            {
+                callback(lease, error);
+            }
+            catch (Exception exception)
+            {
+                if (lease != null) lease.Dispose();
+                Debug.LogException(exception, this);
+            }
         }
 
         private PrefabLease CreateLease(Entry entry)
@@ -246,7 +260,7 @@ namespace WhereTheSoundingsEnd.Streaming
                 Action<PrefabLease, string>[] waiters = entry.Waiters.ToArray();
                 entry.Waiters.Clear();
                 for (int waiterIndex = 0; waiterIndex < waiters.Length; waiterIndex++)
-                    waiters[waiterIndex](null, "Addressable residency service was destroyed.");
+                    NotifyWaiter(waiters[waiterIndex], null, "Addressable residency service was destroyed.");
                 if (entry.Handle.IsValid())
                     Addressables.Release(entry.Handle);
             }
