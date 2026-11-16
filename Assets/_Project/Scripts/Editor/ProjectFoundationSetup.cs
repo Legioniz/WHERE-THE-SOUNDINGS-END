@@ -46,6 +46,7 @@ namespace WhereTheSoundingsEnd.Editor
             ConfigureRendering();
             ConfigurePlayerSettings();
             EnsureAddressablesSettings();
+            AddressableRuntimeContentBuilder.EnsureRuntimePrefabs();
 
             InputActionAsset controls = LoadControls();
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
