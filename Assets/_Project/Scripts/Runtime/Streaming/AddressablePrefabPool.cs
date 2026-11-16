@@ -170,6 +170,7 @@ namespace WhereTheSoundingsEnd.Streaming
             PoolState state;
             if (!pools.TryGetValue(address.Trim(), out state) || state.Loading || state.Prefab == null)
                 return false;
+            PruneDestroyedInstances(state);
 
             while (state.Available.Count > 0 && instance == null)
                 instance = state.Available.Dequeue();
@@ -219,11 +220,39 @@ namespace WhereTheSoundingsEnd.Streaming
             DisposePool(state);
         }
 
+        private static void PruneDestroyedInstances(PoolState state)
+        {
+            List<GameObject> destroyed = null;
+            foreach (GameObject instance in state.All)
+            {
+                if (instance != null) continue;
+                if (destroyed == null) destroyed = new List<GameObject>();
+                destroyed.Add(instance);
+            }
+            if (destroyed != null)
+                for (int i = 0; i < destroyed.Count; i++) state.All.Remove(destroyed[i]);
+
+            Queue<GameObject> validAvailable = new Queue<GameObject>();
+            while (state.Available.Count > 0)
+            {
+                GameObject instance = state.Available.Dequeue();
+                if (instance != null) validAvailable.Enqueue(instance);
+            }
+            while (validAvailable.Count > 0) state.Available.Enqueue(validAvailable.Dequeue());
+
+            if (destroyed != null)
+                for (int i = 0; i < destroyed.Count; i++) state.Active.Remove(destroyed[i]);
+        }
+
         private static void CompleteWaiters(PoolState state, bool success, string error)
         {
             Action<bool, string>[] waiters = state.Waiters.ToArray();
             state.Waiters.Clear();
-            for (int i = 0; i < waiters.Length; i++) waiters[i](success, error);
+            for (int i = 0; i < waiters.Length; i++)
+            {
+                try { waiters[i](success, error); }
+                catch (Exception exception) { Debug.LogException(exception); }
+            }
         }
 
         private static void InvokePoolHooks(GameObject instance, bool rented)
