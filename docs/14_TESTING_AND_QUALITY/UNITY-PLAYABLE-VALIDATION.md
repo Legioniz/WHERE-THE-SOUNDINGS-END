@@ -32,9 +32,9 @@ For a runner registered as a Windows service, verify the service runs under the 
 The workflow performs these steps in order:
 
 1. Initialize the generated Greyhaven and survey scenes in unattended Editor mode.
-2. Run all Edit Mode tests.
-3. Run all Play Mode tests, including the startup smoke test and additive-area transition test.
-4. Build local Addressables content for the generated runtime prefabs before runtime tests.
+2. Build local Addressables content for the generated runtime prefabs.
+3. Run all Edit Mode tests.
+4. Run all Play Mode tests, including the startup smoke test, Addressables pool lifecycle test and additive-area transition test.
 5. Build a Windows 64-bit Development Player after both test suites pass; the build method rebuilds Addressables content before compiling the Player.
 6. Upload test reports, logs and the Windows build as GitHub Actions artifacts.
 
