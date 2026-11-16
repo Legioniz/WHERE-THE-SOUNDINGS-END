@@ -34,15 +34,17 @@ The workflow performs these steps in order:
 1. Initialize the generated Greyhaven and survey scenes in unattended Editor mode.
 2. Run all Edit Mode tests.
 3. Run all Play Mode tests, including the startup smoke test and additive-area transition test.
-4. Build a Windows 64-bit Development Player after both test suites pass.
-5. Upload test reports, logs and the Windows build as GitHub Actions artifacts.
+4. Build local Addressables content for the generated runtime prefabs before runtime tests.
+5. Build a Windows 64-bit Development Player after both test suites pass; the build method rebuilds Addressables content before compiling the Player.
+6. Upload test reports, logs and the Windows build as GitHub Actions artifacts.
 
 Before a Windows build, `ProjectReferenceIntegrityValidator` now performs a Unity Editor preflight. It verifies all nine required scenes are imported and enabled, opens every generated scene, rejects missing MonoBehaviour scripts and unresolved project asset dependencies, validates all six streamed-area roots and their content revisions, and checks the persistent gameplay graph. The graph check confirms the vessel's Input Actions asset and required physics, cargo, fishing, survey, economy, chart, camera-follow, save/autosave, dockside and area-streaming components are connected. The Windows build still fails if Unity's BuildPipeline does not report success. Run **Tools > WHERE THE SOUNDINGS END > Validate Project References** to execute this preflight manually after initialization.
 
 ## Required acceptance checks
 
 - Unity opens the repository without package-resolution failures or C# compilation errors. The assembly-definition graph resolves Runtime, Editor, Edit Mode and Play Mode references; the Yarn project source glob resolves to at least one source file.
-- **Tools > WHERE THE SOUNDINGS END > Validate Project References** passes, with no missing MonoBehaviour scripts or unresolved project asset dependencies across the nine generated scenes.
+- **Tools > WHERE THE SOUNDINGS END > Validate Project References** passes, with no missing MonoBehaviour scripts or unresolved project asset dependencies across the nine generated scenes. It also confirms both generated transient prefabs are inactive, registered under their expected Addressables keys, and contain the required visual controller.
+- Addressables content builds successfully. The Play Mode pool lifecycle test loads `runtime.panic.shadow`, rents and returns the same instance, enforces the pool cap, rejects a double return, and releases the pool only after all instances are returned.
 - The Greyhaven startup smoke test finds the physics-driven vessel, assigned Input System asset, hydrodynamics, cargo hold, harvesting, Sounding Rig, economy components, Main Camera follow target, sea-state director, save/autosave services, and area streamer.
 - All Edit Mode tests pass.
 - The additive-area Play Mode test preloads terrain/harbour/village, loads the lighthouse before approach, unloads it after leaving, and retains the persistent gameplay scene without failed transitions.
