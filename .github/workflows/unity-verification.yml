@@ -36,6 +36,12 @@ jobs:
           & $env:UNITY_EDITOR -batchmode -quit -projectPath "$env:GITHUB_WORKSPACE" -executeMethod WhereTheSoundingsEnd.Editor.ProjectFoundationSetup.InitializeForAutomation -logFile "Logs/UnitySetup.log"
           if ($LASTEXITCODE -ne 0) { throw "Unity project bootstrap failed with exit code $LASTEXITCODE." }
 
+      - name: Build Addressables content for runtime tests
+        shell: powershell
+        run: |
+          & $env:UNITY_EDITOR -batchmode -quit -projectPath "$env:GITHUB_WORKSPACE" -executeMethod WhereTheSoundingsEnd.Editor.ProjectBuildAutomation.BuildAddressablesContentForVerification -logFile "Logs/AddressablesBuild.log"
+          if ($LASTEXITCODE -ne 0) { throw "Addressables content build failed before runtime tests." }
+
       - name: Run Edit Mode tests
         shell: powershell
         run: |
