@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
@@ -112,6 +113,15 @@ namespace WhereTheSoundingsEnd.Editor
                 throw new System.InvalidOperationException(
                     "Unity Addressables settings could not be created. Open Window > Asset Management > Addressables > Groups and resolve the package setup.");
 
+            AssetDatabase.SaveAssets();
+        }
+
+        private static void EnsureAddressablesSettings()
+        {
+            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
+            if (settings == null)
+                throw new System.InvalidOperationException(
+                    "Unity Addressables settings could not be created. Open Window > Asset Management > Addressables > Groups and resolve the package setup.");
             AssetDatabase.SaveAssets();
         }
 
