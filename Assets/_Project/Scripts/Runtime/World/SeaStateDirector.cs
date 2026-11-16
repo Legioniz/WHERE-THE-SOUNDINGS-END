@@ -49,6 +49,9 @@ namespace WhereTheSoundingsEnd.World
         private Material phantomMaterial;
         private GameObject pooledPhantom;
         private GameObject pooledBirdSwarm;
+        private AddressablePrefabPool addressablePrefabPool;
+        private GameObject addressablePhantom;
+        private GameObject addressableBirdSwarm;
         private float phantomRemaining;
         private float birdSwarmRemaining;
         private bool harvestingActive;
@@ -97,6 +100,23 @@ namespace WhereTheSoundingsEnd.World
             if (timeOfDaySeconds <= 0.0)
                 timeOfDaySeconds = startingHour * 3600.0;
             weatherShiftCooldown = Random.Range(900f, 1500f);
+        }
+
+        private void Start()
+        {
+            addressablePrefabPool = FindFirstObjectByType<AddressablePrefabPool>();
+            if (addressablePrefabPool == null) return;
+
+            addressablePrefabPool.WarmPool("runtime.panic.shadow", 1, 2, (success, error) =>
+            {
+                if (!success)
+                    Debug.LogWarning("[SeaState] Addressable phantom pool unavailable; using local pooled fallback. " + error, this);
+            });
+            addressablePrefabPool.WarmPool("runtime.panic.bird_swarm", 1, 2, (success, error) =>
+            {
+                if (!success)
+                    Debug.LogWarning("[SeaState] Addressable bird pool unavailable; using local pooled fallback. " + error, this);
+            });
         }
 
         public void Configure(Rigidbody boat, DialogueRunner runner, HarvestingMinigameController harvest, SpatialCargoHold hold)
@@ -317,6 +337,20 @@ namespace WhereTheSoundingsEnd.World
             Vector3 side = vesselBody.transform.right;
             Vector3 position = vesselBody.position + forward * Random.Range(22f, 36f) +
                                side * Random.Range(-13f, 13f);
+            if (addressablePrefabPool != null &&
+                addressablePrefabPool.IsReady("runtime.panic.shadow") &&
+                addressablePrefabPool.TryRent("runtime.panic.shadow", position, Quaternion.identity, out addressablePhantom))
+            {
+                addressablePhantom.name = leviathan
+                    ? "Panic_Hallucination_Leviathan_Shadow"
+                    : "Panic_Hallucination_Phantom_Reef";
+                addressablePhantom.transform.localScale = leviathan
+                    ? new Vector3(22f, 1.8f, 46f)
+                    : new Vector3(5f, 1.4f, 8f);
+                phantomRemaining = 6f;
+                return;
+            }
+
             if (pooledPhantom == null)
             {
                 pooledPhantom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -379,6 +413,19 @@ namespace WhereTheSoundingsEnd.World
                 }
             }
 
+            if (addressablePrefabPool != null &&
+                addressablePrefabPool.IsReady("runtime.panic.bird_swarm") &&
+                addressablePrefabPool.TryRent(
+                    "runtime.panic.bird_swarm",
+                    vesselBody.position + Vector3.up * 7f,
+                    vesselBody.rotation,
+                    vesselBody.transform,
+                    out addressableBirdSwarm))
+            {
+                birdSwarmRemaining = 5f;
+                return;
+            }
+
             if (pooledBirdSwarm == null)
             {
                 pooledBirdSwarm = new GameObject("Pooled_Panic_Bird_Swarm");
@@ -415,6 +462,28 @@ namespace WhereTheSoundingsEnd.World
         private void UpdateTransientVisualPools(float deltaTime)
         {
             if (deltaTime <= 0f) return;
+            if (addressablePhantom != null && !addressablePhantom.activeSelf)
+                addressablePhantom = null;
+            if (addressablePhantom != null)
+            {
+                phantomRemaining -= deltaTime;
+                if (phantomRemaining <= 0f)
+                {
+                    if (addressablePrefabPool != null) addressablePrefabPool.Return(addressablePhantom);
+                    addressablePhantom = null;
+                }
+            }
+            if (addressableBirdSwarm != null && !addressableBirdSwarm.activeSelf)
+                addressableBirdSwarm = null;
+            if (addressableBirdSwarm != null)
+            {
+                birdSwarmRemaining -= deltaTime;
+                if (birdSwarmRemaining <= 0f)
+                {
+                    if (addressablePrefabPool != null) addressablePrefabPool.Return(addressableBirdSwarm);
+                    addressableBirdSwarm = null;
+                }
+            }
             if (pooledPhantom != null && pooledPhantom.activeSelf)
             {
                 phantomRemaining -= deltaTime;
@@ -429,6 +498,10 @@ namespace WhereTheSoundingsEnd.World
 
         private void OnDestroy()
         {
+            if (addressablePrefabPool != null && addressablePhantom != null)
+                addressablePrefabPool.Return(addressablePhantom);
+            if (addressablePrefabPool != null && addressableBirdSwarm != null)
+                addressablePrefabPool.Return(addressableBirdSwarm);
             if (pooledPhantom != null) Destroy(pooledPhantom);
             if (pooledBirdSwarm != null) Destroy(pooledBirdSwarm);
             if (birdMaterial != null) Destroy(birdMaterial);
