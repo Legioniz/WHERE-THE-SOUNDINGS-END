@@ -1499,7 +1499,7 @@ def main() -> int:
         for required_text in (
             "AcousticEventBus.SignalEmitted += HandleAcousticSignal",
             "AcousticEventBus.SignalEmitted -= HandleAcousticSignal",
-            "CalculateFishAvailabilityAfterDisturbance",
+            "CalculateDisturbanceAvoidanceChance",
             "CalculateDisturbedBiteWaitMultiplier",
             "PublishFishingNoise",
         ):
