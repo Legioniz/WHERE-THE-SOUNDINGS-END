@@ -62,9 +62,9 @@ namespace WhereTheSoundingsEnd.World
             return Mathf.Clamp01(current * Mathf.Pow(0.5f, elapsedSeconds / halfLifeSeconds));
         }
 
-        public static float CalculateFishAvailabilityAfterDisturbance(float disturbance)
+        public static float CalculateDisturbanceAvoidanceChance(float disturbance)
         {
-            return Mathf.Clamp(1f - Mathf.Clamp01(disturbance) * 0.65f, 0.35f, 1f);
+            return Mathf.Clamp01(disturbance) * 0.65f;
         }
 
         public static float CalculateDisturbedBiteWaitMultiplier(float disturbance)
