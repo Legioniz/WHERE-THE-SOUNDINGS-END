@@ -3,6 +3,9 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Build;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 
 namespace WhereTheSoundingsEnd.Editor
@@ -59,6 +62,7 @@ namespace WhereTheSoundingsEnd.Editor
                     BuildTarget.StandaloneWindows64))
                 throw new InvalidOperationException("Unity could not switch to the Windows 64-bit build target.");
 
+            BuildAddressableContent();
             Directory.CreateDirectory(OutputDirectory);
             BuildPlayerOptions options = new BuildPlayerOptions
             {
@@ -78,6 +82,28 @@ namespace WhereTheSoundingsEnd.Editor
                 "Windows Development Build succeeded: " + OutputPath +
                 " | Size: " + report.summary.totalSize + " bytes" +
                 " | Duration: " + report.summary.totalTime);
+        }
+
+        public static void BuildAddressablesContentForVerification()
+        {
+            ProjectFoundationSetup.InitializeForAutomation();
+            BuildAddressableContent();
+        }
+
+        private static void BuildAddressableContent()
+        {
+            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null)
+                throw new InvalidOperationException(
+                    "Addressables settings are missing. Run Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation.");
+
+            AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
+            if (result == null || !string.IsNullOrEmpty(result.Error))
+                throw new InvalidOperationException(
+                    "Addressables content build failed: " +
+                    (result != null ? result.Error : "Unity returned no build result."));
+
+            Debug.Log("Addressables content build succeeded. Addressable prefab content is ready for the Windows Player.");
         }
     }
 }

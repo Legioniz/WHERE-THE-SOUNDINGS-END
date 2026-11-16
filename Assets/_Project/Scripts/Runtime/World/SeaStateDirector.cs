@@ -46,6 +46,14 @@ namespace WhereTheSoundingsEnd.World
         private float fogRemainingGameSeconds;
         private float weatherShiftCooldown;
         private Material birdMaterial;
+        private Material phantomMaterial;
+        private GameObject pooledPhantom;
+        private GameObject pooledBirdSwarm;
+        private AddressablePrefabPool addressablePrefabPool;
+        private GameObject addressablePhantom;
+        private GameObject addressableBirdSwarm;
+        private float phantomRemaining;
+        private float birdSwarmRemaining;
         private bool harvestingActive;
         private bool surveyingActive;
         private int interactionClaimFrame = -1;
@@ -92,6 +100,29 @@ namespace WhereTheSoundingsEnd.World
             if (timeOfDaySeconds <= 0.0)
                 timeOfDaySeconds = startingHour * 3600.0;
             weatherShiftCooldown = Random.Range(900f, 1500f);
+        }
+
+        private void EnsureTransientPool(string address)
+        {
+            if (addressablePrefabPool != null && !addressablePrefabPool.IsReady(address))
+                addressablePrefabPool.WarmPool(address, 1, 2);
+        }
+
+        private void Start()
+        {
+            addressablePrefabPool = FindFirstObjectByType<AddressablePrefabPool>();
+            if (addressablePrefabPool == null) return;
+
+            addressablePrefabPool.WarmPool("runtime.panic.shadow", 1, 2, (success, error) =>
+            {
+                if (!success)
+                    Debug.LogWarning("[SeaState] Addressable phantom pool unavailable; using local pooled fallback. " + error, this);
+            });
+            addressablePrefabPool.WarmPool("runtime.panic.bird_swarm", 1, 2, (success, error) =>
+            {
+                if (!success)
+                    Debug.LogWarning("[SeaState] Addressable bird pool unavailable; using local pooled fallback. " + error, this);
+            });
         }
 
         public void Configure(Rigidbody boat, DialogueRunner runner, HarvestingMinigameController harvest, SpatialCargoHold hold)
@@ -164,6 +195,7 @@ namespace WhereTheSoundingsEnd.World
 
         private void Update()
         {
+            UpdateTransientVisualPools(Time.deltaTime);
             bool pausedByUi = Time.timeScale <= 0.0001f ||
                               (dialogueRunner != null && dialogueRunner.IsDialogueRunning);
             float speed = vesselBody == null ? 0f : HorizontalSpeed(vesselBody.linearVelocity);
@@ -306,36 +338,60 @@ namespace WhereTheSoundingsEnd.World
                 ? "A vast shadow passes beneath the swell."
                 : "A reef shape moves against the swell.";
 
-            // Visual-only phantom obstruction. It deliberately has no collider and cannot damage the boat.
+            // Visual-only obstruction; reuse the cached object instead of allocating each omen.
             Vector3 forward = vesselBody.transform.forward;
             Vector3 side = vesselBody.transform.right;
             Vector3 position = vesselBody.position + forward * Random.Range(22f, 36f) +
                                side * Random.Range(-13f, 13f);
-            GameObject phantom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            phantom.name = leviathan ? "Panic_Hallucination_Leviathan_Shadow" : "Panic_Hallucination_Phantom_Reef";
-            phantom.transform.position = position;
-            phantom.transform.localScale = leviathan ? new Vector3(22f, 1.8f, 46f) : new Vector3(5f, 1.4f, 8f);
-            Renderer renderer = phantom.GetComponent<Renderer>();
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            if (shader != null)
+            if (addressablePhantom != null && addressablePrefabPool != null)
             {
-                Material phantomMaterial = new Material(shader);
-                phantomMaterial.color = new Color(0.015f, 0.025f, 0.03f, 0.7f);
-                if (phantomMaterial.HasProperty("_Surface")) phantomMaterial.SetFloat("_Surface", 1f);
-                if (phantomMaterial.HasProperty("_SrcBlend")) phantomMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                if (phantomMaterial.HasProperty("_DstBlend")) phantomMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                if (phantomMaterial.HasProperty("_ZWrite")) phantomMaterial.SetFloat("_ZWrite", 0f);
-                phantomMaterial.renderQueue = 3000;
-                renderer.material = phantomMaterial;
-                Destroy(phantomMaterial, 6f);
+                addressablePrefabPool.Return(addressablePhantom);
+                addressablePhantom = null;
             }
-            Collider collider = phantom.GetComponent<Collider>();
-            if (collider != null)
+            if (addressablePrefabPool != null &&
+                addressablePrefabPool.IsReady("runtime.panic.shadow") &&
+                addressablePrefabPool.TryRent("runtime.panic.shadow", position, Quaternion.identity, out addressablePhantom))
             {
-                collider.enabled = false;
-                Destroy(collider);
+                if (pooledPhantom != null) pooledPhantom.SetActive(false);
+                addressablePhantom.name = leviathan
+                    ? "Panic_Hallucination_Leviathan_Shadow"
+                    : "Panic_Hallucination_Phantom_Reef";
+                addressablePhantom.transform.localScale = leviathan
+                    ? new Vector3(22f, 1.8f, 46f)
+                    : new Vector3(5f, 1.4f, 8f);
+                phantomRemaining = 6f;
+                return;
             }
-            Destroy(phantom, 6f);
+
+            if (pooledPhantom == null)
+            {
+                pooledPhantom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                pooledPhantom.name = "Pooled_Panic_Hallucination";
+                Collider phantomCollider = pooledPhantom.GetComponent<Collider>();
+                if (phantomCollider != null) phantomCollider.enabled = false;
+                Renderer phantomRenderer = pooledPhantom.GetComponent<Renderer>();
+                Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                if (shader != null)
+                {
+                    phantomMaterial = new Material(shader);
+                    phantomMaterial.color = new Color(0.015f, 0.025f, 0.03f, 0.7f);
+                    if (phantomMaterial.HasProperty("_Surface")) phantomMaterial.SetFloat("_Surface", 1f);
+                    if (phantomMaterial.HasProperty("_SrcBlend")) phantomMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    if (phantomMaterial.HasProperty("_DstBlend")) phantomMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    if (phantomMaterial.HasProperty("_ZWrite")) phantomMaterial.SetFloat("_ZWrite", 0f);
+                    phantomMaterial.renderQueue = 3000;
+                    phantomRenderer.sharedMaterial = phantomMaterial;
+                }
+            }
+            pooledPhantom.name = leviathan
+                ? "Panic_Hallucination_Leviathan_Shadow"
+                : "Panic_Hallucination_Phantom_Reef";
+            pooledPhantom.transform.SetPositionAndRotation(position, Quaternion.identity);
+            pooledPhantom.transform.localScale = leviathan
+                ? new Vector3(22f, 1.8f, 46f)
+                : new Vector3(5f, 1.4f, 8f);
+            pooledPhantom.SetActive(true);
+            phantomRemaining = 6f;
         }
 
         private bool TryStealFish()
@@ -359,10 +415,7 @@ namespace WhereTheSoundingsEnd.World
         private void SpawnBirdSwarm()
         {
             if (vesselBody == null) return;
-            GameObject swarm = new GameObject("Panic_Hallucination_Bird_Swarm");
-            swarm.transform.SetParent(vesselBody.transform, false);
-            swarm.transform.localPosition = Vector3.up * 7f;
-            swarm.AddComponent<PanicBirdSwarmVisual>();
+            EnsureTransientPool("runtime.panic.bird_swarm");
             if (birdMaterial == null)
             {
                 Shader birdShader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
@@ -372,28 +425,106 @@ namespace WhereTheSoundingsEnd.World
                     birdMaterial.color = new Color(0.015f, 0.02f, 0.025f);
                 }
             }
-            for (int i = 0; i < 7; i++)
+
+            if (addressableBirdSwarm != null && addressablePrefabPool != null)
             {
-                GameObject bird = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                bird.name = "Phantom_Seabird";
-                bird.transform.SetParent(swarm.transform, false);
-                bird.transform.localPosition = new Vector3(Random.Range(-5f, 5f), Random.Range(-1f, 2f), Random.Range(-5f, 5f));
-                bird.transform.localScale = new Vector3(0.45f, 0.18f, 0.8f);
-                Collider birdCollider = bird.GetComponent<Collider>();
-                if (birdCollider != null)
-                {
-                    birdCollider.enabled = false;
-                    Destroy(birdCollider);
-                }
-                Renderer birdRenderer = bird.GetComponent<Renderer>();
-                if (birdMaterial != null) birdRenderer.sharedMaterial = birdMaterial;
+                addressablePrefabPool.Return(addressableBirdSwarm);
+                addressableBirdSwarm = null;
             }
-            Destroy(swarm, 5f);
+            if (addressablePrefabPool != null &&
+                addressablePrefabPool.IsReady("runtime.panic.bird_swarm") &&
+                addressablePrefabPool.TryRent(
+                    "runtime.panic.bird_swarm",
+                    vesselBody.position + Vector3.up * 7f,
+                    vesselBody.rotation,
+                    vesselBody.transform,
+                    out addressableBirdSwarm))
+            {
+                if (pooledBirdSwarm != null) pooledBirdSwarm.SetActive(false);
+                birdSwarmRemaining = 5f;
+                return;
+            }
+
+            if (pooledBirdSwarm == null)
+            {
+                pooledBirdSwarm = new GameObject("Pooled_Panic_Bird_Swarm");
+                pooledBirdSwarm.transform.SetParent(vesselBody.transform, false);
+                pooledBirdSwarm.transform.localPosition = Vector3.up * 7f;
+                pooledBirdSwarm.AddComponent<PanicBirdSwarmVisual>();
+                for (int i = 0; i < 7; i++)
+                {
+                    GameObject bird = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    bird.name = "Phantom_Seabird";
+                    bird.transform.SetParent(pooledBirdSwarm.transform, false);
+                    bird.transform.localPosition = new Vector3(
+                        Random.Range(-5f, 5f), Random.Range(-1f, 2f), Random.Range(-5f, 5f));
+                    bird.transform.localScale = new Vector3(0.45f, 0.18f, 0.8f);
+                    Collider birdCollider = bird.GetComponent<Collider>();
+                    if (birdCollider != null) birdCollider.enabled = false;
+                    Renderer birdRenderer = bird.GetComponent<Renderer>();
+                    if (birdMaterial != null) birdRenderer.sharedMaterial = birdMaterial;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < pooledBirdSwarm.transform.childCount; i++)
+                {
+                    Transform bird = pooledBirdSwarm.transform.GetChild(i);
+                    bird.localPosition = new Vector3(
+                        Random.Range(-5f, 5f), Random.Range(-1f, 2f), Random.Range(-5f, 5f));
+                }
+            }
+            pooledBirdSwarm.SetActive(true);
+            birdSwarmRemaining = 5f;
+        }
+
+        private void UpdateTransientVisualPools(float deltaTime)
+        {
+            if (deltaTime <= 0f) return;
+            if (addressablePhantom != null && !addressablePhantom.activeSelf)
+                addressablePhantom = null;
+            if (addressablePhantom != null)
+            {
+                phantomRemaining -= deltaTime;
+                if (phantomRemaining <= 0f)
+                {
+                    if (addressablePrefabPool != null) addressablePrefabPool.Return(addressablePhantom);
+                    addressablePhantom = null;
+                }
+            }
+            if (addressableBirdSwarm != null && !addressableBirdSwarm.activeSelf)
+                addressableBirdSwarm = null;
+            if (addressableBirdSwarm != null)
+            {
+                birdSwarmRemaining -= deltaTime;
+                if (birdSwarmRemaining <= 0f)
+                {
+                    if (addressablePrefabPool != null) addressablePrefabPool.Return(addressableBirdSwarm);
+                    addressableBirdSwarm = null;
+                }
+            }
+            if (pooledPhantom != null && pooledPhantom.activeSelf)
+            {
+                phantomRemaining -= deltaTime;
+                if (phantomRemaining <= 0f) pooledPhantom.SetActive(false);
+            }
+            if (pooledBirdSwarm != null && pooledBirdSwarm.activeSelf)
+            {
+                birdSwarmRemaining -= deltaTime;
+                if (birdSwarmRemaining <= 0f) pooledBirdSwarm.SetActive(false);
+            }
         }
 
         private void OnDestroy()
         {
+            if (addressablePrefabPool != null && addressablePhantom != null)
+                addressablePrefabPool.Return(addressablePhantom);
+            if (addressablePrefabPool != null && addressableBirdSwarm != null)
+                addressablePrefabPool.Return(addressableBirdSwarm);
+            if (pooledPhantom != null) Destroy(pooledPhantom);
+            if (pooledBirdSwarm != null) Destroy(pooledBirdSwarm);
             if (birdMaterial != null) Destroy(birdMaterial);
+            if (phantomMaterial != null) Destroy(phantomMaterial);
         }
 
         private void OnGUI()

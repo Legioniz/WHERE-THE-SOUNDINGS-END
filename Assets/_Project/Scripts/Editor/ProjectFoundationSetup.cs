@@ -2,6 +2,8 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.SceneManagement;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
@@ -43,6 +45,8 @@ namespace WhereTheSoundingsEnd.Editor
             AssetDatabase.Refresh();
             ConfigureRendering();
             ConfigurePlayerSettings();
+            EnsureAddressablesSettings();
+            AddressableRuntimeContentBuilder.EnsureRuntimePrefabs();
 
             InputActionAsset controls = LoadControls();
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
@@ -95,12 +99,24 @@ namespace WhereTheSoundingsEnd.Editor
                 return;
 
             EnsureProjectFolders();
+            EnsureAddressablesSettings();
+            AddressableRuntimeContentBuilder.EnsureRuntimePrefabs();
             InputActionAsset controls = LoadControls();
             GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
             RegisterBuildScene();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        }
+
+        private static void EnsureAddressablesSettings()
+        {
+            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
+            if (settings == null)
+                throw new System.InvalidOperationException(
+                    "Unity Addressables settings could not be created. Open Window > Asset Management > Addressables > Groups and resolve the package setup.");
+
+            AssetDatabase.SaveAssets();
         }
 
         private static InputActionAsset LoadControls()

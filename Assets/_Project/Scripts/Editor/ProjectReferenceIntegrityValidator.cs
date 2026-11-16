@@ -3,6 +3,8 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -57,6 +59,7 @@ namespace WhereTheSoundingsEnd.Editor
         public static void ValidateOrThrow()
         {
             ValidateBuildSettings();
+            ValidateAddressableRuntimeContent();
             InputActionAsset controls = AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath);
             if (controls == null)
                 throw new InvalidOperationException("The player Input Actions asset could not be imported: " + InputActionsPath);
@@ -78,6 +81,37 @@ namespace WhereTheSoundingsEnd.Editor
             {
                 EditorSceneManager.RestoreSceneManagerSetup(previousSetup);
             }
+        }
+
+        private static void ValidateAddressableRuntimeContent()
+        {
+            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null)
+                throw new InvalidOperationException("Addressables settings have not been initialized.");
+
+            ValidateAddressableEntry(
+                settings, AddressableRuntimeContentBuilder.PhantomPrefabPath,
+                AddressableRuntimeContentBuilder.PhantomAddress, false);
+            ValidateAddressableEntry(
+                settings, AddressableRuntimeContentBuilder.BirdSwarmPrefabPath,
+                AddressableRuntimeContentBuilder.BirdSwarmAddress, true);
+        }
+
+        private static void ValidateAddressableEntry(
+            AddressableAssetSettings settings, string assetPath, string expectedAddress, bool requiresBirdVisual)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+            Require(prefab, "generated Addressable prefab " + assetPath);
+            if (prefab != null && prefab.activeSelf)
+                throw new InvalidOperationException("Generated Addressable pool prefab must be saved inactive: " + assetPath);
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            AddressableAssetEntry entry = settings.FindAssetEntry(guid);
+            if (entry == null || !string.Equals(entry.address, expectedAddress, StringComparison.Ordinal))
+                throw new InvalidOperationException(
+                    "Generated prefab '" + assetPath + "' is not registered at Addressables key '" + expectedAddress + "'.");
+
+            if (requiresBirdVisual && prefab.GetComponent<PanicBirdSwarmVisual>() == null)
+                throw new InvalidOperationException("Addressable bird swarm prefab is missing PanicBirdSwarmVisual.");
         }
 
         private static void ValidateBuildSettings()
@@ -174,6 +208,8 @@ namespace WhereTheSoundingsEnd.Editor
             Require(FindComponent<SaveGameCoordinator>(scene), "SaveGameCoordinator");
             Require(FindComponent<AutosaveController>(scene), "AutosaveController");
             Require(FindComponent<AreaStreamingDirector>(scene), "AreaStreamingDirector");
+            Require(FindComponent<AddressableAssetResidencyService>(scene), "AddressableAssetResidencyService");
+            Require(FindComponent<AddressablePrefabPool>(scene), "AddressablePrefabPool");
             Require(FindComponent<DocksideHubController>(scene), "DocksideHubController");
         }
 
