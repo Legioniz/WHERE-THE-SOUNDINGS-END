@@ -78,6 +78,8 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Streaming/AddressableAssetResidencyService.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AddressablePrefabPool.cs",
     "Assets/_Project/Tests/EditMode/AddressablePoolPolicyTests.cs",
+    "Assets/_Project/Tests/EditMode/AddressableRuntimeContentBuilderTests.cs",
+    "Assets/_Project/Tests/PlayMode/AddressablePrefabPoolPlayModeTests.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/StreamedAreaSceneRoot.cs",
     "Assets/_Project/Tests/EditMode/AreaStreamingPolicyTests.cs",
@@ -409,6 +411,18 @@ def main() -> int:
         ):
             if required_text not in pool_source:
                 failures.append(f"AddressablePrefabPool is missing pooling safeguard: {required_text}")
+
+        generated_prefab_tests = (ROOT / "Assets/_Project/Tests/EditMode/AddressableRuntimeContentBuilderTests.cs").read_text(encoding="utf-8")
+        if "EnsureRuntimePrefabs_CreatesInactivePrefabsForAddressablePooling" not in generated_prefab_tests:
+            failures.append("AddressableRuntimeContentBuilderTests is missing generated-prefab verification.")
+
+        pool_playmode_tests = (ROOT / "Assets/_Project/Tests/PlayMode/AddressablePrefabPoolPlayModeTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "WarmPool_RentsReturnsAndEnforcesCapacityWithoutDuplicateRentals",
+            "runtime.panic.shadow", "pool.ClearPool", "Is.SameAs(first)",
+        ):
+            if required_test not in pool_playmode_tests:
+                failures.append(f"AddressablePrefabPoolPlayModeTests is missing lifecycle check: {required_test}")
 
         pool_tests = (ROOT / "Assets/_Project/Tests/EditMode/AddressablePoolPolicyTests.cs").read_text(encoding="utf-8")
         for required_test in (
