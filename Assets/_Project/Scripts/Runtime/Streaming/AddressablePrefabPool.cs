@@ -109,6 +109,13 @@ namespace WhereTheSoundingsEnd.Streaming
 
                 state.Lease = lease;
                 state.Prefab = lease.Asset;
+                if (state.Prefab != null && state.Prefab.activeSelf)
+                {
+                    DisposePool(state);
+                    pools.Remove(key);
+                    CompleteWaiters(state, false, "Pooled Addressable prefab roots must be saved inactive.");
+                    return;
+                }
                 if (state.Prefab == null)
                 {
                     DisposePool(state);
