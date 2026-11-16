@@ -912,6 +912,14 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
             DialogueRunner dialogueRunner)
         {
             if (boat == null) throw new InvalidOperationException("Greyhaven boat root was not created.");
+
+            GameObject residencyRoot = new GameObject("Addressable_Asset_Residency_and_Pooling");
+            residencyRoot.transform.SetParent(parent, false);
+            AddressableAssetResidencyService residency =
+                residencyRoot.AddComponent<AddressableAssetResidencyService>();
+            AddressablePrefabPool prefabPool = residencyRoot.AddComponent<AddressablePrefabPool>();
+            prefabPool.Configure(residency);
+
             Rigidbody body = boat.GetComponent<Rigidbody>();
             SpatialCargoHold hold = boat.GetComponent<SpatialCargoHold>();
             HarvestingMinigameController harvesting = boat.gameObject.AddComponent<HarvestingMinigameController>();
