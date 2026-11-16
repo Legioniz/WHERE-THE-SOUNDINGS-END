@@ -26,7 +26,7 @@ The response is bounded by signal loudness and proximity. A cast publishes a `Fi
 
 Disturbance is a temporary value in the fishing director, not a replacement population value.
 
-- Higher disturbance reduces candidate selection weights, but never hard-locks a species out.
+- Higher disturbance adds a bounded chance that the school avoids the cast, producing a no-bite result. The chance tops out at 65%, so a disturbed ground is never hard-locked.
 - Higher disturbance increases the bite wait, bounded to a maximum 1.8x multiplier.
 - Disturbance decays exponentially using the simulation clock and a configurable half-life (default 180 game seconds).
 - A different region's signal is ignored when both region IDs are known.
