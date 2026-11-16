@@ -29,11 +29,13 @@ namespace WhereTheSoundingsEnd.Streaming
             public readonly HashSet<GameObject> Active = new HashSet<GameObject>();
             public int Maximum;
             public bool Loading;
+            public float LastUsedAt;
             public readonly List<Action<bool, string>> Waiters = new List<Action<bool, string>>();
         }
 
         private readonly Dictionary<string, PoolState> pools =
             new Dictionary<string, PoolState>(StringComparer.Ordinal);
+        [SerializeField, Min(1f)] private float idlePoolReleaseSeconds = 45f;
         private AddressableAssetResidencyService residency;
         private bool shuttingDown;
 
@@ -85,6 +87,7 @@ namespace WhereTheSoundingsEnd.Streaming
                 Key = key,
                 Maximum = maximum,
                 Loading = true,
+                LastUsedAt = Time.unscaledTime,
                 Root = new GameObject("POOL_" + key.Replace('/', '_')).transform
             };
             state.Root.SetParent(transform, false);
@@ -129,6 +132,27 @@ namespace WhereTheSoundingsEnd.Streaming
                 state.Loading = false;
                 CompleteWaiters(state, true, string.Empty);
             });
+        }
+
+        private void Update()
+        {
+            if (shuttingDown || pools.Count == 0) return;
+            List<string> expired = null;
+            float grace = Mathf.Max(1f, idlePoolReleaseSeconds);
+            foreach (KeyValuePair<string, PoolState> pair in pools)
+            {
+                PoolState state = pair.Value;
+                if (state.Loading || state.Active.Count > 0 ||
+                    !AddressablePoolPolicy.ShouldReleaseUnused(
+                        state.Active.Count, Time.unscaledTime - state.LastUsedAt, grace))
+                    continue;
+                if (expired == null) expired = new List<string>();
+                expired.Add(pair.Key);
+            }
+
+            if (expired == null) return;
+            for (int i = 0; i < expired.Count; i++)
+                ClearPool(expired[i]);
         }
 
         public bool IsReady(string address)
@@ -183,6 +207,7 @@ namespace WhereTheSoundingsEnd.Streaming
             if (instance == null) return false;
 
             state.Active.Add(instance);
+            state.LastUsedAt = Time.unscaledTime;
             instance.transform.SetParent(parent, parent != null);
             instance.transform.SetPositionAndRotation(position, rotation);
             instance.transform.localScale = state.Prefab.transform.localScale;
@@ -197,6 +222,7 @@ namespace WhereTheSoundingsEnd.Streaming
             foreach (PoolState state in pools.Values)
             {
                 if (!state.Active.Remove(instance)) continue;
+                state.LastUsedAt = Time.unscaledTime;
                 InvokePoolHooks(instance, false);
                 instance.SetActive(false);
                 instance.transform.SetParent(state.Root, false);
