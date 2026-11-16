@@ -525,8 +525,7 @@ namespace WhereTheSoundingsEnd.World
                 bool baitMatches = fish.PreferredBaitId == "any" ||
                                    fish.PreferredBaitId == Baits[baitIndex];
                 float weight = FishingSimulationPolicy.CalculateCandidateWeight(
-                    stock, techniqueMatches, baitMatches, fish.IsAberrant) *
-                    FishingSimulationPolicy.CalculateFishAvailabilityAfterDisturbance(localFishingDisturbance);
+                    stock, techniqueMatches, baitMatches, fish.IsAberrant);
 
                 candidates.Add(fish);
                 weights.Add(weight);
@@ -534,6 +533,12 @@ namespace WhereTheSoundingsEnd.World
             }
 
             if (candidates.Count == 0 || total <= 0f) return null;
+            // Disturbance is a ground-level avoidance chance, not a uniform weight multiplier:
+            // multiplying every candidate equally would cancel out during weighted normalization.
+            if (UnityEngine.Random.value <
+                FishingSimulationPolicy.CalculateDisturbanceAvoidanceChance(localFishingDisturbance))
+                return null;
+
             float roll = UnityEngine.Random.value * total;
             for (int i = 0; i < candidates.Count; i++)
             {
