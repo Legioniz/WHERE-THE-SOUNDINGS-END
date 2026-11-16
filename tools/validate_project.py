@@ -1011,6 +1011,9 @@ def main() -> int:
             "Unity.InputSystem",
             "Unity.RenderPipelines.Universal.Runtime",
             "YarnSpinner.Unity",
+            "Unity.Addressables",
+            "Unity.ResourceManager",
+            "Unity.Addressables.Editor",
         }
         for assembly_name, (path, definition) in assembly_definitions.items():
             for reference in definition.get("references", []):
