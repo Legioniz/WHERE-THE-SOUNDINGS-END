@@ -152,6 +152,12 @@ namespace WhereTheSoundingsEnd.Streaming
 
         public bool TryRent(string address, Vector3 position, Quaternion rotation, out GameObject instance)
         {
+            return TryRent(address, position, rotation, null, out instance);
+        }
+
+        public bool TryRent(
+            string address, Vector3 position, Quaternion rotation, Transform parent, out GameObject instance)
+        {
             instance = null;
             if (string.IsNullOrWhiteSpace(address)) return false;
             PoolState state;
@@ -169,7 +175,7 @@ namespace WhereTheSoundingsEnd.Streaming
             if (instance == null) return false;
 
             state.Active.Add(instance);
-            instance.transform.SetParent(null, true);
+            instance.transform.SetParent(parent, parent != null);
             instance.transform.SetPositionAndRotation(position, rotation);
             instance.transform.localScale = state.Prefab.transform.localScale;
             instance.SetActive(true);
