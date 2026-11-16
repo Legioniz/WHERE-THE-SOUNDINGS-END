@@ -384,8 +384,13 @@ def main() -> int:
                 failures.append(f"AddressableRuntimeContentBuilder is missing generated content step: {required_text}")
 
         build_automation_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectBuildAutomation.cs").read_text(encoding="utf-8")
-        if "AddressableAssetSettings.BuildPlayerContent" not in build_automation_source:
-            failures.append("Windows player build must build Addressables content before the Player.")
+        if "AddressableAssetSettings.BuildPlayerContent" not in build_automation_source or "BuildAddressablesContentForVerification" not in build_automation_source:
+            failures.append("Player and runtime-test workflows must build Addressables content before execution.")
+        if "BuildAddressablesContentForVerification" not in (ROOT / ".github/workflows/unity-verification.yml").read_text(encoding="utf-8"):
+            failures.append("Unity verification workflow must build Addressables content before Play Mode tests.")
+        setup_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs").read_text(encoding="utf-8")
+        if "AddressableRuntimeContentBuilder.EnsureRuntimePrefabs();" not in setup_source:
+            failures.append("Project foundation setup must generate and register runtime Addressables prefabs.")
 
         sea_state_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs").read_text(encoding="utf-8")
         for required_text in (
