@@ -77,6 +77,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingDirector.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AddressableAssetResidencyService.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AddressablePrefabPool.cs",
+    "Assets/_Project/Scripts/Runtime/Streaming/WorldVisualPoolDirector.cs",
     "Assets/_Project/Tests/EditMode/AddressablePoolPolicyTests.cs",
     "Assets/_Project/Tests/EditMode/AddressableRuntimeContentBuilderTests.cs",
     "Assets/_Project/Tests/PlayMode/AddressablePrefabPoolPlayModeTests.cs",
