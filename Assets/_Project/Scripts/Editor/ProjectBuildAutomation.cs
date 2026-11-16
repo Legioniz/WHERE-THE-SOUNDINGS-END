@@ -36,7 +36,6 @@ namespace WhereTheSoundingsEnd.Editor
         {
             ProjectFoundationSetup.InitializeForAutomation();
             ProjectReferenceIntegrityValidator.ValidateOrThrow();
-            BuildAddressableContent();
 
             string[] enabledScenes = EditorBuildSettings.scenes
                 .Where(scene => scene.enabled)
@@ -63,6 +62,7 @@ namespace WhereTheSoundingsEnd.Editor
                     BuildTarget.StandaloneWindows64))
                 throw new InvalidOperationException("Unity could not switch to the Windows 64-bit build target.");
 
+            BuildAddressableContent();
             Directory.CreateDirectory(OutputDirectory);
             BuildPlayerOptions options = new BuildPlayerOptions
             {
@@ -98,7 +98,6 @@ namespace WhereTheSoundingsEnd.Editor
                     (result != null ? result.Error : "Unity returned no build result."));
 
             Debug.Log("Addressables content build succeeded. Addressable prefab content is ready for the Windows Player.");
-        }
         }
     }
 }
