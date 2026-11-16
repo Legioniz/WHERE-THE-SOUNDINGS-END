@@ -1488,6 +1488,24 @@ def main() -> int:
         if "FishPreferredTechnique.SeaweedHarvesting" not in fishing_tests:
             failures.append("FishingSimulationPolicyTests is missing seaweed harvest technique compatibility.")
 
+        for required_test in (
+            "AcousticDisturbanceGain_IsBoundedByLoudnessAndDistance",
+            "DisturbanceDecay_UsesHalfLifeAndIsFrameRateIndependent",
+            "DisturbedGround_ReducesAvailabilityAndIncreasesBiteWaitWithoutHardLockout",
+        ):
+            if f"void {required_test}()" not in fishing_tests:
+                failures.append(f"FishingSimulationPolicyTests is missing acoustic ecology coverage: {required_test}")
+
+        for required_text in (
+            "AcousticEventBus.SignalEmitted += HandleAcousticSignal",
+            "AcousticEventBus.SignalEmitted -= HandleAcousticSignal",
+            "CalculateFishAvailabilityAfterDisturbance",
+            "CalculateDisturbedBiteWaitMultiplier",
+            "PublishFishingNoise",
+        ):
+            if required_text not in fishing_source:
+                failures.append(f"Fishing acoustic ecology integration is missing: {required_text}")
+
         research_tests = (ROOT / "Assets/_Project/Tests/EditMode/HarbourmasterResearchSaveTests.cs").read_text(encoding="utf-8")
         for permit in ("reef_stewardship", "licensed_sea_cucumber"):
             if permit not in research_tests:
