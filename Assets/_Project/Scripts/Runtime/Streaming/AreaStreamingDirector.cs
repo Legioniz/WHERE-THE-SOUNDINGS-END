@@ -110,6 +110,7 @@ namespace WhereTheSoundingsEnd.Streaming
         private float lastAreaActivityAt;
         private float lastAssetCleanupAt = -90f;
         private Coroutine assetCleanupRoutine;
+        [SerializeField] private AddressableAssetResidencyService addressableResidency;
 
         public int FailedAreaCount
         {
@@ -263,6 +264,9 @@ namespace WhereTheSoundingsEnd.Streaming
 
         private void Start()
         {
+            if (addressableResidency == null)
+                addressableResidency = FindFirstObjectByType<AddressableAssetResidencyService>();
+
             if (trackedPlayer == null)
             {
                 Rigidbody vessel = FindFirstObjectByType<Rigidbody>();
@@ -659,7 +663,8 @@ namespace WhereTheSoundingsEnd.Streaming
                 unloadedAreasSinceCleanup < Mathf.Max(1, unloadsBeforeAssetCleanup) ||
                 Time.unscaledTime - lastAreaActivityAt < Mathf.Max(5f, assetCleanupQuietSeconds) ||
                 Time.unscaledTime - lastAssetCleanupAt < Mathf.Max(30f, assetCleanupCooldownSeconds) ||
-                activeLoadCount > 0)
+                activeLoadCount > 0 ||
+                (addressableResidency != null && addressableResidency.HasPendingOperations))
                 return;
 
             for (int i = 0; i < states.Count; i++)
@@ -673,7 +678,8 @@ namespace WhereTheSoundingsEnd.Streaming
         {
             // A global sweep can cause a hitch; run only after multiple area retirements and a quiet window.
             yield return null;
-            if (activeLoadCount > 0)
+            if (activeLoadCount > 0 ||
+                (addressableResidency != null && addressableResidency.HasPendingOperations))
             {
                 assetCleanupRoutine = null;
                 yield break;
