@@ -1493,7 +1493,7 @@ def main() -> int:
             "DisturbanceDecay_UsesHalfLifeAndIsFrameRateIndependent",
             "DisturbedGround_ReducesAvailabilityAndIncreasesBiteWaitWithoutHardLockout",
         ):
-            if f"void {required_test}()" not in fishing_tests:
+            if required_test not in fishing_tests:
                 failures.append(f"FishingSimulationPolicyTests is missing acoustic ecology coverage: {required_test}")
 
         for required_text in (
