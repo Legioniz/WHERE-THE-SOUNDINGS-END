@@ -60,6 +60,7 @@ namespace WhereTheSoundingsEnd.Editor
             Collider collider = root.GetComponent<Collider>();
             if (collider != null) Object.DestroyImmediate(collider);
             root.GetComponent<Renderer>().sharedMaterial = material;
+            root.SetActive(false);
             PrefabUtility.SaveAsPrefabAsset(root, PhantomPrefabPath);
             Object.DestroyImmediate(root);
         }
@@ -80,6 +81,7 @@ namespace WhereTheSoundingsEnd.Editor
                 if (collider != null) Object.DestroyImmediate(collider);
                 bird.GetComponent<Renderer>().sharedMaterial = material;
             }
+            root.SetActive(false);
             PrefabUtility.SaveAsPrefabAsset(root, BirdSwarmPrefabPath);
             Object.DestroyImmediate(root);
         }
