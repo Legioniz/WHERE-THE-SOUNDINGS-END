@@ -251,8 +251,13 @@ namespace WhereTheSoundingsEnd.World
                                    Lines[lineIndex].castMultiplier * TechniqueCastMultiplier(technique) * installedRodRange;
             Vector3 castPoint = transform.position + transform.forward * selectedCastDistance;
             AdvanceFishingDisturbance();
+            string castRegionId = regionalChart != null ? regionalChart.CurrentRegionId : "greyhaven";
+            bool sameGround = hasFishingGround &&
+                string.Equals(castRegionId, lastFishingRegionId, StringComparison.OrdinalIgnoreCase) &&
+                Vector3.Distance(castPoint, lastFishingGroundPosition) <= 30f;
+            if (!sameGround) localFishingDisturbance = 0f;
             lastFishingGroundPosition = castPoint;
-            lastFishingRegionId = regionalChart != null ? regionalChart.CurrentRegionId : "greyhaven";
+            lastFishingRegionId = castRegionId;
             hasFishingGround = true;
             activeHabitat = DetermineHabitat(castPoint);
             if (seaweedHarvest && activeHabitat != FishHabitat.Kelp)
@@ -358,7 +363,8 @@ namespace WhereTheSoundingsEnd.World
             {
                 status = "NO BITE — the water is quiet here. Try another ground or technique.";
                 waitTimer = UnityEngine.Random.Range(biteWaitMinimum * 0.7f, biteWaitMaximum * 1.1f) *
-                            TechniqueBiteWaitMultiplier(technique);
+                            TechniqueBiteWaitMultiplier(technique) *
+                            FishingSimulationPolicy.CalculateDisturbedBiteWaitMultiplier(localFishingDisturbance);
                 return;
             }
 
