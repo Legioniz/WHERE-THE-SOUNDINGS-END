@@ -3,6 +3,9 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Build;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 
 namespace WhereTheSoundingsEnd.Editor
@@ -33,6 +36,7 @@ namespace WhereTheSoundingsEnd.Editor
         {
             ProjectFoundationSetup.InitializeForAutomation();
             ProjectReferenceIntegrityValidator.ValidateOrThrow();
+            BuildAddressableContent();
 
             string[] enabledScenes = EditorBuildSettings.scenes
                 .Where(scene => scene.enabled)
@@ -78,6 +82,22 @@ namespace WhereTheSoundingsEnd.Editor
                 "Windows Development Build succeeded: " + OutputPath +
                 " | Size: " + report.summary.totalSize + " bytes" +
                 " | Duration: " + report.summary.totalTime);
+
+        private static void BuildAddressableContent()
+        {
+            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null)
+                throw new InvalidOperationException(
+                    "Addressables settings are missing. Run Tools > WHERE THE SOUNDINGS END > Initialize Project Foundation.");
+
+            AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
+            if (result == null || !string.IsNullOrEmpty(result.Error))
+                throw new InvalidOperationException(
+                    "Addressables content build failed: " +
+                    (result != null ? result.Error : "Unity returned no build result."));
+
+            Debug.Log("Addressables content build succeeded. Addressable prefab content is ready for the Windows Player.");
+        }
         }
     }
 }
