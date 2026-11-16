@@ -337,6 +337,11 @@ namespace WhereTheSoundingsEnd.World
             Vector3 side = vesselBody.transform.right;
             Vector3 position = vesselBody.position + forward * Random.Range(22f, 36f) +
                                side * Random.Range(-13f, 13f);
+            if (addressablePhantom != null && addressablePrefabPool != null)
+            {
+                addressablePrefabPool.Return(addressablePhantom);
+                addressablePhantom = null;
+            }
             if (addressablePrefabPool != null &&
                 addressablePrefabPool.IsReady("runtime.panic.shadow") &&
                 addressablePrefabPool.TryRent("runtime.panic.shadow", position, Quaternion.identity, out addressablePhantom))
@@ -352,11 +357,6 @@ namespace WhereTheSoundingsEnd.World
                 return;
             }
 
-            if (addressablePhantom != null && addressablePrefabPool != null)
-            {
-                addressablePrefabPool.Return(addressablePhantom);
-                addressablePhantom = null;
-            }
             if (pooledPhantom == null)
             {
                 pooledPhantom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -419,6 +419,11 @@ namespace WhereTheSoundingsEnd.World
                 }
             }
 
+            if (addressableBirdSwarm != null && addressablePrefabPool != null)
+            {
+                addressablePrefabPool.Return(addressableBirdSwarm);
+                addressableBirdSwarm = null;
+            }
             if (addressablePrefabPool != null &&
                 addressablePrefabPool.IsReady("runtime.panic.bird_swarm") &&
                 addressablePrefabPool.TryRent(
@@ -433,11 +438,6 @@ namespace WhereTheSoundingsEnd.World
                 return;
             }
 
-            if (addressableBirdSwarm != null && addressablePrefabPool != null)
-            {
-                addressablePrefabPool.Return(addressableBirdSwarm);
-                addressableBirdSwarm = null;
-            }
             if (pooledBirdSwarm == null)
             {
                 pooledBirdSwarm = new GameObject("Pooled_Panic_Bird_Swarm");
