@@ -95,6 +95,8 @@ namespace WhereTheSoundingsEnd.World
         [SerializeField, Min(0.2f)] private float biteWaitMaximum = 8f;
         [SerializeField, Min(0.2f)] private float fightBeatDuration = 1.35f;
         [SerializeField, Range(0.02f, 0.4f)] private float strikeWindow = 0.12f;
+        [SerializeField, Min(10f)] private float fishingDisturbanceHalfLifeSeconds = 180f;
+        [SerializeField, Min(0f)] private float acousticReactionRadiusBonus = 12f;
 
         private InputAction harvestBeatAction;
         private VesselEquipmentController equipment;
@@ -103,6 +105,11 @@ namespace WhereTheSoundingsEnd.World
         private ExpeditionEconomyTelemetry economyTelemetry;
         private WorldVisualPoolDirector worldVisuals;
         private GameObject activeFishSchoolVisual;
+        private float localFishingDisturbance;
+        private double lastDisturbanceGameSeconds;
+        private Vector3 lastFishingGroundPosition;
+        private string lastFishingRegionId = string.Empty;
+        private bool hasFishingGround;
         private FishingEncounterPhase phase;
         private FishingTechnique technique = FishingTechnique.StillFishing;
         private int rodIndex;
@@ -201,6 +208,11 @@ namespace WhereTheSoundingsEnd.World
             harvestBeatAction = controls != null ? controls.FindAction("HarvestBeat", false) : null;
         }
 
+        private void OnEnable()
+        {
+            AcousticEventBus.SignalEmitted += HandleAcousticSignal;
+        }
+
         private void Awake()
         {
             if (cargoHold == null) cargoHold = GetComponent<SpatialCargoHold>();
@@ -238,6 +250,15 @@ namespace WhereTheSoundingsEnd.World
             selectedCastDistance = baseCastDistance * Rods[rodIndex].castMultiplier *
                                    Lines[lineIndex].castMultiplier * TechniqueCastMultiplier(technique) * installedRodRange;
             Vector3 castPoint = transform.position + transform.forward * selectedCastDistance;
+            AdvanceFishingDisturbance();
+            string castRegionId = regionalChart != null ? regionalChart.CurrentRegionId : "greyhaven";
+            bool sameGround = hasFishingGround &&
+                string.Equals(castRegionId, lastFishingRegionId, StringComparison.OrdinalIgnoreCase) &&
+                Vector3.Distance(castPoint, lastFishingGroundPosition) <= 30f;
+            if (!sameGround) localFishingDisturbance = 0f;
+            lastFishingGroundPosition = castPoint;
+            lastFishingRegionId = castRegionId;
+            hasFishingGround = true;
             activeHabitat = DetermineHabitat(castPoint);
             if (seaweedHarvest && activeHabitat != FishHabitat.Kelp)
             {
@@ -274,18 +295,21 @@ namespace WhereTheSoundingsEnd.World
             successfulBeats = 0;
             missedBites = 0;
             waitTimer = UnityEngine.Random.Range(biteWaitMinimum, Mathf.Max(biteWaitMinimum, biteWaitMaximum)) *
-                        TechniqueBiteWaitMultiplier(technique);
+                        TechniqueBiteWaitMultiplier(technique) *
+                        FishingSimulationPolicy.CalculateDisturbedBiteWaitMultiplier(localFishingDisturbance);
             phase = FishingEncounterPhase.WaitingForBite;
             status = "LINE DEPLOYED — " + technique + " · " + activeHabitat + " · " +
                      Mathf.RoundToInt(selectedCastDistance) + " m cast. Watch for a bite.";
             if (seaState != null) seaState.SetHarvesting(true);
             SpawnFishSchoolVisual(castPoint);
+            PublishFishingNoise(AcousticEventKind.FishingGearNoise, 0.38f, 42f);
             return true;
         }
 
         private void Update()
         {
             AdvanceMigration();
+            AdvanceFishingDisturbance();
             if (phase == FishingEncounterPhase.Idle) return;
             if (Time.timeScale <= 0.0001f || (seaState != null && seaState.IsDialogueActive))
             {
@@ -339,7 +363,8 @@ namespace WhereTheSoundingsEnd.World
             {
                 status = "NO BITE — the water is quiet here. Try another ground or technique.";
                 waitTimer = UnityEngine.Random.Range(biteWaitMinimum * 0.7f, biteWaitMaximum * 1.1f) *
-                            TechniqueBiteWaitMultiplier(technique);
+                            TechniqueBiteWaitMultiplier(technique) *
+                            FishingSimulationPolicy.CalculateDisturbedBiteWaitMultiplier(localFishingDisturbance);
                 return;
             }
 
@@ -508,6 +533,12 @@ namespace WhereTheSoundingsEnd.World
             }
 
             if (candidates.Count == 0 || total <= 0f) return null;
+            // Disturbance is a ground-level avoidance chance, not a uniform weight multiplier:
+            // multiplying every candidate equally would cancel out during weighted normalization.
+            if (UnityEngine.Random.value <
+                FishingSimulationPolicy.CalculateDisturbanceAvoidanceChance(localFishingDisturbance))
+                return null;
+
             float roll = UnityEngine.Random.value * total;
             for (int i = 0; i < candidates.Count; i++)
             {
@@ -546,6 +577,8 @@ namespace WhereTheSoundingsEnd.World
                     "catch.legality.fine." + Guid.NewGuid().ToString("N"), -legality.FineCents);
 
             ChangePopulation(hookedFish, activeHabitat, -1);
+            AddFishingDisturbance(0.12f);
+            PublishFishingNoise(AcousticEventKind.FishingGearNoise, 0.55f, 58f);
             if (hookedFish.Category != CargoItemCategory.Seaweed)
                 totalCatches++;
             if (equipment != null && hookedFish.Category != CargoItemCategory.Seaweed)
@@ -788,9 +821,59 @@ namespace WhereTheSoundingsEnd.World
 
         private void OnDisable()
         {
+            AcousticEventBus.SignalEmitted -= HandleAcousticSignal;
             ReleaseFishSchoolVisual();
             if (phase != FishingEncounterPhase.Idle)
                 CancelFishing("FISHING INTERRUPTED — the line has been retrieved.");
+        }
+
+        private void HandleAcousticSignal(AcousticSignal signal)
+        {
+            if (!hasFishingGround || string.IsNullOrWhiteSpace(signal.EventId)) return;
+            if (!string.IsNullOrWhiteSpace(signal.RegionId) &&
+                !string.IsNullOrWhiteSpace(lastFishingRegionId) &&
+                !string.Equals(signal.RegionId, lastFishingRegionId, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            float distance = Vector3.Distance(lastFishingGroundPosition, signal.Position);
+            float effectiveRadius = signal.RadiusMeters + acousticReactionRadiusBonus;
+            if (distance > effectiveRadius) return;
+
+            float gain = FishingSimulationPolicy.CalculateAcousticDisturbanceGain(
+                signal.Loudness, distance, effectiveRadius);
+            AddFishingDisturbance(gain);
+        }
+
+        private void AddFishingDisturbance(float amount)
+        {
+            if (amount <= 0f) return;
+            AdvanceFishingDisturbance();
+            localFishingDisturbance = Mathf.Clamp01(localFishingDisturbance + amount);
+        }
+
+        private void AdvanceFishingDisturbance()
+        {
+            double now = seaState != null ? seaState.ElapsedGameSeconds : Time.time;
+            if (lastDisturbanceGameSeconds <= 0d)
+            {
+                lastDisturbanceGameSeconds = now;
+                return;
+            }
+
+            double elapsed = Math.Max(0d, now - lastDisturbanceGameSeconds);
+            if (elapsed <= 0d) return;
+            localFishingDisturbance = FishingSimulationPolicy.DecayDisturbance(
+                localFishingDisturbance, (float)elapsed, fishingDisturbanceHalfLifeSeconds);
+            lastDisturbanceGameSeconds = now;
+        }
+
+        private void PublishFishingNoise(AcousticEventKind kind, float loudness, float radius)
+        {
+            double timestamp = seaState != null ? seaState.ElapsedGameSeconds : Time.time;
+            string regionId = regionalChart != null ? regionalChart.CurrentRegionId : lastFishingRegionId;
+            AcousticEventBus.Publish(new AcousticSignal(
+                "fishing:" + kind + ":" + Guid.NewGuid().ToString("N"),
+                kind, regionId, lastFishingGroundPosition, loudness, radius, timestamp));
         }
 
         private void SpawnFishSchoolVisual(Vector3 castPoint)
