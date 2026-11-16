@@ -185,7 +185,7 @@ def main() -> int:
         assembly_specs = {
             "Assets/_Project/Scripts/Runtime/WhereTheSoundingsEnd.Runtime.asmdef": {
                 "name": "WhereTheSoundingsEnd.Runtime",
-                "references": {"Unity.InputSystem", "YarnSpinner.Unity", "Unity.Addressables"},
+                "references": {"Unity.InputSystem", "YarnSpinner.Unity", "Unity.Addressables", "Unity.ResourceManager"},
             },
             "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef": {
                 "name": "WhereTheSoundingsEnd.Editor",
