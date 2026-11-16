@@ -341,6 +341,7 @@ namespace WhereTheSoundingsEnd.World
                 addressablePrefabPool.IsReady("runtime.panic.shadow") &&
                 addressablePrefabPool.TryRent("runtime.panic.shadow", position, Quaternion.identity, out addressablePhantom))
             {
+                if (pooledPhantom != null) pooledPhantom.SetActive(false);
                 addressablePhantom.name = leviathan
                     ? "Panic_Hallucination_Leviathan_Shadow"
                     : "Panic_Hallucination_Phantom_Reef";
@@ -351,6 +352,11 @@ namespace WhereTheSoundingsEnd.World
                 return;
             }
 
+            if (addressablePhantom != null && addressablePrefabPool != null)
+            {
+                addressablePrefabPool.Return(addressablePhantom);
+                addressablePhantom = null;
+            }
             if (pooledPhantom == null)
             {
                 pooledPhantom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -422,10 +428,16 @@ namespace WhereTheSoundingsEnd.World
                     vesselBody.transform,
                     out addressableBirdSwarm))
             {
+                if (pooledBirdSwarm != null) pooledBirdSwarm.SetActive(false);
                 birdSwarmRemaining = 5f;
                 return;
             }
 
+            if (addressableBirdSwarm != null && addressablePrefabPool != null)
+            {
+                addressablePrefabPool.Return(addressableBirdSwarm);
+                addressableBirdSwarm = null;
+            }
             if (pooledBirdSwarm == null)
             {
                 pooledBirdSwarm = new GameObject("Pooled_Panic_Bird_Swarm");
