@@ -169,8 +169,7 @@ namespace WhereTheSoundingsEnd.Streaming
             instance.transform.SetPositionAndRotation(position, rotation);
             instance.transform.localScale = state.Prefab.transform.localScale;
             instance.SetActive(true);
-            IPooledObject[] hooks = instance.GetComponents<IPooledObject>();
-            for (int i = 0; i < hooks.Length; i++) hooks[i].OnPoolRent();
+            InvokePoolHooks(instance, true);
             return true;
         }
 
@@ -180,8 +179,7 @@ namespace WhereTheSoundingsEnd.Streaming
             foreach (PoolState state in pools.Values)
             {
                 if (!state.Active.Remove(instance)) continue;
-                IPooledObject[] hooks = instance.GetComponents<IPooledObject>();
-                for (int i = 0; i < hooks.Length; i++) hooks[i].OnPoolReturn();
+                InvokePoolHooks(instance, false);
                 instance.SetActive(false);
                 instance.transform.SetParent(state.Root, false);
                 instance.transform.localPosition = Vector3.zero;
@@ -202,6 +200,18 @@ namespace WhereTheSoundingsEnd.Streaming
             if (!pools.TryGetValue(address.Trim(), out state)) return;
             pools.Remove(state.Key);
             DisposePool(state);
+        }
+
+        private static void InvokePoolHooks(GameObject instance, bool rented)
+        {
+            MonoBehaviour[] components = instance.GetComponents<MonoBehaviour>();
+            for (int i = 0; i < components.Length; i++)
+            {
+                IPooledObject hook = components[i] as IPooledObject;
+                if (hook == null) continue;
+                if (rented) hook.OnPoolRent();
+                else hook.OnPoolReturn();
+            }
         }
 
         private GameObject CreateInstance(PoolState state)
