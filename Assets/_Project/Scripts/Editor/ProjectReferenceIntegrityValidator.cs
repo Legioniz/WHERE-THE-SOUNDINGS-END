@@ -102,6 +102,8 @@ namespace WhereTheSoundingsEnd.Editor
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
             Require(prefab, "generated Addressable prefab " + assetPath);
+            if (prefab != null && prefab.activeSelf)
+                throw new InvalidOperationException("Generated Addressable pool prefab must be saved inactive: " + assetPath);
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             AddressableAssetEntry entry = settings.FindAssetEntry(guid);
             if (entry == null || !string.Equals(entry.address, expectedAddress, StringComparison.Ordinal))
