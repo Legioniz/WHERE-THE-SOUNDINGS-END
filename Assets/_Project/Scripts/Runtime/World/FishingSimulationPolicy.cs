@@ -42,6 +42,36 @@ namespace WhereTheSoundingsEnd.World
             return weight;
         }
 
+        /// <summary>
+        /// Converts an audible event into local ecological disturbance. Loudness and distance
+        /// are bounded so a distant or quiet signal cannot empty a fishing ground.
+        /// </summary>
+        public static float CalculateAcousticDisturbanceGain(float loudness, float distance, float effectiveRadius)
+        {
+            if (effectiveRadius <= 0f || distance < 0f || distance > effectiveRadius) return 0f;
+            float proximity = 1f - Mathf.Clamp01(distance / effectiveRadius);
+            return Mathf.Clamp01(loudness) * proximity * 0.22f;
+        }
+
+        /// <summary>Exponential half-life decay; independent of frame rate.</summary>
+        public static float DecayDisturbance(float disturbance, float elapsedSeconds, float halfLifeSeconds)
+        {
+            float current = Mathf.Clamp01(disturbance);
+            if (current <= 0f || elapsedSeconds <= 0f) return current;
+            if (halfLifeSeconds <= 0f) return 0f;
+            return Mathf.Clamp01(current * Mathf.Pow(0.5f, elapsedSeconds / halfLifeSeconds));
+        }
+
+        public static float CalculateFishAvailabilityAfterDisturbance(float disturbance)
+        {
+            return Mathf.Clamp(1f - Mathf.Clamp01(disturbance) * 0.65f, 0.35f, 1f);
+        }
+
+        public static float CalculateDisturbedBiteWaitMultiplier(float disturbance)
+        {
+            return Mathf.Clamp(1f + Mathf.Clamp01(disturbance) * 0.8f, 1f, 1.8f);
+        }
+
         public static float CalculateTimingWindow(float baseWindow, float resistance, float tackleControl)
         {
             float difficultyPenalty = Mathf.Clamp(resistance, 0f, 3f) * 0.025f;
