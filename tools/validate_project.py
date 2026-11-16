@@ -131,6 +131,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Editor/ProjectFoundationSetup.cs",
     "Assets/_Project/Scripts/Editor/ProjectBuildAutomation.cs",
     "Assets/_Project/Scripts/Editor/ProjectReferenceIntegrityValidator.cs",
+    "Assets/_Project/Scripts/Editor/AddressableRuntimeContentBuilder.cs",
     ".github/workflows/unity-verification.yml",
     "docs/14_TESTING_AND_QUALITY/UNITY-PLAYABLE-VALIDATION.md",
     "Assets/_Project/Scripts/Editor/GreyhavenEnvironmentBuilder.cs",
@@ -191,6 +192,7 @@ def main() -> int:
                     "Unity.RenderPipelines.Universal.Runtime",
                     "Unity.InputSystem",
                     "YarnSpinner.Unity",
+                    "Unity.Addressables.Editor",
                 },
             },
             "Assets/_Project/Tests/EditMode/WhereTheSoundingsEnd.Tests.EditMode.asmdef": {
@@ -232,6 +234,7 @@ def main() -> int:
             "GreyhavenEnvironmentBuilder.HasGeneratedAreaScenes",
             "CameraFollow2_5D target is not the generated player vessel",
             "AddressableAssetResidencyService", "AddressablePrefabPool",
+            "ValidateAddressableRuntimeContent", "FindAssetEntry",
         ):
             if required_text not in reference_validator:
                 failures.append(f"Unity reference-integrity preflight is missing: {required_text}")
@@ -369,6 +372,26 @@ def main() -> int:
         ):
             if required_text not in streaming_source:
                 failures.append(f"AreaStreamingDirector is missing streaming safeguard: {required_text}")
+
+        addressable_builder = (ROOT / "Assets/_Project/Scripts/Editor/AddressableRuntimeContentBuilder.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "EnsureRuntimePrefabs", "runtime.panic.shadow", "runtime.panic.bird_swarm",
+            "CreateOrMoveEntry", "SaveAsPrefabAsset",
+        ):
+            if required_text not in addressable_builder:
+                failures.append(f"AddressableRuntimeContentBuilder is missing generated content step: {required_text}")
+
+        build_automation_source = (ROOT / "Assets/_Project/Scripts/Editor/ProjectBuildAutomation.cs").read_text(encoding="utf-8")
+        if "AddressableAssetSettings.BuildPlayerContent" not in build_automation_source:
+            failures.append("Windows player build must build Addressables content before the Player.")
+
+        sea_state_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "runtime.panic.shadow", "runtime.panic.bird_swarm",
+            "addressablePrefabPool.WarmPool", "addressablePrefabPool.TryRent",
+        ):
+            if required_text not in sea_state_source:
+                failures.append(f"SeaStateDirector is missing Addressable transient prefab integration: {required_text}")
 
         residency_source = (ROOT / "Assets/_Project/Scripts/Runtime/Streaming/AddressableAssetResidencyService.cs").read_text(encoding="utf-8")
         for required_text in (
