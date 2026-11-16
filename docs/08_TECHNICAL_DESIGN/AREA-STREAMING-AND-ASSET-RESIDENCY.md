@@ -127,7 +127,7 @@ Project initialization creates two deterministic runtime prefabs and registers t
 | `runtime.world.fish_school` | `World_Fish_School.prefab` | Short-lived fish-school presentation while a fishing line is deployed |
 | `runtime.world.floating_debris` | `World_Floating_Debris.prefab` | Reusable driftwood / surface debris dressing |
 | `runtime.world.salvage_visual` | `World_Salvage_Visual.prefab` | Reusable recovered crate, canister and scrap presentation |
-| `runtime.world.wreck_detail` | `World_Wreck_Detail.prefab` | Reusable broken rib / crossmember detail
+| `runtime.world.wreck_detail` | `World_Wreck_Detail.prefab` | Reusable broken rib / crossmember detail |
 
 The generated assets live under `Assets/_Project/Prefabs/Runtime`. The Editor preflight verifies that both prefab assets exist, are saved inactive, have their expected Addressables entries and addresses, and that the bird prefab retains its visual controller. The Windows Development Build invokes `AddressableAssetSettings.BuildPlayerContent` before building the player, so the local catalog and bundles are not silently omitted.
 
@@ -147,7 +147,7 @@ The maximum pool size is bounded. Prewarm counts are clamped to capacity. Pooled
 
 ### Current boundary
 
-Addressables are currently local-only. This is a working runtime loading and release path for the two generated transient visual prefabs; it is not yet remote patch delivery or whole-island asset streaming. Additional repeat-spawn visuals can use the same bounded pool API. Fish-school visuals are currently tied to active fishing encounters, while population simulation remains aggregate and does not yet create autonomous schools roaming the sea. Floating debris, salvage and wreck-detail pools are available to event/site presenters but are not automatically spawned by the current Greyhaven prototype. Static island scenery and permanent wreck structure remain additive-scene-owned. Static island scenery remains scene-streamed until profiling justifies a more granular split.
+Addressables are currently local-only. This is a working runtime loading and release path for six generated transient visual prefabs; it is not yet remote patch delivery or whole-island asset streaming. Additional repeat-spawn visuals can use the same bounded pool API. Fish-school visuals are currently tied to active fishing encounters, while population simulation remains aggregate and does not yet create autonomous schools roaming the sea. Floating debris, salvage and wreck-detail pools are available to event/site presenters but are not automatically spawned by the current Greyhaven prototype. Static island scenery and permanent wreck structure remain additive-scene-owned until profiling justifies a more granular split.
 
 ## 8. Runtime profiling and telemetry
 
