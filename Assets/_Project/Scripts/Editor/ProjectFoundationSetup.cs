@@ -99,6 +99,8 @@ namespace WhereTheSoundingsEnd.Editor
                 return;
 
             EnsureProjectFolders();
+            EnsureAddressablesSettings();
+            AddressableRuntimeContentBuilder.EnsureRuntimePrefabs();
             InputActionAsset controls = LoadControls();
             GreyhavenEnvironmentBuilder.Build(controls, ScenePath);
             RegisterBuildScene();
