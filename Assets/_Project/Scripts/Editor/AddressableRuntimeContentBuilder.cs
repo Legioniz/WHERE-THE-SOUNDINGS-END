@@ -100,7 +100,6 @@ namespace WhereTheSoundingsEnd.Editor
             if (entry == null)
                 throw new System.InvalidOperationException("Could not register runtime prefab as Addressable: " + assetPath);
             entry.address = address;
-            EditorUtility.SetDirty(entry);
             EditorUtility.SetDirty(settings);
         }
 
