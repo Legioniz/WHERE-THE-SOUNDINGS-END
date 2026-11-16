@@ -1,8 +1,8 @@
 # Area Streaming and Asset Residency
 
 > Project: WHERE THE SOUNDINGS END  
-> Status: Runtime telemetry and Play Mode transition test authored; Unity execution pending  
-> Version: 1.2  
+> Status: Addressables residency and pooling integrated; Unity execution and hardware profiling pending  
+> Version: 1.3  
 > Last reviewed: 2026-11-15
 
 ## 1. Design intent
@@ -24,6 +24,8 @@ The generated Greyhaven_Blockout scene owns:
 - NPC agents, NPC schedules, externally managed resident trigger components, dockside access points and waypoint anchors.
 - World clock, atmosphere director, save coordinator, autosave, and save participants.
 - AreaStreamingDirector, which owns area load state and travel-distance checks.
+- AddressableAssetResidencyService, which owns asynchronous Addressables prefab handles and reference-counted leases.
+- AddressablePrefabPool, which owns bounded reusable dynamic prefab instances and keeps their prefab dependencies leased.
 
 These are not unloaded during ordinary sailing. Keeping NPCs, save participants, and gameplay references in one scene avoids stale object references and incomplete cross-scene saves.
 
@@ -57,7 +59,7 @@ AreaStreamingDirector performs horizontal X/Z distance checks using unscaled tim
 - Unload guard: the unload coroutine rechecks the vessel distance immediately before deactivating the area root.
 - On-demand access: `RequestArea(areaId)` pins a known area as an explicit request and loads it regardless of vessel distance; `ReleaseArea(areaId)` returns it to automatic distance policy. Explicit requests keep the area active until released. Unknown IDs return false, and a new explicit request retries a previously failed area.
 - Standby: after the vessel leaves the preload radius, a loaded static root is deactivated immediately while its scene and assets remain resident. Returning inside the preload radius reactivates it without a scene reload. The wider unload radius and grace period still govern final retirement. Explicitly requested areas do not enter standby.
-- Idle cleanup: after at least two area unloads, a quiet window of 12 seconds, and a 90-second cleanup cooldown, the director runs one asynchronous `Resources.UnloadUnusedAssets` sweep. New scene loads wait until the sweep finishes. The cleanup is not run on every transition and never forces a managed-GC collection.
+- Idle cleanup: after at least two area unloads, a quiet window of 12 seconds, and a 90-second cleanup cooldown, the director runs one asynchronous `Resources.UnloadUnusedAssets` sweep. New scene loads wait until the sweep finishes. The cleanup is not run on every transition, waits while Addressables operations are in flight, and never forces a managed-GC collection.
 - Explicit-call boundary: `RequestArea` and `ReleaseArea` are public runtime APIs, but the current Greyhaven prototype has no gameplay/quest caller for them. Existing six-area Greyhaven streaming is driven by vessel-distance checks; explicit requests are currently covered by Play Mode tests. Wire future region/mission transitions to these APIs when those features are implemented.
 - Retry: explicit `RequestArea` calls clear a prior failed flag and allow a deliberate retry; automatic proximity loading still avoids retry loops.
 
@@ -107,9 +109,43 @@ A queued proximity request is cancelled when the vessel leaves the preload band 
 - Keep dynamic objects and their references in the persistent world or move them through a dedicated ownership/state-transfer contract; do not mix them into static area scenes.
 - Scene unload retires the area's GameObjects and scene references. Unity may retain shared assets still referenced elsewhere.
 - Do not call `Resources.UnloadUnusedAssets` after every transition; global sweeps can introduce frame-time spikes. The director performs a throttled asynchronous sweep only after multiple area retirements and a quiet window, and serializes new scene loads against that sweep. Keep the cleanup thresholds configurable and profile them on target hardware.
-- No Addressables package, remote download, paid storage, paid API, or runtime account is required for this implementation.
+- Addressables package `com.unity.addressables` 2.10.3 is pinned for Unity 6.3 / 6000.3. Addressables are built locally before the Windows Player build. No remote catalog, CDN, paid storage, paid API, or runtime account is required.
 
-## 7. Runtime profiling and telemetry
+
+## 7. Addressable dynamic assets and object pools
+
+The project deliberately keeps the six static Greyhaven scenery scenes on the existing additive SceneManager path. Those scenes contain tightly validated static hierarchies and should not be migrated to Addressables until their scene ownership and cross-scene dependencies are redesigned. Addressables currently own reusable dynamic prefab assets whose lifetimes are independent of static area scenes.
+
+### Generated Addressable content
+
+Project initialization creates two deterministic runtime prefabs and registers them in the default local Addressables group:
+
+| Address | Generated asset | Use |
+|---|---|---|
+| `runtime.panic.shadow` | `Panic_Hallucination_Shadow.prefab` | Distant phantom / leviathan shadow |
+| `runtime.panic.bird_swarm` | `Panic_Bird_Swarm.prefab` | Panic-triggered seabird hallucination |
+
+The generated assets live under `Assets/_Project/Prefabs/Runtime`. The Editor preflight verifies that both prefab assets exist, have their expected Addressables entries and addresses, and that the bird prefab retains its visual controller. The Windows Development Build invokes `AddressableAssetSettings.BuildPlayerContent` before building the player, so the local catalog and bundles are not silently omitted.
+
+### Residency leases
+
+`AddressableAssetResidencyService.AcquirePrefab(address, callback)` loads a prefab asynchronously. Concurrent requests for the same address share one in-flight load and each successful caller receives its own `PrefabLease`. A lease increments the resident reference count; disposing it decrements the count. The underlying Addressables handle is released only after the final lease is gone and the configurable eight-second idle grace expires. Failed loads release their operation handle, notify all waiters, and remove the failed cache entry so a later request can retry.
+
+The service exposes loaded asset count, active lease count and in-flight operation state for diagnostics and coordination. It does not release an asset while a pool still owns a lease. AreaStreamingDirector also defers its global unused-asset sweep while an Addressables load is in flight.
+
+### Bounded prefab pools
+
+`AddressablePrefabPool.WarmPool` asynchronously acquires and retains one lease per pool, then prewarms up to the requested capacity. `TryRent` never blocks: it returns a disabled pooled instance activated at the requested pose, or returns false if the pool is not ready or its maximum capacity is reached. `Return` invokes optional `IPooledObject` reset hooks, disables the instance and places it back in the pool. `ClearPool` refuses to destroy a pool while any instance is still rented. Destroying a pool destroys its instances before disposing the prefab lease.
+
+The maximum pool size is bounded. Prewarm counts are clamped to capacity. Pooled objects must reset transient state in `OnPoolReturn` / `OnPoolRent`; they must not retain references to area-scene objects after return. The pool owns instances in the persistent gameplay scene unless a caller supplies an explicit parent anchor.
+
+The panic hallucination shadow and bird swarm now use Addressable prefab pools when ready. A small local cached-object fallback remains available if Addressables initialization or content loading fails, preserving the horror event rather than turning an optional visual asset failure into a gameplay failure. These fallback visuals are also reused instead of destroyed and recreated each event.
+
+### Current boundary
+
+Addressables are currently local-only. This is a working runtime loading and release path for the two generated transient visual prefabs; it is not yet remote patch delivery or whole-island asset streaming. Future fish schools, floating debris, wreck details, salvage visuals and other repeat-spawn objects can be added as addressable prefabs and warmed by the same pool API. Static island scenery remains scene-streamed until profiling justifies a more granular split.
+
+## 8. Runtime profiling and telemetry
 
 In the Editor and Development Builds, each completed area load emits one `[AreaStreaming] LOAD` record and each unload emits `UNLOAD_START` / `UNLOAD_COMPLETE` records. The load record includes:
 
@@ -127,12 +163,12 @@ For a useful hardware profile, repeat the same route at least five times in a Wi
 
 No performance threshold is claimed until a representative Windows baseline is measured.
 
-## 8. Future expansion
+## 9. Future expansion
 
 For future islands or larger maritime regions, author additional area definitions and matching additive scenes with unique stable IDs and content revisions. Do not make each island a separate persistent gameplay root until save data, active player ownership, NPC/world clock ownership, lighting/render settings, and cross-region travel have explicit transfer semantics.
 
-## 9. Verification status
+## 10. Verification status
 
-The source includes deterministic Edit Mode tests for distance boundaries, non-finite inputs, preload/unload hysteresis, standby boundaries, and exact area-ID/content-revision matching (including stale revision and wrong-area rejection). The Editor preflight also checks generated scene presence, root count, serialized root state and referenced asset integrity before offering a rebuild. Play Mode coverage exercises proximity preload/unload and an explicit request → standby → wake → release → unload cycle while asserting the persistent gameplay scene remains loaded. Static CI validation checks the scene loader, on-demand API, standby lifecycle, quiet-window cleanup, root integrity contract, editor scene generation, build-scene list preservation, telemetry instrumentation and Play Mode coverage.
+The source includes deterministic Edit Mode tests for distance boundaries, non-finite inputs, preload/unload hysteresis, standby boundaries, and exact area-ID/content-revision matching (including stale revision and wrong-area rejection). The Editor preflight also checks generated scene presence, root count, serialized root state and referenced asset integrity before offering a rebuild. Play Mode coverage exercises proximity preload/unload and an explicit request → standby → wake → release → unload cycle while asserting the persistent gameplay scene remains loaded. Static CI validation checks the scene loader, on-demand API, standby lifecycle, quiet-window cleanup, Addressables package and assembly references, generated prefab registration, lease release rules, pool bounds, panic-visual integration, root integrity contract, editor scene generation, build-scene list preservation, telemetry instrumentation and Play Mode coverage.
 
-Unity semantic compilation, Edit Mode test execution, Play Mode travel test execution, frame-time profiling, and Windows player build remain mandatory before treating the feature as production-verified. The telemetry is implemented but no real hardware measurements have been collected in this environment.
+Unity semantic compilation, Edit Mode test execution (including Addressables prefab generation and pool policy tests), Play Mode travel test execution, Addressables runtime load/rent/return/release verification, frame-time profiling, and Windows player build remain mandatory before treating the feature as production-verified. The telemetry is implemented but no real hardware measurements have been collected in this environment.
