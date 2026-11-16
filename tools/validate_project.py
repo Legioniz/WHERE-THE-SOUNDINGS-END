@@ -395,7 +395,7 @@ def main() -> int:
         sea_state_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs").read_text(encoding="utf-8")
         for required_text in (
             "runtime.panic.shadow", "runtime.panic.bird_swarm",
-            "addressablePrefabPool.WarmPool", "addressablePrefabPool.TryRent",
+            "addressablePrefabPool.WarmPool", "addressablePrefabPool.TryRent", "EnsureTransientPool",
         ):
             if required_text not in sea_state_source:
                 failures.append(f"SeaStateDirector is missing Addressable transient prefab integration: {required_text}")
@@ -413,6 +413,7 @@ def main() -> int:
         for required_text in (
             "WarmPool", "TryRent", "Return(GameObject instance)", "ClearPool",
             "state.Maximum", "IPooledObject", "state.Lease.Dispose()",
+            "idlePoolReleaseSeconds", "ShouldReleaseUnused",
         ):
             if required_text not in pool_source:
                 failures.append(f"AddressablePrefabPool is missing pooling safeguard: {required_text}")
