@@ -114,7 +114,7 @@ namespace WhereTheSoundingsEnd.Streaming
 
                 if (entry.Asset != null)
                 {
-                    completed(CreateLease(entry), string.Empty);
+                    NotifyWaiter(completed, CreateLease(entry), string.Empty);
                     return;
                 }
 
