@@ -116,15 +116,6 @@ namespace WhereTheSoundingsEnd.Editor
             AssetDatabase.SaveAssets();
         }
 
-        private static void EnsureAddressablesSettings()
-        {
-            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
-            if (settings == null)
-                throw new System.InvalidOperationException(
-                    "Unity Addressables settings could not be created. Open Window > Asset Management > Addressables > Groups and resolve the package setup.");
-            AssetDatabase.SaveAssets();
-        }
-
         private static InputActionAsset LoadControls()
         {
             InputActionAsset controls = AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath);
