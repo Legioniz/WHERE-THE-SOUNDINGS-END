@@ -202,7 +202,7 @@ namespace WhereTheSoundingsEnd.Streaming
                 Entry entry = pair.Value;
                 if (entry.Loading || entry.LeaseCount > 0 || entry.UnusedSince < 0f)
                     continue;
-                if (Time.unscaledTime - entry.UnusedSince < grace)
+                if (!AddressablePoolPolicy.ShouldReleaseUnused(entry.LeaseCount, Time.unscaledTime - entry.UnusedSince, grace))
                     continue;
                 if (release == null) release = new List<string>();
                 release.Add(pair.Key);
@@ -238,14 +238,18 @@ namespace WhereTheSoundingsEnd.Streaming
         private void OnDestroy()
         {
             shuttingDown = true;
-            foreach (Entry entry in entries.Values)
+            List<Entry> closing = new List<Entry>(entries.Values);
+            entries.Clear();
+            for (int entryIndex = 0; entryIndex < closing.Count; entryIndex++)
             {
-                for (int i = 0; i < entry.Waiters.Count; i++)
-                    entry.Waiters[i](null, "Addressable residency service was destroyed.");
+                Entry entry = closing[entryIndex];
+                Action<PrefabLease, string>[] waiters = entry.Waiters.ToArray();
+                entry.Waiters.Clear();
+                for (int waiterIndex = 0; waiterIndex < waiters.Length; waiterIndex++)
+                    waiters[waiterIndex](null, "Addressable residency service was destroyed.");
                 if (entry.Handle.IsValid())
                     Addressables.Release(entry.Handle);
             }
-            entries.Clear();
         }
     }
 }
