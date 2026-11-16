@@ -5,7 +5,7 @@ namespace WhereTheSoundingsEnd.World
     /// <summary>
     /// Lightweight non-physical orbit for panic-only seabird hallucinations.
     /// </summary>
-    public sealed class PanicBirdSwarmVisual : MonoBehaviour
+    public sealed class PanicBirdSwarmVisual : MonoBehaviour, WhereTheSoundingsEnd.Streaming.IPooledObject
     {
         [SerializeField] private float orbitDegreesPerSecond = 115f;
         [SerializeField] private float bobAmplitude = 0.35f;
@@ -15,6 +15,15 @@ namespace WhereTheSoundingsEnd.World
         private void Awake()
         {
             origin = transform.localPosition;
+        }
+
+        public void OnPoolRent()
+        {
+            origin = transform.localPosition;
+        }
+
+        public void OnPoolReturn()
+        {
         }
 
         private void Update()
