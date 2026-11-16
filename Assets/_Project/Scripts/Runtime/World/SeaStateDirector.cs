@@ -102,6 +102,12 @@ namespace WhereTheSoundingsEnd.World
             weatherShiftCooldown = Random.Range(900f, 1500f);
         }
 
+        private void EnsureTransientPool(string address)
+        {
+            if (addressablePrefabPool != null && !addressablePrefabPool.IsReady(address))
+                addressablePrefabPool.WarmPool(address, 1, 2);
+        }
+
         private void Start()
         {
             addressablePrefabPool = FindFirstObjectByType<AddressablePrefabPool>();
@@ -409,6 +415,7 @@ namespace WhereTheSoundingsEnd.World
         private void SpawnBirdSwarm()
         {
             if (vesselBody == null) return;
+            EnsureTransientPool("runtime.panic.bird_swarm");
             if (birdMaterial == null)
             {
                 Shader birdShader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
