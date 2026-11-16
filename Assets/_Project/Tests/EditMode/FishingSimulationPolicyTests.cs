@@ -87,6 +87,38 @@ namespace WhereTheSoundingsEnd.Tests
             Assert.That(aberrant / matched, Is.EqualTo(0.15f).Within(0.00001f));
         }
 
+        [TestCase(1f, 0f, 20f, 0.22f)]
+        [TestCase(1f, 10f, 20f, 0.11f)]
+        [TestCase(0.5f, 10f, 20f, 0.055f)]
+        [TestCase(1f, 21f, 20f, 0f)]
+        public void AcousticDisturbanceGain_IsBoundedByLoudnessAndDistance(
+            float loudness, float distance, float radius, float expected)
+        {
+            Assert.That(FishingSimulationPolicy.CalculateAcousticDisturbanceGain(loudness, distance, radius),
+                Is.EqualTo(expected).Within(0.00001f));
+        }
+
+        [Test]
+        public void DisturbanceDecay_UsesHalfLifeAndIsFrameRateIndependent()
+        {
+            float fullStep = FishingSimulationPolicy.DecayDisturbance(1f, 180f, 180f);
+            float halfStep = FishingSimulationPolicy.DecayDisturbance(1f, 90f, 180f);
+            float twoHalfSteps = FishingSimulationPolicy.DecayDisturbance(halfStep, 90f, 180f);
+            Assert.That(fullStep, Is.EqualTo(0.5f).Within(0.00001f));
+            Assert.That(twoHalfSteps, Is.EqualTo(fullStep).Within(0.00001f));
+            Assert.That(FishingSimulationPolicy.DecayDisturbance(0.7f, 0f, 180f), Is.EqualTo(0.7f));
+            Assert.That(FishingSimulationPolicy.DecayDisturbance(0.7f, 10f, 0f), Is.EqualTo(0f));
+        }
+
+        [Test]
+        public void DisturbedGround_ReducesAvailabilityAndIncreasesBiteWaitWithoutHardLockout()
+        {
+            Assert.That(FishingSimulationPolicy.CalculateFishAvailabilityAfterDisturbance(0f), Is.EqualTo(1f));
+            Assert.That(FishingSimulationPolicy.CalculateFishAvailabilityAfterDisturbance(1f), Is.EqualTo(0.35f));
+            Assert.That(FishingSimulationPolicy.CalculateDisturbedBiteWaitMultiplier(0f), Is.EqualTo(1f));
+            Assert.That(FishingSimulationPolicy.CalculateDisturbedBiteWaitMultiplier(1f), Is.EqualTo(1.8f));
+        }
+
         [Test]
         public void CatchQuality_IncreasesWithSuccessfulBeats()
         {
