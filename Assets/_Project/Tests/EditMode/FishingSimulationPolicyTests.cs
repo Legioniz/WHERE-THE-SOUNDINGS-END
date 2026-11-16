@@ -113,8 +113,9 @@ namespace WhereTheSoundingsEnd.Tests
         [Test]
         public void DisturbedGround_ReducesAvailabilityAndIncreasesBiteWaitWithoutHardLockout()
         {
-            Assert.That(FishingSimulationPolicy.CalculateFishAvailabilityAfterDisturbance(0f), Is.EqualTo(1f));
-            Assert.That(FishingSimulationPolicy.CalculateFishAvailabilityAfterDisturbance(1f), Is.EqualTo(0.35f));
+            Assert.That(FishingSimulationPolicy.CalculateDisturbanceAvoidanceChance(0f), Is.EqualTo(0f));
+            Assert.That(FishingSimulationPolicy.CalculateDisturbanceAvoidanceChance(1f), Is.EqualTo(0.65f));
+            Assert.That(FishingSimulationPolicy.CalculateDisturbanceAvoidanceChance(0.5f), Is.EqualTo(0.325f));
             Assert.That(FishingSimulationPolicy.CalculateDisturbedBiteWaitMultiplier(0f), Is.EqualTo(1f));
             Assert.That(FishingSimulationPolicy.CalculateDisturbedBiteWaitMultiplier(1f), Is.EqualTo(1.8f));
         }
