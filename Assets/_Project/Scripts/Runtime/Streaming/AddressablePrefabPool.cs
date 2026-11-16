@@ -29,6 +29,7 @@ namespace WhereTheSoundingsEnd.Streaming
             public readonly HashSet<GameObject> Active = new HashSet<GameObject>();
             public int Maximum;
             public bool Loading;
+            public readonly List<Action<bool, string>> Waiters = new List<Action<bool, string>>();
         }
 
         private readonly Dictionary<string, PoolState> pools =
@@ -72,8 +73,8 @@ namespace WhereTheSoundingsEnd.Streaming
             PoolState existing;
             if (pools.TryGetValue(key, out existing))
             {
-                if (completed != null)
-                    completed(!existing.Loading, existing.Loading ? "Pool is still loading." : string.Empty);
+                if (existing.Loading && completed != null) existing.Waiters.Add(completed);
+                else if (completed != null) completed(true, string.Empty);
                 return;
             }
 
@@ -88,10 +89,12 @@ namespace WhereTheSoundingsEnd.Streaming
             };
             state.Root.SetParent(transform, false);
             pools.Add(key, state);
+            if (completed != null) state.Waiters.Add(completed);
 
             residency.AcquirePrefab(key, (lease, error) =>
             {
-                if (shuttingDown || state == null)
+                PoolState currentState;
+                if (shuttingDown || state == null || !pools.TryGetValue(key, out currentState) || currentState != state)
                 {
                     if (lease != null) lease.Dispose();
                     return;
@@ -100,7 +103,7 @@ namespace WhereTheSoundingsEnd.Streaming
                 {
                     pools.Remove(key);
                     Destroy(state.Root.gameObject);
-                    if (completed != null) completed(false, error);
+                    CompleteWaiters(state, false, error);
                     return;
                 }
 
@@ -110,14 +113,14 @@ namespace WhereTheSoundingsEnd.Streaming
                 {
                     DisposePool(state);
                     pools.Remove(key);
-                    if (completed != null) completed(false, "Loaded prefab lease returned no asset.");
+                    CompleteWaiters(state, false, "Loaded prefab lease returned no asset.");
                     return;
                 }
 
                 for (int i = 0; i < prewarm; i++)
                     CreateInstance(state);
                 state.Loading = false;
-                if (completed != null) completed(true, string.Empty);
+                CompleteWaiters(state, true, string.Empty);
             });
         }
 
@@ -161,6 +164,7 @@ namespace WhereTheSoundingsEnd.Streaming
             {
                 if (state.All.Count >= state.Maximum) return false;
                 instance = CreateInstance(state);
+                if (instance != null && state.Available.Count > 0) state.Available.Dequeue();
             }
             if (instance == null) return false;
 
@@ -197,9 +201,16 @@ namespace WhereTheSoundingsEnd.Streaming
         {
             if (string.IsNullOrWhiteSpace(address)) return;
             PoolState state;
-            if (!pools.TryGetValue(address.Trim(), out state)) return;
+            if (!pools.TryGetValue(address.Trim(), out state) || state.Active.Count > 0) return;
             pools.Remove(state.Key);
             DisposePool(state);
+        }
+
+        private static void CompleteWaiters(PoolState state, bool success, string error)
+        {
+            Action<bool, string>[] waiters = state.Waiters.ToArray();
+            state.Waiters.Clear();
+            for (int i = 0; i < waiters.Length; i++) waiters[i](success, error);
         }
 
         private static void InvokePoolHooks(GameObject instance, bool rented)
