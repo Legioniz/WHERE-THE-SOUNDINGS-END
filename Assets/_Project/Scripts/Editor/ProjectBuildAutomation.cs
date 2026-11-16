@@ -84,6 +84,12 @@ namespace WhereTheSoundingsEnd.Editor
                 " | Duration: " + report.summary.totalTime);
         }
 
+        public static void BuildAddressablesContentForVerification()
+        {
+            ProjectFoundationSetup.InitializeForAutomation();
+            BuildAddressableContent();
+        }
+
         private static void BuildAddressableContent()
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
