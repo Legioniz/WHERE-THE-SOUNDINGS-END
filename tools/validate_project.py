@@ -77,6 +77,7 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingDirector.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AddressableAssetResidencyService.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AddressablePrefabPool.cs",
+    "Assets/_Project/Scripts/Runtime/Streaming/WorldVisualPoolDirector.cs",
     "Assets/_Project/Tests/EditMode/AddressablePoolPolicyTests.cs",
     "Assets/_Project/Tests/EditMode/AddressableRuntimeContentBuilderTests.cs",
     "Assets/_Project/Tests/PlayMode/AddressablePrefabPoolPlayModeTests.cs",
@@ -421,6 +422,28 @@ def main() -> int:
         generated_prefab_tests = (ROOT / "Assets/_Project/Tests/EditMode/AddressableRuntimeContentBuilderTests.cs").read_text(encoding="utf-8")
         if "EnsureRuntimePrefabs_CreatesInactivePrefabsForAddressablePooling" not in generated_prefab_tests:
             failures.append("AddressableRuntimeContentBuilderTests is missing generated-prefab verification.")
+
+        world_visual_source = (ROOT / "Assets/_Project/Scripts/Runtime/Streaming/WorldVisualPoolDirector.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "runtime.world.fish_school", "runtime.world.floating_debris",
+            "runtime.world.salvage_visual", "runtime.world.wreck_detail",
+            "WarmPools", "TrySpawnFishSchool", "TrySpawnFloatingDebris",
+            "TrySpawnSalvageVisual", "TrySpawnWreckDetail", "ReturnVisual",
+        ):
+            if required_text not in world_visual_source:
+                failures.append(f"WorldVisualPoolDirector is missing visual-pool integration: {required_text}")
+
+        fish_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/FishingSystemDirector.cs").read_text(encoding="utf-8")
+        if "SpawnFishSchoolVisual(castPoint)" not in fish_source or "ReleaseFishSchoolVisual()" not in fish_source:
+            failures.append("FishingSystemDirector is missing transient fish-school rent/return lifecycle.")
+
+        generated_world_content = (ROOT / "Assets/_Project/Scripts/Editor/AddressableRuntimeContentBuilder.cs").read_text(encoding="utf-8")
+        for required_address in (
+            "runtime.world.fish_school", "runtime.world.floating_debris",
+            "runtime.world.salvage_visual", "runtime.world.wreck_detail",
+        ):
+            if required_address not in generated_world_content:
+                failures.append(f"AddressableRuntimeContentBuilder is missing world visual address: {required_address}")
 
         pool_playmode_tests = (ROOT / "Assets/_Project/Tests/PlayMode/AddressablePrefabPoolPlayModeTests.cs").read_text(encoding="utf-8")
         for required_test in (

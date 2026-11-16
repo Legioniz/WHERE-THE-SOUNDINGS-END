@@ -124,6 +124,10 @@ Project initialization creates two deterministic runtime prefabs and registers t
 |---|---|---|
 | `runtime.panic.shadow` | `Panic_Hallucination_Shadow.prefab` | Distant phantom / leviathan shadow |
 | `runtime.panic.bird_swarm` | `Panic_Bird_Swarm.prefab` | Panic-triggered seabird hallucination |
+| `runtime.world.fish_school` | `World_Fish_School.prefab` | Short-lived fish-school presentation while a fishing line is deployed |
+| `runtime.world.floating_debris` | `World_Floating_Debris.prefab` | Reusable driftwood / surface debris dressing |
+| `runtime.world.salvage_visual` | `World_Salvage_Visual.prefab` | Reusable recovered crate, canister and scrap presentation |
+| `runtime.world.wreck_detail` | `World_Wreck_Detail.prefab` | Reusable broken rib / crossmember detail |
 
 The generated assets live under `Assets/_Project/Prefabs/Runtime`. The Editor preflight verifies that both prefab assets exist, are saved inactive, have their expected Addressables entries and addresses, and that the bird prefab retains its visual controller. The Windows Development Build invokes `AddressableAssetSettings.BuildPlayerContent` before building the player, so the local catalog and bundles are not silently omitted.
 
@@ -139,11 +143,11 @@ The service exposes loaded asset count, active lease count and in-flight operati
 
 The maximum pool size is bounded. Prewarm counts are clamped to capacity. Pooled objects must reset transient state in `OnPoolReturn` / `OnPoolRent`; they must not retain references to area-scene objects after return. The pool owns instances in the persistent gameplay scene unless a caller supplies an explicit parent anchor.
 
-The panic hallucination shadow and bird swarm now use Addressable prefab pools when ready. A small local cached-object fallback remains available if Addressables initialization or content loading fails, preserving the horror event rather than turning an optional visual asset failure into a gameplay failure. These fallback visuals are also reused instead of destroyed and recreated each event.
+`WorldVisualPoolDirector` warms four bounded visual pools for fish schools, floating debris, salvage presentation and wreck fragments. `FishingSystemDirector` rents a fish-school visual at the cast point and returns it when the encounter ends or is interrupted. The fish visual is strictly presentational: the persistent `FishingSystemDirector` continues to own stock counts, habitat, migration and catch resolution. Floating-debris, salvage and wreck-detail pools expose explicit rent/return APIs for dynamic event and site presenters; static wreck framing and authored environmental history remain in their additive area scene. The panic hallucination shadow and bird swarm now use Addressable prefab pools when ready. A small local cached-object fallback remains available if Addressables initialization or content loading fails, preserving the horror event rather than turning an optional visual asset failure into a gameplay failure. These fallback visuals are also reused instead of destroyed and recreated each event.
 
 ### Current boundary
 
-Addressables are currently local-only. This is a working runtime loading and release path for the two generated transient visual prefabs; it is not yet remote patch delivery or whole-island asset streaming. Future fish schools, floating debris, wreck details, salvage visuals and other repeat-spawn objects can be added as addressable prefabs and warmed by the same pool API. Static island scenery remains scene-streamed until profiling justifies a more granular split.
+Addressables are currently local-only. This is a working runtime loading and release path for six generated transient visual prefabs; it is not yet remote patch delivery or whole-island asset streaming. Additional repeat-spawn visuals can use the same bounded pool API. Fish-school visuals are currently tied to active fishing encounters, while population simulation remains aggregate and does not yet create autonomous schools roaming the sea. Floating debris, salvage and wreck-detail pools are available to event/site presenters but are not automatically spawned by the current Greyhaven prototype. Static island scenery and permanent wreck structure remain additive-scene-owned until profiling justifies a more granular split.
 
 ## 8. Runtime profiling and telemetry
 

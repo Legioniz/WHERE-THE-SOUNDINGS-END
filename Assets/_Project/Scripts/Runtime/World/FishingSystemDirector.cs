@@ -6,6 +6,7 @@ using WhereTheSoundingsEnd.Inventory;
 using WhereTheSoundingsEnd.Economy;
 using WhereTheSoundingsEnd.Persistence;
 using WhereTheSoundingsEnd.Narrative;
+using WhereTheSoundingsEnd.Streaming;
 
 namespace WhereTheSoundingsEnd.World
 {
@@ -100,6 +101,8 @@ namespace WhereTheSoundingsEnd.World
         private RegionalChartController regionalChart;
         private EconomyWalletController wallet;
         private ExpeditionEconomyTelemetry economyTelemetry;
+        private WorldVisualPoolDirector worldVisuals;
+        private GameObject activeFishSchoolVisual;
         private FishingEncounterPhase phase;
         private FishingTechnique technique = FishingTechnique.StillFishing;
         private int rodIndex;
@@ -205,6 +208,7 @@ namespace WhereTheSoundingsEnd.World
             regionalChart = GetComponent<RegionalChartController>();
             wallet = GetComponent<EconomyWalletController>();
             economyTelemetry = GetComponent<ExpeditionEconomyTelemetry>();
+            worldVisuals = FindFirstObjectByType<WorldVisualPoolDirector>();
             if (seaState == null) seaState = FindFirstObjectByType<SeaStateDirector>();
             if (harvestBeatAction == null && controls != null)
                 harvestBeatAction = controls.FindAction("HarvestBeat", false);
@@ -275,6 +279,7 @@ namespace WhereTheSoundingsEnd.World
             status = "LINE DEPLOYED — " + technique + " · " + activeHabitat + " · " +
                      Mathf.RoundToInt(selectedCastDistance) + " m cast. Watch for a bite.";
             if (seaState != null) seaState.SetHarvesting(true);
+            SpawnFishSchoolVisual(castPoint);
             return true;
         }
 
@@ -567,6 +572,7 @@ namespace WhereTheSoundingsEnd.World
         private void FinishFishing()
         {
             phase = FishingEncounterPhase.Idle;
+            ReleaseFishSchoolVisual();
             if (seaState != null)
             {
                 seaState.SetHarvesting(false);
@@ -782,8 +788,26 @@ namespace WhereTheSoundingsEnd.World
 
         private void OnDisable()
         {
+            ReleaseFishSchoolVisual();
             if (phase != FishingEncounterPhase.Idle)
                 CancelFishing("FISHING INTERRUPTED — the line has been retrieved.");
+        }
+
+        private void SpawnFishSchoolVisual(Vector3 castPoint)
+        {
+            ReleaseFishSchoolVisual();
+            if (worldVisuals == null || technique == FishingTechnique.SeaweedHarvesting) return;
+            Vector3 position = castPoint + Vector3.down * Mathf.Clamp(estimatedDepth * 0.22f, 1.5f, 7f);
+            worldVisuals.TrySpawnFishSchool(position, Quaternion.LookRotation(transform.forward, Vector3.up), null,
+                out activeFishSchoolVisual);
+        }
+
+        private void ReleaseFishSchoolVisual()
+        {
+            if (activeFishSchoolVisual == null) return;
+            if (worldVisuals == null || !worldVisuals.ReturnVisual(activeFishSchoolVisual))
+                Destroy(activeFishSchoolVisual);
+            activeFishSchoolVisual = null;
         }
 
         private void OnGUI()

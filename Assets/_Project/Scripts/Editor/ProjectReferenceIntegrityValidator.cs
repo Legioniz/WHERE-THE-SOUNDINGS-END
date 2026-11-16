@@ -95,6 +95,14 @@ namespace WhereTheSoundingsEnd.Editor
             ValidateAddressableEntry(
                 settings, AddressableRuntimeContentBuilder.BirdSwarmPrefabPath,
                 AddressableRuntimeContentBuilder.BirdSwarmAddress, true);
+            ValidateAddressableEntry(settings, AddressableRuntimeContentBuilder.FishSchoolPrefabPath,
+                AddressableRuntimeContentBuilder.FishSchoolAddress, false);
+            ValidateAddressableEntry(settings, AddressableRuntimeContentBuilder.FloatingDebrisPrefabPath,
+                AddressableRuntimeContentBuilder.FloatingDebrisAddress, false);
+            ValidateAddressableEntry(settings, AddressableRuntimeContentBuilder.SalvageVisualPrefabPath,
+                AddressableRuntimeContentBuilder.SalvageVisualAddress, false);
+            ValidateAddressableEntry(settings, AddressableRuntimeContentBuilder.WreckDetailPrefabPath,
+                AddressableRuntimeContentBuilder.WreckDetailAddress, false);
         }
 
         private static void ValidateAddressableEntry(
@@ -210,6 +218,7 @@ namespace WhereTheSoundingsEnd.Editor
             Require(FindComponent<AreaStreamingDirector>(scene), "AreaStreamingDirector");
             Require(FindComponent<AddressableAssetResidencyService>(scene), "AddressableAssetResidencyService");
             Require(FindComponent<AddressablePrefabPool>(scene), "AddressablePrefabPool");
+            Require(FindComponent<WorldVisualPoolDirector>(scene), "WorldVisualPoolDirector");
             Require(FindComponent<DocksideHubController>(scene), "DocksideHubController");
         }
 
