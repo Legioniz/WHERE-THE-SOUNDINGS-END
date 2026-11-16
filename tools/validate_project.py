@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_EDITOR = "6000.3.28f1"
 EXPECTED_PACKAGES = {
+    "com.unity.addressables": "2.10.3",
     "com.unity.inputsystem": "1.20.1",
     "com.unity.render-pipelines.universal": "17.3.0",
     "com.unity.test-framework": "1.4.6",
@@ -74,6 +75,9 @@ REQUIRED_FILES = [
     "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs",
     "Assets/_Project/Scripts/Runtime/World/UnexplainedWarningPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingDirector.cs",
+    "Assets/_Project/Scripts/Runtime/Streaming/AddressableAssetResidencyService.cs",
+    "Assets/_Project/Scripts/Runtime/Streaming/AddressablePrefabPool.cs",
+    "Assets/_Project/Tests/EditMode/AddressablePoolPolicyTests.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/AreaStreamingPolicy.cs",
     "Assets/_Project/Scripts/Runtime/Streaming/StreamedAreaSceneRoot.cs",
     "Assets/_Project/Tests/EditMode/AreaStreamingPolicyTests.cs",
@@ -178,7 +182,7 @@ def main() -> int:
         assembly_specs = {
             "Assets/_Project/Scripts/Runtime/WhereTheSoundingsEnd.Runtime.asmdef": {
                 "name": "WhereTheSoundingsEnd.Runtime",
-                "references": {"Unity.InputSystem", "YarnSpinner.Unity"},
+                "references": {"Unity.InputSystem", "YarnSpinner.Unity", "Unity.Addressables"},
             },
             "Assets/_Project/Scripts/Editor/WhereTheSoundingsEnd.Editor.asmdef": {
                 "name": "WhereTheSoundingsEnd.Editor",
@@ -227,6 +231,7 @@ def main() -> int:
             "GetMonoBehavioursWithMissingScriptCount", "GetDependencies",
             "GreyhavenEnvironmentBuilder.HasGeneratedAreaScenes",
             "CameraFollow2_5D target is not the generated player vessel",
+            "AddressableAssetResidencyService", "AddressablePrefabPool",
         ):
             if required_text not in reference_validator:
                 failures.append(f"Unity reference-integrity preflight is missing: {required_text}")
@@ -360,9 +365,44 @@ def main() -> int:
             "RetryFailedArea(string areaId)", "AreaStreamingPolicy.ShouldStandby",
             "EnterStandby", "IsAreaInStandby", "Resources.UnloadUnusedAssets",
             "assetCleanupQuietSeconds", "assetCleanupCooldownSeconds", "assetCleanupRoutine != null",
+            "addressableResidency.HasPendingOperations",
         ):
             if required_text not in streaming_source:
                 failures.append(f"AreaStreamingDirector is missing streaming safeguard: {required_text}")
+
+        residency_source = (ROOT / "Assets/_Project/Scripts/Runtime/Streaming/AddressableAssetResidencyService.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "Addressables.LoadAssetAsync<GameObject>", "Addressables.Release(entry.Handle)",
+            "LeaseCount", "HasPendingOperations", "ReleaseUnusedNow",
+            "PrefabLease", "ShouldReleaseUnused",
+        ):
+            if required_text not in residency_source:
+                failures.append(f"AddressableAssetResidencyService is missing residency safeguard: {required_text}")
+
+        pool_source = (ROOT / "Assets/_Project/Scripts/Runtime/Streaming/AddressablePrefabPool.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "WarmPool", "TryRent", "Return(GameObject instance)", "ClearPool",
+            "state.Maximum", "IPooledObject", "state.Lease.Dispose()",
+        ):
+            if required_text not in pool_source:
+                failures.append(f"AddressablePrefabPool is missing pooling safeguard: {required_text}")
+
+        pool_tests = (ROOT / "Assets/_Project/Tests/EditMode/AddressablePoolPolicyTests.cs").read_text(encoding="utf-8")
+        for required_test in (
+            "NormalizePrewarmCount_ClampsToSafePoolCapacity",
+            "ShouldReleaseUnused_RequiresZeroReferencesAndElapsedGrace",
+            "ShouldReleaseUnused_RejectsNonFiniteTimingValues",
+        ):
+            if required_test not in pool_tests:
+                failures.append(f"AddressablePoolPolicyTests is missing regression: {required_test}")
+
+        sea_state_source = (ROOT / "Assets/_Project/Scripts/Runtime/World/SeaStateDirector.cs").read_text(encoding="utf-8")
+        for required_text in (
+            "pooledPhantom", "pooledBirdSwarm", "UpdateTransientVisualPools",
+            "phantomRemaining", "birdSwarmRemaining",
+        ):
+            if required_text not in sea_state_source:
+                failures.append(f"SeaStateDirector is missing pooled hallucination visual behavior: {required_text}")
 
         area_root_source = (ROOT / "Assets/_Project/Scripts/Runtime/Streaming/StreamedAreaSceneRoot.cs").read_text(encoding="utf-8")
         for required_text in (
