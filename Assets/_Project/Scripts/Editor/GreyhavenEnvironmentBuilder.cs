@@ -919,6 +919,8 @@ ALG-008|Sea grape / Caulerpa|1.98|SEAWEED|greyhaven,the_shallows,the_drowned_par
                 residencyRoot.AddComponent<AddressableAssetResidencyService>();
             AddressablePrefabPool prefabPool = residencyRoot.AddComponent<AddressablePrefabPool>();
             prefabPool.Configure(residency);
+            WorldVisualPoolDirector worldVisuals = residencyRoot.AddComponent<WorldVisualPoolDirector>();
+            worldVisuals.Configure(prefabPool);
 
             Rigidbody body = boat.GetComponent<Rigidbody>();
             SpatialCargoHold hold = boat.GetComponent<SpatialCargoHold>();
