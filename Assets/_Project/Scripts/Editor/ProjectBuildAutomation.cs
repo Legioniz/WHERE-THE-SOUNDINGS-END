@@ -82,6 +82,7 @@ namespace WhereTheSoundingsEnd.Editor
                 "Windows Development Build succeeded: " + OutputPath +
                 " | Size: " + report.summary.totalSize + " bytes" +
                 " | Duration: " + report.summary.totalTime);
+        }
 
         private static void BuildAddressableContent()
         {
