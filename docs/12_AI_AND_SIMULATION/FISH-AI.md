@@ -44,7 +44,7 @@ This creates a tactical choice: repeated fishing and noisy equipment can make a 
 
 ## 5. Current limitations
 
-- Disturbance currently models the last selected fishing ground, not a full spatial grid of all habitats.
+- Disturbance currently models the last selected fishing ground, not a full spatial grid of all habitats. Moving more than 30 metres or changing region starts a fresh local disturbance record.
 - Autonomous roaming fish schools, predator-specific responses, feeding, breeding, and detailed per-species schooling are not implemented by this pass.
 - Temporary disturbance resets with a new game session; authoritative regional stock and catch records remain in the existing save participant.
 - Runtime tuning requires Unity playtesting across nearshore, kelp, open-water, and deep-water grounds.
