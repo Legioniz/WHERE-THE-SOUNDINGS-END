@@ -174,6 +174,8 @@ namespace WhereTheSoundingsEnd.Editor
             Require(FindComponent<SaveGameCoordinator>(scene), "SaveGameCoordinator");
             Require(FindComponent<AutosaveController>(scene), "AutosaveController");
             Require(FindComponent<AreaStreamingDirector>(scene), "AreaStreamingDirector");
+            Require(FindComponent<AddressableAssetResidencyService>(scene), "AddressableAssetResidencyService");
+            Require(FindComponent<AddressablePrefabPool>(scene), "AddressablePrefabPool");
             Require(FindComponent<DocksideHubController>(scene), "DocksideHubController");
         }
 
